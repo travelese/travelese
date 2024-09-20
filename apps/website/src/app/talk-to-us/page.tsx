@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 export default function Page() {
   return (
     <div className="mt-24">
-      <CalEmbed calLink="pontus-midday/15min" />
+      <CalEmbed calLink="itsarminbabaei/15min" />
     </div>
   );
 }

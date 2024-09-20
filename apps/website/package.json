@@ -21,6 +21,7 @@
     "@splinetool/runtime": "1.9.26",
     "@team-plain/typescript-sdk": "4.9.0",
     "@uidotdev/usehooks": "^2.4.1",
+    "cobe": "^0.6.3",
     "d3": "^7.9.0",
     "date-fns": "^3.6.0",
     "framer-motion": "^11.5.4",

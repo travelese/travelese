@@ -1,7 +1,10 @@
-import { FaGithub } from "react-icons/fa";
-import { FaLinkedinIn, FaProductHunt, FaYoutube } from "react-icons/fa";
-import { FaXTwitter } from "react-icons/fa6";
-import { FaDiscord } from "react-icons/fa6";
+import {
+  FaGithub,
+  FaLinkedinIn,
+  FaProductHunt,
+  FaYoutube,
+} from "react-icons/fa";
+import { FaDiscord, FaXTwitter } from "react-icons/fa6";
 
 export function SocialLinks() {
   return (
@@ -25,7 +28,7 @@ export function SocialLinks() {
         </a>
       </li>
       <li>
-        <a target="_blank" rel="noreferrer" href="https://git.new/midday">
+        <a target="_blank" rel="noreferrer" href="https://git.new/YnerfLx">
           <span className="sr-only">Github</span>
           <FaGithub size={22} className="fill-[#878787]" />
         </a>
