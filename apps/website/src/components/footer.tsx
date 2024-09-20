@@ -1,7 +1,6 @@
 import { LogoLarge } from "@/components/logo-large";
 import { SubscribeInput } from "@/components/subscribe-input";
 import Link from "next/link";
-import { GithubStars } from "./github-stars";
 import { SocialLinks } from "./social-links";
 import { StatusWidget } from "./status-widget";
 
@@ -98,7 +97,7 @@ export function Footer() {
           <div className="md:w-6/12 flex mt-8 md:mt-0 md:justify-end">
             <div className="flex md:items-end flex-col">
               <div className="flex items-start md:items-center flex-col md:flex-row space-y-6 md:space-y-0 mb-8">
-                <GithubStars />
+                {/* <GithubStars /> */}
                 <SocialLinks />
               </div>
 

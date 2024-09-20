@@ -6,7 +6,7 @@
     },
     {
       "name": "supabase-functions",
-      "path": "packages/supabase/functions"
+      "path": "apps/api/supabase/functions"
     }
   ],
   "settings": {
