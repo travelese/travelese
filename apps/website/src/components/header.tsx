@@ -21,12 +21,8 @@ import { usePathname } from "next/navigation";
 import menuAssistant from "public/menu-assistant.jpg";
 import menuEngine from "public/menu-engine.png";
 import { useEffect, useState } from "react";
-import { FaDiscord, FaGithub } from "react-icons/fa";
-import {
-  MdOutlineDescription,
-  MdOutlineIntegrationInstructions,
-  MdOutlineMemory,
-} from "react-icons/md";
+import { FaGithub } from "react-icons/fa";
+import { MdOutlineDescription } from "react-icons/md";
 import { LogoIcon } from "./logo-icon";
 
 const listVariant = {
@@ -99,15 +95,15 @@ export function Header() {
           icon: <Icons.Overview size={20} />,
         },
         {
-          path: "/inbox",
-          title: "Inbox",
+          path: "/flights",
+          title: "Flights",
           icon: <Icons.Inbox2 size={20} />,
         },
         {
-          path: "/vault",
-          title: "Vault",
+          path: "/stays",
+          title: "Stays",
           icon: <Icons.Files size={20} />,
-        },
+        } /* ,
         {
           path: "/tracker",
           title: "Tracker",
@@ -117,7 +113,7 @@ export function Header() {
           path: "/invoice",
           title: "Invoice",
           icon: <Icons.Invoice size={20} />,
-        },
+        }, */,
       ],
     },
     {
@@ -137,7 +133,7 @@ export function Header() {
       path: "/download",
     },
     {
-      title: "Developers",
+      title: "Travel Agents",
       cover: (
         <Link href="/engine" onClick={handleOnClick}>
           <Image alt="Engine" src={menuEngine} quality={100} />
@@ -145,15 +141,15 @@ export function Header() {
       ),
       children: [
         {
-          path: "https://git.new/midday",
+          path: "https://github.com/arminbabaeistudio/travelese",
           title: "Open Source",
           icon: <FaGithub size={19} />,
         },
         {
-          path: "https://docs.midday.ai",
+          path: "https://docs.travelese.xyz",
           title: "Documentation",
           icon: <MdOutlineDescription size={20} />,
-        },
+        } /* ,
         {
           path: "/engine",
           title: "Engine",
@@ -168,7 +164,7 @@ export function Header() {
           title: "Apps & Integrations",
           path: "https://docs.midday.ai",
           icon: <MdOutlineIntegrationInstructions size={20} />,
-        },
+        }, */,
       ],
     },
   ];
@@ -189,7 +185,7 @@ export function Header() {
         <ContextMenu>
           <ContextMenuTrigger>
             <Link href="/">
-              <span className="sr-only">Midday Logo</span>
+              <span className="sr-only">Travelese Logo</span>
               <LogoIcon />
             </Link>
           </ContextMenuTrigger>
@@ -229,12 +225,12 @@ export function Header() {
                 <Icons.LogoIcon />
                 <span className="font-medium text-sm">Copy Logo as SVG</span>
               </ContextMenuItem>
-              <ContextMenuItem asChild>
+              {/* <ContextMenuItem asChild>
                 <Link href="/branding" className="flex items-center space-x-2">
                   <Icons.Change />
                   <span className="font-medium text-sm">Branding</span>
                 </Link>
-              </ContextMenuItem>
+              </ContextMenuItem> 
               <ContextMenuItem>
                 <a
                   href="https://ui.midday.ai"
@@ -243,7 +239,7 @@ export function Header() {
                   <Icons.Palette />
                   <span className="font-medium text-sm">Design System</span>
                 </a>
-              </ContextMenuItem>
+              </ContextMenuItem> */}
             </div>
           </ContextMenuContent>
         </ContextMenu>
@@ -330,7 +326,7 @@ export function Header() {
 
         <a
           className="text-sm font-medium pr-2 border-l-[1px] border-border pl-4 hidden md:block"
-          href="https://app.midday.ai"
+          href="https://app.travelese.xyz"
         >
           Sign in
         </a>
@@ -344,7 +340,7 @@ export function Header() {
         >
           <div className="mt-4 flex justify-between p-3 px-4 relative ml-[1px]">
             <button type="button" onClick={handleToggleMenu}>
-              <span className="sr-only">Midday Logo</span>
+              <span className="sr-only">Travelese Logo</span>
               <LogoIcon />
             </button>
 

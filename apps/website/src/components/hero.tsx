@@ -2,7 +2,7 @@ import { Button } from "@midday/ui/button";
 import { ErrorBoundary } from "next/dist/client/components/error-boundary";
 import Link from "next/link";
 import { Suspense } from "react";
-import { Donut } from "./donut";
+import Cobe from "./cobe";
 import { ErrorFallback } from "./error-fallback";
 
 export function Hero() {
@@ -14,7 +14,7 @@ export function Hero() {
             variant="outline"
             className="rounded-full border-border flex space-x-2 items-center"
           >
-            <span className="font-mono text-xs">August Product Updates</span>
+            <span className="font-mono text-xs">September Product Updates</span>
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width={12}
@@ -30,14 +30,13 @@ export function Hero() {
         </Link>
 
         <h1 className="text-[30px] md:text-[90px] font-medium mt-6 leading-none">
-          Run your
-          <br /> business smarter.
+          Travel
+          <br /> smarter.
         </h1>
 
         <p className="mt-4 md:mt-6 max-w-[600px] text-[#878787]">
-          An all-in-one tool for freelancers, contractors, consultants, and
-          micro businesses to monitor financial health, time-track projects,
-          store files, and send invoices.
+          An all-in-one tool for travellers, travel agents, and travel agencies
+          to manage their bookings, track flights, and send invoices.
         </p>
 
         <div className="mt-8">
@@ -51,25 +50,26 @@ export function Hero() {
               </Button>
             </Link>
 
-            <a href="https://app.midday.ai">
+            <a href="https://app.travelese.xyz">
               <Button className="h-12 px-5">Get Started</Button>
             </a>
           </div>
         </div>
 
-        <p className="text-xs text-[#707070] mt-8 font-mono">
+        {/* <p className="text-xs text-[#707070] mt-8 font-mono">
           Used by over{" "}
           <Link href="/open-startup" prefetch>
             <span className="underline">7,800+</span>
           </Link>{" "}
           businesses.
-        </p>
+        </p> */}
       </div>
 
       <div className="scale-50 lg:scale-[0.50] xl:scale-100 -top-[500px] -right-[380px] pointer-events-none transform-gpu grayscale sm:flex xl:flex lg:animate-[open-scale-up-fade_1.5s_ease-in-out] absolute md:-right-[200px] xl:-right-[100px] w-auto h-auto md:-top-[200px]">
         <ErrorBoundary errorComponent={ErrorFallback}>
           <Suspense>
-            <Donut />
+            <Cobe />
+            {/* <Donut /> */}
           </Suspense>
         </ErrorBoundary>
       </div>

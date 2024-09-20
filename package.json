@@ -7,6 +7,8 @@
     "packages/email/*"
   ],
   "scripts": {
+    "prepare": "husky",
+    "commit": "cz",
     "build": "turbo build",
     "clean": "git clean -xdf node_modules",
     "clean:workspaces": "turbo clean",
@@ -37,5 +39,13 @@
   "packageManager": "bun@1.1.27",
   "resolutions": {
     "jackspeak": "2.1.1"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^19.5.0",
+    "@commitlint/config-conventional": "^19.5.0",
+    "husky": "^9.1.6"
+  },
+  "commitizen": {
+    "path": "./node_modules/cz-conventional-changelog"
   }
 }

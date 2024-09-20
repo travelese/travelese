@@ -11,11 +11,11 @@ export function Footer() {
         <div className="flex justify-between items-center border-border border-b-[1px] pb-10 md:pb-16 mb-12">
           <Link href="/" className="scale-50 -ml-[52px] md:ml-0 md:scale-100">
             <LogoLarge />
-            <span className="sr-only">Midday</span>
+            <span className="sr-only">Travelese</span>
           </Link>
 
           <span className="font-normal md:text-2xl text-right">
-            Run your business smarter.
+            Traveller Experience.
           </span>
         </div>
 
@@ -28,17 +28,17 @@ export function Footer() {
                   <Link href="/overview">Overview</Link>
                 </li>
                 <li className="transition-colors text-[#878787]">
-                  <Link href="/inbox">Inbox</Link>
+                  <Link href="/inbox">Flights</Link>
                 </li>
                 <li className="transition-colors text-[#878787]">
-                  <Link href="/vault">Vault</Link>
+                  <Link href="/vault">Stays</Link>
                 </li>
-                <li className="transition-colors text-[#878787]">
+                {/* <li className="transition-colors text-[#878787]">
                   <Link href="/tracker">Tracker</Link>
                 </li>
                 <li className="transition-colors text-[#878787]">
                   <Link href="/invoice">Invoice</Link>
-                </li>
+                </li> */}
                 <li className="transition-colors text-[#878787]">
                   <Link href="/pricing">Pricing</Link>
                 </li>
@@ -55,7 +55,9 @@ export function Footer() {
               <span>Resources</span>
               <ul>
                 <li className="transition-colors text-[#878787]">
-                  <Link href="https://git.new/midday">Github</Link>
+                  <Link href="https://github.com/arminbabaeistudio/travelese">
+                    Github
+                  </Link>
                 </li>
                 <li className="transition-colors text-[#878787]">
                   <Link href="/support">Support</Link>
@@ -66,9 +68,9 @@ export function Footer() {
                 <li className="transition-colors text-[#878787]">
                   <Link href="/terms">Terms and Conditions</Link>
                 </li>
-                <li className="transition-colors text-[#878787]">
+                {/* <li className="transition-colors text-[#878787]">
                   <Link href="/branding">Branding</Link>
-                </li>
+                </li> */}
                 <li className="transition-colors text-[#878787]">
                   <Link href="/feature-request">Feature Request</Link>
                 </li>
@@ -113,7 +115,7 @@ export function Footer() {
       </div>
 
       <h5 className="text-[#161616] text-[500px] leading-none text-center pointer-events-none">
-        midday
+        travelese
       </h5>
     </footer>
   );
