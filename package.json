@@ -1,20 +1,29 @@
 {
-  "name": "midday",
+  "name": "travelese",
   "private": true,
-  "workspaces": ["packages/*", "apps/*", "packages/email/*"],
+  "workspaces": [
+    "packages/*",
+    "apps/*",
+    "packages/email/*"
+  ],
   "scripts": {
+    "prepare": "husky",
+    "commit": "cz",
     "build": "turbo build",
     "clean": "git clean -xdf node_modules",
     "clean:workspaces": "turbo clean",
     "dev": "turbo dev --parallel",
     "test": "turbo test --parallel",
     "start:dashboard": "turbo start --filter=@midday/dashboard",
-    "start:website": "turbo start --filter=@midday/website",
-    "dev:api": "turbo dev --filter=@midday/api",
+    "start:website": "turbo start --filter=@travelese/website",
+    "start:mobile": "turbo start --filter=@travelese/mobile",
+    "build:website": "turbo run build --filter=@travelese/website",
+    "build:dashboard": "turbo run build --filter=@midday/dashboard",
+    "dev:website": "turbo dev --filter=@travelese/website ",
     "dev:dashboard": "turbo dev --filter=@midday/dashboard",
-    "build:dashboard": "turbo build --filter=@midday/dashboard",
     "dev:engine": "turbo dev --filter=@midday/engine",
-    "dev:website": "turbo dev --filter=@midday/website ",
+    "dev:api": "turbo dev --filter=@midday/api",
+    "dev:mobile": "turbo dev --filter=@travelese/mobile",
     "dev:desktop": "turbo dev --filter=@midday/desktop",
     "jobs:dashboard": "turbo jobs --filter=@midday/dashboard",
     "format": "biome format --write .",
@@ -30,5 +39,13 @@
   "packageManager": "bun@1.1.27",
   "resolutions": {
     "jackspeak": "2.1.1"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^19.5.0",
+    "@commitlint/config-conventional": "^19.5.0",
+    "husky": "^9.1.6"
+  },
+  "commitizen": {
+    "path": "./node_modules/cz-conventional-changelog"
   }
 }

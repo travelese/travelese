@@ -5,7 +5,7 @@
   "scripts": {
     "build": "NODE_ENV=production next build",
     "clean": "git clean -xdf .next .turbo node_modules",
-    "jobs": "bunx @trigger.dev/cli@latest dev -p 3001 --client-id=midday-G6Yq",
+    "jobs": "bunx @trigger.dev/cli@latest dev -p 3001 --client-id=travelese-G6Yq",
     "dev": "next dev -p 3001",
     "lint": "next lint",
     "format": "biome format --write .",
@@ -33,7 +33,7 @@
     "@todesktop/client-active-win": "^0.15.0",
     "@todesktop/client-core": "^1.9.0",
     "@todesktop/runtime": "^1.6.4",
-    "@trigger.dev/nextjs": "^2.3.19",
+    "@trigger.dev/nextjs": "^3.0.5",
     "@uidotdev/usehooks": "^2.4.1",
     "@upstash/ratelimit": "^2.0.3",
     "ai": "3.3.40",
@@ -68,7 +68,9 @@
     "tus-js-client": "4.1.0",
     "use-long-press": "^3.2.0",
     "zod": "^3.23.8",
-    "zustand": "^4.5.5"
+    "zustand": "^4.5.5",
+    "@trigger.dev/sdk": "^3.0.5",
+    "@trigger.dev/react": "^3.0.5"
   },
   "devDependencies": {
     "@midday/tsconfig": "workspace:*",
