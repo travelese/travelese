@@ -12,7 +12,11 @@
     "**/*.ts",
     "**/*.tsx",
     ".next/types/**/*.ts",
-    "tailwind.config.ts"
+    "tailwind.config.ts",
+    "../dashboard/src/hooks/use-navigation.ts",
+    "../dashboard/src/hooks/use-search-form.ts",
+    "../dashboard/src/utils/duffel.ts",
+    "../dashboard/src/app/[locale]/(app)/(sidebar)/travel/layout.tsx"
   ],
   "exclude": ["node_modules"]
 }
