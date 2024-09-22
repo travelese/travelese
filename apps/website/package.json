@@ -13,6 +13,9 @@
   },
   "dependencies": {
     "@calcom/embed-react": "^1.5.0",
+    "@duffel/api": "^2.13.0",
+    "@hookform/resolvers": "^3.9.0",
+    "@kiwicom/orbit-components": "^15.8.0",
     "@midday/supabase": "workspace:*",
     "@midday/ui": "workspace:*",
     "@openpanel/nextjs": "^1.0.3",
@@ -36,7 +39,9 @@
     "react-use-draggable-scroll": "^0.4.7",
     "server-only": "^0.0.1",
     "sharp": "^0.33.5",
-    "sugar-high": "^0.7.0"
+    "sugar-high": "^0.7.0",
+    "svix": "^1.28.0",
+    "superjson": "^2.2.1"
   },
   "devDependencies": {
     "@midday/tsconfig": "workspace:*",
