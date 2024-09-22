@@ -1,35 +1,36 @@
-compatibility_date = "2023-12-01"
+compatibility_date = "2024-09-21"
 workers_dev = false
 logpush = true
 
+
 [env.production]
 name = "engine"
-route = { pattern = "engine.midday.ai/*", zone_name = "midday.ai" }
+route = { pattern = "engine.travelese.xyz/*", zone_name = "travelese.xyz" }
 
 kv_namespaces = [
-  { binding = "KV", id = "1ce9f0355d854a569f72bfccbfbea369" }
+  { binding = "KV", id = "b321b928d84747a4b899b21894a720c2" }
 ]
 
 mtls_certificates = [
-  { binding = "TELLER_CERT", certificate_id = "76fdbac8-e96b-4a1e-922c-e54891b7371c" }
+  { binding = "TELLER_CERT", certificate_id = "44d6feaf-8445-414a-a096-151a21a16988" }
 ]
 
 r2_buckets = [
-  { binding = "STORAGE", bucket_name = "engine-assets", preview_bucket_name = "", jurisdiction = "eu" }
+  { binding = "STORAGE", bucket_name = "engine-assets", preview_bucket_name = ""}
 ]
 
 [env.staging]
 name = "engine-staging"
-route = { pattern = "engine-staging.midday.ai/*", zone_name = "midday.ai" }
+route = { pattern = "engine-staging.travelese.xyz/*", zone_name = "travelese.xyz" }
 
 kv_namespaces = [
-  { binding = "KV", id = "825dc18b2a38463492ff0db06ba99fc8" }
+  { binding = "KV", id = "b321b928d84747a4b899b21894a720c2" }
 ]
 
 mtls_certificates = [
-  { binding = "TELLER_CERT", certificate_id = "76fdbac8-e96b-4a1e-922c-e54891b7371c" }
+  { binding = "TELLER_CERT", certificate_id = "44d6feaf-8445-414a-a096-151a21a16988" }
 ]
 
 r2_buckets = [
-  { binding = "STORAGE", bucket_name = "engine-assets", preview_bucket_name = "", jurisdiction = "eu" }
+  { binding = "STORAGE", bucket_name = "engine-assets", preview_bucket_name = "" }
 ]
