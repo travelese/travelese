@@ -28,13 +28,12 @@ export default function App() {
       glowColor: [1, 1, 1],
       markers: [
         // longitude latitude
-        { location: [37.7595, -122.4367], size: 0.03 }, // San Francisco
-        { location: [40.7128, -74.006], size: 0.1 }, // New York
-        { location: [43.6532, -79.3832], size: 0.05 }, // Toronto
-        { location: [48.8566, 2.3522], size: 0.05 }, // Paris
-        { location: [45.4642, 9.19], size: 0.05 }, // Milan
-        { location: [35.6762, 51.4241], size: 0.05 }, // Tehran
-        { location: [35.6762, 139.6503], size: 0.05 }, // Tokyo
+        { location: [40.7128, -74.006], size: 0.04 }, // New York
+        { location: [43.6532, -79.3832], size: 0.07 }, // Toronto
+        { location: [48.8566, 2.3522], size: 0.04 }, // Paris
+        { location: [45.4642, 9.19], size: 0.04 }, // Milan
+        { location: [35.6762, 51.4241], size: 0.04 }, // Tehran
+        { location: [35.6762, 139.6503], size: 0.04 }, // Tokyo
       ],
       onRender: (state) => {
         // Called on every animation frame.
