@@ -1,8 +1,8 @@
 import "@/styles/globals.css";
-import { cn } from "@midday/ui/cn";
-import "@midday/ui/globals.css";
-import { Provider as Analytics } from "@midday/events/client";
-import { Toaster } from "@midday/ui/toaster";
+import { Provider as Analytics } from "@travelese/events/client";
+import { cn } from "@travelese/ui/cn";
+import "@travelese/ui/globals.css";
+import { Toaster } from "@travelese/ui/toaster";
 import { GeistMono } from "geist/font/mono";
 import { GeistSans } from "geist/font/sans";
 import type { Metadata } from "next";

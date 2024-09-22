@@ -2,25 +2,21 @@
 
 import * as React from "react";
 
-import { Button } from "@/components/ui/button";
+import { Button } from "@travelese/ui/button";
 import {
   Command,
   CommandGroup,
   CommandInput,
   CommandItem,
   CommandList,
-} from "@/components/ui/command";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+} from "@travelese/ui/command";
+import { Popover, PopoverContent, PopoverTrigger } from "@travelese/ui/popover";
 
 import {
-  PlaneTakeoffIcon,
-  PlaneLandingIcon,
   HotelIcon,
   MapPinIcon,
+  PlaneLandingIcon,
+  PlaneTakeoffIcon,
 } from "lucide-react";
 
 import type { Places } from "@duffel/api/types";

@@ -1,4 +1,4 @@
-import { Skeleton } from "@midday/ui/skeleton";
+import { Skeleton } from "@travelese/ui/skeleton";
 
 export function Loading() {
   return (

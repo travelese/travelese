@@ -1,5 +1,7 @@
-import { getTrackerRecordsByRange } from "@midday/supabase/cached-queries";
-import { getUser } from "@midday/supabase/cached-queries";
+import {
+  getTrackerRecordsByRange,
+  getUser,
+} from "@travelese/supabase/cached-queries";
 import { endOfMonth, formatISO, startOfMonth, subMonths } from "date-fns";
 import { TrackerGraph as TrackerGraphComponent } from "./tracker-graph";
 

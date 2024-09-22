@@ -1,8 +1,7 @@
 import type { UpdateTransactionValues } from "@/actions/schema";
-import { Drawer, DrawerContent } from "@midday/ui/drawer";
-import { useMediaQuery } from "@midday/ui/hooks";
-import { Sheet, SheetContent } from "@midday/ui/sheet";
-import React from "react";
+import { Drawer, DrawerContent } from "@travelese/ui/drawer";
+import { useMediaQuery } from "@travelese/ui/hooks";
+import { Sheet, SheetContent } from "@travelese/ui/sheet";
 import { TransactionDetails } from "../transaction-details";
 
 type Props = {

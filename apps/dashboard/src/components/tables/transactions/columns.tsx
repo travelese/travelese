@@ -7,6 +7,7 @@ import { TransactionBankAccount } from "@/components/transaction-bank-account";
 import { TransactionMethod } from "@/components/transaction-method";
 import { TransactionStatus } from "@/components/transaction-status";
 import { formatTransactionDate } from "@/utils/format";
+import type { ColumnDef } from "@tanstack/react-table";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -17,25 +18,24 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@midday/ui/alert-dialog";
-import { Button } from "@midday/ui/button";
-import { Checkbox } from "@midday/ui/checkbox";
-import { cn } from "@midday/ui/cn";
+} from "@travelese/ui/alert-dialog";
+import { Button } from "@travelese/ui/button";
+import { Checkbox } from "@travelese/ui/checkbox";
+import { cn } from "@travelese/ui/cn";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@midday/ui/dropdown-menu";
-import { Icons } from "@midday/ui/icons";
+} from "@travelese/ui/dropdown-menu";
+import { Icons } from "@travelese/ui/icons";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "@midday/ui/tooltip";
-import type { ColumnDef } from "@tanstack/react-table";
+} from "@travelese/ui/tooltip";
 import { Loader2 } from "lucide-react";
 
 export type Transaction = {

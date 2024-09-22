@@ -1,9 +1,9 @@
 "use server";
 
-import { LogEvents } from "@midday/events/events";
-import { setupAnalytics } from "@midday/events/server";
-import { getSession } from "@midday/supabase/cached-queries";
-import { createClient } from "@midday/supabase/server";
+import { LogEvents } from "@travelese/events/events";
+import { setupAnalytics } from "@travelese/events/server";
+import { getSession } from "@travelese/supabase/cached-queries";
+import { createClient } from "@travelese/supabase/server";
 import { revalidateTag } from "next/cache";
 import { redirect } from "next/navigation";
 

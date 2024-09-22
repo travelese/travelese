@@ -1,8 +1,8 @@
 "use server";
 
-import { LogEvents } from "@midday/events/events";
-import { Events, client } from "@midday/jobs";
-import { updateTeam } from "@midday/supabase/mutations";
+import { LogEvents } from "@travelese/events/events";
+import { Events, client } from "@travelese/jobs";
+import { updateTeam } from "@travelese/supabase/mutations";
 import { revalidatePath, revalidateTag } from "next/cache";
 import { z } from "zod";
 import { authActionClient } from "../safe-action";

@@ -1,5 +1,5 @@
-import { getInboxEmail } from "@midday/inbox";
-import { Icons } from "@midday/ui/icons";
+import { getInboxEmail } from "@travelese/inbox";
+import { Icons } from "@travelese/ui/icons";
 import { CopyInput } from "./copy-input";
 
 type Props = {

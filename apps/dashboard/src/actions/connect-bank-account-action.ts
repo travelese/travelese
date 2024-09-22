@@ -1,10 +1,10 @@
 "use server";
 
 import { getMostFrequentCurrency } from "@/utils/currency";
-import { LogEvents } from "@midday/events/events";
-import { Events, client } from "@midday/jobs";
-import { getTeamSettings } from "@midday/supabase/cached-queries";
-import { createBankAccounts } from "@midday/supabase/mutations";
+import { LogEvents } from "@travelese/events/events";
+import { Events, client } from "@travelese/jobs";
+import { getTeamSettings } from "@travelese/supabase/cached-queries";
+import { createBankAccounts } from "@travelese/supabase/mutations";
 import { revalidateTag } from "next/cache";
 import { authActionClient } from "./safe-action";
 import { connectBankAccountSchema } from "./schema";

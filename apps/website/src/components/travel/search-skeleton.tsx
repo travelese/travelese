@@ -1,6 +1,5 @@
-import * as React from "react";
-import { Card } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Card } from "@travelese/ui/card";
+import { Skeleton } from "@travelese/ui/skeleton";
 
 export default function SearchSkeleton() {
   return (

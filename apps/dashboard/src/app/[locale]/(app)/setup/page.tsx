@@ -1,6 +1,6 @@
 import { SetupForm } from "@/components/setup-form";
-import { getSession, getUser } from "@midday/supabase/cached-queries";
-import { Icons } from "@midday/ui/icons";
+import { getUser } from "@travelese/supabase/cached-queries";
+import { Icons } from "@travelese/ui/icons";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";

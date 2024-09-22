@@ -1,5 +1,4 @@
-import { CalEmbed } from "@/components/cal-embed";
-import { Button } from "@midday/ui/button";
+import { Button } from "@travelese/ui/button";
 import Link from "next/link";
 
 export function SectionBook() {

@@ -1,6 +1,8 @@
-import { getCountryInfo } from "@midday/location";
-import { getTrackerRecordsByRange } from "@midday/supabase/cached-queries";
-import { getUser } from "@midday/supabase/cached-queries";
+import { getCountryInfo } from "@travelese/location";
+import {
+  getTrackerRecordsByRange,
+  getUser,
+} from "@travelese/supabase/cached-queries";
 import { endOfMonth, formatISO, startOfMonth } from "date-fns";
 import { TrackerHeader } from "./tracker-header";
 import { TrackerWrapper } from "./tracker-wrapper";

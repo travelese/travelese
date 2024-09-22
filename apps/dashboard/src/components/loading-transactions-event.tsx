@@ -1,4 +1,4 @@
-import { cn } from "@midday/ui/cn";
+import { cn } from "@travelese/ui/cn";
 import { useEventRunStatuses } from "@trigger.dev/react";
 import { useTheme } from "next-themes";
 import dynamic from "next/dynamic";

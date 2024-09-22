@@ -16,17 +16,17 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@midday/ui/alert-dialog";
-import { Button } from "@midday/ui/button";
+} from "@travelese/ui/alert-dialog";
+import { Button } from "@travelese/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@midday/ui/dropdown-menu";
-import { Icons } from "@midday/ui/icons";
-import { TableCell, TableRow } from "@midday/ui/table";
-import { useToast } from "@midday/ui/use-toast";
+} from "@travelese/ui/dropdown-menu";
+import { Icons } from "@travelese/ui/icons";
+import { TableCell, TableRow } from "@travelese/ui/table";
+import { useToast } from "@travelese/ui/use-toast";
 import { useAction } from "next-safe-action/hooks";
 import Link from "next/link";
 

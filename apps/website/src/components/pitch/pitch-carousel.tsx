@@ -16,7 +16,7 @@ import {
   type CarouselApi,
   CarouselContent,
   CarouselItem,
-} from "@midday/ui/carousel";
+} from "@travelese/ui/carousel";
 import { useEffect, useRef, useState } from "react";
 import { CarouselToolbar } from "./carousel-toolbar";
 

@@ -20,7 +20,7 @@ interface WelcomeProps {
 
 const baseUrl =
   process.env.VERCEL_ENV === "production"
-    ? "https://midday.ai/email"
+    ? "https://travelese.xyz/email"
     : "http://localhost:3000/email";
 
 export const WelcomeEmail = ({ fullName = "Viktor Hofte" }: WelcomeProps) => {
@@ -69,13 +69,13 @@ export const WelcomeEmail = ({ fullName = "Viktor Hofte" }: WelcomeProps) => {
 
             <span className="font-medium">Hi {firstName},</span>
             <Text className="text-[#121212]">
-              Welcome to Midday! I'm Pontus, one of the founders.
+              Welcome to Travelese! I'm Armin, the founders.
               <br />
               <br />
-              We've been working on Midday for the past months, and during this
-              time, we've implemented the basic functionality to get started.
-              However, with your feedback, we can make the right decisions to
-              help run your business smarter.
+              I've been working on Travelese for the past months, and during
+              this time, we've implemented the basic functionality to get
+              started. However, with your feedback, we can make the right
+              decisions to help run your business smarter.
               <br />
               <br />
               During our beta phase, you may encounter some bugs, but we
@@ -85,7 +85,7 @@ export const WelcomeEmail = ({ fullName = "Viktor Hofte" }: WelcomeProps) => {
               Should you have any questions, please don't hesitate to reply
               directly to this email or to{" "}
               <Link
-                href="https://cal.com/pontus-midday/15min"
+                href="https://cal.com/itsarminbabaei/15min"
                 className="text-[#121212] underline"
               >
                 schedule a call with me
@@ -101,7 +101,7 @@ export const WelcomeEmail = ({ fullName = "Viktor Hofte" }: WelcomeProps) => {
               className="my-0 mx-auto block w-full"
             />
 
-            <Text className="text-[#707070]">Best regards, founders</Text>
+            <Text className="text-[#707070]">Best regards, founder</Text>
 
             <Img
               src={`${baseUrl}/signature.png`}

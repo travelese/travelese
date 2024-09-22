@@ -1,5 +1,5 @@
-import ConnectionIssueEmail from "@midday/email/emails/connection-issue";
 import { render } from "@react-email/components";
+import ConnectionIssueEmail from "@travelese/email/emails/connection-issue";
 import { cronTrigger } from "@trigger.dev/sdk";
 import { nanoid } from "nanoid";
 import { client, resend, supabase } from "../client";

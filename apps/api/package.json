@@ -1,5 +1,5 @@
 {
-  "name": "@midday/api",
+  "name": "@travelese/api",
   "private": true,
   "scripts": {
     "dev": "supabase start",

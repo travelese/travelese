@@ -1,16 +1,16 @@
-import { createClient } from "@midday/supabase/client";
+import { createClient } from "@travelese/supabase/client";
 import {
   getCurrentUserTeamQuery,
   getTeamMembersQuery,
-} from "@midday/supabase/queries";
+} from "@travelese/supabase/queries";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@midday/ui/select";
-import { Skeleton } from "@midday/ui/skeleton";
+} from "@travelese/ui/select";
+import { Skeleton } from "@travelese/ui/skeleton";
 import { useEffect, useState } from "react";
 import { AssignedUser } from "./assigned-user";
 

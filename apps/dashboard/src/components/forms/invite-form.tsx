@@ -6,17 +6,17 @@ import {
   inviteTeamMembersSchema,
 } from "@/actions/schema";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Button } from "@midday/ui/button";
-import { Form, FormControl, FormField, FormItem } from "@midday/ui/form";
-import { Input } from "@midday/ui/input";
+import { Button } from "@travelese/ui/button";
+import { Form, FormControl, FormField, FormItem } from "@travelese/ui/form";
+import { Input } from "@travelese/ui/input";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@midday/ui/select";
-import { useToast } from "@midday/ui/use-toast";
+} from "@travelese/ui/select";
+import { useToast } from "@travelese/ui/use-toast";
 import { Loader2 } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
 import Link from "next/link";

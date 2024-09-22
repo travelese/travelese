@@ -1,10 +1,10 @@
-import { createClient } from "@midday/supabase/client";
 import {
   globalShortcut,
   nativeWindow,
   object,
   platform,
 } from "@todesktop/client-core";
+import { createClient } from "@travelese/supabase/client";
 
 const windows = {
   command: "XEVrd9yvoaSgNhFr6GqYX",
@@ -13,15 +13,15 @@ const windows = {
 async function main() {
   // Menu items
   await object.on("open-x", () => {
-    platform.os.openURL("https://x.com/middayai");
+    platform.os.openURL("https://x.com/itstravelese");
   });
 
   await object.on("open-discord", () => {
-    platform.os.openURL("https://discord.gg/ZmqcvWKH");
+    platform.os.openURL("");
   });
 
   await object.on("open-github", () => {
-    platform.os.openURL("https://github.com/midday-ai/midday");
+    platform.os.openURL("https://github.com/arminbabaeistudio.com/travelese");
   });
 
   // Command menu

@@ -4,16 +4,15 @@ import { generateCsvMapping } from "@/actions/ai/generate-csv-mapping";
 import { SelectAccount } from "@/components/select-account";
 import { SelectCurrency } from "@/components/select-currency";
 import { formatAmount } from "@/utils/format";
-import { formatAmountValue, formatDate } from "@midday/import";
+import { formatAmountValue, formatDate } from "@travelese/import";
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from "@midday/ui/accordion";
-import { Icons } from "@midday/ui/icons";
-import { Input } from "@midday/ui/input";
-import { Label } from "@midday/ui/label";
+} from "@travelese/ui/accordion";
+import { Icons } from "@travelese/ui/icons";
+import { Label } from "@travelese/ui/label";
 import {
   Select,
   SelectContent,
@@ -22,15 +21,15 @@ import {
   SelectLabel,
   SelectTrigger,
   SelectValue,
-} from "@midday/ui/select";
-import { Spinner } from "@midday/ui/spinner";
-import { Switch } from "@midday/ui/switch";
+} from "@travelese/ui/select";
+import { Spinner } from "@travelese/ui/spinner";
+import { Switch } from "@travelese/ui/switch";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "@midday/ui/tooltip";
+} from "@travelese/ui/tooltip";
 import { readStreamableValue } from "ai/rsc";
 import { capitalCase } from "change-case";
 import { useEffect, useState } from "react";

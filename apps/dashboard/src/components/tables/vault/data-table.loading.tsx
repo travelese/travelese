@@ -1,5 +1,5 @@
-import { Skeleton } from "@midday/ui/skeleton";
-import { Table, TableBody, TableCell, TableRow } from "@midday/ui/table";
+import { Skeleton } from "@travelese/ui/skeleton";
+import { Table, TableBody, TableCell, TableRow } from "@travelese/ui/table";
 import { DataTableHeader } from "./date-table-header";
 
 export function Loading() {

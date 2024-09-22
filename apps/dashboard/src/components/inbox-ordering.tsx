@@ -1,14 +1,14 @@
 "use client";
 
 import { inboxOrderAction } from "@/actions/inbox/order";
-import { Button } from "@midday/ui/button";
+import { Button } from "@travelese/ui/button";
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuTrigger,
-} from "@midday/ui/dropdown-menu";
-import { Icons } from "@midday/ui/icons";
+} from "@travelese/ui/dropdown-menu";
+import { Icons } from "@travelese/ui/icons";
 import { useOptimisticAction } from "next-safe-action/hooks";
 
 type Props = {

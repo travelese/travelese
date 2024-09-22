@@ -1,6 +1,6 @@
-import { getUser } from "@midday/supabase/cached-queries";
-import { getInboxQuery } from "@midday/supabase/queries";
-import { createClient } from "@midday/supabase/server";
+import { getUser } from "@travelese/supabase/cached-queries";
+import { getInboxQuery } from "@travelese/supabase/queries";
+import { createClient } from "@travelese/supabase/server";
 import { UploadZone } from "./inbox-upload-zone";
 import { InboxView } from "./inbox-view";
 

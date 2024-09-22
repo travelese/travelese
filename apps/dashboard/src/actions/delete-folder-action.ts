@@ -1,7 +1,7 @@
 "use server";
 
-import { LogEvents } from "@midday/events/events";
-import { deleteFolder } from "@midday/supabase/storage";
+import { LogEvents } from "@travelese/events/events";
+import { deleteFolder } from "@travelese/supabase/storage";
 import { revalidatePath } from "next/cache";
 import { authActionClient } from "./safe-action";
 import { deleteFolderSchema } from "./schema";

@@ -1,10 +1,10 @@
 {
-  "extends": "@midday/tsconfig/react-library.json",
+  "extends": "@travelese/tsconfig/react-library.json",
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"],
-      "@midday/ui/*": ["../ui/src/*"]
+      "@travelese/ui/*": ["../ui/src/*"]
     }
   },
   "include": ["."],

@@ -1,8 +1,8 @@
-import { Input } from "@midday/ui/input";
+import { Input } from "@travelese/ui/input";
 import { useState } from "react";
 
 const toHHMMSS = (secs: number) => {
-  const secNum = parseInt(secs.toString(), 10);
+  const secNum = Number.parseInt(secs.toString(), 10);
   const hours = Math.floor(secNum / 3600);
   const minutes = Math.floor(secNum / 60) % 60;
   const seconds = secNum % 60;
@@ -22,7 +22,7 @@ type Props = {
 
 export function TimeInput({ defaultValue, onChange, className }: Props) {
   const [value, setValue] = useState(
-    (defaultValue && toHHMMSS(defaultValue)) ?? "0:00:00"
+    (defaultValue && toHHMMSS(defaultValue)) ?? "0:00:00",
   );
 
   const handleOnChange = (evt) => {

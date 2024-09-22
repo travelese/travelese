@@ -1,17 +1,17 @@
-import React, { useState, useEffect } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
+import type { Offer, StaysSearchResult } from "@duffel/api/types";
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from "@/components/ui/accordion";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Label } from "@/components/ui/label";
-import { Slider } from "@/components/ui/slider";
-import { Input } from "@/components/ui/input";
+} from "@travelese/ui/accordion";
+import { Checkbox } from "@travelese/ui/checkbox";
+import { Input } from "@travelese/ui/input";
+import { Label } from "@travelese/ui/label";
+import { Slider } from "@travelese/ui/slider";
 import { StarIcon } from "lucide-react";
-import { Offer, StaysSearchResult } from "@duffel/api/types";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
 
 type SearchResult = Offer | StaysSearchResult;
 
@@ -145,14 +145,14 @@ export default function SearchFilters({ results }: SearchFiltersProps) {
         filterConfigs.fly.airlines.options = uniqueAirlines;
 
         const maxOfferPrice = Math.max(
-          ...flyResults.map((offer) => parseFloat(offer.total_amount)),
+          ...flyResults.map((offer) => Number.parseFloat(offer.total_amount)),
         );
         setMaxPrice(Math.ceil(maxOfferPrice / 100) * 100);
       } else {
         const stayResults = results as StaysSearchResult[];
         const maxStayPrice = Math.max(
           ...stayResults.map((stay) =>
-            parseFloat(stay.accommodation.cheapest_rate_total_amount),
+            Number.parseFloat(stay.accommodation.cheapest_rate_total_amount),
           ),
         );
         setMaxPrice(Math.ceil(maxStayPrice / 100) * 100);
@@ -245,7 +245,10 @@ export default function SearchFilters({ results }: SearchFiltersProps) {
                   type="number"
                   value={min}
                   onChange={(e) =>
-                    handleFilterChange(key, [parseInt(e.target.value), max])
+                    handleFilterChange(key, [
+                      Number.parseInt(e.target.value),
+                      max,
+                    ])
                   }
                   className="w-20"
                 />
@@ -253,7 +256,10 @@ export default function SearchFilters({ results }: SearchFiltersProps) {
                   type="number"
                   value={max}
                   onChange={(e) =>
-                    handleFilterChange(key, [min, parseInt(e.target.value)])
+                    handleFilterChange(key, [
+                      min,
+                      Number.parseInt(e.target.value),
+                    ])
                   }
                   className="w-20"
                 />
@@ -276,7 +282,7 @@ export default function SearchFilters({ results }: SearchFiltersProps) {
                     onCheckedChange={() => handleFilterChange(key, rating)}
                   />
                   <span className="flex items-center">
-                    {Array.from({ length: parseInt(rating) }).map(
+                    {Array.from({ length: Number.parseInt(rating) }).map(
                       (_, index) => (
                         <StarIcon
                           key={index}

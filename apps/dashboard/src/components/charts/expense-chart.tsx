@@ -1,12 +1,12 @@
-import { getExpenses } from "@midday/supabase/cached-queries";
-import { cn } from "@midday/ui/cn";
-import { Icons } from "@midday/ui/icons";
+import { getExpenses } from "@travelese/supabase/cached-queries";
+import { cn } from "@travelese/ui/cn";
+import { Icons } from "@travelese/ui/icons";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "@midday/ui/tooltip";
+} from "@travelese/ui/tooltip";
 import Link from "next/link";
 import { AnimatedNumber } from "../animated-number";
 import { expenseChartExampleData } from "./data";

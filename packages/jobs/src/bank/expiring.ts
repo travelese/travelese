@@ -1,5 +1,5 @@
-import ConnectionExpireEmail from "@midday/email/emails/connection-expire";
 import { render } from "@react-email/components";
+import ConnectionExpireEmail from "@travelese/email/emails/connection-expire";
 import { cronTrigger } from "@trigger.dev/sdk";
 import { addDays } from "date-fns";
 import { nanoid } from "nanoid";
@@ -59,7 +59,7 @@ client.defineJob({
         );
 
         return {
-          from: "Middaybot <middaybot@midday.ai>",
+          from: "Travelesebot <travelesebot@travelese.xyz>",
           to: [user.email],
           subject: "Bank Connection Expiring Soon",
           html,

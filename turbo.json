@@ -80,9 +80,6 @@
         "^topo"
       ]
     },
-    "clean": {
-      "cache": false
-    },
     "typecheck": {
       "dependsOn": [
         "^topo"
@@ -90,6 +87,9 @@
       "outputs": [
         "node_modules/.cache/tsbuildinfo.json"
       ]
+    },
+    "clean": {
+      "cache": false
     }
   }
 }

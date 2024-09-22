@@ -1,14 +1,9 @@
-import * as React from "react";
-import { Button } from "@/components/ui/button";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { MinusIcon, PlusIcon, UserIcon } from "lucide-react";
-import { Child } from "@kiwicom/orbit-components/icons";
-import { Infant } from "@kiwicom/orbit-components/icons";
 import type { DuffelPassengerType, Guest } from "@duffel/api/types";
+import { Child, Infant } from "@kiwicom/orbit-components/icons";
+import { Button } from "@travelese/ui/button";
+import { Popover, PopoverContent, PopoverTrigger } from "@travelese/ui/popover";
+import { MinusIcon, PlusIcon, UserIcon } from "lucide-react";
+import type * as React from "react";
 
 const pluralize = (
   type: DuffelPassengerType | Guest["type"],

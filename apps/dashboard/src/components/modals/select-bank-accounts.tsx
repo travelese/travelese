@@ -9,28 +9,28 @@ import { useI18n } from "@/locales/client";
 import { getInitials } from "@/utils/format";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { Accounts } from "@midday-ai/engine/resources/accounts.mjs";
-import { Avatar, AvatarFallback } from "@midday/ui/avatar";
-import { Button } from "@midday/ui/button";
+import { Avatar, AvatarFallback } from "@travelese/ui/avatar";
+import { Button } from "@travelese/ui/button";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from "@midday/ui/dialog";
+} from "@travelese/ui/dialog";
 import {
   Form,
   FormControl,
   FormField,
   FormItem,
   FormLabel,
-} from "@midday/ui/form";
-import { Icons } from "@midday/ui/icons";
-import { Skeleton } from "@midday/ui/skeleton";
-import { Switch } from "@midday/ui/switch";
-import { Tabs, TabsContent } from "@midday/ui/tabs";
-import { Textarea } from "@midday/ui/textarea";
-import { useToast } from "@midday/ui/use-toast";
+} from "@travelese/ui/form";
+import { Icons } from "@travelese/ui/icons";
+import { Skeleton } from "@travelese/ui/skeleton";
+import { Switch } from "@travelese/ui/switch";
+import { Tabs, TabsContent } from "@travelese/ui/tabs";
+import { Textarea } from "@travelese/ui/textarea";
+import { useToast } from "@travelese/ui/use-toast";
 import { Loader2 } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
 import { useEffect, useState } from "react";

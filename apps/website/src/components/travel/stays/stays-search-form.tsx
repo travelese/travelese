@@ -1,16 +1,15 @@
 "use client";
 
-import Loading from "@/app/loading";
 import {
   DatesField,
   DestinationField,
   RoomsField,
   TravellersField,
 } from "@/components/travel/search-form-fields";
-import { Button } from "@/components/ui/button";
-import { Form } from "@/components/ui/form";
 import useNavigation from "@/hooks/use-navigation";
 import { useSearchForm } from "@/hooks/use-search-form";
+import { Button } from "@travelese/ui/button";
+import { Form } from "@travelese/ui/form";
 import { SearchIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 
@@ -25,10 +24,6 @@ export default function StaySearchForm() {
   useEffect(() => {
     setIsClient(true);
   }, []);
-
-  if (!isClient) {
-    return <Loading />;
-  }
 
   return (
     <div className="overflow-x-auto">

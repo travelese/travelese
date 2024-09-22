@@ -3,16 +3,16 @@
 import { assistantSettingsAction } from "@/actions/ai/assistant-settings-action";
 import type { AI } from "@/actions/ai/chat";
 import { clearHistoryAction } from "@/actions/ai/clear-history-action";
-import { Button } from "@midday/ui/button";
+import { Button } from "@travelese/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@midday/ui/card";
-import { Switch } from "@midday/ui/switch";
-import { useToast } from "@midday/ui/use-toast";
+} from "@travelese/ui/card";
+import { Switch } from "@travelese/ui/switch";
+import { useToast } from "@travelese/ui/use-toast";
 import { useUIState } from "ai/rsc";
 import { useAction, useOptimisticAction } from "next-safe-action/hooks";
 

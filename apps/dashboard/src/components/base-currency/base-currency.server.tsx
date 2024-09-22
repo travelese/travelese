@@ -1,4 +1,4 @@
-import { getTeamSettings } from "@midday/supabase/cached-queries";
+import { getTeamSettings } from "@travelese/supabase/cached-queries";
 import { SelectCurrency } from "./select-currency";
 
 export async function BaseCurrencyServer() {

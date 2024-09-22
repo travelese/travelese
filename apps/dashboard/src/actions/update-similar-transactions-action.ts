@@ -1,6 +1,6 @@
 "use server";
 
-import { updateSimilarTransactionsCategory } from "@midday/supabase/mutations";
+import { updateSimilarTransactionsCategory } from "@travelese/supabase/mutations";
 import { revalidateTag } from "next/cache";
 import { authActionClient } from "./safe-action";
 import { updateSimilarTransactionsCategorySchema } from "./schema";

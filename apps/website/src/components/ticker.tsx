@@ -1,5 +1,5 @@
-import type { Database } from "@midday/supabase/types";
 import { createServerClient } from "@supabase/ssr";
+import type { Database } from "@travelese/supabase/types";
 import Link from "next/link";
 
 const currency = "USD";

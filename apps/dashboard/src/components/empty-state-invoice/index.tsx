@@ -1,9 +1,9 @@
 "use client";
 
 import { requestAccessAction } from "@/actions/request-access-action";
-import { Button } from "@midday/ui/button";
-import { cn } from "@midday/ui/cn";
-import { Icons } from "@midday/ui/icons";
+import { Button } from "@travelese/ui/button";
+import { cn } from "@travelese/ui/cn";
+import { Icons } from "@travelese/ui/icons";
 import { Loader2 } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
 import Image from "next/image";

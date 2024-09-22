@@ -6,8 +6,8 @@ import {
   HoverCard,
   HoverCardContent,
   HoverCardTrigger,
-} from "@midday/ui/hover-card";
-import { type FileType, isSupportedFilePreview } from "@midday/utils";
+} from "@travelese/ui/hover-card";
+import { type FileType, isSupportedFilePreview } from "@travelese/utils";
 import { FileIcon } from "./file-icon";
 
 type Props = {

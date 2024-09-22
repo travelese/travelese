@@ -3,7 +3,7 @@
 import { AddAccountButton } from "@/components/add-account-button";
 import { FormatAmount } from "@/components/format-amount";
 import { formatAccountName } from "@/utils/format";
-import { cn } from "@midday/ui/cn";
+import { cn } from "@travelese/ui/cn";
 import Image from "next/image";
 import { useState } from "react";
 

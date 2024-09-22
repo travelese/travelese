@@ -1,8 +1,8 @@
 "use client";
 
-import { Button } from "@midday/ui/button";
-import { Input } from "@midday/ui/input";
 import type { Table } from "@tanstack/react-table";
+import { Button } from "@travelese/ui/button";
+import { Input } from "@travelese/ui/input";
 import type { Category } from "./columns";
 
 type Props = {

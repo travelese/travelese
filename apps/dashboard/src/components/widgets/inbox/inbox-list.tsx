@@ -2,7 +2,7 @@
 
 import { FormatAmount } from "@/components/format-amount";
 import { InboxStatus } from "@/components/inbox-status";
-import { Icons } from "@midday/ui/icons";
+import { Icons } from "@travelese/ui/icons";
 import { format } from "date-fns";
 import Link from "next/link";
 

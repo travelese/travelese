@@ -1,26 +1,22 @@
 import { DatePickerWithRange } from "@/components/travel/date-selector";
 import PlacesSelector from "@/components/travel/places-selector";
 import TravellerSelector from "@/components/travel/traveller-selector";
-import { Button } from "@/components/ui/button";
+import { Accommodation, Seat } from "@kiwicom/orbit-components/icons";
+import { Button } from "@travelese/ui/button";
 import {
   Command,
   CommandGroup,
   CommandInput,
   CommandItem,
   CommandList,
-} from "@/components/ui/command";
+} from "@travelese/ui/command";
 import {
   FormControl,
   FormField,
   FormItem,
   FormMessage,
-} from "@/components/ui/form";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { Accommodation, Seat } from "@kiwicom/orbit-components/icons";
+} from "@travelese/ui/form";
+import { Popover, PopoverContent, PopoverTrigger } from "@travelese/ui/popover";
 import type React from "react";
 import type { DateRange } from "react-day-picker";
 import type { Control } from "react-hook-form";

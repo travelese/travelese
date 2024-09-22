@@ -1,9 +1,9 @@
-import { DocumentClient } from "@midday/documents";
+import { DocumentClient } from "@travelese/documents";
 import {
   NotificationTypes,
   TriggerEvents,
   triggerBulk,
-} from "@midday/notification";
+} from "@travelese/notification";
 import { eventTrigger } from "@trigger.dev/sdk";
 import { z } from "zod";
 import { client, supabase } from "../client";

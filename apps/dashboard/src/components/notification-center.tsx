@@ -1,11 +1,11 @@
 "use client";
 
 import { useNotifications } from "@/hooks/use-notifications";
-import { Button } from "@midday/ui/button";
-import { Icons } from "@midday/ui/icons";
-import { Popover, PopoverContent, PopoverTrigger } from "@midday/ui/popover";
-import { ScrollArea } from "@midday/ui/scroll-area";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@midday/ui/tabs";
+import { Button } from "@travelese/ui/button";
+import { Icons } from "@travelese/ui/icons";
+import { Popover, PopoverContent, PopoverTrigger } from "@travelese/ui/popover";
+import { ScrollArea } from "@travelese/ui/scroll-area";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@travelese/ui/tabs";
 import { formatDistanceToNow } from "date-fns";
 import Link from "next/link";
 import { useEffect, useState } from "react";

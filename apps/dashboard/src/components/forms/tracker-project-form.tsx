@@ -1,10 +1,10 @@
 "use client";
 
 import { useCurrentLocale } from "@/locales/client";
-import { uniqueCurrencies } from "@midday/location/src/currencies";
-import { Button } from "@midday/ui/button";
-import { Collapsible, CollapsibleContent } from "@midday/ui/collapsible";
-import { CurrencyInput } from "@midday/ui/currency-input";
+import { uniqueCurrencies } from "@travelese/location/src/currencies";
+import { Button } from "@travelese/ui/button";
+import { Collapsible, CollapsibleContent } from "@travelese/ui/collapsible";
+import { CurrencyInput } from "@travelese/ui/currency-input";
 import {
   Form,
   FormControl,
@@ -13,17 +13,17 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@midday/ui/form";
-import { Input } from "@midday/ui/input";
+} from "@travelese/ui/form";
+import { Input } from "@travelese/ui/input";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@midday/ui/select";
-import { Switch } from "@midday/ui/switch";
-import { Textarea } from "@midday/ui/textarea";
+} from "@travelese/ui/select";
+import { Switch } from "@travelese/ui/switch";
+import { Textarea } from "@travelese/ui/textarea";
 import { Loader2 } from "lucide-react";
 import { useState } from "react";
 

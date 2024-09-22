@@ -2,13 +2,12 @@
 
 import { updateUserAction } from "@/actions/update-user-action";
 import { useUpload } from "@/hooks/use-upload";
-import { Avatar, AvatarFallback, AvatarImage } from "@midday/ui/avatar";
-import { Icons } from "@midday/ui/icons";
-import { stripSpecialCharacters } from "@midday/utils";
+import { Avatar, AvatarFallback, AvatarImage } from "@travelese/ui/avatar";
+import { Icons } from "@travelese/ui/icons";
+import { stripSpecialCharacters } from "@travelese/utils";
 import { Loader2 } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
-import { useRef, useState } from "react";
-import { forwardRef } from "react";
+import { forwardRef, useRef, useState } from "react";
 
 type Props = {
   userId: string;

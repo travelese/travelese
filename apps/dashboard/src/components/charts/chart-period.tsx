@@ -1,10 +1,10 @@
 "use client";
 
 import { changeChartPeriodAction } from "@/actions/change-chart-period-action";
-import { Button } from "@midday/ui/button";
-import { Calendar } from "@midday/ui/calendar";
-import { Icons } from "@midday/ui/icons";
-import { Popover, PopoverContent, PopoverTrigger } from "@midday/ui/popover";
+import { Button } from "@travelese/ui/button";
+import { Calendar } from "@travelese/ui/calendar";
+import { Icons } from "@travelese/ui/icons";
+import { Popover, PopoverContent, PopoverTrigger } from "@travelese/ui/popover";
 import {
   Select,
   SelectContent,
@@ -12,9 +12,14 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@midday/ui/select";
-import { formatISO } from "date-fns";
-import { startOfMonth, startOfYear, subMonths, subWeeks } from "date-fns";
+} from "@travelese/ui/select";
+import {
+  formatISO,
+  startOfMonth,
+  startOfYear,
+  subMonths,
+  subWeeks,
+} from "date-fns";
 import { formatDateRange } from "little-date";
 import { useAction } from "next-safe-action/hooks";
 import { parseAsString, useQueryStates } from "nuqs";

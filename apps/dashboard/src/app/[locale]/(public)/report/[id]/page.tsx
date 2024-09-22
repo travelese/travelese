@@ -1,7 +1,6 @@
 import { AnimatedNumber } from "@/components/animated-number";
 import { AreaChart } from "@/components/charts/area-chart";
 import { BarChart } from "@/components/charts/bar-chart";
-import { ExpenseChart } from "@/components/charts/expense-chart";
 import { StackedBarChart } from "@/components/charts/stacked-bar-chart";
 import { FormatAmount } from "@/components/format-amount";
 import { calculateAvgBurnRate } from "@/utils/format";
@@ -10,9 +9,9 @@ import {
   getExpensesQuery,
   getMetricsQuery,
   getRunwayQuery,
-} from "@midday/supabase/queries";
-import { createClient } from "@midday/supabase/server";
-import { Button } from "@midday/ui/button";
+} from "@travelese/supabase/queries";
+import { createClient } from "@travelese/supabase/server";
+import { Button } from "@travelese/ui/button";
 import { format } from "date-fns";
 import type { Metadata } from "next";
 import Link from "next/link";

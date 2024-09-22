@@ -1,15 +1,15 @@
 import { createPlaidLinkTokenAction } from "@/actions/institutions/create-plaid-link";
 import { reconnectGoCardLessLinkAction } from "@/actions/institutions/reconnect-gocardless-link";
-import { Button } from "@midday/ui/button";
-import { Icons } from "@midday/ui/icons";
+import { isDesktopApp } from "@todesktop/client-core/platform/todesktop";
+import { Button } from "@travelese/ui/button";
+import { Icons } from "@travelese/ui/icons";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "@midday/ui/tooltip";
-import { useToast } from "@midday/ui/use-toast";
-import { isDesktopApp } from "@todesktop/client-core/platform/todesktop";
+} from "@travelese/ui/tooltip";
+import { useToast } from "@travelese/ui/use-toast";
 import { useScript } from "@uidotdev/usehooks";
 import { Loader2 } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";

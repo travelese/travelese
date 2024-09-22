@@ -1,19 +1,18 @@
 "use client";
 
-import { Button } from "@midday/ui/button";
-import { cn } from "@midday/ui/cn";
+import { Button } from "@travelese/ui/button";
+import { cn } from "@travelese/ui/cn";
 import {
   Dialog,
   DialogContentFrameless,
   DialogTrigger,
-} from "@midday/ui/dialog";
-import { Icons } from "@midday/ui/icons";
-import { Skeleton } from "@midday/ui/skeleton";
-import { FileType } from "@midday/utils";
+} from "@travelese/ui/dialog";
+import { Icons } from "@travelese/ui/icons";
+import { Skeleton } from "@travelese/ui/skeleton";
+import { FileType } from "@travelese/utils";
 import { AnimatePresence, motion } from "framer-motion";
 import dynamic from "next/dynamic";
 import { useState } from "react";
-import React from "react";
 
 const Iframe = dynamic(() => import("./iframe").then((mod) => mod.Iframe), {
   ssr: false,

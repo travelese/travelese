@@ -1,8 +1,8 @@
 "use server";
 
-import { LogEvents } from "@midday/events/events";
-import { getTeamMembers } from "@midday/supabase/cached-queries";
-import { leaveTeam } from "@midday/supabase/mutations";
+import { LogEvents } from "@travelese/events/events";
+import { getTeamMembers } from "@travelese/supabase/cached-queries";
+import { leaveTeam } from "@travelese/supabase/mutations";
 import {
   revalidatePath as revalidatePathFunc,
   revalidateTag,

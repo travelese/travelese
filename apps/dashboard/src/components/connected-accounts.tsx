@@ -9,7 +9,7 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@midday/ui/card";
+} from "@travelese/ui/card";
 import { Suspense } from "react";
 
 export function ConnectedAccounts() {

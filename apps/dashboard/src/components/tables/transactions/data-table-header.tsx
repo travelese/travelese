@@ -1,8 +1,8 @@
 "use client";
 
-import { Button } from "@midday/ui/button";
-import { Checkbox } from "@midday/ui/checkbox";
-import { TableHead, TableHeader, TableRow } from "@midday/ui/table";
+import { Button } from "@travelese/ui/button";
+import { Checkbox } from "@travelese/ui/checkbox";
+import { TableHead, TableHeader, TableRow } from "@travelese/ui/table";
 import { ArrowDown, ArrowUp } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback } from "react";

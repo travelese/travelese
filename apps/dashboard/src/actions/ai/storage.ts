@@ -1,7 +1,7 @@
 "use server";
 
-import { client as RedisClient } from "@midday/kv";
-import { getSession, getUser } from "@midday/supabase/cached-queries";
+import { client as RedisClient } from "@travelese/kv";
+import { getSession, getUser } from "@travelese/supabase/cached-queries";
 import type { Chat, SettingsResponse } from "./types";
 
 export async function getAssistantSettings(): Promise<SettingsResponse> {

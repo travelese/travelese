@@ -1,12 +1,12 @@
 "use client";
 
-import { useMediaQuery } from "@midday/ui/hooks";
+import { useMediaQuery } from "@travelese/ui/hooks";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "@midday/ui/tooltip";
+} from "@travelese/ui/tooltip";
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 

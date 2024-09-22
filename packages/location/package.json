@@ -1,5 +1,5 @@
 {
-    "name": "@midday/location",
+    "name": "@travelese/location",
     "version": "1.0.0",
     "main": "src/index.ts",
     "private": true,

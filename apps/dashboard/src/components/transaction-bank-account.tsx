@@ -1,5 +1,5 @@
 import { BankLogo } from "@/components/bank-logo";
-import { cn } from "@midday/ui/cn";
+import { cn } from "@travelese/ui/cn";
 
 type Props = {
   logoUrl?: string;

@@ -1,7 +1,7 @@
 "use server";
 
 import { openai } from "@ai-sdk/openai";
-import { getCountry } from "@midday/location";
+import { getCountry } from "@travelese/location";
 import { generateObject } from "ai";
 import { z } from "zod";
 import { authActionClient } from "../safe-action";

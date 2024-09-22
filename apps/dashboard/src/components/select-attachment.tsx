@@ -1,11 +1,11 @@
 import { searchAction } from "@/actions/search-action";
-import { Combobox } from "@midday/ui/combobox";
+import { Combobox } from "@travelese/ui/combobox";
 import {
   HoverCard,
   HoverCardContent,
   HoverCardTrigger,
-} from "@midday/ui/hover-card";
-import { isSupportedFilePreview } from "@midday/utils";
+} from "@travelese/ui/hover-card";
+import { isSupportedFilePreview } from "@travelese/utils";
 import { useDebounce } from "@uidotdev/usehooks";
 import { format } from "date-fns";
 import { useAction } from "next-safe-action/hooks";

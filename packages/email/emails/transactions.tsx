@@ -1,4 +1,3 @@
-import { cn } from "@midday/ui/cn";
 import {
   Body,
   Button,
@@ -12,6 +11,7 @@ import {
   Tailwind,
   Text,
 } from "@react-email/components";
+import { cn } from "@travelese/ui/cn";
 import { format } from "date-fns";
 import { Footer } from "../components/footer";
 import { Logo } from "../components/logo";
@@ -72,19 +72,19 @@ const defaultTransactions = [
 
 const baseUrl =
   process.env.VERCEL_ENV === "production"
-    ? "https://midday.ai/email"
+    ? "https://travelese.xyz/email"
     : "http://localhost:3000/email";
 
 const baseAppUrl =
   process.env.VERCEL_ENV === "production"
-    ? "https://app.midday.ai"
+    ? "https://app.travelese.xyz"
     : "http://localhost:3001";
 
 export const TransactionsEmail = ({
-  fullName = "Viktor Hofte",
+  fullName = "Armin Babaei",
   transactions = defaultTransactions,
   locale = "en",
-  teamName = "Viktor Hofte AB",
+  teamName = "Acme Co",
 }: TransactionsEmailEmailProps) => {
   const { t } = getI18n({ locale });
   const firstName = fullName.split(" ").at(0);

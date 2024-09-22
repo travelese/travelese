@@ -2,8 +2,8 @@
 
 import { generateVaultFilters } from "@/actions/ai/filters/generate-vault-filters";
 import { useI18n } from "@/locales/client";
-import { Calendar } from "@midday/ui/calendar";
-import { cn } from "@midday/ui/cn";
+import { Calendar } from "@travelese/ui/calendar";
+import { cn } from "@travelese/ui/cn";
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -14,9 +14,9 @@ import {
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
-} from "@midday/ui/dropdown-menu";
-import { Icons } from "@midday/ui/icons";
-import { Input } from "@midday/ui/input";
+} from "@travelese/ui/dropdown-menu";
+import { Icons } from "@travelese/ui/icons";
+import { Input } from "@travelese/ui/input";
 import { readStreamableValue } from "ai/rsc";
 import { formatISO } from "date-fns";
 import { parseAsArrayOf, parseAsString, useQueryStates } from "nuqs";

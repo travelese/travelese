@@ -3,23 +3,20 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
-import { Button } from "@/components/ui/button";
+import { Button } from "@travelese/ui/button";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Skeleton } from "@/components/ui/skeleton";
+} from "@travelese/ui/select";
+import { Skeleton } from "@travelese/ui/skeleton";
 
 import { FilterIcon, ListOrderedIcon } from "lucide-react";
 
-import Loading from "@/app/loading";
-import FlyCard from "@/components/travel/fly/fly-card";
 import SearchFilters from "@/components/travel/search-filters";
 import SearchSkeleton from "@/components/travel/search-skeleton";
-import StayCard from "@/components/travel/stay/stay-card";
 import useNavigation from "@/hooks/use-navigation";
 import type {
   Offer,
@@ -28,9 +25,9 @@ import type {
 } from "@duffel/api/types";
 import { toast } from "sonner";
 
-type FlySortValues = "total_amount" | "total_duration";
-type StaySortValues = "price" | "rating";
-type SortValues = FlySortValues | StaySortValues;
+type FlightsSortValues = "total_amount" | "total_duration";
+type StaysSortValues = "price" | "rating";
+type SortValues = FlightsSortValues | StaysSortValues;
 
 type SearchResult = Offer | StaysSearchResult;
 
@@ -159,7 +156,6 @@ export default function SearchResult() {
   if (error) {
     toast.error(
       <div className="flex items-center gap-2">
-        <Loading />
         <span>{error.message}</span>
       </div>,
     );

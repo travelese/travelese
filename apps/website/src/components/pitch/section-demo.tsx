@@ -1,8 +1,8 @@
 "use client";
 
-import { Button } from "@midday/ui/button";
-import { useMediaQuery } from "@midday/ui/hooks";
-import { Icons } from "@midday/ui/icons";
+import { Button } from "@travelese/ui/button";
+import { useMediaQuery } from "@travelese/ui/hooks";
+import { Icons } from "@travelese/ui/icons";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";

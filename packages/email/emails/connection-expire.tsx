@@ -23,7 +23,7 @@ interface WelcomeProps {
 
 const baseUrl =
   process.env.VERCEL_ENV === "production"
-    ? "https://midday.ai/email"
+    ? "https://travelese.xyz/email"
     : "http://localhost:3000/email";
 
 export const ConnectionExpireEmail = ({

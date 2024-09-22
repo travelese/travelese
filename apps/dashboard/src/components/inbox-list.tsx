@@ -1,6 +1,6 @@
-import { Button } from "@midday/ui/button";
-import { Icons } from "@midday/ui/icons";
-import { ScrollArea } from "@midday/ui/scroll-area";
+import { Button } from "@travelese/ui/button";
+import { Icons } from "@travelese/ui/icons";
+import { ScrollArea } from "@travelese/ui/scroll-area";
 import { AnimatePresence, motion } from "framer-motion";
 import { InboxItem } from "./inbox-item";
 

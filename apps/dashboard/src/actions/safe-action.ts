@@ -1,9 +1,9 @@
 import { logger } from "@/utils/logger";
-import { setupAnalytics } from "@midday/events/server";
-import { client as RedisClient } from "@midday/kv";
-import { getUser } from "@midday/supabase/cached-queries";
-import { createClient } from "@midday/supabase/server";
 import * as Sentry from "@sentry/nextjs";
+import { setupAnalytics } from "@travelese/events/server";
+import { client as RedisClient } from "@travelese/kv";
+import { getUser } from "@travelese/supabase/cached-queries";
+import { createClient } from "@travelese/supabase/server";
 import { Ratelimit } from "@upstash/ratelimit";
 import {
   DEFAULT_SERVER_ERROR_MESSAGE,

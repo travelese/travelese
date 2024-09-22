@@ -1,8 +1,8 @@
 import { useAssistantStore } from "@/store/assistant";
-import { Icons } from "@midday/ui/icons";
-import { Popover, PopoverContent, PopoverTrigger } from "@midday/ui/popover";
 import { app, platform } from "@todesktop/client-core";
 import { isDesktopApp } from "@todesktop/client-core/platform/todesktop";
+import { Icons } from "@travelese/ui/icons";
+import { Popover, PopoverContent, PopoverTrigger } from "@travelese/ui/popover";
 import { useRouter } from "next/navigation";
 
 type Props = {

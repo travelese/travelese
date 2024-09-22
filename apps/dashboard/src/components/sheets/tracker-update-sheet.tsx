@@ -15,21 +15,20 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@midday/ui/alert-dialog";
-import { Drawer, DrawerContent, DrawerHeader } from "@midday/ui/drawer";
+} from "@travelese/ui/alert-dialog";
+import { Drawer, DrawerContent, DrawerHeader } from "@travelese/ui/drawer";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@midday/ui/dropdown-menu";
-import { useMediaQuery } from "@midday/ui/hooks";
-import { Icons } from "@midday/ui/icons";
-import { ScrollArea } from "@midday/ui/scroll-area";
-import { Sheet, SheetContent, SheetHeader } from "@midday/ui/sheet";
-import { useToast } from "@midday/ui/use-toast";
+} from "@travelese/ui/dropdown-menu";
+import { useMediaQuery } from "@travelese/ui/hooks";
+import { Icons } from "@travelese/ui/icons";
+import { ScrollArea } from "@travelese/ui/scroll-area";
+import { Sheet, SheetContent, SheetHeader } from "@travelese/ui/sheet";
+import { useToast } from "@travelese/ui/use-toast";
 import { useAction } from "next-safe-action/hooks";
-import React from "react";
 import { useForm } from "react-hook-form";
 import type { z } from "zod";
 

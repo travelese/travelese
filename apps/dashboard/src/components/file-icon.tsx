@@ -1,5 +1,5 @@
-import { cn } from "@midday/ui/cn";
-import { Icons } from "@midday/ui/icons";
+import { cn } from "@travelese/ui/cn";
+import { Icons } from "@travelese/ui/icons";
 
 type FileIconProps = {
   mimetype: string;

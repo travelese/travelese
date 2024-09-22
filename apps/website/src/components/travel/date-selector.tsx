@@ -1,17 +1,13 @@
 "use client";
 
-import * as React from "react";
-import { addDays, format } from "date-fns";
-import { DateRange } from "react-day-picker";
+import { format } from "date-fns";
+import type * as React from "react";
+import type { DateRange } from "react-day-picker";
 
-import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+import { Button } from "@travelese/ui/button";
+import { Calendar } from "@travelese/ui/calendar";
+import { cn } from "@travelese/ui/cn";
+import { Popover, PopoverContent, PopoverTrigger } from "@travelese/ui/popover";
 
 import { Calendar as CalendarIcon } from "lucide-react";
 

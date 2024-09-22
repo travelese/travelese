@@ -1,13 +1,11 @@
-"use client";
-
+import { ArrowLeftIcon, ArrowRightIcon } from "@radix-ui/react-icons";
 import useEmblaCarousel, {
   type UseEmblaCarouselType,
 } from "embla-carousel-react";
 import * as React from "react";
-import { useHotkeys } from "react-hotkeys-hook";
+
+import { Button } from "@/components/button";
 import { cn } from "../utils";
-import { Button } from "./button";
-import { Icons } from "./icons";
 
 type CarouselApi = UseEmblaCarouselType[1];
 type UseCarouselParameters = Parameters<typeof useEmblaCarousel>;
@@ -28,7 +26,6 @@ type CarouselContextProps = {
   scrollNext: () => void;
   canScrollPrev: boolean;
   canScrollNext: boolean;
-  scrollTo: (index: number) => void;
 } & CarouselProps;
 
 const CarouselContext = React.createContext<CarouselContextProps | null>(null);
@@ -86,15 +83,18 @@ const Carousel = React.forwardRef<
       api?.scrollNext();
     }, [api]);
 
-    const scrollTo = React.useCallback(
-      (index: number) => {
-        api?.scrollTo(index);
+    const handleKeyDown = React.useCallback(
+      (event: React.KeyboardEvent<HTMLDivElement>) => {
+        if (event.key === "ArrowLeft") {
+          event.preventDefault();
+          scrollPrev();
+        } else if (event.key === "ArrowRight") {
+          event.preventDefault();
+          scrollNext();
+        }
       },
-      [api],
+      [scrollPrev, scrollNext],
     );
-
-    useHotkeys("left", scrollPrev);
-    useHotkeys("right", scrollNext);
 
     React.useEffect(() => {
       if (!api || !setApi) {
@@ -130,11 +130,11 @@ const Carousel = React.forwardRef<
           scrollNext,
           canScrollPrev,
           canScrollNext,
-          scrollTo,
         }}
       >
         <div
           ref={ref}
+          onKeyDownCapture={handleKeyDown}
           className={cn("relative", className)}
           role="region"
           aria-roledescription="carousel"
@@ -204,7 +204,7 @@ const CarouselPrevious = React.forwardRef<
       variant={variant}
       size={size}
       className={cn(
-        "absolute h-8 w-8 rounded-full",
+        "absolute  h-8 w-8 rounded-full",
         orientation === "horizontal"
           ? "-left-12 top-1/2 -translate-y-1/2"
           : "-top-12 left-1/2 -translate-x-1/2 rotate-90",
@@ -214,8 +214,7 @@ const CarouselPrevious = React.forwardRef<
       onClick={scrollPrev}
       {...props}
     >
-      <Icons.ChevronLeft className="h-6 w-6" />
-
+      <ArrowLeftIcon className="h-4 w-4" />
       <span className="sr-only">Previous slide</span>
     </Button>
   );
@@ -244,7 +243,7 @@ const CarouselNext = React.forwardRef<
       onClick={scrollNext}
       {...props}
     >
-      <Icons.ChevronRight className="h-6 w-6" />
+      <ArrowRightIcon className="h-4 w-4" />
       <span className="sr-only">Next slide</span>
     </Button>
   );
@@ -252,11 +251,10 @@ const CarouselNext = React.forwardRef<
 CarouselNext.displayName = "CarouselNext";
 
 export {
-  type CarouselApi,
   Carousel,
   CarouselContent,
   CarouselItem,
-  CarouselPrevious,
   CarouselNext,
-  useCarousel,
+  CarouselPrevious,
+  type CarouselApi,
 };

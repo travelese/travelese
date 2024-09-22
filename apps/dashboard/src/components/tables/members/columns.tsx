@@ -2,6 +2,7 @@ import { changeUserRoleAction } from "@/actions/change-user-role-action";
 import { deleteTeamMemberAction } from "@/actions/delete-team-member-action";
 import { leaveTeamAction } from "@/actions/leave-team-action";
 import { useI18n } from "@/locales/client";
+import type { ColumnDef } from "@tanstack/react-table";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -12,26 +13,24 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@midday/ui/alert-dialog";
-import { Avatar, AvatarFallback, AvatarImage } from "@midday/ui/avatar";
-import { Button } from "@midday/ui/button";
+} from "@travelese/ui/alert-dialog";
+import { Avatar, AvatarFallback, AvatarImage } from "@travelese/ui/avatar";
+import { Button } from "@travelese/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@midday/ui/dropdown-menu";
+} from "@travelese/ui/dropdown-menu";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@midday/ui/select";
-import { useToast } from "@midday/ui/use-toast";
-import type { ColumnDef } from "@tanstack/react-table";
-import { MoreHorizontal } from "lucide-react";
-import { Loader2 } from "lucide-react";
+} from "@travelese/ui/select";
+import { useToast } from "@travelese/ui/use-toast";
+import { Loader2, MoreHorizontal } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
 import { useRouter } from "next/navigation";
 

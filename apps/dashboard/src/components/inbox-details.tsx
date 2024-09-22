@@ -1,16 +1,17 @@
-import { Avatar, AvatarFallback } from "@midday/ui/avatar";
-import { Button } from "@midday/ui/button";
-import { cn } from "@midday/ui/cn";
+import { Avatar, AvatarFallback } from "@travelese/ui/avatar";
+import { Button } from "@travelese/ui/button";
+import { cn } from "@travelese/ui/cn";
 import {
+  DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-} from "@midday/ui/dropdown-menu";
-import { DropdownMenu, DropdownMenuTrigger } from "@midday/ui/dropdown-menu";
-import { Icons } from "@midday/ui/icons";
-import { Separator } from "@midday/ui/separator";
-import { Skeleton } from "@midday/ui/skeleton";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@midday/ui/tooltip";
-import { useToast } from "@midday/ui/use-toast";
+  DropdownMenuTrigger,
+} from "@travelese/ui/dropdown-menu";
+import { Icons } from "@travelese/ui/icons";
+import { Separator } from "@travelese/ui/separator";
+import { Skeleton } from "@travelese/ui/skeleton";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@travelese/ui/tooltip";
+import { useToast } from "@travelese/ui/use-toast";
 import { format } from "date-fns";
 import { MoreVertical, Trash2 } from "lucide-react";
 import Image from "next/image";

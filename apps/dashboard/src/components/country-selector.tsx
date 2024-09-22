@@ -1,19 +1,19 @@
-import countries from "@midday/location/src/country-flag";
-import { Button } from "@midday/ui/button";
-import { cn } from "@midday/ui/cn";
+import { CaretSortIcon, CheckIcon } from "@radix-ui/react-icons";
+import countries from "@travelese/location/src/country-flag";
+import { Button } from "@travelese/ui/button";
+import { cn } from "@travelese/ui/cn";
 import {
   Command,
   CommandEmpty,
   CommandGroup,
   CommandInput,
   CommandItem,
-} from "@midday/ui/command";
+} from "@travelese/ui/command";
 import {
   Popover,
   PopoverContentWithoutPortal,
   PopoverTrigger,
-} from "@midday/ui/popover";
-import { CaretSortIcon, CheckIcon } from "@radix-ui/react-icons";
+} from "@travelese/ui/popover";
 import * as React from "react";
 
 type Props = {

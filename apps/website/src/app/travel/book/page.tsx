@@ -4,10 +4,10 @@ import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import BookForm from "@/components/travel/book-form";
-import FlyCard from "@/components/travel/fly/fly-card";
+import FlightsCard from "@/components/travel/flights/flights-card";
 import PriceCard from "@/components/travel/price-card";
-import { Skeleton } from "@/components/ui/skeleton";
 import type { Offer } from "@duffel/api/types";
+import { Skeleton } from "@travelese/ui/skeleton";
 import { toast } from "sonner";
 
 export default function FlyBookPage() {
@@ -60,7 +60,7 @@ export default function FlyBookPage() {
     <main className="grid flex-1 items-start gap-8 sm:px-6 sm:py-0 md:gap-8 lg:grid-cols-3 xl:grid-cols-3 p-6 md:p-10 border">
       <div className="grid auto-rows-max items-start gap-4 md:gap-8 lg:col-span-2">
         <div className="grid gap-6">
-          {selectedOffer && <FlyCard offer={selectedOffer} />}
+          {selectedOffer && <FlightsCard offer={selectedOffer} />}
           {selectedOffer && <BookForm selectedOffer={selectedOffer} />}
         </div>
       </div>

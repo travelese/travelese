@@ -1,8 +1,8 @@
 import { useTransactionsStore } from "@/store/transactions";
-import { Button } from "@midday/ui/button";
-import { Checkbox } from "@midday/ui/checkbox";
-import { Icons } from "@midday/ui/icons";
-import { Popover, PopoverContent, PopoverTrigger } from "@midday/ui/popover";
+import { Button } from "@travelese/ui/button";
+import { Checkbox } from "@travelese/ui/checkbox";
+import { Icons } from "@travelese/ui/icons";
+import { Popover, PopoverContent, PopoverTrigger } from "@travelese/ui/popover";
 
 export function ColumnVisibility({ disabled }: { disabled?: boolean }) {
   const { columns } = useTransactionsStore();

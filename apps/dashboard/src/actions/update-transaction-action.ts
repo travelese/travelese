@@ -1,6 +1,6 @@
 "use server";
 
-import { updateTransaction } from "@midday/supabase/mutations";
+import { updateTransaction } from "@travelese/supabase/mutations";
 import { revalidateTag } from "next/cache";
 import { authActionClient } from "./safe-action";
 import { updateTransactionSchema } from "./schema";

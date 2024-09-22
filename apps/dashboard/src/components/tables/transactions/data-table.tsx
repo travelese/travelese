@@ -7,11 +7,6 @@ import { updateTransactionAction } from "@/actions/update-transaction-action";
 import { TransactionSheet } from "@/components/sheets/transaction-sheet";
 import { useTransactionsStore } from "@/store/transactions";
 import { Cookies } from "@/utils/constants";
-import { Button } from "@midday/ui/button";
-import { cn } from "@midday/ui/cn";
-import { Spinner } from "@midday/ui/spinner";
-import { Table, TableBody, TableCell, TableRow } from "@midday/ui/table";
-import { useToast } from "@midday/ui/use-toast";
 import {
   type ColumnDef,
   type VisibilityState,
@@ -19,10 +14,14 @@ import {
   getCoreRowModel,
   useReactTable,
 } from "@tanstack/react-table";
+import { Button } from "@travelese/ui/button";
+import { cn } from "@travelese/ui/cn";
+import { Spinner } from "@travelese/ui/spinner";
+import { Table, TableBody, TableCell, TableRow } from "@travelese/ui/table";
+import { useToast } from "@travelese/ui/use-toast";
 import { useAction } from "next-safe-action/hooks";
 import { useQueryState } from "nuqs";
-import { useEffect } from "react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useInView } from "react-intersection-observer";
 import { BottomBar } from "./bottom-bar";
 import { DataTableHeader } from "./data-table-header";

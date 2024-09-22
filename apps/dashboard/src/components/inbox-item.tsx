@@ -1,5 +1,5 @@
-import { cn } from "@midday/ui/cn";
-import { Skeleton } from "@midday/ui/skeleton";
+import { cn } from "@travelese/ui/cn";
+import { Skeleton } from "@travelese/ui/skeleton";
 import { format } from "date-fns";
 import { useQueryState } from "nuqs";
 import { FormatAmount } from "./format-amount";

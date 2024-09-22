@@ -1,14 +1,14 @@
 import { getVatRateAction } from "@/actions/ai/get-vat-rate";
 import { Experimental } from "@/components/experimental";
-import { Button } from "@midday/ui/button";
-import { cn } from "@midday/ui/cn";
-import { Icons } from "@midday/ui/icons";
+import { Button } from "@travelese/ui/button";
+import { cn } from "@travelese/ui/cn";
+import { Icons } from "@travelese/ui/icons";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "@midday/ui/tooltip";
+} from "@travelese/ui/tooltip";
 import { useAction } from "next-safe-action/hooks";
 import { useEffect, useState } from "react";
 

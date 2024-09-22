@@ -3,14 +3,14 @@
 import { featureRequestAction } from "@/actions/feature-request-action";
 import { featureRequestSchema } from "@/actions/schema";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Button } from "@midday/ui/button";
+import { Button } from "@travelese/ui/button";
 import {
   DialogContent,
   DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@midday/ui/dialog";
+} from "@travelese/ui/dialog";
 import {
   Form,
   FormControl,
@@ -18,16 +18,16 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@midday/ui/form";
-import { Input } from "@midday/ui/input";
+} from "@travelese/ui/form";
+import { Input } from "@travelese/ui/input";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@midday/ui/select";
-import { Textarea } from "@midday/ui/textarea";
+} from "@travelese/ui/select";
+import { Textarea } from "@travelese/ui/textarea";
 import { Loader2 } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
 import { useState } from "react";

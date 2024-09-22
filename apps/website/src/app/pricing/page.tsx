@@ -4,8 +4,8 @@ import {
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from "@midday/ui/accordion";
-import { Button } from "@midday/ui/button";
+} from "@travelese/ui/accordion";
+import { Button } from "@travelese/ui/button";
 import type { Metadata } from "next";
 import Link from "next/link";
 

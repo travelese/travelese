@@ -6,6 +6,12 @@ import { leaveTeamAction } from "@/actions/leave-team-action";
 import { InviteTeamMembersModal } from "@/components/modals/invite-team-members-modal";
 import { useI18n } from "@/locales/client";
 import {
+  type ColumnDef,
+  flexRender,
+  getCoreRowModel,
+  useReactTable,
+} from "@tanstack/react-table";
+import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
@@ -15,35 +21,28 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@midday/ui/alert-dialog";
-import { Avatar, AvatarFallback, AvatarImage } from "@midday/ui/avatar";
-import { Button } from "@midday/ui/button";
-import { cn } from "@midday/ui/cn";
-import { Dialog } from "@midday/ui/dialog";
+} from "@travelese/ui/alert-dialog";
+import { Avatar, AvatarFallback, AvatarImage } from "@travelese/ui/avatar";
+import { Button } from "@travelese/ui/button";
+import { cn } from "@travelese/ui/cn";
+import { Dialog } from "@travelese/ui/dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@midday/ui/dropdown-menu";
-import { Input } from "@midday/ui/input";
+} from "@travelese/ui/dropdown-menu";
+import { Input } from "@travelese/ui/input";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@midday/ui/select";
-import { Table, TableBody, TableCell, TableRow } from "@midday/ui/table";
-import { useToast } from "@midday/ui/use-toast";
-import {
-  type ColumnDef,
-  flexRender,
-  getCoreRowModel,
-  useReactTable,
-} from "@tanstack/react-table";
-import { MoreHorizontal } from "lucide-react";
-import { Loader2 } from "lucide-react";
+} from "@travelese/ui/select";
+import { Table, TableBody, TableCell, TableRow } from "@travelese/ui/table";
+import { useToast } from "@travelese/ui/use-toast";
+import { Loader2, MoreHorizontal } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
 import { useRouter } from "next/navigation";
 import * as React from "react";

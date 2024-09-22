@@ -1,5 +1,5 @@
 import { Cookies } from "@/utils/constants";
-import { Icons } from "@midday/ui/icons";
+import { Icons } from "@travelese/ui/icons";
 import { cookies } from "next/headers";
 import Link from "next/link";
 import { Suspense } from "react";

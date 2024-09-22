@@ -1,7 +1,7 @@
 "use server";
 
-import { LogEvents } from "@midday/events/events";
-import { deleteTeamMember } from "@midday/supabase/mutations";
+import { LogEvents } from "@travelese/events/events";
+import { deleteTeamMember } from "@travelese/supabase/mutations";
 import { revalidatePath as revalidatePathFunc } from "next/cache";
 import { authActionClient } from "./safe-action";
 import { deleteTeamMemberSchema } from "./schema";

@@ -1,7 +1,7 @@
 import { secondsToHoursAndMinutes } from "@/utils/format";
-import { Avatar, AvatarFallback, AvatarImage } from "@midday/ui/avatar";
-import { Button } from "@midday/ui/button";
-import { Skeleton } from "@midday/ui/skeleton";
+import { Avatar, AvatarFallback, AvatarImage } from "@travelese/ui/avatar";
+import { Button } from "@travelese/ui/button";
+import { Skeleton } from "@travelese/ui/skeleton";
 
 export function RecordSkeleton() {
   return (

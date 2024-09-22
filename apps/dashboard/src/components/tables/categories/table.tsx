@@ -3,6 +3,12 @@
 import { deleteCategoriesAction } from "@/actions/delete-categories-action";
 import { CreateCategoriesModal } from "@/components/modals/create-categories-modal";
 import {
+  flexRender,
+  getCoreRowModel,
+  getFilteredRowModel,
+  useReactTable,
+} from "@tanstack/react-table";
+import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
@@ -11,9 +17,9 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@midday/ui/alert-dialog";
-import { cn } from "@midday/ui/cn";
-import { Dialog } from "@midday/ui/dialog";
+} from "@travelese/ui/alert-dialog";
+import { cn } from "@travelese/ui/cn";
+import { Dialog } from "@travelese/ui/dialog";
 import {
   Table,
   TableBody,
@@ -21,14 +27,8 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@midday/ui/table";
-import { useToast } from "@midday/ui/use-toast";
-import {
-  flexRender,
-  getCoreRowModel,
-  getFilteredRowModel,
-  useReactTable,
-} from "@tanstack/react-table";
+} from "@travelese/ui/table";
+import { useToast } from "@travelese/ui/use-toast";
 import { useAction } from "next-safe-action/hooks";
 import React from "react";
 import { type Category, columns } from "./columns";
@@ -80,7 +80,7 @@ export function DataTable({ data }: Props) {
                         ? null
                         : flexRender(
                             header.column.columnDef.header,
-                            header.getContext()
+                            header.getContext(),
                           )}
                     </TableHead>
                   );

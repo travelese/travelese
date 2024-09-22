@@ -1,7 +1,7 @@
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@travelese/ui/tabs";
 
-import FlySearchForm from "@/components/travel/fly/fly-search-form";
-import StaySearchForm from "@/components/travel/stay/stay-search-form";
+import FlightsSearchForm from "@/components/travel/flights/flights-search-form";
+import StaysSearchForm from "@/components/travel/stays/stays-search-form";
 import { HotelIcon, PlaneTakeoffIcon } from "lucide-react";
 
 export default function LandingPage() {
@@ -32,10 +32,10 @@ export default function LandingPage() {
                     </TabsTrigger>
                   </TabsList>
                   <TabsContent value="fly" className="overflow-hidden">
-                    <FlySearchForm />
+                    <FlightsSearchForm />
                   </TabsContent>
                   <TabsContent value="stay">
-                    <StaySearchForm />
+                    <StaysSearchForm />
                   </TabsContent>
                 </Tabs>
               </div>

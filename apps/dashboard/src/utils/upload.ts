@@ -1,5 +1,5 @@
-import { stripSpecialCharacters } from "@midday/utils";
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { stripSpecialCharacters } from "@travelese/utils";
 import * as tus from "tus-js-client";
 
 type ResumableUploadParmas = {

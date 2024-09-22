@@ -5,18 +5,18 @@ import { exchangePublicToken } from "@/actions/institutions/exchange-public-toke
 import { getInstitutions } from "@/actions/institutions/get-institutions";
 import { useConnectParams } from "@/hooks/use-connect-params";
 import type { Institutions } from "@midday-ai/engine/resources/institutions/institutions";
-import { track } from "@midday/events/client";
-import { LogEvents } from "@midday/events/events";
-import { Button } from "@midday/ui/button";
+import { track } from "@travelese/events/client";
+import { LogEvents } from "@travelese/events/events";
+import { Button } from "@travelese/ui/button";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from "@midday/ui/dialog";
-import { Input } from "@midday/ui/input";
-import { Skeleton } from "@midday/ui/skeleton";
+} from "@travelese/ui/dialog";
+import { Input } from "@travelese/ui/input";
+import { Skeleton } from "@travelese/ui/skeleton";
 import { useDebounce, useScript } from "@uidotdev/usehooks";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";

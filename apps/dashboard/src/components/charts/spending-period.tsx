@@ -7,8 +7,8 @@ import {
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuTrigger,
-} from "@midday/ui/dropdown-menu";
-import { Icons } from "@midday/ui/icons";
+} from "@travelese/ui/dropdown-menu";
+import { Icons } from "@travelese/ui/icons";
 import {
   endOfMonth,
   startOfMonth,

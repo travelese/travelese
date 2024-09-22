@@ -1,8 +1,7 @@
 "use server";
 
-import type { Database } from "@midday/supabase/types";
 import { createServerClient } from "@supabase/ssr";
-import { unstable_cache } from "next/cache";
+import type { Database } from "@travelese/supabase/types";
 
 export async function fetchStats() {
   const supabase = createServerClient<Database>(

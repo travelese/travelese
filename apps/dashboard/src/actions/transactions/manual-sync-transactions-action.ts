@@ -2,8 +2,8 @@
 
 import { authActionClient } from "@/actions/safe-action";
 import { manualSyncTransactionsSchema } from "@/actions/schema";
-import { LogEvents } from "@midday/events/events";
-import { Events, client } from "@midday/jobs";
+import { LogEvents } from "@travelese/events/events";
+import { Events, client } from "@travelese/jobs";
 
 export const manualSyncTransactionsAction = authActionClient
   .schema(manualSyncTransactionsSchema)

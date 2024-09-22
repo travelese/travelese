@@ -1,5 +1,5 @@
 import { getColorFromName, getRandomColor } from "@/utils/categories";
-import { Input } from "@midday/ui/input";
+import { Input } from "@travelese/ui/input";
 import { useState } from "react";
 import { ColorPicker } from "./color-picker";
 

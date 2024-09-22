@@ -1,8 +1,6 @@
 "use client";
 
-import * as React from "react";
-
-import { Button } from "@/components/ui/button";
+import { Button } from "@travelese/ui/button";
 import {
   Card,
   CardContent,
@@ -10,20 +8,20 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
+} from "@travelese/ui/card";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from "@travelese/ui/dropdown-menu";
 import {
   Pagination,
   PaginationContent,
   PaginationItem,
-} from "@/components/ui/pagination";
-import { Separator } from "@/components/ui/separator";
+} from "@travelese/ui/pagination";
+import { Separator } from "@travelese/ui/separator";
 
 import {
   ChevronLeftIcon,
@@ -33,7 +31,7 @@ import {
   MoveVerticalIcon,
 } from "lucide-react";
 
-import { Offer } from "@duffel/api/types";
+import type { Offer } from "@duffel/api/types";
 
 interface PriceCardProps {
   selectedOffer: Offer;
@@ -161,7 +159,8 @@ export default function PriceCard({ selectedOffer }: PriceCardProps) {
                   dateTime={
                     selectedOffer.payment_requirements.payment_required_by
                       ? new Date(
-                          selectedOffer.payment_requirements.payment_required_by,
+                          selectedOffer.payment_requirements
+                            .payment_required_by,
                         ).toISOString()
                       : undefined
                   }

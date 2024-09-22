@@ -1,7 +1,7 @@
 "use client";
 
 import type { ClientMessage } from "@/actions/ai/types";
-import { cn } from "@midday/ui/cn";
+import { cn } from "@travelese/ui/cn";
 
 type Props = {
   messages: ClientMessage[];

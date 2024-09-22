@@ -8,7 +8,7 @@ import {
   SelectGroup,
   SelectItem,
   SelectTrigger,
-} from "@midday/ui/select";
+} from "@travelese/ui/select";
 import { useOptimisticAction } from "next-safe-action/hooks";
 
 const options = ["profit", "revenue", "expense", "burn_rate"];

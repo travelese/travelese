@@ -2,20 +2,20 @@ import { createAttachmentsAction } from "@/actions/create-attachments-action";
 import type { UpdateTransactionValues } from "@/actions/schema";
 import { updateSimilarTransactionsCategoryAction } from "@/actions/update-similar-transactions-action";
 import { updateSimilarTransactionsRecurringAction } from "@/actions/update-similar-transactions-recurring";
-import { createClient } from "@midday/supabase/client";
-import { getTransactionQuery } from "@midday/supabase/queries";
+import { createClient } from "@travelese/supabase/client";
 import {
   getCurrentUserTeamQuery,
   getSimilarTransactions,
-} from "@midday/supabase/queries";
+  getTransactionQuery,
+} from "@travelese/supabase/queries";
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from "@midday/ui/accordion";
-import { cn } from "@midday/ui/cn";
-import { Label } from "@midday/ui/label";
+} from "@travelese/ui/accordion";
+import { cn } from "@travelese/ui/cn";
+import { Label } from "@travelese/ui/label";
 import {
   Select,
   SelectContent,
@@ -23,11 +23,11 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@midday/ui/select";
-import { Skeleton } from "@midday/ui/skeleton";
-import { Switch } from "@midday/ui/switch";
-import { ToastAction } from "@midday/ui/toast";
-import { useToast } from "@midday/ui/use-toast";
+} from "@travelese/ui/select";
+import { Skeleton } from "@travelese/ui/skeleton";
+import { Switch } from "@travelese/ui/switch";
+import { ToastAction } from "@travelese/ui/toast";
+import { useToast } from "@travelese/ui/use-toast";
 import { format } from "date-fns";
 import { useAction } from "next-safe-action/hooks";
 import { useQueryState } from "nuqs";

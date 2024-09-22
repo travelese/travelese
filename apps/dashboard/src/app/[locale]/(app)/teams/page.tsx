@@ -1,9 +1,9 @@
 import { SelectTeamTable } from "@/components/tables/select-team/table";
 import { UserMenu } from "@/components/user-menu";
-import { getUser } from "@midday/supabase/cached-queries";
-import { getTeamsByUserIdQuery } from "@midday/supabase/queries";
-import { createClient } from "@midday/supabase/server";
-import { Icons } from "@midday/ui/icons";
+import { getUser } from "@travelese/supabase/cached-queries";
+import { getTeamsByUserIdQuery } from "@travelese/supabase/queries";
+import { createClient } from "@travelese/supabase/server";
+import { Icons } from "@travelese/ui/icons";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";

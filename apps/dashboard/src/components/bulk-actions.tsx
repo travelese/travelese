@@ -2,7 +2,7 @@
 
 import { bulkUpdateTransactionsAction } from "@/actions/bulk-update-transactions-action";
 import { useTransactionsStore } from "@/store/transactions";
-import { Button } from "@midday/ui/button";
+import { Button } from "@travelese/ui/button";
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -13,9 +13,9 @@ import {
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
-} from "@midday/ui/dropdown-menu";
-import { Icons } from "@midday/ui/icons";
-import { useToast } from "@midday/ui/use-toast";
+} from "@travelese/ui/dropdown-menu";
+import { Icons } from "@travelese/ui/icons";
+import { useToast } from "@travelese/ui/use-toast";
 import { useAction } from "next-safe-action/hooks";
 import { SelectCategory } from "./select-category";
 import { SelectUser } from "./select-user";

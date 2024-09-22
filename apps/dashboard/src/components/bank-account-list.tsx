@@ -1,5 +1,5 @@
-import { getTeamBankAccounts } from "@midday/supabase/cached-queries";
-import { Skeleton } from "@midday/ui/skeleton";
+import { getTeamBankAccounts } from "@travelese/supabase/cached-queries";
+import { Skeleton } from "@travelese/ui/skeleton";
 import { BankConnections } from "./bank-connections";
 import { ManualAccounts } from "./manual-accounts";
 

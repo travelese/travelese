@@ -11,7 +11,7 @@ import {
   BreadcrumbList,
   BreadcrumbPage,
   BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
+} from "@travelese/ui/breadcrumb";
 
 export default function FlyLayout({
   children,

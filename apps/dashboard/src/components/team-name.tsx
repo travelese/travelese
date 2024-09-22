@@ -1,9 +1,9 @@
 "use client";
 
-import { UpdateTeamFormValues, updateTeamSchema } from "@/actions/schema";
+import { type UpdateTeamFormValues, updateTeamSchema } from "@/actions/schema";
 import { updateTeamAction } from "@/actions/update-team-action";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Button } from "@midday/ui/button";
+import { Button } from "@travelese/ui/button";
 import {
   Card,
   CardContent,
@@ -11,15 +11,15 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@midday/ui/card";
+} from "@travelese/ui/card";
 import {
   Form,
   FormControl,
   FormField,
   FormItem,
   FormMessage,
-} from "@midday/ui/form";
-import { Input } from "@midday/ui/input";
+} from "@travelese/ui/form";
+import { Input } from "@travelese/ui/input";
 import { Loader2 } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
 import { useForm } from "react-hook-form";

@@ -1,6 +1,6 @@
 import { createGoCardLessLinkAction } from "@/actions/institutions/create-gocardless-link";
-import { useToast } from "@midday/ui/use-toast";
 import { isDesktopApp } from "@todesktop/client-core/platform/todesktop";
+import { useToast } from "@travelese/ui/use-toast";
 import { useAction } from "next-safe-action/hooks";
 import { BankConnectButton } from "./bank-connect-button";
 

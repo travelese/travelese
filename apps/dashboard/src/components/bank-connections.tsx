@@ -7,15 +7,15 @@ import {
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from "@midday/ui/accordion";
-import { Icons } from "@midday/ui/icons";
+} from "@travelese/ui/accordion";
+import { Icons } from "@travelese/ui/icons";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "@midday/ui/tooltip";
-import { useToast } from "@midday/ui/use-toast";
+} from "@travelese/ui/tooltip";
+import { useToast } from "@travelese/ui/use-toast";
 import { useEventDetails } from "@trigger.dev/react";
 import { differenceInDays, formatDistanceToNow } from "date-fns";
 import { useAction } from "next-safe-action/hooks";

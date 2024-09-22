@@ -1,14 +1,14 @@
 import { getConnectionsStatus } from "@/utils/connection-status";
-import { getBankConnectionsByTeamId } from "@midday/supabase/cached-queries";
-import { Button } from "@midday/ui/button";
-import { cn } from "@midday/ui/cn";
-import { Icons } from "@midday/ui/icons";
+import { getBankConnectionsByTeamId } from "@travelese/supabase/cached-queries";
+import { Button } from "@travelese/ui/button";
+import { cn } from "@travelese/ui/cn";
+import { Icons } from "@travelese/ui/icons";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "@midday/ui/tooltip";
+} from "@travelese/ui/tooltip";
 import Link from "next/link";
 
 export async function ConnectionStatus() {

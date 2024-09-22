@@ -1,13 +1,13 @@
 "use client";
 
-import { Button } from "@midday/ui/button";
+import { Button } from "@travelese/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@midday/ui/dropdown-menu";
-import { Icons } from "@midday/ui/icons";
+} from "@travelese/ui/dropdown-menu";
+import { Icons } from "@travelese/ui/icons";
 import { parseAsBoolean, parseAsString, useQueryStates } from "nuqs";
 
 export function AddTransactions() {

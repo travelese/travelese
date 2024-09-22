@@ -1,6 +1,6 @@
 "use client";
 
-import { shuffle } from "@midday/utils";
+import { shuffle } from "@travelese/utils";
 import { motion } from "framer-motion";
 import { useMemo, useRef } from "react";
 import { useDraggable } from "react-use-draggable-scroll";

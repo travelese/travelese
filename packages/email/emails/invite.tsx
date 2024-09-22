@@ -3,7 +3,6 @@ import {
   Button,
   Container,
   Font,
-  Head,
   Heading,
   Html,
   Link,
@@ -29,18 +28,18 @@ interface InviteEmailProps {
 
 const baseUrl =
   process.env.VERCEL_ENV === "production"
-    ? "https://midday.ai/email"
+    ? "https://travelese.xyz/email"
     : "http://localhost:3000/email";
 
 const baseAppUrl =
   process.env.VERCEL_ENV === "production"
-    ? "https://app.midday.ai"
+    ? "https://app.travelese.xyz"
     : "http://localhost:3001";
 
 export const InviteEmail = ({
   invitedByEmail = "bukinoshita@example.com",
-  invitedByName = "Pontus Abrahamsson",
-  email = "pontus@lostisland.co",
+  invitedByName = "Armin Babaei",
+  email = "armin@lostisland.co",
   teamName = "Acme Co",
   inviteCode = "jnwe9203frnwefl239jweflasn1230oqef",
   ip = "204.13.186.218",

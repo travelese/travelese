@@ -1,4 +1,4 @@
-import { Icons } from "@midday/ui/icons";
+import { Icons } from "@travelese/ui/icons";
 
 type Props = {
   firstName: string;

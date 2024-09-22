@@ -1,7 +1,7 @@
 "use client";
 
-import { Button } from "@midday/ui/button";
 import * as Sentry from "@sentry/nextjs";
+import { Button } from "@travelese/ui/button";
 import Link from "next/link";
 import { useEffect } from "react";
 

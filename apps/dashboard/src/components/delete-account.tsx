@@ -11,15 +11,15 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@midday/ui/alert-dialog";
-import { Button } from "@midday/ui/button";
+} from "@travelese/ui/alert-dialog";
+import { Button } from "@travelese/ui/button";
 import {
   Card,
   CardDescription,
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@midday/ui/card";
+} from "@travelese/ui/card";
 import { Loader2 } from "lucide-react";
 import { useTransition } from "react";
 

@@ -1,5 +1,5 @@
 import type { Transactions } from "@midday-ai/engine/resources/transactions";
-import type { Database } from "@midday/supabase/types";
+import type { Database } from "@travelese/supabase/types";
 
 type TransformTransactionData = {
   transaction: Transactions.Data;

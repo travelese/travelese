@@ -16,8 +16,8 @@
     "@duffel/api": "^2.13.0",
     "@hookform/resolvers": "^3.9.0",
     "@kiwicom/orbit-components": "^15.8.0",
-    "@midday/supabase": "workspace:*",
-    "@midday/ui": "workspace:*",
+    "@travelese/supabase": "workspace:*",
+    "@travelese/ui": "workspace:*",
     "@openpanel/nextjs": "^1.0.3",
     "@openstatus/react": "^0.0.3",
     "@splinetool/react-spline": "^4.0.0",
@@ -44,7 +44,7 @@
     "superjson": "^2.2.1"
   },
   "devDependencies": {
-    "@midday/tsconfig": "workspace:*",
+    "@travelese/tsconfig": "workspace:*",
     "@types/node": "^22.5.5",
     "@types/react": "^18.3.7",
     "@types/react-dom": "^18.3.0"

@@ -4,8 +4,8 @@ import {
   HoverCard,
   HoverCardContent,
   HoverCardTrigger,
-} from "@midday/ui/hover-card";
-import { Progress } from "@midday/ui/progress";
+} from "@travelese/ui/hover-card";
+import { Progress } from "@travelese/ui/progress";
 import Link from "next/link";
 import { Category } from "../category";
 import { SpendingCategoryItem } from "./spending-category-item";

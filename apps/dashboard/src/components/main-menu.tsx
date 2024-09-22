@@ -2,15 +2,15 @@
 
 import { updateMenuAction } from "@/actions/update-menu-action";
 import { useMenuStore } from "@/store/menu";
-import { Button } from "@midday/ui/button";
-import { cn } from "@midday/ui/cn";
-import { Icons } from "@midday/ui/icons";
+import { Button } from "@travelese/ui/button";
+import { cn } from "@travelese/ui/cn";
+import { Icons } from "@travelese/ui/icons";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "@midday/ui/tooltip";
+} from "@travelese/ui/tooltip";
 import { useClickAway } from "@uidotdev/usehooks";
 import { Reorder, motion, useMotionValue } from "framer-motion";
 import { useAction } from "next-safe-action/hooks";

@@ -2,9 +2,9 @@
 
 import { invalidateCacheAction } from "@/actions/invalidate-cache-action";
 import { resumableUpload } from "@/utils/upload";
-import { createClient } from "@midday/supabase/client";
-import { cn } from "@midday/ui/cn";
-import { useToast } from "@midday/ui/use-toast";
+import { createClient } from "@travelese/supabase/client";
+import { cn } from "@travelese/ui/cn";
+import { useToast } from "@travelese/ui/use-toast";
 import { type ReactNode, useEffect, useRef, useState } from "react";
 import { useDropzone } from "react-dropzone";
 

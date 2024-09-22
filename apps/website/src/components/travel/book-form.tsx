@@ -1,27 +1,26 @@
 "use client";
 
-import * as React from "react";
-import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { SubmitHandler, useForm } from "react-hook-form";
+import { type SubmitHandler, useForm } from "react-hook-form";
+import { z } from "zod";
 
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@travelese/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@travelese/ui/card";
 import {
   Form,
   FormControl,
   FormField,
   FormItem,
   FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
+} from "@travelese/ui/form";
+import { Input } from "@travelese/ui/input";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from "@travelese/ui/select";
 
 import {
   Calendar as CalendarIcon,
@@ -30,9 +29,8 @@ import {
   UserCircleIcon,
 } from "lucide-react";
 
-import { toast } from "sonner";
 import type { Offer } from "@duffel/api/types";
-import Loading from "@/app/loading";
+import { toast } from "sonner";
 
 interface BookFormProps {
   selectedOffer: Offer;
@@ -111,7 +109,6 @@ export default function BookForm({ selectedOffer }: BookFormProps) {
 
     const bookingToast = toast.loading(
       <div className="flex items-center gap-2">
-        <Loading />
         <span>Booking order...</span>
       </div>,
     );
@@ -145,7 +142,6 @@ export default function BookForm({ selectedOffer }: BookFormProps) {
       // Save the order
       const syncToast = toast.loading(
         <div className="flex items-center gap-2">
-          <Loading />
           <span>Syncying order...</span>
         </div>,
       );
@@ -168,7 +164,6 @@ export default function BookForm({ selectedOffer }: BookFormProps) {
       // Send email confirmation
       const emailToast = toast.loading(
         <div className="flex items-center gap-2">
-          <Loading />
           <span>Emailing order...</span>
         </div>,
       );
@@ -199,8 +194,6 @@ export default function BookForm({ selectedOffer }: BookFormProps) {
       toast.error("Error", {
         description: `Failed to complete the booking process: ${error instanceof Error ? error.message : error}`,
       });
-
-      console.error("Booking process error:", error);
     }
   };
 

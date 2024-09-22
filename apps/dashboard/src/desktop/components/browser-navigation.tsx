@@ -1,8 +1,8 @@
 "use client";
 
-import { cn } from "@midday/ui/cn";
-import { Icons } from "@midday/ui/icons";
 import { webContents } from "@todesktop/client-core";
+import { cn } from "@travelese/ui/cn";
+import { Icons } from "@travelese/ui/icons";
 import { useEffect, useState } from "react";
 
 export function BrowserNavigation() {

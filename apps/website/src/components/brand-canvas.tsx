@@ -1,6 +1,6 @@
 "use client";
 
-import { Button } from "@midday/ui/button";
+import { Button } from "@travelese/ui/button";
 import {
   Select,
   SelectContent,
@@ -8,7 +8,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@midday/ui/select";
+} from "@travelese/ui/select";
 import Image from "next/image";
 import { useRef, useState } from "react";
 import { useDraggable } from "react-use-draggable-scroll";

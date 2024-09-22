@@ -1,14 +1,14 @@
-import * as crypto from "node:crypto";
 import { env } from "@/env.mjs";
 import { logger } from "@/utils/logger";
-import WelcomeEmail from "@midday/email/emails/welcome";
-import { LogEvents } from "@midday/events/events";
-import { setupAnalytics } from "@midday/events/server";
 import { render } from "@react-email/render";
+import WelcomeEmail from "@travelese/email/emails/welcome";
+import { LogEvents } from "@travelese/events/events";
+import { setupAnalytics } from "@travelese/events/server";
 import { LoopsClient } from "loops";
 import { nanoid } from "nanoid";
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
+import * as crypto from "node:crypto";
 import { Resend } from "resend";
 
 export const dynamic = "force-dynamic";

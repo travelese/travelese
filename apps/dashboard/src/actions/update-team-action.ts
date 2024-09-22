@@ -1,6 +1,6 @@
 "use server";
 
-import { updateTeam } from "@midday/supabase/mutations";
+import { updateTeam } from "@travelese/supabase/mutations";
 import {
   revalidatePath as revalidatePathFunc,
   revalidateTag,

@@ -1,5 +1,5 @@
-import { Icons } from "@midday/ui/icons";
-import { Input } from "@midday/ui/input";
+import { Icons } from "@travelese/ui/icons";
+import { Input } from "@travelese/ui/input";
 import { useHotkeys } from "react-hotkeys-hook";
 
 type Props = {

@@ -1,6 +1,6 @@
 "use server";
 
-import { LayoutProcessor } from "@midday/documents";
+import { LayoutProcessor } from "@travelese/documents";
 import { z } from "zod";
 import { authActionClient } from "../safe-action";
 

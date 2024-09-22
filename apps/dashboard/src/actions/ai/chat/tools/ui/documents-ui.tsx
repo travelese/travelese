@@ -2,7 +2,7 @@
 
 import { BotCard } from "@/components/chat/messages";
 import { FilePreview } from "@/components/file-preview";
-import type { FileType } from "@midday/utils";
+import type { FileType } from "@travelese/utils";
 
 type Document = {
   id: string;

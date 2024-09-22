@@ -1,5 +1,5 @@
-import { Tabs } from "@midday/ui/tabs";
-import { TooltipProvider } from "@midday/ui/tooltip";
+import { Tabs } from "@travelese/ui/tabs";
+import { TooltipProvider } from "@travelese/ui/tooltip";
 import { useQueryState } from "nuqs";
 import { InboxDetailsSkeleton } from "./inbox-details-skeleton";
 import { InboxListSkeleton } from "./inbox-list-skeleton";

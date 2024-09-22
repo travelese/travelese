@@ -1,8 +1,8 @@
 "use client";
 
 import { useI18n } from "@/locales/client";
-import { cn } from "@midday/ui/cn";
-import { Skeleton } from "@midday/ui/skeleton";
+import { cn } from "@travelese/ui/cn";
+import { Skeleton } from "@travelese/ui/skeleton";
 
 export function Tag({
   name,

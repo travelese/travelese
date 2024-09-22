@@ -1,8 +1,8 @@
 "use server";
 
 import { dub } from "@/utils/dub";
-import { LogEvents } from "@midday/events/events";
-import { share } from "@midday/supabase/storage";
+import { LogEvents } from "@travelese/events/events";
+import { share } from "@travelese/supabase/storage";
 import { authActionClient } from "./safe-action";
 import { shareFileSchema } from "./schema";
 

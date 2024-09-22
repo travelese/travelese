@@ -4,8 +4,7 @@ import {
   CarouselItem,
   CarouselNext,
   CarouselPrevious,
-} from "@midday/ui/carousel";
-import * as React from "react";
+} from "@travelese/ui/carousel";
 import { Spending } from "./charts/spending";
 import { Transactions } from "./charts/transactions";
 import { AccountBalance } from "./widgets/account-balance";

@@ -1,14 +1,14 @@
 "use client";
 
-import { cn } from "@midday/ui/cn";
+import { todesktopUpdater } from "@todesktop/client-core";
+import { isDesktopApp } from "@todesktop/client-core/platform/todesktop";
+import { cn } from "@travelese/ui/cn";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "@midday/ui/tooltip";
-import { todesktopUpdater } from "@todesktop/client-core";
-import { isDesktopApp } from "@todesktop/client-core/platform/todesktop";
+} from "@travelese/ui/tooltip";
 import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useState } from "react";
 

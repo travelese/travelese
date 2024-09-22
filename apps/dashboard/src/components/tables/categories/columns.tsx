@@ -1,22 +1,21 @@
 "use client";
 
 import { EditCategoryModal } from "@/components/modals/edit-category-modal";
-import { Button } from "@midday/ui/button";
-import { Checkbox } from "@midday/ui/checkbox";
+import { DotsHorizontalIcon } from "@radix-ui/react-icons";
+import type { ColumnDef } from "@tanstack/react-table";
+import { Button } from "@travelese/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@midday/ui/dropdown-menu";
+} from "@travelese/ui/dropdown-menu";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "@midday/ui/tooltip";
-import { DotsHorizontalIcon } from "@radix-ui/react-icons";
-import type { ColumnDef } from "@tanstack/react-table";
+} from "@travelese/ui/tooltip";
 import * as React from "react";
 
 export type Category = {

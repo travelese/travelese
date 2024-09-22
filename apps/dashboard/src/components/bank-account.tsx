@@ -14,19 +14,18 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@midday/ui/alert-dialog";
-import { Avatar, AvatarFallback } from "@midday/ui/avatar";
-import { cn } from "@midday/ui/cn";
+} from "@travelese/ui/alert-dialog";
+import { Avatar, AvatarFallback } from "@travelese/ui/avatar";
+import { cn } from "@travelese/ui/cn";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@midday/ui/dropdown-menu";
-import { Switch } from "@midday/ui/switch";
-import { MoreHorizontal } from "lucide-react";
-import { Loader2 } from "lucide-react";
+} from "@travelese/ui/dropdown-menu";
+import { Switch } from "@travelese/ui/switch";
+import { Loader2, MoreHorizontal } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
 import { parseAsBoolean, parseAsString, useQueryStates } from "nuqs";
 import { useState } from "react";

@@ -1,6 +1,6 @@
-import { createClient } from "@midday/supabase/client";
-import { getUserQuery } from "@midday/supabase/queries";
 import { HeadlessService } from "@novu/headless";
+import { createClient } from "@travelese/supabase/client";
+import { getUserQuery } from "@travelese/supabase/queries";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 export function useNotifications() {

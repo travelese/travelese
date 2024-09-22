@@ -1,12 +1,12 @@
 "use client";
 
-import { Icons } from "@midday/ui/icons";
+import { Icons } from "@travelese/ui/icons";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "@midday/ui/tooltip";
+} from "@travelese/ui/tooltip";
 
 export function InboxStatus({ item }) {
   if (item.status === "processing" || item.status === "new") {

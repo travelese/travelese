@@ -1,16 +1,16 @@
-import * as crypto from "node:crypto";
-import { getI18n } from "@midday/email/locales";
+import { getI18n } from "@travelese/email/locales";
 import {
   NotificationTypes,
   TriggerEvents,
   triggerBulk,
-} from "@midday/notification";
-import { updateInboxById } from "@midday/supabase/mutations";
-import { createClient } from "@midday/supabase/server";
+} from "@travelese/notification";
+import { updateInboxById } from "@travelese/supabase/mutations";
+import { createClient } from "@travelese/supabase/server";
 import { subDays } from "date-fns";
 import { revalidateTag } from "next/cache";
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
+import * as crypto from "node:crypto";
 
 export const maxDuration = 300; // 5min
 export const dynamic = "force-dynamic";

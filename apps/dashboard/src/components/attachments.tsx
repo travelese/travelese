@@ -2,11 +2,11 @@
 
 import { deleteAttachmentAction } from "@/actions/delete-attachment-action";
 import { useUpload } from "@/hooks/use-upload";
-import { createClient } from "@midday/supabase/client";
-import { getCurrentUserTeamQuery } from "@midday/supabase/queries";
-import { cn } from "@midday/ui/cn";
-import { useToast } from "@midday/ui/use-toast";
-import { stripSpecialCharacters } from "@midday/utils";
+import { createClient } from "@travelese/supabase/client";
+import { getCurrentUserTeamQuery } from "@travelese/supabase/queries";
+import { cn } from "@travelese/ui/cn";
+import { useToast } from "@travelese/ui/use-toast";
+import { stripSpecialCharacters } from "@travelese/utils";
 import { useEffect, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { AttachmentItem } from "./attachment-item";

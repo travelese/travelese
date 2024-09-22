@@ -2,7 +2,7 @@
 const config = {
   poweredByHeader: false,
   reactStrictMode: true,
-  transpilePackages: ["@midday/ui", "@midday/tailwind"],
+  transpilePackages: ["@travelese/ui", "@travelese/tailwind"],
   eslint: {
     ignoreDuringBuilds: true,
   },

@@ -10,7 +10,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@midday/ui/select";
+} from "@travelese/ui/select";
 
 type Theme = "dark" | "system" | "light";
 

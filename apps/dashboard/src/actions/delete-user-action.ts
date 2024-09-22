@@ -1,10 +1,10 @@
 "use server";
 
-import { LogEvents } from "@midday/events/events";
-import { setupAnalytics } from "@midday/events/server";
-import { getUser } from "@midday/supabase/cached-queries";
-import { deleteUser } from "@midday/supabase/mutations";
-import { createClient } from "@midday/supabase/server";
+import { LogEvents } from "@travelese/events/events";
+import { setupAnalytics } from "@travelese/events/server";
+import { getUser } from "@travelese/supabase/cached-queries";
+import { deleteUser } from "@travelese/supabase/mutations";
+import { createClient } from "@travelese/supabase/server";
 import { LoopsClient } from "loops";
 import { redirect } from "next/navigation";
 

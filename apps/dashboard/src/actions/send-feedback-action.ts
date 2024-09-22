@@ -1,7 +1,7 @@
 "use server";
 
-import { LogEvents } from "@midday/events/events";
 import { PlainClient } from "@team-plain/typescript-sdk";
+import { LogEvents } from "@travelese/events/events";
 import { authActionClient } from "./safe-action";
 import { sendFeedbackSchema } from "./schema";
 
