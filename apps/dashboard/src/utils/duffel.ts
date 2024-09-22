@@ -1,5 +1,5 @@
-import { DuffelError } from "@duffel/api";
-import { duffel } from "./index";
+import { env } from "@/lib/env.mjs";
+import { Duffel, DuffelError } from "@duffel/api";
 
 import type { Places } from "@duffel/api/Places/Suggestions/SuggestionsType";
 import type { StaysBookingPayload } from "@duffel/api/Stays/Bookings/Bookings";
@@ -16,6 +16,10 @@ import type {
   StaysSearchParams,
   StaysSearchResult,
 } from "@duffel/api/types";
+
+export const duffel = new Duffel({
+  token: env.DUFFEL_TRAVELESE_ACCESS_TOKEN,
+});
 
 export async function searchFlights(
   slices: CreateOfferRequest["slices"],
@@ -128,5 +132,3 @@ export async function bookStays(
     );
   }
 }
-
-export { duffel };

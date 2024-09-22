@@ -7,11 +7,11 @@ import {
   TravellersField,
 } from "@/components/travel/search-form-fields";
 import useNavigation from "@/hooks/use-navigation";
-import { useSearchForm } from "@/hooks/use-search-form";
 import { Button } from "@travelese/ui/button";
 import { Form } from "@travelese/ui/form";
 import { SearchIcon } from "lucide-react";
 import { useEffect, useState } from "react";
+import { useSearchForm } from "../../../../../dashboard/src/hooks/use-search-form";
 
 export default function StaySearchForm() {
   const [isClient, setIsClient] = useState(false);
