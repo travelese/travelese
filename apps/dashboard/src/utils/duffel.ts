@@ -1,4 +1,4 @@
-import { env } from "@/lib/env.mjs";
+import { env } from "@/env.mjs";
 import { Duffel, DuffelError } from "@duffel/api";
 
 import type { Places } from "@duffel/api/Places/Suggestions/SuggestionsType";

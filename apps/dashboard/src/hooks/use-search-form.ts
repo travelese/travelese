@@ -1,12 +1,10 @@
-import { useState, useEffect } from "react";
-import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import { addDays, format, startOfTomorrow } from "date-fns";
-import { DateRange } from "react-day-picker";
+import { useEffect, useState } from "react";
+import type { DateRange } from "react-day-picker";
+import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import * as Sentry from "@sentry/nextjs";
-import { posthog } from "posthog-js";
+import { z } from "zod";
 
 const FlightFormSchema = z.object({
   origin: z.string().min(3),
@@ -43,26 +41,29 @@ const StayFormSchema = z
     path: ["check_out_date"],
   });
 
-type SearchType = "fly" | "stay";
+type SearchType = "flights" | "stays";
 
 export function useSearchForm(
   type: SearchType,
   navigateToSearchPage: (queryParams: Record<string, string>) => void,
 ) {
   const [date, setDateState] = useState<DateRange | undefined>({
-    from: type === "fly" ? new Date() : startOfTomorrow(),
-    to: type === "fly" ? addDays(new Date(), 7) : addDays(startOfTomorrow(), 3),
+    from: type === "flights" ? new Date() : startOfTomorrow(),
+    to:
+      type === "flights"
+        ? addDays(new Date(), 7)
+        : addDays(startOfTomorrow(), 3),
   });
 
   const form = useForm<
     z.infer<typeof FlightFormSchema> | z.infer<typeof StayFormSchema>
   >({
     resolver:
-      type === "fly"
+      type === "flights"
         ? zodResolver(FlightFormSchema)
         : zodResolver(StayFormSchema),
     defaultValues:
-      type === "fly"
+      type === "flights"
         ? {
             origin: "",
             destination: "",
@@ -92,7 +93,7 @@ export function useSearchForm(
   const setDate = (newDate: DateRange | undefined) => {
     setDateState(newDate);
     if (newDate) {
-      if (type === "fly") {
+      if (type === "flights") {
         form.setValue("dates", {
           from: newDate.from || new Date(),
           to: newDate.to || addDays(newDate.from || new Date(), 7),
@@ -108,7 +109,7 @@ export function useSearchForm(
   };
 
   useEffect(() => {
-    if (type === "fly") {
+    if (type === "flights") {
       const { from, to } = form.getValues("dates");
       setDateState({ from, to });
     } else {
@@ -122,7 +123,7 @@ export function useSearchForm(
     data: z.infer<typeof FlightFormSchema> | z.infer<typeof StayFormSchema>,
   ) => {
     try {
-      if (type === "fly") {
+      if (type === "flights") {
         const { origin, destination, dates, cabin, passengers } =
           data as z.infer<typeof FlightFormSchema>;
         const formattedPassengers = passengers.map((type) => ({ type }));
@@ -133,7 +134,7 @@ export function useSearchForm(
         }
 
         const queryParams: Record<string, string> = {
-          type: "fly",
+          type: "flights",
           origin,
           destination,
           from: format(dates.from, "yyyy-MM-dd"),
@@ -142,10 +143,6 @@ export function useSearchForm(
           cabin,
         };
 
-        posthog.capture("search_initiated", {
-          searchType: "fly",
-          searchParams: queryParams,
-        });
         navigateToSearchPage(queryParams);
       } else {
         const { check_in_date, check_out_date, rooms, guests, location } =
@@ -173,16 +170,10 @@ export function useSearchForm(
           radius: location.radius.toString(),
         };
 
-        posthog.capture("search_initiated", {
-          searchType: "stay",
-          searchParams: queryParams,
-        });
-
         navigateToSearchPage(queryParams);
       }
     } catch (error) {
-      Sentry.captureException(error);
-      handleError(error, type);
+      console.error(error);
     }
   };
 
