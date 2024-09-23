@@ -12,6 +12,7 @@
   "settings": {
     "files.exclude": {
       "packages/supabase/functions/": true
-    }
+    },
+    "github-actions.workflows.pinned.workflows": []
   }
 }
