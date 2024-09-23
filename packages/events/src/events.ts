@@ -191,4 +191,244 @@ export const LogEvents = {
     name: "Update Currency",
     channel: "transaction",
   },
+  CreatePartialOfferRequest: {
+    name: "create_partial_offer_request",
+    channel: "travel",
+  },
+  GetPartialOfferRequest: {
+    name: "get_partial_offer_request",
+    channel: "travel",
+  },
+  GetFullOfferFares: {
+    name: "get_full_offer_fares",
+    channel: "travel",
+  },
+  ListOffers: {
+    name: "list_offers",
+    channel: "travel",
+  },
+  GetOffer: {
+    name: "get_offer",
+    channel: "travel",
+  },
+  UpdateOfferPassenger: {
+    name: "update_offer_passenger",
+    channel: "travel",
+  },
+  CreateOrder: {
+    name: "create_order",
+    channel: "travel",
+  },
+  ListOrderServices: {
+    name: "list_order_services",
+    channel: "travel",
+  },
+  AddOrderService: {
+    name: "add_order_service",
+    channel: "travel",
+  },
+  GetOrder: {
+    name: "get_order",
+    channel: "travel",
+  },
+  UpdateOrder: {
+    name: "update_order",
+    channel: "travel",
+  },
+  ListOrders: {
+    name: "list_orders",
+    channel: "travel",
+  },
+  CreatePayment: {
+    name: "create_payment",
+    channel: "travel",
+  },
+  GetSeatMaps: {
+    name: "get_seat_maps",
+    channel: "travel",
+  },
+  ListOrderCancellations: {
+    name: "list_order_cancellations",
+    channel: "travel",
+  },
+  GetOrderCancellation: {
+    name: "get_order_cancellation",
+    channel: "travel",
+  },
+  CreateOrderCancellation: {
+    name: "create_order_cancellation",
+    channel: "travel",
+  },
+  ConfirmOrderCancellation: {
+    name: "confirm_order_cancellation",
+    channel: "travel",
+  },
+  CreateOrderChange: {
+    name: "create_order_change",
+    channel: "travel",
+  },
+  GetOrderChange: {
+    name: "get_order_change",
+    channel: "travel",
+  },
+  ListOrderChangeOffers: {
+    name: "list_order_change_offers",
+    channel: "travel",
+  },
+  CreateBatchOfferRequest: {
+    name: "create_batch_offer_request",
+    channel: "travel",
+  },
+  GetBatchOfferRequest: {
+    name: "get_batch_offer_request",
+    channel: "travel",
+  },
+  ListAirlineInitiatedChanges: {
+    name: "list_airline_initiated_changes",
+    channel: "travel",
+  },
+  AcceptAirlineInitiatedChange: {
+    name: "accept_airline_initiated_change",
+    channel: "travel",
+  },
+  UpdateAirlineInitiatedChange: {
+    name: "update_airline_initiated_change",
+    channel: "travel",
+  },
+  SearchAccommodationSuggestions: {
+    name: "search_accommodation_suggestions",
+    channel: "travel",
+  },
+  FetchAllRates: {
+    name: "fetch_all_rates",
+    channel: "travel",
+  },
+  CreateQuoteForRate: {
+    name: "create_quote_for_rate",
+    channel: "travel",
+  },
+  CreateBooking: {
+    name: "create_booking",
+    channel: "travel",
+  },
+  GetBooking: {
+    name: "get_booking",
+    channel: "travel",
+  },
+  CancelBooking: {
+    name: "cancel_booking",
+    channel: "travel",
+  },
+  GetAccommodation: {
+    name: "get_accommodation",
+    channel: "travel",
+  },
+  ListLoyaltyProgrammes: {
+    name: "list_loyalty_programmes",
+    channel: "travel",
+  },
+  GetBrand: {
+    name: "get_brand",
+    channel: "travel",
+  },
+  ListBrands: {
+    name: "list_brands",
+    channel: "travel",
+  },
+  GetAirline: {
+    name: "get_airline",
+    channel: "travel",
+  },
+  ListAirlines: {
+    name: "list_airlines",
+    channel: "travel",
+  },
+  GetAircraft: {
+    name: "get_aircraft",
+    channel: "travel",
+  },
+  ListAircraft: {
+    name: "list_aircraft",
+    channel: "travel",
+  },
+  ListAirports: {
+    name: "list_airports",
+    channel: "travel",
+  },
+  GetAirport: {
+    name: "get_airport",
+    channel: "travel",
+  },
+  ListCities: {
+    name: "list_cities",
+    channel: "travel",
+  },
+  GetCity: {
+    name: "get_city",
+    channel: "travel",
+  },
+  ListPlaceSuggestions: {
+    name: "list_place_suggestions",
+    channel: "travel",
+  },
+  GetLoyaltyProgramme: {
+    name: "get_loyalty_programme",
+    channel: "travel",
+  },
+  CreateCustomerUser: {
+    name: "create_customer_user",
+    channel: "travel",
+  },
+  UpdateCustomerUser: {
+    name: "update_customer_user",
+    channel: "travel",
+  },
+  GetCustomerUser: {
+    name: "get_customer_user",
+    channel: "travel",
+  },
+  CreateComponentClientKey: {
+    name: "create_component_client_key",
+    channel: "travel",
+  },
+  ListWebhooks: {
+    name: "list_webhooks",
+    channel: "travel",
+  },
+  GetWebhookEvent: {
+    name: "get_webhook_event",
+    channel: "travel",
+  },
+  RetryWebhookEvent: {
+    name: "retry_webhook_event",
+    channel: "travel",
+  },
+  CreateWebhook: {
+    name: "create_webhook",
+    channel: "travel",
+  },
+  GetWebhook: {
+    name: "get_webhook",
+    channel: "travel",
+  },
+  DeleteWebhook: {
+    name: "delete_webhook",
+    channel: "travel",
+  },
+  PingWebhook: {
+    name: "ping_webhook",
+    channel: "travel",
+  },
+  GetWebhookDelivery: {
+    name: "get_webhook_delivery",
+    channel: "travel",
+  },
+  ListWebhookDeliveries: {
+    name: "list_webhook_deliveries",
+    channel: "travel",
+  },
+  CreateSession: {
+    name: "create_session",
+    channel: "travel",
+  },
 };
