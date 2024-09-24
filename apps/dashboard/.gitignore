@@ -2,19 +2,13 @@
 node_modules
 dist
 package-lock.json
-<<<<<<< Updated upstream
 bun.lockb
 .env*.local
 .env*.development
 .env*.preview
 .env*.production
 .env*.example
-=======
 yarn.lock
 pnpm-lock.yaml
 bun.lockb
 .env*.local
-<<<<<<< Updated upstream
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
