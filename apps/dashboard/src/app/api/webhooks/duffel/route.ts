@@ -1,12 +1,13 @@
+import { env } from "@/env.mjs";
 import crypto from "node:crypto";
 
 export async function POST(request: Request) {
   console.log("Received webhook request");
   console.log("Headers:", Object.fromEntries(request.headers));
 
-  const WEBHOOK_SECRET = env.DUFFEL_WEBHOOK_SECRET!;
+  const DUFFEL_WEBHOOK_SECRET = env.DUFFEL_TRAVELESE_WEBHOOK_SECRET!;
 
-  if (!WEBHOOK_SECRET) {
+  if (!DUFFEL_WEBHOOK_SECRET) {
     throw new Error(
       "Please add DUFFEL_WEBHOOK_SECRET from Duffel Dashboard to .env",
     );
@@ -27,7 +28,7 @@ export async function POST(request: Request) {
 
   const signedPayload = `${timestamp}.${payload}`;
   const computedSignature = `v1=${crypto
-    .createHmac("sha256", WEBHOOK_SECRET)
+    .createHmac("sha256", DUFFEL_WEBHOOK_SECRET)
     .update(signedPayload)
     .digest("hex")}`;
 

@@ -103,7 +103,7 @@ const StaysCard: React.FC<StaysCardProps> = ({ stay, onSelect }) => {
         <Card>
           <div className="flex flex-col sm:flex-row w-full items-start sm:items-center justify-between p-4 sm:p-6 rounded-lg cursor-pointer">
             <div className="w-full sm:w-2/3 space-y-4 sm:pr-5 sm:border-r sm:border-dashed">
-              <StaySummary stay={stay} nights={nights} />
+              <StaysSummary stay={stay} nights={nights} />
               <IncludedItems amenities={stay.accommodation.amenities} />
             </div>
             <div className="flex flex-col items-center justify-center w-full sm:w-1/3 mt-4 sm:mt-0 space-y-3">
@@ -295,7 +295,7 @@ const StaysDetails: React.FC<{ stay: StaysSearchResult; nights: number }> = ({
 }) => (
   <div className="segment m-2 space-y-4">
     <AccommodationHeader accommodation={stay.accommodation} />
-    <StayDates stay={stay} nights={nights} />
+    <StaysDates stay={stay} nights={nights} />
 
     <Accordion type="single" collapsible>
       <AccordionItem value="item-1">

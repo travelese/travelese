@@ -30,6 +30,10 @@ export const env = createEnv({
     WEBHOOK_SECRET_KEY: z.string(),
     AZURE_DOCUMENT_INTELLIGENCE_ENDPOINT: z.string(),
     AZURE_DOCUMENT_INTELLIGENCE_KEY: z.string(),
+    DUFFEL_TRAVELESE_ACCESS_TOKEN: z.string(),
+    DUFFEL_TRAVELESE_WEBHOOK_SECRET: z.string(),
+    DUFFEL_TRAVELESE_PRO_ACCESS_TOKEN: z.string(),
+    DUFFEL_TRAVELESE_PRO_WEBHOOK_SECRET: z.string(),
   },
   /**
    * Specify your client-side environment variables schema here.
@@ -83,6 +87,13 @@ export const env = createEnv({
       process.env.AZURE_DOCUMENT_INTELLIGENCE_ENDPOINT,
     AZURE_DOCUMENT_INTELLIGENCE_KEY:
       process.env.AZURE_DOCUMENT_INTELLIGENCE_KEY,
+    DUFFEL_TRAVELESE_ACCESS_TOKEN: process.env.DUFFEL_TRAVELESE_ACCESS_TOKEN,
+    DUFFEL_TRAVELESE_WEBHOOK_SECRET:
+      process.env.DUFFEL_TRAVELESE_WEBHOOK_SECRET,
+    DUFFEL_TRAVELESE_PRO_ACCESS_TOKEN:
+      process.env.DUFFEL_TRAVELESE_PRO_ACCESS_TOKEN,
+    DUFFEL_TRAVELESE_PRO_WEBHOOK_SECRET:
+      process.env.DUFFEL_TRAVELESE_PRO_WEBHOOK_SECRET,
   },
   skipValidation: !!process.env.CI || !!process.env.SKIP_ENV_VALIDATION,
 });
