@@ -9,10 +9,10 @@ export async function fetchStats() {
     process.env.SUPABASE_SERVICE_ROLE_KEY!,
     {
       cookies: {
-        get() {
+        getAll() {
           return null;
         },
-        set() {
+        setAll() {
           return null;
         },
         remove() {

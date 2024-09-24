@@ -1,11 +1,17 @@
 .vercel
-
 node_modules
 dist
-
-# Change them to your taste:
 package-lock.json
+<<<<<<< Updated upstream
+bun.lockb
+.env*.local
+.env*.development
+.env*.preview
+.env*.production
+.env*.example
+=======
 yarn.lock
 pnpm-lock.yaml
 bun.lockb
 .env*.local
+>>>>>>> Stashed changes

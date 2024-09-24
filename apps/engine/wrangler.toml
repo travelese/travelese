@@ -2,10 +2,16 @@ compatibility_date = "2024-09-21"
 workers_dev = false
 logpush = true
 
+<<<<<<< Updated upstream
+<<<<<<< Updated upstream
 tail_consumers = [
   {service = "travelese-tail"},
   {service = "engine-tail"}
 ]
+=======
+>>>>>>> Stashed changes
+=======
+>>>>>>> Stashed changes
 
 [env.production]
 name = "engine"

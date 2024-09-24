@@ -93,9 +93,15 @@
     "./cn": "./src/utils/cn.ts",
     "./truncate": "./src/utils/truncate.ts",
     "./hooks": "./src/hooks/index.ts",
+<<<<<<< Updated upstream
+<<<<<<< Updated upstream
     "./slider": "./src/components/slider.tsx",
     "./pagination": "./src/components/pagination.tsx",
     "./badge": "./src/components/badge.tsx",
+=======
+>>>>>>> Stashed changes
+=======
+>>>>>>> Stashed changes
     "./travelese-logo": "./src/components/travelese-logo.tsx"
   },
   "dependencies": {
