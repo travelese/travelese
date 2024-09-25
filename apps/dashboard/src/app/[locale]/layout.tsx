@@ -10,12 +10,12 @@ import type { ReactElement } from "react";
 import { Providers } from "./providers";
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://app.midday.ai"),
-  title: "Midday | Run your business smarter",
+  metadataBase: new URL("https://app.travelese.xyz"),
+  title: "Travelese | Traveller Experience Management",
   description:
     "Automate financial tasks, stay organized, and make informed decisions effortlessly.",
   twitter: {
-    title: "Midday | Run your business smarter",
+    title: "Travelese | Traveller Experience Management",
     description:
       "Automate financial tasks, stay organized, and make informed decisions effortlessly.",
     images: [
@@ -32,11 +32,11 @@ export const metadata: Metadata = {
     ],
   },
   openGraph: {
-    title: "Midday | Run your business smarter",
+    title: "Travelese | Traveller Experience Management",
     description:
       "Automate financial tasks, stay organized, and make informed decisions effortlessly.",
-    url: "https://app.midday.ai",
-    siteName: "Midday",
+    url: "https://app.travelese.xyz",
+    siteName: "Travelese",
     images: [
       {
         url: "https://cdn.midday.ai/opengraph-image.jpg",

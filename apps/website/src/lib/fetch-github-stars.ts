@@ -2,7 +2,7 @@
 
 export async function fetchGithubStars() {
   const response = await fetch(
-    "https://api.github.com/repos/midday-ai/midday",
+    "https://api.github.com/repos/arminbabaeistudio/travelese",
     {
       next: {
         revalidate: 300,

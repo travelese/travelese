@@ -60,7 +60,7 @@ export async function GithubStats() {
       </div>
 
       <div className="pb-10 mt-10 h-[130px]">
-        {data?.stats && <ChartSSR data={data?.stats} />}
+        {data?.stats && <ChartSSR data={data.stats} />}
         <p className="text-[#878787] text-sm mt-4">Updated one hour ago</p>
       </div>
     </>

@@ -9,6 +9,7 @@ import { SectionSix } from "@/components/section-six";
 import { SectionThree } from "@/components/section-three";
 import { SectionTwo } from "@/components/section-two";
 import { Testimonials } from "@/components/testimonials";
+import { Ticker } from "@/components/ticker";
 import { SectionVideo } from "./section-video";
 
 export function StartPage() {
@@ -25,7 +26,7 @@ export function StartPage() {
       <SectionSeven />
       <SectionVideo />
       <SectionOSS />
-      {/* <Ticker /> */}
+      <Ticker />
       <Testimonials />
     </>
   );

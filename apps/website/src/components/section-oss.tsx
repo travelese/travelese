@@ -22,7 +22,7 @@ export function SectionOSS() {
         <p className="text-[#707070] max-w-[500px]">
           We believe in being as transparent as possible, from{" "}
           <a
-            href="https://git.new/midday"
+            href="https://git.new/travelese"
             target="_blank"
             rel="noreferrer"
             className="underline"
@@ -63,7 +63,7 @@ export function SectionOSS() {
                     </p>
 
                     <a
-                      href="https://git.new/midday"
+                      href="https://git.new/travelese"
                       target="_blank"
                       rel="noreferrer"
                     >
@@ -89,7 +89,7 @@ export function SectionOSS() {
                       shares expertise and offers support.
                     </p>
                     <a
-                      href="https://go.midday.ai/anPiuRx"
+                      href="https://go.travelese.xyz/YBPQvBx"
                       target="_blank"
                       rel="noreferrer"
                     >
@@ -115,7 +115,7 @@ export function SectionOSS() {
                       contribute the code, or even fork the repository.
                     </p>
                     <a
-                      href="https://go.midday.ai/aTNyqQH"
+                      href="https://go.travelese.xyz/dSfFmQp"
                       target="_blank"
                       rel="noreferrer"
                     >
@@ -144,18 +144,22 @@ export function SectionOSS() {
             </Accordion>
           </div>
           <div className="md:basis-1/2">
-            <a href="https://git.new/midday" target="_blank" rel="noreferrer">
+            <a
+              href="https://git.new/travelese"
+              target="_blank"
+              rel="noreferrer"
+            >
               <div className="aspect-square md:max-h-[280px] w-full md:border border-border md:p-10 mt-0 md:mt-0">
                 <div className="md:border-b-[1px] border-border pb-8 mb-8">
                   <h3 className="font-medium text-xl md:text-2xl hidden md:block">
-                    Midday
+                    Travelese
                   </h3>
                 </div>
 
                 <div>
                   <div className="flex space-x-2 overflow-auto scrollbar-hide">
                     <span className="border border-border py-1.5 px-4 text-sm rounded-full">
-                      finance
+                      travel
                     </span>
                     <span className="border border-border py-1.5 px-4 text-sm rounded-full">
                       typescript
