@@ -10,7 +10,7 @@ export async function TransactionEnrichmentsChart() {
       <p className="text-[#878787] text-sm text-center">
         Number of enriched categories using{" "}
         <Link href="/engine" className="underline">
-          Midday Engine
+          Travelese Engine
         </Link>
         .
       </p>

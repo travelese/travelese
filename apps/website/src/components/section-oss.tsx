@@ -59,7 +59,7 @@ export function SectionOSS() {
                   <div className="flex-col">
                     <p>
                       All of our code is fully open source, clone, fork and
-                      contribute to Midday.
+                      contribute to Travelese.
                     </p>
 
                     <a
@@ -89,7 +89,7 @@ export function SectionOSS() {
                       shares expertise and offers support.
                     </p>
                     <a
-                      href="https://go.travelese.xyz/YBPQvBx"
+                      href="https://go.travelese.ai/YBPQvBx"
                       target="_blank"
                       rel="noreferrer"
                     >
@@ -115,7 +115,7 @@ export function SectionOSS() {
                       contribute the code, or even fork the repository.
                     </p>
                     <a
-                      href="https://go.travelese.xyz/dSfFmQp"
+                      href="https://go.travelese.ai/tG0yZKv"
                       target="_blank"
                       rel="noreferrer"
                     >

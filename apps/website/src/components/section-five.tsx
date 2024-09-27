@@ -17,7 +17,7 @@ export function SectionFive() {
           <h4 className="font-medium text-xl md:text-2xl mb-4">Vault</h4>
 
           <p className="text-[#878787] mb-4 text-sm">
-            Store your files securely in Midday.
+            Store your files securely in Travelese.
           </p>
 
           <p className="text-[#878787] text-sm">

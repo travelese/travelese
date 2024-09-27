@@ -9,7 +9,7 @@ tail_consumers = [
 
 [env.production]
 name = "engine"
-route = { pattern = "engine.travelese.xyz/*", zone_name = "travelese.xyz" }
+route = { pattern = "engine.travelese.ai/*", zone_name = "travelese.ai" }
 
 kv_namespaces = [
   { binding = "KV", id = "b321b928d84747a4b899b21894a720c2" }
@@ -25,7 +25,7 @@ r2_buckets = [
 
 [env.staging]
 name = "engine-staging"
-route = { pattern = "engine-staging.travelese.xyz/*", zone_name = "travelese.xyz" }
+route = { pattern = "engine-staging.travelese.ai/*", zone_name = "travelese.ai" }
 
 kv_namespaces = [
   { binding = "KV", id = "b321b928d84747a4b899b21894a720c2" }

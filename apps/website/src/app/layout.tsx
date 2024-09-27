@@ -17,17 +17,17 @@ export const preferredRegion = ["fra1", "sfo1", "iad1"];
 export const metadata: Metadata = {
   metadataBase: new URL(baseUrl),
   title: {
-    default: "Midday | Run your business smarter",
-    template: "%s | Midday",
+    default: "Travelese | Traveller Experience Management",
+    template: "%s | Travelese",
   },
   description:
-    "Midday provides you with greater insight into your business and automates the boring tasks, allowing you to focus on what you love to do instead.",
+    "Travelese provides you with greater insight into your traveller experience and automates the boring tasks, allowing you to focus on what you love to do instead.",
   openGraph: {
-    title: "Midday | Run your business smarter",
+    title: "Travelese | Traveller Experience Management",
     description: "This is my portfolio.",
     url: baseUrl,
     siteName:
-      "Midday provides you with greater insight into your business and automates the boring tasks, allowing you to focus on what you love to do instead.",
+      "Travelese provides you with greater insight into your traveller experience and automates the boring tasks, allowing you to focus on what you love to do instead.",
     locale: "en_US",
     type: "website",
     images: [
@@ -44,7 +44,7 @@ export const metadata: Metadata = {
     ],
   },
   twitter: {
-    title: "Midday | Run your business smarter",
+    title: "Travelese | Traveller Experience Management",
     description: "This is my portfolio.",
     images: [
       {

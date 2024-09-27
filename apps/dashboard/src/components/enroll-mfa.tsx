@@ -21,48 +21,83 @@ export function EnrollMFA() {
   const [secret, setSecret] = useState();
   const [error, setError] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+  const [otpValue, setOtpValue] = useState("");
 
   const onComplete = async (code: string) => {
+    console.log("onComplete called with code:", code);
     setError(false);
 
     if (!isValidating) {
       setValidating(true);
 
-      const challenge = await supabase.auth.mfa.challenge({ factorId });
+      try {
+        console.log("Calling supabase.auth.mfa.challenge");
+        const challenge = await supabase.auth.mfa.challenge({ factorId });
+        console.log("Challenge response:", challenge);
 
-      const verify = await supabase.auth.mfa.verify({
-        factorId,
-        challengeId: challenge.data.id,
-        code,
-      });
+        console.log("Calling supabase.auth.mfa.verify");
+        const verify = await supabase.auth.mfa.verify({
+          factorId,
+          challengeId: challenge.data.id,
+          code,
+        });
+        console.log("Verify response:", verify);
 
-      if (verify.data) {
-        router.replace("/");
+        if (verify.data) {
+          console.log("Verification successful, redirecting");
+          router.replace("/");
+        } else {
+          console.log("Verification failed");
+          setError(true);
+        }
+      } catch (error) {
+        console.error("Error during MFA verification:", error);
+        setError(true);
+      } finally {
+        setValidating(false);
       }
+    }
+  };
+
+  const handleOtpChange = (value: string) => {
+    console.log("OTP changed:", value);
+    setOtpValue(value);
+    if (value.length === 6) {
+      console.log("OTP complete, calling onComplete");
+      onComplete(value);
     }
   };
 
   useEffect(() => {
     async function enroll() {
-      const { data, error } = await supabase.auth.mfa.enroll({
-        factorType: "totp",
-        issuer: "app.midday.ai",
-      });
+      console.log("Enrolling MFA");
+      try {
+        console.log("Calling supabase.auth.mfa.enroll");
+        const { data, error } = await supabase.auth.mfa.enroll({
+          factorType: "totp",
+          issuer: "app.travelese.ai",
+        });
 
-      if (error) {
-        throw error;
+        if (error) {
+          console.error("Error enrolling MFA:", error);
+          throw error;
+        }
+
+        console.log("MFA enrollment successful:", data);
+        setFactorId(data.id);
+        setQR(data.totp.qr_code);
+        setSecret(data.totp.secret);
+      } catch (error) {
+        console.error("Caught error during MFA enrollment:", error);
+        setError(true);
       }
-
-      setFactorId(data.id);
-
-      setQR(data.totp.qr_code);
-      setSecret(data.totp.secret);
     }
 
     enroll();
   }, []);
 
   const handleOnCancel = () => {
+    console.log("Cancel clicked, unenrolling MFA");
     supabase.auth.mfa.unenroll({
       factorId,
     });
@@ -104,15 +139,13 @@ export function EnrollMFA() {
 
       <div className="flex w-full">
         <InputOTP
-          className={error ? "invalid" : ""}
+          value={otpValue}
+          onChange={handleOtpChange}
           maxLength={6}
-          onComplete={onComplete}
-          numeric="numeric"
-          disabled={isValidating}
           render={({ slots }) => (
             <InputOTPGroup>
               {slots.map((slot, index) => (
-                <InputOTPSlot key={index.toString()} {...slot} />
+                <InputOTPSlot key={index} {...slot} />
               ))}
             </InputOTPGroup>
           )}

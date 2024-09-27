@@ -21,8 +21,12 @@ import { usePathname } from "next/navigation";
 import menuAssistant from "public/menu-assistant.jpg";
 import menuEngine from "public/menu-engine.png";
 import { useEffect, useState } from "react";
-import { FaGithub } from "react-icons/fa";
-import { MdOutlineDescription } from "react-icons/md";
+import { FaDiscord, FaGithub } from "react-icons/fa";
+import {
+  MdOutlineDescription,
+  MdOutlineIntegrationInstructions,
+  MdOutlineMemory,
+} from "react-icons/md";
 import { LogoIcon } from "./logo-icon";
 
 const listVariant = {
@@ -133,7 +137,7 @@ export function Header() {
       path: "/download",
     },
     {
-      title: "Travel Agents",
+      title: "Developers",
       cover: (
         <Link href="/engine" onClick={handleOnClick}>
           <Image alt="Engine" src={menuEngine} quality={100} />
@@ -141,15 +145,15 @@ export function Header() {
       ),
       children: [
         {
-          path: "https://github.com/arminbabaeistudio/travelese",
+          path: "https://github.new/travelese",
           title: "Open Source",
           icon: <FaGithub size={19} />,
         },
         {
-          path: "https://docs.travelese.xyz",
+          path: "https://docs.travelese.ai",
           title: "Documentation",
           icon: <MdOutlineDescription size={20} />,
-        } /* ,
+        },
         {
           path: "/engine",
           title: "Engine",
@@ -157,14 +161,14 @@ export function Header() {
         },
         {
           title: "Join the community",
-          path: "https://go.midday.ai/anPiuRx",
+          path: "https://go.travelese.ai/XTxOfuy",
           icon: <FaDiscord size={19} />,
         },
         {
           title: "Apps & Integrations",
-          path: "https://docs.midday.ai",
+          path: "https://docs.travelese.ai",
           icon: <MdOutlineIntegrationInstructions size={20} />,
-        }, */,
+        },
       ],
     },
   ];
@@ -225,21 +229,21 @@ export function Header() {
                 <Icons.LogoIcon />
                 <span className="font-medium text-sm">Copy Logo as SVG</span>
               </ContextMenuItem>
-              {/* <ContextMenuItem asChild>
+              <ContextMenuItem asChild>
                 <Link href="/branding" className="flex items-center space-x-2">
                   <Icons.Change />
                   <span className="font-medium text-sm">Branding</span>
                 </Link>
-              </ContextMenuItem> 
+              </ContextMenuItem>
               <ContextMenuItem>
                 <a
-                  href="https://ui.midday.ai"
+                  href="https://ui.travelese.ai"
                   className="flex items-center space-x-2"
                 >
                   <Icons.Palette />
                   <span className="font-medium text-sm">Design System</span>
                 </a>
-              </ContextMenuItem> */}
+              </ContextMenuItem>
             </div>
           </ContextMenuContent>
         </ContextMenu>
@@ -326,7 +330,7 @@ export function Header() {
 
         <a
           className="text-sm font-medium pr-2 border-l-[1px] border-border pl-4 hidden md:block"
-          href="https://app.travelese.xyz"
+          href="https://app.travelese.ai"
         >
           Sign in
         </a>
@@ -427,7 +431,7 @@ export function Header() {
               >
                 <Link
                   className="text-xl text-primary"
-                  href="https://app.midday.ai"
+                  href="https://app.travelese.ai"
                 >
                   Sign in
                 </Link>

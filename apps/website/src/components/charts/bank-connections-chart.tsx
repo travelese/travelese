@@ -10,7 +10,7 @@ export async function BankConnectionsChart() {
       <p className="text-[#878787] text-sm text-center">
         Number of connected bank connections using{" "}
         <Link href="/engine" className="underline">
-          Midday Engine
+          Travelese Engine
         </Link>
         .
       </p>

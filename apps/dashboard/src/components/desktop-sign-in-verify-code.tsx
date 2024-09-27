@@ -15,7 +15,7 @@ export function DesktopSignInVerifyCode({
 
   useEffect(() => {
     if (code && !hasRunned.current) {
-      window.location.replace(`midday://api/auth/callback?code=${code}`);
+      window.location.replace(`travelese://api/auth/callback?code=${code}`);
       hasRunned.current = true;
     }
   }, [code]);
@@ -27,16 +27,16 @@ export function DesktopSignInVerifyCode({
           src={appIcon}
           width={80}
           height={80}
-          alt="Midday"
+          alt="Travelese"
           quality={100}
           className="mb-10"
         />
         <p>Signing in...</p>
         <p className="mb-4">
-          If Midday dosen't open in a few seconds,{" "}
+          If Travelese dosen't open in a few seconds,{" "}
           <a
             className="underline"
-            href={`midday://api/auth/callback?code=${code}`}
+            href={`travelese://api/auth/callback?code=${code}`}
           >
             click here
           </a>

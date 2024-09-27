@@ -13,11 +13,11 @@ export const metadata: Metadata = {
   metadataBase: new URL("https://app.travelese.xyz"),
   title: "Travelese | Traveller Experience Management",
   description:
-    "Automate financial tasks, stay organized, and make informed decisions effortlessly.",
+    "Automate travel tasks, stay organized, and make informed decisions effortlessly.",
   twitter: {
     title: "Travelese | Traveller Experience Management",
     description:
-      "Automate financial tasks, stay organized, and make informed decisions effortlessly.",
+      "Automate travel tasks, stay organized, and make informed decisions effortlessly.",
     images: [
       {
         url: "https://cdn.midday.ai/opengraph-image.jpg",
@@ -34,8 +34,8 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Travelese | Traveller Experience Management",
     description:
-      "Automate financial tasks, stay organized, and make informed decisions effortlessly.",
-    url: "https://app.travelese.xyz",
+      "Automate travel tasks, stay organized, and make informed decisions effortlessly.",
+    url: "https://app.travelese.ai",
     siteName: "Travelese",
     images: [
       {

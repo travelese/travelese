@@ -17,9 +17,9 @@ export function FooterCTA() {
         Traveller Experience by Travelese.
       </span>
       <p className="text-[#878787] mt-6">
-        An all-in-one tool for travellers, travel agents, and travel agencies to
+        An all-in-one tool for travellers to manage their bookings, track
         <br />
-        manage their bookings, track flights, and send invoices.
+        their travel plans, and get recommendations.
       </p>
 
       <div className="mt-10 md:mb-8">
@@ -33,7 +33,7 @@ export function FooterCTA() {
             </Button>
           </Link>
 
-          <a href="https://app.travelese.xyz">
+          <a href="https://app.travelese.ai">
             <Button className="h-12 px-5 bg-white text-black hover:bg-white/80">
               Get Started
             </Button>

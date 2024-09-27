@@ -7,7 +7,7 @@ import engine from "public/engine-ui.png";
 export const metadata: Metadata = {
   title: "Engine",
   description:
-    "Midday engine streamlines banking integrations with a single API effortlessly connecting to multiple providers and get one unified format.",
+    "Travelese engine streamlines banking integrations with a single API effortlessly connecting to multiple providers and get one unified format.",
 };
 
 export default function Page() {
@@ -23,7 +23,7 @@ export default function Page() {
 
       <div className="mb-2 mt-6">
         <p className="text-[#707070] mt-4 mb-8 text-center max-w-[550px]">
-          Midday engine streamlines banking integrations with a single API
+          Travelese engine streamlines banking integrations with a single API
           effortlessly connecting to multiple providers and get one unified
           format.
         </p>
@@ -33,7 +33,7 @@ export default function Page() {
 
       <div className="text-center flex flex-col items-center mt-[140px]">
         <h3 className="mb-4 text-2xl font-medium">
-          Unlimited bank connections
+          Unlimited travel connections
         </h3>
         <p className="text-[#878787] font-sm max-w-[600px]">
           Expand your market reach by enabling multiple banking providers with
@@ -55,7 +55,7 @@ export default function Page() {
           One SDK, implement in minutes
         </h3>
         <p className="text-[#878787] font-sm max-w-[600px]">
-          With Midday Engine SDK you can implement banking providers in matter
+          With Travelese Engine SDK you can implement travel providers in matter
           of minutes.
         </p>
 

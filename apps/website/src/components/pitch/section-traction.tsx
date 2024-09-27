@@ -40,7 +40,7 @@ export function SectionTraction() {
       <div className="absolute left-4 right-4 md:left-8 md:right-8 top-4 flex justify-between text-lg">
         <span>Where we are</span>
         <span className="text-[#878787]">
-          <Link href="/">midday.ai</Link>
+          <Link href="/">travelese.ai</Link>
         </span>
       </div>
       <div className="flex flex-col min-h-screen justify-center container">
@@ -50,8 +50,8 @@ export function SectionTraction() {
               <h2 className="text-2xl">Waitlist sign ups</h2>
 
               <p className="text-[#878787] text-sm text-center">
-                We have built Midday in public on X and amassed nearly 4000
-                signups ready to start using Midday.
+                We have built Travelese in public on X and amassed nearly x
+                signups ready to start using Travelese.
               </p>
 
               <span className="mt-auto font-mono text-[80px] md:text-[122px]">
@@ -63,7 +63,7 @@ export function SectionTraction() {
               <h2 className="text-2xl">GitHub stars</h2>
 
               <p className="text-[#878787] text-sm text-center">
-                Our goal is to build a great community around Midday.
+                Our goal is to build a great community around Travelese.
               </p>
 
               <div className="flex items-center space-x-4">
@@ -87,7 +87,7 @@ export function SectionTraction() {
               <h2 className="text-2xl">Customers</h2>
 
               <p className="text-[#878787] text-sm text-center">
-                This is the number of customers currently using Midday.
+                This is the number of customers currently using Travelese.
               </p>
 
               <div className="flex items-center space-x-4">
@@ -133,7 +133,7 @@ export function SectionTraction() {
 
             <div className="absolute w-[220px] bottom-6 left-[50%] -mt-5 -ml-[110px] flex justify-center">
               <a
-                href="https://twitter.com/search?q=midday.ai&src=typed_query&f=top"
+                href="https://twitter.com/search?q=travelese.ai&src=typed_query&f=top"
                 target="_blank"
                 rel="noreferrer"
               >

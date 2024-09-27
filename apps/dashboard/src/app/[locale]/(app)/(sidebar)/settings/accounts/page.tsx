@@ -3,7 +3,7 @@ import { ConnectedAccounts } from "@/components/connected-accounts";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Accounts | Midday",
+  title: "Accounts | Travelese",
 };
 
 export default function Page() {

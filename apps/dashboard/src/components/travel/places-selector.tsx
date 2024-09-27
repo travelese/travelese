@@ -1,7 +1,6 @@
 "use client";
 
-import * as React from "react";
-
+import type { Places } from "@duffel/api/types";
 import { Button } from "@travelese/ui/button";
 import {
   Command,
@@ -11,15 +10,14 @@ import {
   CommandList,
 } from "@travelese/ui/command";
 import { Popover, PopoverContent, PopoverTrigger } from "@travelese/ui/popover";
-
 import {
   HotelIcon,
   MapPinIcon,
   PlaneLandingIcon,
   PlaneTakeoffIcon,
 } from "lucide-react";
-
-import type { Places } from "@duffel/api/types";
+import * as React from "react";
+import { listPlaceSuggestionsAction } from "../../actions/travel/supporting-resources/list-place-suggestions-action";
 
 interface PlacesSelectorProps {
   value: string;
@@ -51,12 +49,12 @@ const PlacesSelector = React.forwardRef<HTMLButtonElement, PlacesSelectorProps>(
         return;
       }
       try {
-        const response = await fetch(
-          `/api/travel/places?name=${encodeURIComponent(query)}`,
-        );
-        const result = await response.json();
+        const result = await listPlaceSuggestionsAction({
+          query,
+        });
         setPlaces(result.data || []);
       } catch (error) {
+        console.error("Failed to fetch places:", error);
         setPlaces([]);
       }
     };
@@ -113,9 +111,8 @@ const PlacesSelector = React.forwardRef<HTMLButtonElement, PlacesSelectorProps>(
                       const place = places.find((p) => p.iata_code === value)!;
                       if (place.type === "city") {
                         return `${place.name} (${place.iata_code})`;
-                      } else {
-                        return `${place.city_name} (${place.iata_code})`;
                       }
+                      return `${place.city_name} (${place.iata_code})`;
                     })()
                   : value
                 : placeholder}

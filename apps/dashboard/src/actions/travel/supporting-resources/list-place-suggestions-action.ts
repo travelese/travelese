@@ -1,5 +1,7 @@
 "use server";
 
+import { DuffelError } from "@duffel/api";
+import type { Places } from "@duffel/api/Places/Suggestions/SuggestionsType";
 import { LogEvents } from "@travelese/events/events";
 import { duffel } from "../../../utils/duffel";
 import { authActionClient } from "../../safe-action";
@@ -14,14 +16,13 @@ export const listPlaceSuggestionsAction = authActionClient
       channel: LogEvents.ListPlaceSuggestions.channel,
     },
   })
-  .action(async ({ query, type, limit }) => {
+  .action(async ({ parsedInput }) => {
     try {
-      const response = await duffel.places.suggestions.list({
+      const { query } = parsedInput;
+      const response = await duffel.suggestions.list({
         query,
-        type,
-        limit,
       });
-      return response.data;
+      return response.data as Places[];
     } catch (error) {
       throw new Error(
         `Failed to list place suggestions: ${

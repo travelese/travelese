@@ -53,6 +53,7 @@ import {
   PlaneTakeoffIcon,
   WifiIcon,
 } from "lucide-react";
+import React from "react";
 
 interface FlightsCardProps {
   offer: Offer;

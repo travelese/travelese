@@ -56,9 +56,7 @@ export function Footer() {
               <span>Resources</span>
               <ul>
                 <li className="transition-colors text-[#878787]">
-                  <Link href="https://github.com/arminbabaeistudio/travelese">
-                    Github
-                  </Link>
+                  <Link href="https://git.new/travelese">Github</Link>
                 </li>
                 <li className="transition-colors text-[#878787]">
                   <Link href="/support">Support</Link>

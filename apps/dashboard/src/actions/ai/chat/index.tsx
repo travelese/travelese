@@ -1,6 +1,7 @@
 "use server";
 
 import { BotMessage, SpinnerMessage } from "@/components/chat/messages";
+import { logger } from "@/utils/logger";
 import { openai } from "@ai-sdk/openai";
 import { client as RedisClient } from "@travelese/kv";
 import { getUser } from "@travelese/supabase/cached-queries";
@@ -21,6 +22,7 @@ import { getForecastTool } from "./tools/forecast";
 import { getDocumentsTool } from "./tools/get-documents";
 import { getInvoicesTool } from "./tools/get-invoces";
 import { getTransactionsTool } from "./tools/get-transactions";
+import { getPlaceSuggestionsTools } from "./tools/place-suggestions";
 import { getProfitTool } from "./tools/profit";
 import { createReport } from "./tools/report";
 import { getRevenueTool } from "./tools/revenue";
@@ -39,9 +41,12 @@ export async function submitUserMessage(
   const ip = headers().get("x-forwarded-for");
   const { success } = await ratelimit.limit(ip);
 
+  logger("Submitting user message", { content, ip });
+
   const aiState = getMutableAIState<typeof AI>();
 
   if (!success) {
+    logger("Rate limit exceeded", { ip });
     aiState.update({
       ...aiState.get(),
       messages: [
@@ -67,6 +72,8 @@ export async function submitUserMessage(
   const user = await getUser();
   const teamId = user?.data?.team_id as string;
 
+  logger("User context", { userId: user?.data?.id, teamId });
+
   const defaultValues = {
     from: subMonths(startOfMonth(new Date()), 12).toISOString(),
     to: new Date().toISOString(),
@@ -87,11 +94,12 @@ export async function submitUserMessage(
   let textStream: undefined | ReturnType<typeof createStreamableValue<string>>;
   let textNode: undefined | React.ReactNode;
 
+  logger("Calling OpenAI API");
   const result = await streamUI({
     model: openai("gpt-4o-mini"),
     initial: <SpinnerMessage />,
     system: `\
-    You are a helpful assistant in Midday who can help users ask questions about their transactions, revenue, spending find invoices and more.
+    You are a helpful assistant in Travelese who can help users ask questions about their transactions, revenue, spending find invoices and more.
 
     If the user wants the burn rate, call \`getBurnRate\` function.
     If the user wants the runway, call \`getRunway\` function.
@@ -100,6 +108,8 @@ export async function submitUserMessage(
     If the user wants to see spending based on a category, call \`getSpending\` function.
     If the user wants to find invoices or receipts, call \`getInvoices\` function.
     If the user wants to find documents, call \`getDocuments\` function.
+
+    If the user wants to find place suggestions for travel, call \`getPlaceSuggestions\` function.
 
     Always try to call the functions with default values, otherwise ask the user to respond with parameters.
     Current date is: ${new Date().toISOString().split("T")[0]} \n
@@ -131,6 +141,7 @@ export async function submitUserMessage(
             },
           ],
         });
+        logger("OpenAI API response completed", { content });
       } else {
         textStream.update(delta);
       }
@@ -178,8 +189,11 @@ export async function submitUserMessage(
         dateFrom: defaultValues.from,
         dateTo: defaultValues.to,
       }),
+      getPlaceSuggestions: getPlaceSuggestionsTools({ aiState }),
     },
   });
+
+  logger("OpenAI API call completed");
 
   return {
     id: nanoid(),

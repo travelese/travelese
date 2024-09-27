@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Support",
-  description: "Get help with Midday",
+  description: "Get help with Travelese",
 };
 
 export default function Page() {

@@ -11,7 +11,7 @@ export function SectionTeam() {
       <div className="absolute left-4 right-4 md:left-8 md:right-8 top-4 flex justify-between text-lg">
         <span>Who we are</span>
         <span className="text-[#878787]">
-          <Link href="/">midday.ai</Link>
+          <Link href="/">travelese.ai</Link>
         </span>
       </div>
       <div className="flex flex-col min-h-screen justify-center container">
@@ -27,7 +27,7 @@ export function SectionTeam() {
                 className="mb-4"
               />
 
-              <h2 className="text-xl">Pontus Abrahamsson</h2>
+              <h2 className="text-xl">A</h2>
               <span>Co-founder</span>
 
               <p className="text-[#878787] text-sm !mt-2">

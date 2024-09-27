@@ -6,7 +6,7 @@ import { getUser } from "@travelese/supabase/cached-queries";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Language & region | Midday",
+  title: "Language & region | Travelese",
 };
 
 export default async function Language() {
