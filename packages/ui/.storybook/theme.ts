@@ -8,8 +8,8 @@ export default create({
   fontCode: "monospace",
 
   brandTitle: "Travelese | Storybook",
-  brandUrl: "https://travelese.xyz",
-  brandImage: "https://travelese.xyz/email/logo-footer-dark.png",
+  brandUrl: "https://travelese.ai",
+  brandImage: "https://travelese.ai/email/logo-footer-dark.png",
   brandTarget: "_self",
 
   //

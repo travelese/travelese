@@ -28,22 +28,22 @@ interface InviteEmailProps {
 
 const baseUrl =
   process.env.VERCEL_ENV === "production"
-    ? "https://travelese.xyz/email"
+    ? "https://travelese.ai/email"
     : "http://localhost:3000/email";
 
 const baseAppUrl =
   process.env.VERCEL_ENV === "production"
-    ? "https://app.travelese.xyz"
+    ? "https://app.travelese.ai"
     : "http://localhost:3001";
 
 export const InviteEmail = ({
   invitedByEmail = "bukinoshita@example.com",
   invitedByName = "Armin Babaei",
-  email = "armin@lostisland.co",
-  teamName = "Acme Co",
+  email = "armin@travelese.ai",
+  teamName = "Travelese",
   inviteCode = "jnwe9203frnwefl239jweflasn1230oqef",
   ip = "204.13.186.218",
-  location = "São Paulo, Brazil",
+  location = "Toronto, Canada",
   locale = "en",
 }: InviteEmailProps) => {
   const { t } = getI18n({ locale });
@@ -85,7 +85,7 @@ export const InviteEmail = ({
             <Logo baseUrl={baseUrl} />
             <Heading className="mx-0 my-[30px] p-0 text-[24px] font-normal text-[#121212] text-center">
               {t("invite.title1")} <strong>{teamName}</strong>{" "}
-              {t("invite.title2")} <strong>Midday</strong>
+              {t("invite.title2")} <strong>Travelese</strong>
             </Heading>
 
             <Text className="text-[14px] leading-[24px] text-[#121212]">
@@ -97,7 +97,7 @@ export const InviteEmail = ({
                 {invitedByEmail}
               </Link>
               ) {t("invite.link1")} <strong>{teamName}</strong>{" "}
-              {t("invite.link2")} <strong>Midday</strong>.
+              {t("invite.link2")} <strong>Travelese</strong>.
             </Text>
             <Section className="mb-[42px] mt-[32px] text-center">
               <Button

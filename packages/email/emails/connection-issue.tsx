@@ -21,13 +21,13 @@ interface WelcomeProps {
 
 const baseUrl =
   process.env.VERCEL_ENV === "production"
-    ? "https://travelese.xyz/email"
+    ? "https://travelese.ai/email"
     : "http://localhost:3000/email";
 
 export const ConnectionIssueEmail = ({
-  fullName = "Viktor Hofte",
+  fullName = "Armin Babaei",
   bankName = "Revolut",
-  teamName = "Midday",
+  teamName = "Travelese",
 }: WelcomeProps) => {
   const firstName = fullName.split(" ").at(0);
   const text = `Hi ${firstName}, We wanted to inform you that our connection to your bank ${bankName} for your team ${teamName} is currently disconnected.`;
@@ -79,8 +79,8 @@ export const ConnectionIssueEmail = ({
               <br />
               We wanted to let you know that your bank{" "}
               <strong>{bankName}</strong> for team <strong>{teamName}</strong>{" "}
-              is currently disconnected. To keep Midday running smoothly, we'll
-              need you to reconnect your bank.
+              is currently disconnected. To keep Travelese running smoothly,
+              we'll need you to reconnect your bank.
               <br />
               <br />
               The good news? It only takes 60 seconds to get everything back on
@@ -90,7 +90,7 @@ export const ConnectionIssueEmail = ({
             <Section className="text-center mt-[50px] mb-[50px]">
               <Button
                 className="bg-transparent rounded-md text-primary text-[14px] text-[#121212] font-medium no-underline text-center px-6 py-3 border border-solid border-[#121212]"
-                href="https://go.midday.ai/34Xt7XK"
+                href="https://go.travelese.ai"
               >
                 Reconnect
               </Button>

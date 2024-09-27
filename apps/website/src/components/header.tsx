@@ -101,13 +101,13 @@ export function Header() {
         {
           path: "/flights",
           title: "Flights",
-          icon: <Icons.Inbox2 size={20} />,
+          icon: <Icons.Flights size={20} />,
         },
         {
           path: "/stays",
           title: "Stays",
-          icon: <Icons.Files size={20} />,
-        } /* ,
+          icon: <Icons.Stays size={20} />,
+        },
         {
           path: "/tracker",
           title: "Tracker",
@@ -117,7 +117,7 @@ export function Header() {
           path: "/invoice",
           title: "Invoice",
           icon: <Icons.Invoice size={20} />,
-        }, */,
+        },
       ],
     },
     {
