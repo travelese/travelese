@@ -11,7 +11,7 @@ import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Pricing",
-  description: "Midday's pricing",
+  description: "Travelese's pricing",
 };
 
 export default function Page() {
@@ -45,7 +45,7 @@ export default function Page() {
                 <a
                   target="_blank"
                   rel="noreferrer"
-                  href="https://app.midday.ai"
+                  href="https://app.travelese.ai"
                 >
                   <Button className="h-12 px-5">Get Started</Button>
                 </a>
@@ -63,7 +63,9 @@ export default function Page() {
             <Accordion type="single" collapsible className="w-full mt-10 mb-48">
               <AccordionItem value="item-1">
                 <AccordionTrigger>
-                  <span className="truncate">Can I self-host Midday.ai?</span>
+                  <span className="truncate">
+                    Can I self-host Travelese.ai?
+                  </span>
                 </AccordionTrigger>
                 <AccordionContent>
                   Absolutely. We are currently writing the documentation for
@@ -71,7 +73,7 @@ export default function Page() {
                   <a
                     target="_blank"
                     rel="noreferrer"
-                    href="https://git.new/midday"
+                    href="https://git.new/travelese"
                     className="underline"
                   >
                     here
@@ -81,7 +83,7 @@ export default function Page() {
               </AccordionItem>
               <AccordionItem value="item-2">
                 <AccordionTrigger>
-                  Can I run Midday.ai locally?
+                  Can I run Travelese.ai locally?
                 </AccordionTrigger>
                 <AccordionContent>
                   Yes. We are currently writing documentation for this. You can
@@ -89,7 +91,7 @@ export default function Page() {
                   <a
                     target="_blank"
                     rel="noreferrer"
-                    href="https://git.new/midday"
+                    href="https://git.new/travelese"
                     className="underline"
                   >
                     here
@@ -98,13 +100,15 @@ export default function Page() {
                 </AccordionContent>
               </AccordionItem>
               <AccordionItem value="item-3">
-                <AccordionTrigger>Is Midday.ai open source?</AccordionTrigger>
+                <AccordionTrigger>
+                  Is Travelese.ai open source?
+                </AccordionTrigger>
                 <AccordionContent>
                   Yes. You can find the repository{" "}
                   <a
                     target="_blank"
                     rel="noreferrer"
-                    href="https://git.new/midday"
+                    href="https://git.new/travelese"
                     className="underline"
                   >
                     here
@@ -124,7 +128,7 @@ export default function Page() {
                   are also actively working towards SOC 2 Type II compliance. We
                   encrypt data at rest, and sensitive data on row level. We also
                   support 2FA authentication.
-                  <Link href="/policy">midday.ai/policy</Link>.
+                  <Link href="/policy">travelese.ai/policy</Link>.
                 </AccordionContent>
               </AccordionItem>
 
@@ -136,23 +140,23 @@ export default function Page() {
                 </AccordionTrigger>
                 <AccordionContent>
                   Yes, you can cancel your subscription at any time. If you
-                  cancel your subscription, you will still be able to use Midday
-                  until the end of your billing period.
+                  cancel your subscription, you will still be able to use
+                  Travelese until the end of your billing period.
                 </AccordionContent>
               </AccordionItem>
 
               <AccordionItem value="item-6">
                 <AccordionTrigger>
                   <span className="truncate max-w-[300px] md:max-w-full">
-                    I have more questions about Midday.ai. How can I get in
+                    I have more questions about Travelese.ai. How can I get in
                     touch?
                   </span>
                 </AccordionTrigger>
                 <AccordionContent>
                   Sure, we're happy to answer any questions you might have. Just
                   send us an email at{" "}
-                  <a href="mailto:support@midday.ai">support@midday.ai</a> and
-                  we'll get back to you as soon as possible.
+                  <a href="mailto:support@travelese.ai">support@travelese.ai</a>{" "}
+                  and we'll get back to you as soon as possible.
                 </AccordionContent>
               </AccordionItem>
             </Accordion>

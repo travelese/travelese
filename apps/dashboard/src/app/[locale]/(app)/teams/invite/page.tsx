@@ -6,7 +6,7 @@ import Link from "next/link";
 import { Suspense } from "react";
 
 export const metadata: Metadata = {
-  title: "Invite Team Member | Midday",
+  title: "Invite Team Member | Travelese",
 };
 
 export default async function InviteMembers() {

@@ -128,7 +128,7 @@ export default async function Page() {
             </TableBody>
           </Table>
           <p className="text-xs text-center mt-4 text-[#878787]">
-            Midday Labs AB
+            Armin Babaei Studio Inc. (Travelese)
           </p>
         </TabsContent>
       </Tabs>

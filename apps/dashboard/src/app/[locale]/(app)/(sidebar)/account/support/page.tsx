@@ -3,7 +3,7 @@ import { getUser } from "@travelese/supabase/cached-queries";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Support | Midday",
+  title: "Support | Travelese",
 };
 
 export default async function Support() {

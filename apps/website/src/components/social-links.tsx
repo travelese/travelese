@@ -1,4 +1,4 @@
-import { FaGithub, FaLinkedinIn } from "react-icons/fa";
+import { FaGithub, FaInstagram, FaLinkedinIn } from "react-icons/fa";
 import { FaDiscord, FaXTwitter } from "react-icons/fa6";
 
 export function SocialLinks() {
@@ -8,14 +8,24 @@ export function SocialLinks() {
         <a
           target="_blank"
           rel="noreferrer"
-          href="https://go.travelese.xyz/nU1AaKG"
+          href="https://go.travelese.ai/0FpSUKo"
         >
           <span className="sr-only">X</span>
           <FaXTwitter size={22} className="fill-[#878787]" />
         </a>
       </li>
+      <li>
+        <a
+          target="_blank"
+          rel="noreferrer"
+          href="https://go.travelese.ai/wHbE80j"
+        >
+          <span className="sr-only">Instagram</span>
+          <FaInstagram size={22} className="fill-[#878787]" />
+        </a>
+      </li>
       {/*  <li>
-        <a target="_blank" rel="noreferrer" href="https://go.travelese.xyz/">
+        <a target="_blank" rel="noreferrer" href="https://go.travelese.ai/">
           <span className="sr-only">Producthunt</span>
           <FaProductHunt size={22} className="fill-[#878787]" />
         </a>
@@ -24,7 +34,7 @@ export function SocialLinks() {
         <a
           target="_blank"
           rel="noreferrer"
-          href="https://go.travelese.xyz/YBPQvBx"
+          href="https://go.travelese.ai/XTxOfuy"
         >
           <span className="sr-only">Discord</span>
           <FaDiscord size={24} className="fill-[#878787]" />
@@ -40,18 +50,12 @@ export function SocialLinks() {
         <a
           target="_blank"
           rel="noreferrer"
-          href="https://go.travelese.xyz/34tYXdW"
+          href="https://go.travelese.ai/oP5xRyx"
         >
           <span className="sr-only">LinkedIn</span>
           <FaLinkedinIn size={22} className="fill-[#878787]" />
         </a>
       </li>
-      {/* <li>
-        <a target="_blank" rel="noreferrer" href="https://go.travelese.xyz/">
-          <span className="sr-only">Youtube</span>
-          <FaYoutube size={22} className="fill-[#878787]" />
-        </a>
-      </li> */}
     </ul>
   );
 }

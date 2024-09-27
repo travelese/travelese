@@ -1,52 +1,67 @@
 export const chatExamples = [
   {
-    title: `What's my burn rate`,
+    title: `What's my trip itinerary`,
     content:
-      "Based on your historical data, your average burn rate is $8,933.33 per month. Your expected runway is 7 months, ending on January 5, 2025.",
+      "You have a flight from New York to Los Angeles on January 10, 2025, at 10:00 AM. Your hotel reservation is at the Hilton Los Angeles Airport, starting from January 10, 2025, to January 15, 2025.",
   },
   {
-    title: `What's my runway`,
+    title: `What's the status of my flight`,
     content:
-      "Based on your historical data, your expected runway is 7 months, ending in Jan 5, 2025.",
+      "Your flight from New York to Los Angeles on January 10, 2025, is on schedule and expected to depart at 10:00 AM.",
   },
   {
-    title: "What is my spending on Software",
+    title: "Show me hotel options near the airport",
     content:
-      "You have spent $8,933.33 on Software between Jun 1, 2023 and Jun 5, 2024",
+      "Here are some hotel options near Los Angeles Airport: 1. Hilton Los Angeles Airport, 2. Sheraton Gateway Los Angeles Hotel, 3. The Westin Los Angeles Airport.",
   },
   {
-    title: "Find a receipt or invoice",
+    title: "What is the check-in time for my hotel",
     content:
-      "Please provide the name of the receipt or invoice you are looking for.",
+      "The check-in time for your hotel, Hilton Los Angeles Airport, is 3:00 PM on January 10, 2025.",
   },
   {
-    title: "Find a transaction",
+    title: "Find my travel booking reference",
     content:
-      "Could you please provide more details about the transaction you are looking for?",
+      "Your travel booking reference is #LA12345. Please use this reference to access your booking details.",
   },
   {
-    title: `What's my profit for last year`,
+    title: "Find my flight number",
     content:
-      "Based on the period from Jun 1, 2022 and Jun 1, 2023 your current profit is $18,933.33. In the previous period, your profit was $3,422.33",
+      "Your flight number is AA1234. Please use this number to access your flight details.",
   },
   {
-    title: `What's my revenue`,
+    title: `What's the weather forecast for my destination`,
     content:
-      "Based on the period from Jun 1, 2023 and Jun 5, 2024 your revenue is $18,933.33. In the previous period, your profit was $20,933.33.",
+      "The weather forecast for Los Angeles on January 10, 2025, is mostly sunny with a high of 75°F and a low of 55°F.",
   },
   {
-    title: "Create a report",
+    title: `What's the traffic update for my route`,
     content:
-      "Could you please specify the type of report you would like to create?",
+      "There is moderate traffic on the route from Los Angeles Airport to your hotel. The estimated travel time is 30 minutes.",
   },
   {
-    title: "Forecast profit",
+    title: "Create a travel expense report",
     content:
-      "Based on the last 12 months profit data, the forecasted profit for the next month is approximately $18,933.33. This is an indication of the forecast and should be verified.",
+      "To create a travel expense report, please provide the following details: trip dates, destination, and expenses incurred.",
   },
   {
-    title: "Forecast revenue",
+    title: "Recommend a restaurant near my hotel",
     content:
-      "Based on the last 12 months revenue data, the average monthly revenue is $3,422.33. Therefore, the forecasted revenue for the next month is approximately $18,933.33. This is an indication of the forecast and should be verified.",
+      "Here are some restaurant options near your hotel: 1. The Palm Restaurant, 2. The Cheesecake Factory, 3. California Pizza Kitchen.",
+  },
+  {
+    title: "Recommend a local attraction",
+    content:
+      "Here are some local attractions near your hotel: 1. Universal Studios Hollywood, 2. Griffith Observatory, 3. Getty Center.",
+  },
+  {
+    title: "Find a travel document",
+    content:
+      "Please provide the name of the travel document you are looking for, such as a visa, passport, or travel itinerary.",
+  },
+  {
+    title: "Travel alerts for my destination",
+    content:
+      "There are no travel alerts for Los Angeles at this time. However, please check the official government website for the latest travel advisories.",
   },
 ];

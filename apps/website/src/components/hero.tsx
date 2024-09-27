@@ -30,13 +30,14 @@ export function Hero() {
         </Link>
 
         <h1 className="text-[30px] md:text-[90px] font-medium mt-6 leading-none">
-          Travel
-          <br /> smarter.
+          Traveller
+          <br /> Experience.
         </h1>
 
         <p className="mt-4 md:mt-6 max-w-[600px] text-[#878787]">
-          An all-in-one tool for travellers, travel agents, and travel agencies
-          to manage their bookings, track flights, and send invoices.
+          An all-in-one tool for travellers to manage their travel experience,
+          <br />
+          track flights, and more.
         </p>
 
         <div className="mt-8">
@@ -50,7 +51,7 @@ export function Hero() {
               </Button>
             </Link>
 
-            <a href="https://app.travelese.xyz">
+            <a href="https://app.travelese.ai">
               <Button className="h-12 px-5">Get Started</Button>
             </a>
           </div>

@@ -6,7 +6,7 @@ import Link from "next/link";
 import { Suspense } from "react";
 
 export const metadata: Metadata = {
-  title: "Create Team | Midday",
+  title: "Create Team | Travelese",
 };
 
 export default async function CreateTeam() {
@@ -36,8 +36,8 @@ export default async function CreateTeam() {
 
           <div className="mb-2">
             <p className="text-sm">
-              This will be the name of your Midday workspace — choose something
-              that your team will recognize.
+              This will be the name of your Travelese workspace — choose
+              something that your team will recognize.
             </p>
           </div>
 

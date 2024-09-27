@@ -29,7 +29,7 @@ export function Footer({ onSubmit }: Props) {
               <button
                 type="button"
                 className="flex space-x-2 items-center text-xs hover:bg-[#2b2b2b] rounded-md transition-colors w-full p-1"
-                onClick={() => router.push("https://x.com/middayai")}
+                onClick={() => router.push("https://go.travelese.ai/0FpSUKo")}
               >
                 <Icons.X className="w-[16px] h-[16px]" />
                 <span>Follow us</span>
@@ -39,7 +39,7 @@ export function Footer({ onSubmit }: Props) {
               <button
                 type="button"
                 className="flex space-x-2 items-center text-xs hover:bg-[#2b2b2b] rounded-md transition-colors w-full p-1"
-                onClick={() => router.push("https://go.midday.ai/anPiuRx")}
+                onClick={() => router.push("https://go.travelese.ai/XTxOfuy")}
               >
                 <Icons.Discord className="w-[16px] h-[16px]" />
                 <span>Join Our Community</span>
@@ -50,7 +50,7 @@ export function Footer({ onSubmit }: Props) {
               <button
                 type="button"
                 className="flex space-x-2 items-center text-xs hover:bg-[#2b2b2b] rounded-md transition-colors w-full p-1"
-                onClick={() => router.push("https://git.new/midday")}
+                onClick={() => router.push("https://git.new/travelese")}
               >
                 <Icons.GithubOutline className="w-[16px] h-[16px]" />
                 <span>Github</span>

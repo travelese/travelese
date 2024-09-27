@@ -45,8 +45,8 @@ export function TeamName({ name }) {
           <CardHeader>
             <CardTitle>Team Name</CardTitle>
             <CardDescription>
-              This is your team's visible name within Midday. For example, the
-              name of your company or department.
+              This is your team's visible name within Travelese. For example,
+              the name of your company or department.
             </CardDescription>
           </CardHeader>
 

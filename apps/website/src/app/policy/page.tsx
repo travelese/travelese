@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Policy",
-  description: "Privacy Policy",
+  title: "Privacy Policy",
+  description: "Privacy Policy for Travelese",
 };
 
 export default function Page() {
@@ -14,17 +14,22 @@ export default function Page() {
         </h1>
 
         <div className="text-component line-height-lg v-space-md">
-          <p className="leading-7 mt-8">Last updated: October 26, 2023</p>
+          <p className="leading-7 mt-8">Last updated: September 21, 2024</p>
 
           <p className="leading-7 mt-8">
-            Midday Labs AB ("us", "we", or "our") operates the Midday
-            application (hereinafter referred to as the "Service").
+            Armin Babaei Studio Inc. ("us", "we", or "our") operates the
+            Travelese application (hereinafter referred to as the "Service"). We
+            are a company based in Canada.
           </p>
 
           <p className="leading-7 mt-8">
             This page informs you of our policies regarding the collection, use
             and disclosure of personal data when you use our Service and the
-            choices you have associated with that data.
+            choices you have associated with that data. This policy applies to
+            residents of Canada, the European Union (EU), and the European
+            Economic Area (EEA), and complies with the Personal Information
+            Protection and Electronic Documents Act (PIPEDA), the General Data
+            Protection Regulation (GDPR), and other applicable privacy laws.
           </p>
 
           <p className="leading-7 mt-8">
@@ -42,7 +47,8 @@ export default function Page() {
                 <strong>Service</strong>
               </p>
               <p className="leading-7 mt-8">
-                Service is the Midday application operated by Midday Labs AB
+                Service is the Travelese application operated by Armin Babaei
+                Studio Inc.
               </p>
             </li>
             <li>
@@ -130,7 +136,8 @@ export default function Page() {
           </p>
 
           <ul>
-            <li>Email address</li> <li>First name and last name</li>{" "}
+            <li>Email address</li>
+            <li>First name and last name</li>
             <li>Cookies and Usage Data</li>
           </ul>
 
@@ -188,7 +195,8 @@ export default function Page() {
 
           <h2>Use of Data</h2>
           <p className="leading-7 mt-8">
-            Midday Labs AB uses the collected data for various purposes:
+            Armin Babaei Studio Inc. uses the collected data for various
+            purposes:
           </p>
           <ul>
             <li>To provide and maintain our Service</li>
@@ -217,13 +225,13 @@ export default function Page() {
             Protection Regulation (GDPR)
           </h2>
           <p className="leading-7 mt-8">
-            If you are from the European Economic Area (EEA), Midday Labs AB
-            legal basis for collecting and using the personal information
-            described in this Privacy Policy depends on the Personal Data we
-            collect and the specific context in which we collect it.
+            If you are from the European Economic Area (EEA), Armin Babaei
+            Studio Inc. legal basis for collecting and using the personal
+            information described in this Privacy Policy depends on the Personal
+            Data we collect and the specific context in which we collect it.
           </p>
           <p className="leading-7 mt-8">
-            Midday Labs AB may process your Personal Data because:
+            Armin Babaei Studio Inc. may process your Personal Data because:
           </p>
           <ul>
             <li>We need to perform a contract with you</li>
@@ -232,25 +240,51 @@ export default function Page() {
               The processing is in our legitimate interests and it is not
               overridden by your rights
             </li>
-            <li>For payment processing purposes</li>{" "}
+            <li>For payment processing purposes</li>
             <li>To comply with the law</li>
           </ul>
 
-          <h2>Retention of Data</h2>
+          <h2>
+            Personal Information Protection and Electronic Documents Act
+            (PIPEDA)
+          </h2>
           <p className="leading-7 mt-8">
-            Midday Labs AB will retain your Personal Data only for as long as is
-            necessary for the purposes set out in this Privacy Policy. We will
-            retain and use your Personal Data to the extent necessary to comply
-            with our legal obligations (for example, if we are required to
-            retain your data to comply with applicable laws), resolve disputes
-            and enforce our legal agreements and policies.
+            If you are a resident of Canada, the collection, use, and disclosure
+            of your personal information is governed by the Personal Information
+            Protection and Electronic Documents Act (PIPEDA). Under PIPEDA, we
+            are required to obtain your consent when we collect, use or disclose
+            your personal information.
           </p>
           <p className="leading-7 mt-8">
-            Midday Labs AB will also retain Usage Data for internal analysis
-            purposes. Usage Data is generally retained for a shorter period of
-            time, except when this data is used to strengthen the security or to
-            improve the functionality of our Service, or we are legally
-            obligated to retain this data for longer periods.
+            Armin Babaei Studio Inc. collects and uses personal information for
+            purposes that a reasonable person would consider appropriate in the
+            circumstances. You have the right to access your personal
+            information held by us and to challenge its accuracy if need be. You
+            also have the right to withdraw your consent for the use and
+            disclosure of your personal information, subject to certain
+            exceptions set out in law.
+          </p>
+          <p className="leading-7 mt-8">
+            For more information about your rights under PIPEDA, please contact
+            the Office of the Privacy Commissioner of Canada or visit their
+            website at https://www.priv.gc.ca/.
+          </p>
+
+          <h2>Retention of Data</h2>
+          <p className="leading-7 mt-8">
+            Armin Babaei Studio Inc. will retain your Personal Data only for as
+            long as is necessary for the purposes set out in this Privacy
+            Policy. We will retain and use your Personal Data to the extent
+            necessary to comply with our legal obligations (for example, if we
+            are required to retain your data to comply with applicable laws),
+            resolve disputes and enforce our legal agreements and policies.
+          </p>
+          <p className="leading-7 mt-8">
+            Armin Babaei Studio Inc. will also retain Usage Data for internal
+            analysis purposes. Usage Data is generally retained for a shorter
+            period of time, except when this data is used to strengthen the
+            security or to improve the functionality of our Service, or we are
+            legally obligated to retain this data for longer periods.
           </p>
 
           <h2>Transfer of Data</h2>
@@ -261,49 +295,50 @@ export default function Page() {
             protection laws may differ from those of your jurisdiction.
           </p>
           <p className="leading-7 mt-8">
-            If you are located outside Sweden and choose to provide information
+            If you are located outside Canada and choose to provide information
             to us, please note that we transfer the data, including Personal
-            Data, to Sweden and process it there.
+            Data, to Canada and process it there.
           </p>
           <p className="leading-7 mt-8">
             Your consent to this Privacy Policy followed by your submission of
             such information represents your agreement to that transfer.
           </p>
           <p className="leading-7 mt-8">
-            Midday Labs AB will take all the steps reasonably necessary to
-            ensure that your data is treated securely and in accordance with
-            this Privacy Policy and no transfer of your Personal Data will take
-            place to an organisation or a country unless there are adequate
-            controls in place including the security of your data and other
-            personal information.
+            Armin Babaei Studio Inc. will take all the steps reasonably
+            necessary to ensure that your data is treated securely and in
+            accordance with this Privacy Policy and no transfer of your Personal
+            Data will take place to an organisation or a country unless there
+            are adequate controls in place including the security of your data
+            and other personal information.
           </p>
-          <br />
+
           <h2>Disclosure of Data</h2>
           <h3>Business Transaction</h3>
           <p className="leading-7 mt-8">
-            If Midday Labs AB is involved in a merger, acquisition or asset
-            sale, your Personal Data may be transferred. We will provide notice
-            before your Personal Data is transferred and becomes subject to a
-            different Privacy Policy.
+            If Armin Babaei Studio Inc. is involved in a merger, acquisition or
+            asset sale, your Personal Data may be transferred. We will provide
+            notice before your Personal Data is transferred and becomes subject
+            to a different Privacy Policy.
           </p>
-          <br />
+
           <h3>Disclosure for Law Enforcement</h3>
           <p className="leading-7 mt-8">
-            Under certain circumstances, Midday Labs AB may be required to
-            disclose your Personal Data if required to do so by law or in
-            response to valid requests by public authorities (e.g. a court or a
-            government agency).
+            Under certain circumstances, Armin Babaei Studio Inc. may be
+            required to disclose your Personal Data if required to do so by law
+            or in response to valid requests by public authorities (e.g. a court
+            or a government agency).
           </p>
-          <br />
+
           <h3>Legal Requirements</h3>
           <p className="leading-7 mt-8">
-            Midday Labs AB may disclose your Personal Data in the good faith
-            belief that such action is necessary to:
+            Armin Babaei Studio Inc. may disclose your Personal Data in the good
+            faith belief that such action is necessary to:
           </p>
           <ul>
             <li>To comply with a legal obligation</li>
             <li>
-              To protect and defend the rights or property of Midday Labs AB
+              To protect and defend the rights or property of Armin Babaei
+              Studio Inc.
             </li>
             <li>
               To prevent or investigate possible wrongdoing in connection with
@@ -315,7 +350,7 @@ export default function Page() {
             </li>
             <li>To protect against legal liability</li>
           </ul>
-          <br />
+
           <h2>Security of Data</h2>
           <p className="leading-7 mt-8">
             The security of your data is important to us but remember that no
@@ -325,14 +360,12 @@ export default function Page() {
             its absolute security.
           </p>
 
-          <h2>
-            Our Policy on "Do Not Track" Signals under the California Online
-            Protection Act (CalOPPA)
-          </h2>
+          <h2>Do Not Track</h2>
           <p className="leading-7 mt-8">
-            We do not support Do Not Track ("DNT"). Do Not Track is a preference
-            you can set in your web browser to inform websites that you do not
-            want to be tracked.
+            We honor Do Not Track signals and Do Not Track, plant cookies, or
+            use advertising when a Do Not Track (DNT) browser mechanism is in
+            place. Do Not Track is a preference you can set in your web browser
+            to inform websites that you do not want to be tracked.
           </p>
           <p className="leading-7 mt-8">
             You can enable or disable Do Not Track by visiting the Preferences
@@ -345,9 +378,9 @@ export default function Page() {
           </h2>
           <p className="leading-7 mt-8">
             If you are a resident of the European Economic Area (EEA), you have
-            certain data protection rights. Midday Labs AB aims to take
-            reasonable steps to allow you to correct, amend, delete or limit the
-            use of your Personal Data.
+            certain data protection rights. Armin Babaei Studio Inc. aims to
+            take reasonable steps to allow you to correct, amend, delete or
+            limit the use of your Personal Data.
           </p>
           <p className="leading-7 mt-8">
             If you wish to be informed about what Personal Data we hold about
@@ -401,8 +434,9 @@ export default function Page() {
             <li>
               <p className="leading-7 mt-8">
                 <strong>The right to withdraw consent.</strong> You also have
-                the right to withdraw your consent at any time where Acre Labs
-                AB relied on your consent to process your personal information.
+                the right to withdraw your consent at any time where Armin
+                Babaei Studio Inc. relied on your consent to process your
+                personal information.
               </p>
             </li>
           </ul>
@@ -417,7 +451,7 @@ export default function Page() {
             please contact your local data protection authority in the European
             Economic Area (EEA).
           </p>
-          <br />
+
           <h2>Service Providers</h2>
           <p className="leading-7 mt-8">
             We may employ third party companies and individuals to facilitate
@@ -430,7 +464,7 @@ export default function Page() {
             perform these tasks on our behalf and are obligated not to disclose
             or use it for any other purpose.
           </p>
-          <br />
+
           <h3>Analytics</h3>
           <p className="leading-7 mt-8">
             We may use third-party Service Providers to monitor and analyse the
@@ -514,7 +548,7 @@ export default function Page() {
                   rel="noreferrer"
                   href="https://www.apple.com/legal/privacy/en-ww/"
                 >
-                  https:// www.apple.com/legal/privacy/en-ww/
+                  https://www.apple.com/legal/privacy/en-ww/
                 </a>
               </p>
             </li>
@@ -529,7 +563,7 @@ export default function Page() {
                   rel="noreferrer"
                   href="https://www.google.com/policies/privacy/"
                 >
-                  https:// www.google.com/policies/privacy/
+                  https://www.google.com/policies/privacy/
                 </a>
               </p>
             </li>
@@ -561,7 +595,7 @@ export default function Page() {
             from children without verification of parental consent, we take
             steps to remove that information from our servers.
           </p>
-          <br />
+
           <h2>Changes to This Privacy Policy</h2>
           <p className="leading-7 mt-8">
             We may update our Privacy Policy from time to time. We will notify
@@ -577,14 +611,14 @@ export default function Page() {
             changes. Changes to this Privacy Policy are effective when they are
             posted on this page.
           </p>
-          <br />
+
           <h2>Contact Us</h2>
           <p className="leading-7 mt-8">
             If you have any questions about this Privacy Policy, please contact
             us:
           </p>
           <ul>
-            <li>By email: support@midday.ai</li>
+            <li>By email: support@travelese.xyz</li>
           </ul>
         </div>
       </div>

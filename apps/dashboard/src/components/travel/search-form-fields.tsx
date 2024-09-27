@@ -1,6 +1,5 @@
 import { DatePickerWithRange } from "@/components/travel/date-selector";
 import PlacesSelector from "@/components/travel/places-selector";
-import TravellerSelector from "@/components/travel/traveller-selector";
 import { Accommodation, Seat } from "@kiwicom/orbit-components/icons";
 import { Button } from "@travelese/ui/button";
 import {
@@ -114,6 +113,7 @@ export const TravellersField: React.FC<FieldProps> = ({
         <TravellerSelector
           value={field.value}
           onChange={(newTravellers) => field.onChange(newTravellers)}
+          searchType={searchType}
         />
         <FormMessage>{fieldState.error?.message}</FormMessage>
       </FormItem>
@@ -124,7 +124,7 @@ export const TravellersField: React.FC<FieldProps> = ({
 export const CabinField: React.FC<FieldProps> = ({ control }) => (
   <FormField
     control={control}
-    name="cabin"
+    name="cabin_class"
     render={({ field }) => (
       <FormItem className="lg:col-span-2">
         <Popover>
@@ -136,7 +136,9 @@ export const CabinField: React.FC<FieldProps> = ({ control }) => (
                 className="w-full justify-start text-left font-normal"
               >
                 <Seat className="mr-2 h-4 w-4 shrink-0" />
-                {field.value.charAt(0).toUpperCase() + field.value.slice(1)}
+                {field.value
+                  ? field.value.charAt(0).toUpperCase() + field.value.slice(1)
+                  : "Select cabin class"}
               </Button>
             </FormControl>
           </PopoverTrigger>
@@ -213,3 +215,46 @@ export const RoomsField: React.FC<FieldProps> = ({ control }) => (
     )}
   />
 );
+
+// Update the TravellerSelector component
+const TravellerSelector: React.FC<{
+  value: any;
+  onChange: (value: any) => void;
+  searchType?: "fly" | "stay";
+}> = ({ value, onChange, searchType }) => {
+  const getTravellerCounts = () => {
+    if (Array.isArray(value)) {
+      return value.reduce<Record<string, number>>((acc, p) => {
+        acc[p.type] = (acc[p.type] || 0) + 1;
+        return acc;
+      }, {});
+    } else if (typeof value === "number") {
+      return { adult: value };
+    } else {
+      return {};
+    }
+  };
+
+  const travellerCounts = getTravellerCounts();
+
+  const totalTravellers = Object.values(travellerCounts).reduce(
+    (a, b) => a + b,
+    0,
+  );
+
+  const updateTravellers = (type: string, change: number) => {
+    let newValue;
+    if (searchType === "stay") {
+      newValue = Math.max(1, (value as number) + change);
+    } else {
+      const newCounts = { ...travellerCounts };
+      newCounts[type] = Math.max(0, (newCounts[type] || 0) + change);
+      newValue = Object.entries(newCounts).flatMap(([type, count]) =>
+        Array(count).fill({ type }),
+      );
+    }
+    onChange(newValue);
+  };
+
+  // ... (rest of the component remains the same)
+};
