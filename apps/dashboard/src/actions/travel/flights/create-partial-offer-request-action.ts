@@ -18,7 +18,6 @@ export const createPartialOfferRequestAction = authActionClient
     try {
       const response = await duffel.partialOfferRequests.create({
         ...parsedInput,
-        return_offers: false,
       });
 
       return response.data;

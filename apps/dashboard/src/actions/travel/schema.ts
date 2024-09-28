@@ -1,12 +1,31 @@
 import { z } from "zod";
 
 export const createPartialOfferRequestSchema = z.object({
+  supplier_timeout: z.number().optional(),
   slices: z.array(
     z.object({
       origin: z.string(),
       destination: z.string(),
-      departure_date: z.string(),
+      departure_time: z.object({
+        from: z.string().datetime(),
+        to: z.string().datetime(),
+      }),
+      departure_date: z.string().datetime(),
+      arrival_time: z.object({
+        from: z.string().datetime(),
+        to: z.string().datetime(),
+      }),
     }),
+  ),
+  private_fares: z.record(
+    z.string(),
+    z.array(
+      z.object({
+        corporate_code: z.string().optional(),
+        tracking_reference: z.string().optional(),
+        tour_code: z.string().optional(),
+      }),
+    ),
   ),
   passengers: z.array(
     z.object({
@@ -36,6 +55,7 @@ export const createPartialOfferRequestSchema = z.object({
 
 export const getPartialOfferRequestSchema = z.object({
   id: z.string(),
+  selected_partial_offer_ids: z.array(z.string()).optional(),
 });
 
 export const getFullOfferFaresSchema = z.object({
