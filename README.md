@@ -1,7 +1,11 @@
 <!-- ![hero]() -->
+<<<<<<< HEAD
 [![Production Deployment - Dashboard](https://github.com/arminbabaeistudio/travelese/actions/workflows/production-dashboard.yml/badge.svg)](https://github.com/arminbabaeistudio/travelese/actions/workflows/production-dashboard.yml)
 [![Production Deployment - Website](https://github.com/arminbabaeistudio/travelese/actions/workflows/production-website.yml/badge.svg)](https://github.com/arminbabaeistudio/travelese/actions/workflows/production-website.yml)
 [![Production Deployment - Engine](https://github.com/arminbabaeistudio/travelese/actions/workflows/production-engine.yml/badge.svg)](https://github.com/arminbabaeistudio/travelese/actions/workflows/production-engine.yml)
+=======
+[![Production Deployment - Dashboard](https://github.com/arminbabaeistudio/travelese/actions/workflows/production-dashboard.yml/badge.svg)](https://github.com/arminbabaeistudio/travelese/actions/workflows/production-dashboard.yml)[![Production Deployment - Website](https://github.com/arminbabaeistudio/travelese/actions/workflows/production-website.yml/badge.svg)](https://github.com/arminbabaeistudio/travelese/actions/workflows/production-website.yml)[![Production Deployment - Engine](https://github.com/arminbabaeistudio/travelese/actions/workflows/production-engine.yml/badge.svg)](https://github.com/arminbabaeistudio/travelese/actions/workflows/production-engine.yml)
+>>>>>>> a4bf0022f21949446038dd40693d95356add91df
 
 <p align="center">
 	<h1 align="center"><b>Travelese</b></h1>
@@ -9,11 +13,11 @@
     Traveller Experience
     <br />
     <br />
-    <a href="">Discord</a>
+    <a href="https://go.travelese.ai/XTxOfuy">Discord</a>
     ·
-    <a href="https://travelese.xyz">Website</a>
+    <a href="https://travelese.ai">Website</a>
     ·
-    <a href="https://github.com/arminbabaeistudio/travelese/issues">Issues</a>
+    <a href="https://git.new/travelese">Issues</a>
   </p>
 </p>
 
@@ -29,7 +33,7 @@ Travelese
 
 ## Get started
 
-We are working on the documentation to get started with Travelese for local development: https://docs.travelese.xyz
+We are working on the documentation to get started with Travelese for local development: https://docs.travelese.ai
 
 ## App Architecture
 

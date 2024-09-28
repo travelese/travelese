@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import signature from "public/email/signature-dark.png";
-import founders from "public/founders.png";
+import founder from "public/founder.png";
 
 export const metadata: Metadata = {
   title: "Story",
@@ -31,7 +31,7 @@ export default function Page() {
         regardless of how far or big we go.
       </p>
 
-      <Image src={founders} width={800} height={514} alt="Pontus & Viktor" />
+      <Image src={founder} width={800} height={514} alt="Armin" />
 
       <div className="mt-6 mb-8">
         <p className="text-sm text-[#878787] mb-2">Best regards, Armin</p>

@@ -1,9 +1,8 @@
 import Image from "next/image";
 import Link from "next/link";
-import founders from "./founders.png";
-import pontus from "./pontus.png";
+import armin from "./armin.png";
+import founder from "./founder.png";
 import { Card } from "./ui";
-import viktor from "./viktor.png";
 
 export function SectionTeam() {
   return (
@@ -19,52 +18,29 @@ export function SectionTeam() {
           <div className="space-y-8">
             <Card className="items-start space-y-0">
               <Image
-                src={pontus}
-                alt="Pontus"
+                src={armin}
+                alt="Armin"
                 width={76}
                 height={76}
                 quality={100}
                 className="mb-4"
               />
 
-              <h2 className="text-xl">A</h2>
-              <span>Co-founder</span>
-
+              <h2 className="text-xl">Armin Babaei</h2>
+              <span>Founder</span>
               <p className="text-[#878787] text-sm !mt-2">
-                Fullstack developer. Been running his own studio for 10 years
-                offering his service to big companies like Klarna, Viaplay and
-                Expressen.
-              </p>
-            </Card>
-
-            <Card className="items-start space-y-0">
-              <Image
-                src={viktor}
-                alt="Viktor"
-                width={76}
-                height={76}
-                quality={100}
-                className="mb-4"
-              />
-
-              <h2 className="text-xl">Viktor Hofte</h2>
-              <span className="mb-4">Co-founder</span>
-
-              <p className="text-[#878787] text-sm !mt-2">
-                Designer. Been running his own studio for 2 years offering his
+                Nerd. Been running his own studio for 2 years offering his
                 service to a range of early stage startups but also big
-                companies like Juni and Estrid. <br />
+                companies like... <br />
                 <br />
-                Prior to this he was Senior Design Lead at Klarna. He also
-                worked at DDB Stockholm working with Clients such as HM and
-                Volkswagen.
+                Prior to this he was Travel Technology Director at ...
               </p>
             </Card>
           </div>
           <div>
             <Image
-              src={founders}
-              alt="Founders"
+              src={founder}
+              alt="Founder"
               width={650}
               height={875}
               quality={100}
@@ -72,7 +48,7 @@ export function SectionTeam() {
           </div>
           <div className="ml-auto w-full space-y-8 items-center flex">
             <h2 className="text-[64px] font-medium text-center leading-tight">
-              “The speed and velocity we have together is unmatched.”
+              “Hey 👋🏽 I'm Armin.”
             </h2>
           </div>
         </div>

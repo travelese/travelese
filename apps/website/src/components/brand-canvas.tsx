@@ -24,7 +24,7 @@ const assets = [
     key="2"
     src={require("public/branding/2.png")}
     width={600}
-    alt="founders"
+    alt="founder"
   />,
   <Image
     key="3"
@@ -84,7 +84,7 @@ const assets = [
     key="2"
     src={require("public/branding/2.png")}
     width={600}
-    alt="founders"
+    alt="founder"
   />,
   <Image
     key="3"
@@ -127,16 +127,16 @@ export function BrandCanvas() {
             </SelectTrigger>
             <SelectContent>
               <SelectGroup>
-                <SelectItem value="https://cdn.midday.ai/all.zip">
+                <SelectItem value="https://cdn.travelese.ai/all.zip">
                   All
                 </SelectItem>
-                <SelectItem value="https://cdn.midday.ai/videos.zip">
+                <SelectItem value="https://cdn.travelese.ai/videos.zip">
                   Videos
                 </SelectItem>
-                <SelectItem value="https://cdn.midday.ai/founders.zip">
-                  Founders
+                <SelectItem value="https://cdn.travelese.ai/founder.zip">
+                  Founder
                 </SelectItem>
-                <SelectItem value="https://cdn.midday.ai/screens.zip">
+                <SelectItem value="https://cdn.travelese.ai/screens.zip">
                   Screens
                 </SelectItem>
               </SelectGroup>

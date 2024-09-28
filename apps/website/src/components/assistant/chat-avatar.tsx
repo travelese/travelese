@@ -11,7 +11,7 @@ export function ChatAvatar({ role }: Props) {
     case "user": {
       return (
         <Avatar className="size-6">
-          <AvatarImage src="https://pbs.twimg.com/profile_images/1755611130368770048/JwLEqyeo_400x400.jpg" />
+          <AvatarImage src="https://pbs.twimg.com/profile_images/1831477610414518272/s_7NZWub_400x400.jpg" />
         </Avatar>
       );
     }

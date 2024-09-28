@@ -24,7 +24,7 @@ export function StartPage() {
       <SectionFive />
       <SectionSix />
       <SectionSeven />
-      <SectionVideo />
+      {/* <SectionVideo /> */}
       <SectionOSS />
       <Ticker />
       <Testimonials />

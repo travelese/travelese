@@ -54,7 +54,7 @@ client.defineJob({
         );
 
         return {
-          from: "Middaybot <middaybot@midday.ai>",
+          from: "Travelese <bot@travelese.ai>",
           to: [user.email],
           subject: "Bank Connection Issue",
           html,
