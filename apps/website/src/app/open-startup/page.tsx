@@ -6,7 +6,7 @@ import { TrackerEntriesChart } from "@/components/charts/tracker-entries-chart";
 import { TrackerProjectsChart } from "@/components/charts/tracker-projects-chart";
 import { TransactionEnrichmentsChart } from "@/components/charts/transaction-enrichments-chart";
 import { TransactionsChart } from "@/components/charts/transactions-chart";
-import { UsersChart } from "@/components/charts/users-chart";
+import { TravellersChart } from "@/components/charts/travellers-chart";
 import { VaultChart } from "@/components/charts/vault-chart";
 import {
   Table,
@@ -53,14 +53,16 @@ export default async function Page() {
 
         <TabsContent value="metrics" className="m-0 h-full">
           <div className="grid md:grid-cols-2 gap-6 mt-12">
-            <UsersChart />
+            <TravellersChart />
             <TransactionsChart />
+            {/* 
             <TransactionEnrichmentsChart />
             <BankAccountsChart />
             <BankConnectionsChart />
             <VaultChart />
             <TrackerEntriesChart />
-            <TrackerProjectsChart />
+            <TrackerProjectsChart /> 
+            */}
             <InboxChart />
             <ReportsChart />
           </div>
@@ -120,7 +122,7 @@ export default async function Page() {
             </TableHeader>
             <TableBody>
               <TableRow>
-                <TableCell>Founders</TableCell>
+                <TableCell>Founder</TableCell>
                 <TableCell>0</TableCell>
                 <TableCell>100</TableCell>
                 <TableCell className="text-right">100%</TableCell>

@@ -20,12 +20,12 @@ interface WelcomeProps {
 
 const baseUrl =
   process.env.VERCEL_ENV === "production"
-    ? "https://travelese.xyz/email"
+    ? "https://travelese.ai/email"
     : "http://localhost:3000/email";
 
-export const WelcomeEmail = ({ fullName = "Viktor Hofte" }: WelcomeProps) => {
+export const WelcomeEmail = ({ fullName = "Armin Babaei" }: WelcomeProps) => {
   const firstName = fullName.split(" ").at(0);
-  const text = `Hi ${firstName}, Welcome to Midday! I'm Pontus, one of the founders. It's really important to us that you have a great experience ramping up.`;
+  const text = `Hi ${firstName}, Welcome to Travelese! I'm Armin, the founder. It's really important to us that you have a great experience ramping up.`;
 
   return (
     <Html>
@@ -62,14 +62,14 @@ export const WelcomeEmail = ({ fullName = "Viktor Hofte" }: WelcomeProps) => {
           >
             <Logo baseUrl={baseUrl} />
             <Heading className="text-[#121212] text-[21px] font-normal text-center p-0 my-[30px] mx-0">
-              Welcome to Midday
+              Welcome to Travelese
             </Heading>
 
             <br />
 
             <span className="font-medium">Hi {firstName},</span>
             <Text className="text-[#121212]">
-              Welcome to Travelese! I'm Armin, the founders.
+              Welcome to Travelese! I'm Armin, the founder.
               <br />
               <br />
               I've been working on Travelese for the past months, and during
@@ -96,8 +96,8 @@ export const WelcomeEmail = ({ fullName = "Viktor Hofte" }: WelcomeProps) => {
             <br />
 
             <Img
-              src={`${baseUrl}/founders.jpeg`}
-              alt="Founders"
+              src={`${baseUrl}/founder.jpeg`}
+              alt="Founder"
               className="my-0 mx-auto block w-full"
             />
 

@@ -72,19 +72,19 @@ const defaultTransactions = [
 
 const baseUrl =
   process.env.VERCEL_ENV === "production"
-    ? "https://travelese.xyz/email"
+    ? "https://travelese.ai/email"
     : "http://localhost:3000/email";
 
 const baseAppUrl =
   process.env.VERCEL_ENV === "production"
-    ? "https://app.travelese.xyz"
+    ? "https://app.travelese.ai"
     : "http://localhost:3001";
 
 export const TransactionsEmail = ({
   fullName = "Armin Babaei",
   transactions = defaultTransactions,
   locale = "en",
-  teamName = "Acme Co",
+  teamName = "Travelese",
 }: TransactionsEmailEmailProps) => {
   const { t } = getI18n({ locale });
   const firstName = fullName.split(" ").at(0);

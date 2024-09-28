@@ -20,9 +20,7 @@ export function Footer({ baseUrl }: Props) {
 
       <br />
 
-      <Text className="text-[21px] font-regular">
-        Run your business smarter.
-      </Text>
+      <Text className="text-[21px] font-regular">Traveller Experince</Text>
 
       <br />
 
@@ -39,7 +37,7 @@ export function Footer({ baseUrl }: Props) {
             <Row className="mb-1.5">
               <Link
                 className="text-[#707070] text-[14px]"
-                href="https://go.midday.ai/bOp4NOx"
+                href="https://go.travelese.ai/pZLWc4R"
               >
                 Overview
               </Link>
@@ -47,23 +45,23 @@ export function Footer({ baseUrl }: Props) {
             <Row className="mb-1.5">
               <Link
                 className="text-[#707070] text-[14px]"
-                href="https://go.midday.ai/VFcNsmQ"
+                href="https://go.travelese.ai/JISKG9m"
               >
-                Inbox
+                Flights
               </Link>
             </Row>
             <Row className="mb-1.5">
               <Link
                 className="text-[#707070] text-[14px]"
-                href="https://go.midday.ai/uA06kWO"
+                href="https://go.travelese.ai/H4EQQK2"
               >
-                Vault
+                Stays
               </Link>
             </Row>
-            <Row className="mb-1.5">
+            {/* <Row className="mb-1.5">
               <Link
                 className="text-[#707070] text-[14px]"
-                href="https://go.midday.ai/x7Fow9L"
+                href="https://go.travelese.ai"
               >
                 Tracker
               </Link>
@@ -72,16 +70,16 @@ export function Footer({ baseUrl }: Props) {
             <Row className="mb-1.5">
               <Link
                 className="text-[#707070] text-[14px]"
-                href="https://go.midday.ai/fkYXc95"
+                href="https://go.travelese.ai"
               >
                 Invoice
               </Link>
-            </Row>
+            </Row> */}
 
             <Row className="mb-1.5">
               <Link
                 className="text-[#707070] text-[14px]"
-                href="https://go.midday.ai/dEnP9h5"
+                href="https://go.travelese.ai/LWIpEcG"
               >
                 Pricing
               </Link>
@@ -90,7 +88,7 @@ export function Footer({ baseUrl }: Props) {
             <Row className="mb-1.5">
               <Link
                 className="text-[#707070] text-[14px]"
-                href="https://go.midday.ai/E24P3oY"
+                href="https://go.travelese.ai/hhYt47S"
               >
                 Engine
               </Link>
@@ -99,7 +97,7 @@ export function Footer({ baseUrl }: Props) {
             <Row className="mb-1.5">
               <Link
                 className="text-[#707070] text-[14px]"
-                href="https://midday.ai/download"
+                href="https://travelese.ai/download"
               >
                 Download
               </Link>
@@ -115,7 +113,7 @@ export function Footer({ baseUrl }: Props) {
             <Row className="mb-1.5">
               <Link
                 className="text-[#707070] text-[14px]"
-                href="https://go.midday.ai/fhEy5CL"
+                href="https://go.travelese.ai"
               >
                 Homepage
               </Link>
@@ -123,7 +121,7 @@ export function Footer({ baseUrl }: Props) {
             <Row className="mb-1.5">
               <Link
                 className="text-[#707070] text-[14px]"
-                href="https://git.new/midday"
+                href="https://git.new/travelese"
               >
                 Github
               </Link>
@@ -131,7 +129,7 @@ export function Footer({ baseUrl }: Props) {
             <Row className="mb-1.5">
               <Link
                 className="text-[#707070] text-[14px]"
-                href="https://go.midday.ai/ZrhEMbR"
+                href="https://go.travelese.ai/hasc1BR"
               >
                 Support
               </Link>
@@ -139,7 +137,7 @@ export function Footer({ baseUrl }: Props) {
             <Row className="mb-1.5">
               <Link
                 className="text-[#707070] text-[14px]"
-                href="https://go.midday.ai/rofdWKi"
+                href="https://go.travelese.ai/0YxKnZU"
               >
                 Terms of service
               </Link>
@@ -147,7 +145,7 @@ export function Footer({ baseUrl }: Props) {
             <Row className="mb-1.5">
               <Link
                 className="text-[#707070] text-[14px]"
-                href="https://go.midday.ai/TJIL5mQ"
+                href="https://go.travelese.ai/bdpkTRD"
               >
                 Privacy policy
               </Link>
@@ -156,7 +154,7 @@ export function Footer({ baseUrl }: Props) {
             <Row className="mb-1.5">
               <Link
                 className="text-[#707070] text-[14px]"
-                href="https://go.midday.ai/IQ1kcN0"
+                href="https://go.travelese.ai/wXccEF50"
               >
                 Branding
               </Link>
@@ -165,7 +163,7 @@ export function Footer({ baseUrl }: Props) {
             <Row className="mb-1.5">
               <Link
                 className="text-[#707070] text-[14px]"
-                href="https://go.midday.ai/x5ohOs7"
+                href="https://go.travelese.ai/qtPAqor"
               >
                 Feature Request
               </Link>
@@ -181,7 +179,7 @@ export function Footer({ baseUrl }: Props) {
             <Row className="mb-1.5">
               <Link
                 className="text-[#707070] text-[14px]"
-                href="https://go.midday.ai/186swoH"
+                href="https://go.travelese.ai/oPf0AmF"
               >
                 Story
               </Link>
@@ -189,7 +187,7 @@ export function Footer({ baseUrl }: Props) {
             <Row className="mb-1.5">
               <Link
                 className="text-[#707070] text-[14px]"
-                href="https://go.midday.ai/QWyX8Um"
+                href="https://go.travelese.ai/m5UA5OH"
               >
                 Updates
               </Link>
@@ -197,7 +195,7 @@ export function Footer({ baseUrl }: Props) {
             <Row className="mb-1.5">
               <Link
                 className="text-[#707070] text-[14px]"
-                href="https://go.midday.ai/Dd7M8cl"
+                href="https://go.travelese.ai"
               >
                 Open startup
               </Link>
@@ -205,7 +203,7 @@ export function Footer({ baseUrl }: Props) {
             <Row className="mb-1.5">
               <Link
                 className="text-[#707070] text-[14px]"
-                href="https://go.midday.ai/M2Hv420"
+                href="https://go.travelese.ai/rZrELLy"
               >
                 OSS Friends
               </Link>
@@ -220,44 +218,44 @@ export function Footer({ baseUrl }: Props) {
 
       <Row>
         <Column className="align-middle w-[40px]">
-          <Link href="https://go.midday.ai/lS72Toq">
+          <Link href="https://go.travelese.ai/0FpSUKo">
             <Img
               src={`${baseUrl}/x.png`}
               width="22"
               height="22"
-              alt="Midday on X"
+              alt="Travelese on X"
             />
           </Link>
         </Column>
-        <Column className="align-middle w-[40px]">
-          <Link href="https://go.midday.ai/7rhA3rz">
+        {/* <Column className="align-middle w-[40px]">
+          <Link href="https://go.travelese.ai/">
             <Img
               src={`${baseUrl}/producthunt.png`}
               width="22"
               height="22"
-              alt="Midday on Producthunt"
+              alt="Travelese on Producthunt"
             />
           </Link>
-        </Column>
+        </Column> */}
 
         <Column className="align-middle w-[40px]">
-          <Link href="https://go.midday.ai/anPiuRx">
+          <Link href="https://go.travelese.ai/XTxOfuy">
             <Img
               src={`${baseUrl}/discord.png`}
               width="22"
               height="22"
-              alt="Midday on Discord"
+              alt="Travelese on Discord"
             />
           </Link>
         </Column>
 
         <Column className="align-middle">
-          <Link href="https://go.midday.ai/Ct3xybK">
+          <Link href="https://go.travelese.ai/oP5xRyx">
             <Img
               src={`${baseUrl}/linkedin.png`}
               width="22"
               height="22"
-              alt="Midday on LinkedIn"
+              alt="Travelese on LinkedIn"
             />
           </Link>
         </Column>
@@ -268,14 +266,14 @@ export function Footer({ baseUrl }: Props) {
 
       <Row>
         <Text className="text-[#B8B8B8] text-xs">
-          Midday Labs AB - Torsgatan 59 113 37, Stockholm, Sweden.
+          Armin Babaei Studio Inc (Travelese) - Toronto, Canada
         </Text>
       </Row>
 
       <Row>
         <Link
           className="text-[#707070] text-[14px]"
-          href="https://app.midday.ai/settings/notifications"
+          href="https://app.travelese.ai/settings/notifications"
           title="Unsubscribe"
         >
           Notification preferences
@@ -286,11 +284,11 @@ export function Footer({ baseUrl }: Props) {
       <br />
 
       <Row>
-        <Link href="https://go.midday.ai/FZwOHud">
+        <Link href="https://go.travelese.ai">
           <Img
             src={`${baseUrl}/logo-footer.png`}
             width="100"
-            alt="Midday"
+            alt="Travelese"
             className="block"
           />
         </Link>

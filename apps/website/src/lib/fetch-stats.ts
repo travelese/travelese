@@ -42,7 +42,7 @@ export async function fetchStats() {
   );
 
   const [
-    { count: users },
+    { count: travellers },
     { count: transactions },
     { count: bankAccounts },
     { count: trackerEntries },
@@ -96,7 +96,7 @@ export async function fetchStats() {
   ]);
 
   return {
-    users,
+    travellers,
     transactions,
     bankAccounts,
     trackerEntries,
