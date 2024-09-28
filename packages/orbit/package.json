@@ -1,0 +1,28 @@
+{
+  "name": "@travelese/orbit",
+  "version": "1.0.0",
+  "private": true,
+  "sideEffects": false,
+  "files": ["tailwind.config.ts", "postcss.config.js", "globals.css"],
+  "scripts": {
+    "clean": "rm -rf .turbo node_modules",
+    "lint": "biome check .",
+    "format": "biome format --write .",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@kiwicom/orbit-components": "^12.1.2",
+    "@kiwicom/orbit-tailwind-preset": "^4.0.0",
+    "@types/react": "^18.3.8",
+    "@types/react-dom": "^18.3.0",
+    "styled-components": "^5.3.11",
+    "autoprefixer": "^10.4.20",
+    "postcss": "^8.4.47",
+    "prop-types": "^15.8.1",
+    "tailwindcss": "^3.4.12",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "storybook": "^8.3.1",
+    "typescript": "^5.6.2"
+  }
+}
