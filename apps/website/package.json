@@ -29,7 +29,7 @@
     "date-fns": "^3.6.0",
     "framer-motion": "^11.5.4",
     "geist": "^1.3.1",
-    "next": "^15.0.0-canary.172",
+    "next": "14.2.1",
     "next-mdx-remote": "^5.0.0",
     "next-safe-action": "^7.9.3",
     "next-themes": "^0.3.0",

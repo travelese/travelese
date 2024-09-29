@@ -1,11 +1,7 @@
 {
   "name": "travelese",
   "private": true,
-  "workspaces": [
-    "packages/*",
-    "apps/*",
-    "packages/email/*"
-  ],
+  "workspaces": ["packages/*", "apps/*", "packages/email/*"],
   "scripts": {
     "prepare": "husky",
     "commit": "cz",
@@ -30,7 +26,7 @@
   "dependencies": {
     "@biomejs/biome": "1.9.1",
     "@manypkg/cli": "^0.21.4",
-    "next": "^15.0.0-canary.172",
+    "next": "^14.2.1",
     "react-spring": "^9.7.4",
     "turbo": "2.1.2",
     "typescript": "^5.6.2"
