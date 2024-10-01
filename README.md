@@ -1,11 +1,5 @@
 <!-- ![hero]() -->
-<<<<<<< HEAD
-[![Production Deployment - Dashboard](https://github.com/arminbabaeistudio/travelese/actions/workflows/production-dashboard.yml/badge.svg)](https://github.com/arminbabaeistudio/travelese/actions/workflows/production-dashboard.yml)
-[![Production Deployment - Website](https://github.com/arminbabaeistudio/travelese/actions/workflows/production-website.yml/badge.svg)](https://github.com/arminbabaeistudio/travelese/actions/workflows/production-website.yml)
-[![Production Deployment - Engine](https://github.com/arminbabaeistudio/travelese/actions/workflows/production-engine.yml/badge.svg)](https://github.com/arminbabaeistudio/travelese/actions/workflows/production-engine.yml)
-=======
 [![Production Deployment - Dashboard](https://github.com/arminbabaeistudio/travelese/actions/workflows/production-dashboard.yml/badge.svg)](https://github.com/arminbabaeistudio/travelese/actions/workflows/production-dashboard.yml)[![Production Deployment - Website](https://github.com/arminbabaeistudio/travelese/actions/workflows/production-website.yml/badge.svg)](https://github.com/arminbabaeistudio/travelese/actions/workflows/production-website.yml)[![Production Deployment - Engine](https://github.com/arminbabaeistudio/travelese/actions/workflows/production-engine.yml/badge.svg)](https://github.com/arminbabaeistudio/travelese/actions/workflows/production-engine.yml)
->>>>>>> a4bf0022f21949446038dd40693d95356add91df
 
 <p align="center">
 	<h1 align="center"><b>Travelese</b></h1>
@@ -44,9 +38,11 @@ We are working on the documentation to get started with Travelese for local deve
 - Nextjs
 - Supabase
 - Shadcn
+- TailwindCSS
+- Biome
 - ToDesktop
 - Expo
-- TailwindCSS
+- Orbit
 
 ### Hosting
 
@@ -56,16 +52,17 @@ We are working on the documentation to get started with Travelese for local deve
 
 ### Services
 
+- Github Actions (CI/CD)
+- Duffel (Flights and Stays)
 - Trigger.dev (background jobs)
 - Resend (email)
 - Novu (notifications)
-- Github Actions (CI/CD)
-- GoCardLess (Bank connection EU)
 - Plaid (Bank connection in Canada and US)
-- Teller (Bank connection in the US)
 - Loops (Marketing email)
 - OpenPanel (Events and Analytics)
 - Dub (Short URLs)
+- Sentry (Error handling)
+- Cloudflare (CDN)
 
 ## Repo Activity
 

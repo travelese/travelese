@@ -16,14 +16,13 @@ export function SectionTwo() {
 
         <div className="mt-6 md:max-w-[40%] md:ml-8 md:mb-8 flex flex-col justify-center p-8 md:p-0">
           <h3 className="font-medium text-xl md:text-2xl mb-4">
-            Financial overview
+            Local Connections
           </h3>
 
           <p className="text-[#878787] mb-4 text-sm">
-            Bring your own bank. We connect to over 20 000+ banks in 33
-            countries across US, Canada, UK and Europe. Keep tabs on your
-            expenses and income, and gain a clearer picture of your business's
-            financial track record and current situation.
+            Connect with locals and experience destinations as they do. Our
+            platform helps you find and engage with local guides, hosts, and
+            experiences that go beyond the typical tourist offerings.
           </p>
 
           <div className="flex space-x-2 items-center mt-8">
@@ -39,7 +38,7 @@ export function SectionTwo() {
               />
             </svg>
             <span className="text-[#878787] text-sm">
-              Share financial reports
+              Share local experiences
             </span>
           </div>
         </div>

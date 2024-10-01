@@ -1,6 +1,5 @@
 "use server";
 
-import { DuffelError } from "@duffel/api";
 import type { Places } from "@duffel/api/Places/Suggestions/SuggestionsType";
 import { LogEvents } from "@travelese/events/events";
 import { duffel } from "../../../utils/duffel";

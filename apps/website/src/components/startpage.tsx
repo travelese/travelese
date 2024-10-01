@@ -20,8 +20,8 @@ export function StartPage() {
       <SectionOne />
       <SectionTwo />
       <SectionThree />
-      <SectionFour />
-      <SectionFive />
+      {/* <SectionFour /> */}
+      {/* <SectionFive /> */}
       <SectionSix />
       <SectionSeven />
       {/* <SectionVideo /> */}

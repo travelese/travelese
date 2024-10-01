@@ -35,9 +35,8 @@ export function Hero() {
         </h1>
 
         <p className="mt-4 md:mt-6 max-w-[600px] text-[#878787]">
-          An all-in-one tool for travellers to manage their travel experience,
+          An all-in-one platform for authentic, immersive Traveller Experience.
           <br />
-          track flights, and more.
         </p>
 
         <div className="mt-8">

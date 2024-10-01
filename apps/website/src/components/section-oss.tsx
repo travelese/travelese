@@ -18,9 +18,10 @@ export function SectionOSS() {
   return (
     <section className="container mb-16 md:mb-32">
       <div className="mb-12">
-        <h2 className="text-4xl mb-4 font-medium">Open startup</h2>
+        <h2 className="text-4xl mb-4 font-medium">Travelese is open-source</h2>
         <p className="text-[#707070] max-w-[500px]">
-          We believe in being as transparent as possible, from{" "}
+          We believe in transparency and community-driven development.
+          Contribute to shaping the future of authentic travel., from{" "}
           <a
             href="https://git.new/travelese"
             target="_blank"
@@ -85,8 +86,8 @@ export function SectionOSS() {
                 <AccordionContent className="text-[#707070]">
                   <div className="flex-col">
                     <p>
-                      A welcoming community of hundreds of developers that
-                      shares expertise and offers support.
+                      A vibrant community of thousands of travelers who share
+                      genuine experiences and offer personalized insights.
                     </p>
                     <a
                       href="https://go.travelese.ai/YBPQvBx"
