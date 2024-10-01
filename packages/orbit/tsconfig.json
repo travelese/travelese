@@ -6,6 +6,7 @@
       "@/*": ["./src/*"]
     }
   },
-  "include": ["src"],
+  "types": ["styled-components"],
+  "include": ["."],
   "exclude": ["node_modules"]
 }

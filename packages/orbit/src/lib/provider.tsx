@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import * as React from 'react';
-import OrbitProvider from '@kiwicom/orbit-components/lib/OrbitProvider';
-import { defaultTheme } from '@kiwicom/orbit-components/lib';
+import { defaultTheme } from "@kiwicom/orbit-components/lib";
+import OrbitProvider from "@kiwicom/orbit-components/lib/OrbitProvider";
+import * as React from "react";
 
 export default function Provider({
   children,
