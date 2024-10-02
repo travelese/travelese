@@ -2,11 +2,6 @@ compatibility_date = "2024-09-21"
 workers_dev = false
 logpush = true
 
-tail_consumers = [
-  {service = "travelese-tail"},
-  {service = "engine-tail"}
-]
-
 [env.production]
 name = "engine"
 route = { pattern = "engine.travelese.ai/*", zone_name = "travelese.ai" }
@@ -38,3 +33,6 @@ mtls_certificates = [
 r2_buckets = [
   { binding = "STORAGE", bucket_name = "engine-assets", preview_bucket_name = "" }
 ]
+
+[observability]
+enabled = true

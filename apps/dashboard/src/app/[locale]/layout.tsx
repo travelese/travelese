@@ -2,6 +2,7 @@ import "@/styles/globals.css";
 import { Provider as Analytics } from "@travelese/events/client";
 import { cn } from "@travelese/ui/cn";
 import "@travelese/ui/globals.css";
+import "@travelese/orbit/globals.css";
 import { Toaster } from "@travelese/ui/toaster";
 import { GeistMono } from "geist/font/mono";
 import { GeistSans } from "geist/font/sans";
@@ -10,7 +11,7 @@ import type { ReactElement } from "react";
 import { Providers } from "./providers";
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://app.travelese.xyz"),
+  metadataBase: new URL("https://app.travelese.ai"),
   title: "Travelese | Traveller Experience Management",
   description:
     "Automate travel tasks, stay organized, and make informed decisions effortlessly.",

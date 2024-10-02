@@ -1,19 +1,10 @@
+import orbitComponentsPreset from "@kiwicom/orbit-tailwind-preset";
 import type { Config } from "tailwindcss";
 
-const config: Config = {
-  presets: [
-    async () => {
-      const orbitComponentsPreset = (
-        await import("@kiwicom/orbit-tailwind-preset")
-      ).default;
-      return orbitComponentsPreset;
-    },
-  ],
+export default {
   content: [
-    "./pages/**/*.{js,ts,jsx,tsx,mdx}",
-    "./components/**/*.{js,ts,jsx,tsx,mdx}",
-    "./app/**/*.{js,ts,jsx,tsx,mdx}",
-    "./node_modules/@kiwicom/orbit-components/**/*.js", // adjust as necessary in monorepos
+    "./src/**/*.{ts,tsx}",
+    "../../../node_modules/@kiwicom/orbit-components/**/*.js",
   ],
   theme: {
     extend: {
@@ -22,7 +13,6 @@ const config: Config = {
       },
     },
   },
-  plugins: [],
-};
-
-export default config;
+  plugins: [orbitComponentsPreset],
+  prefix: "kw-",
+} satisfies Config;

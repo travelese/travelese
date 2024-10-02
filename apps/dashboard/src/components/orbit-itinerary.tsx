@@ -23,24 +23,24 @@ function FlightItinerary() {
         <Itinerary>
           <ItinerarySegment spaceAfter="medium">
             <ItinerarySegmentStop
-              city="Moscow"
-              station="Sheremetyevo International Airport (SVO)"
-              date="Fri, 19.10"
-              time="14:05"
+              city="Toronto"
+              station="Toronto Pearson International Airport (YYZ)"
+              date="Mon, 04.11"
+              time="00:55"
             />
             <ItinerarySegmentDetail
               icon={<Airplane size="small" />}
-              duration="2h 30m"
+              duration="15h 50m"
               summary={
                 <Badge
                   carriers={[
                     {
-                      code: "FR",
-                      name: "Ryanair",
+                      code: "CX",
+                      name: "Cathay Pacific",
                     },
                   ]}
                 >
-                  Ryanair
+                  Cathay Pacific
                 </Badge>
               }
               content={[
@@ -50,12 +50,12 @@ function FlightItinerary() {
                     {
                       icon: <Airplane size="small" />,
                       name: "Carrier",
-                      value: "Ryanair",
+                      value: "Cathay Pacific",
                     },
                     {
                       icon: <InformationCircle size="small" />,
                       name: "Connection number",
-                      value: "RA 8345",
+                      value: "CX 829",
                     },
                   ],
                 },
@@ -97,10 +97,10 @@ function FlightItinerary() {
               ]}
             />
             <ItinerarySegmentStop
-              city="Prague"
-              station="Václav Havel Airport Prague (PRG)"
-              date="Fri, 19.10"
-              time="16:35"
+              city="Hong Kong"
+              station="Hong Kong International Airport (HKG)"
+              date="Mon, 04.11"
+              time="04:45"
             />
           </ItinerarySegment>
         </Itinerary>

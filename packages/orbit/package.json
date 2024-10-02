@@ -2,31 +2,31 @@
   "name": "@travelese/orbit",
   "version": "1.0.0",
   "private": true,
-  "sideEffects": false,
   "files": ["tailwind.config.ts", "postcss.config.js", "globals.css"],
   "scripts": {
     "clean": "rm -rf .turbo node_modules",
     "lint": "biome check .",
-    "format": "biome format --write .",
+    "format": "biome --write .",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@kiwicom/orbit-components": "^12.1.2",
     "@kiwicom/orbit-tailwind-preset": "^4.0.0",
-    "@types/react": "^18.3.8",
-    "@types/react-dom": "^18.3.0",
-    "styled-components": "^6.1.13",
-    "autoprefixer": "^10.4.20",
-    "postcss": "^8.4.47",
-    "prop-types": "^15.8.1",
-    "tailwindcss": "^3.4.12",
-    "react": "18.3.1",
-    "react-dom": "18.3.1",
-    "storybook": "^8.3.1",
+    "@types/node": "20.11.19",
+    "@types/react": "18.2.57",
+    "@types/react-dom": "18.2.19",
+    "autoprefixer": "10.4.17",
+    "postcss": "8.4.35",
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
+    "styled-components": "^5.3.11",
+    "tailwindcss": "3.4.1",
     "typescript": "^5.6.2"
   },
   "exports": {
     "./provider": "./src/lib/provider.tsx",
-    "./registry": "./src/lib/registry.tsx"
+    "./registry": "./src/lib/registry.tsx",
+    "./tailwind.config": "./tailwind.config.ts",
+    "./globals.css": "./src/globals.css"
   }
 }

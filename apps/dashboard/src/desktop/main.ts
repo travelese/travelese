@@ -13,7 +13,7 @@ const windows = {
 async function main() {
   // Menu items
   await object.on("open-x", () => {
-    platform.os.openURL("https://x.com/itstravelese");
+    platform.os.openURL("https://go.travelese.ai/0FpSUKo");
   });
 
   await object.on("open-discord", () => {
@@ -21,7 +21,7 @@ async function main() {
   });
 
   await object.on("open-github", () => {
-    platform.os.openURL("https://github.com/arminbabaeistudio.com/travelese");
+    platform.os.openURL("https://git.new/travelese");
   });
 
   // Command menu

@@ -618,7 +618,7 @@ export default function Page() {
             us:
           </p>
           <ul>
-            <li>By email: support@travelese.xyz</li>
+            <li>By email: support@travelese.ai</li>
           </ul>
         </div>
       </div>
