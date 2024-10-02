@@ -9,7 +9,7 @@ type Props = {
 
 export function CalEmbed({ calLink }) {
   useEffect(() => {
-    (async function () {
+    (async () => {
       const cal = await getCalApi();
       cal("ui", {
         styles: { branding: { brandColor: "#000000" } },

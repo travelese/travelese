@@ -11,9 +11,12 @@ export function Screens() {
     <div className="mt-[120px] md:mt-[240px] relative pt-12 pb-16">
       <div className="relative z-10 flex flex-col items-center">
         <div className="text-center pb-14">
-          <h3 className="text-4xl md:text-6xl font-medium">The thin layer</h3>
+          <h3 className="text-4xl md:text-6xl font-medium">
+            The authentic layer
+          </h3>
           <p className="mt-4 text-[#878787]">
-            Bridging the gap between your bank and your accountants software.
+            Bridging the gap between tourist traps and genuine local
+            experiences.
           </p>
         </div>
 

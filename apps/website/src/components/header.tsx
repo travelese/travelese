@@ -137,7 +137,7 @@ export function Header() {
       path: "/download",
     },
     {
-      title: "Developers",
+      title: "Community",
       cover: (
         <Link href="/engine" onClick={handleOnClick}>
           <Image alt="Engine" src={menuEngine} quality={100} />

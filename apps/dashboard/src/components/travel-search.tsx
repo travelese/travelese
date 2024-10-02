@@ -1,24 +1,40 @@
 "use client";
 
+import { DuffelError } from "@duffel/api";
 import { Button } from "@travelese/ui/button";
 import { Checkbox } from "@travelese/ui/checkbox";
-import { Input } from "@travelese/ui/input";
+import { Icons } from "@travelese/ui/icons";
 import { Popover, PopoverContent, PopoverTrigger } from "@travelese/ui/popover";
+import { Sheet, SheetContent, SheetTrigger } from "@travelese/ui/sheet";
+import { format } from "date-fns";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   CalendarIcon,
+  ChevronDownIcon,
   LuggageIcon,
   MinusIcon,
   PlusIcon,
-  SearchIcon,
   UserIcon,
-  ChevronDownIcon,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { createPartialOfferRequestAction } from "../actions/travel/flights/create-partial-offer-request-action";
 import { searchAccommodationAction } from "../actions/travel/stays/search-accommodation-action";
+import { logger } from "../utils/logger";
 import LocationSelector from "./location-selector";
 import Calendar from "./travel-calendar";
+
+const PASSENGER_TYPES = {
+  ADULT: "adult",
+  CHILD: "child",
+  INFANT_WITHOUT_SEAT: "infant_without_seat",
+} as const;
+
+const CABIN_CLASSES = {
+  ECONOMY: "economy",
+  PREMIUM_ECONOMY: "premium_economy",
+  BUSINESS: "business",
+  FIRST: "first",
+} as const;
 
 interface CounterProps {
   label: string;
@@ -75,7 +91,9 @@ export default function TravelSearch() {
   const [tripType, setTripType] = useState("return");
   const [travelClass, setTravelClass] = useState("economy");
   const [from, setFrom] = useState("");
+  const [fromIATA, setFromIATA] = useState("");
   const [to, setTo] = useState("");
+  const [toIATA, setToIATA] = useState("");
   const [departureDate, setDepartureDate] = useState<Date | null>(null);
   const [returnDate, setReturnDate] = useState<Date | null>(null);
   const [isCalendarOpen, setIsCalendarOpen] = useState<
@@ -93,6 +111,30 @@ export default function TravelSearch() {
   const [checkAccommodation, setCheckAccommodation] = useState(false);
   const [isTripTypeOpen, setIsTripTypeOpen] = useState(false);
   const [isTravelClassOpen, setIsTravelClassOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
+
+  const PopoverOrSheet = isMobile ? Sheet : Popover;
+  const TriggerComponent = isMobile ? SheetTrigger : PopoverTrigger;
+  const ContentComponent = isMobile ? SheetContent : PopoverContent;
+
+  const renderTriggerContent = (icon: React.ReactNode, text: string) => (
+    <>
+      {icon}
+      <span className={`flex-grow text-left ${isMobile ? "hidden" : ""}`}>
+        {text}
+      </span>
+      <ChevronDownIcon className={`h-4 w-4 ml-2 ${isMobile ? "hidden" : ""}`} />
+    </>
+  );
 
   const updatePassengers = (
     type: keyof typeof passengers,
@@ -134,55 +176,61 @@ export default function TravelSearch() {
     return null;
   };
 
+  const handleFromChange = (value: string, iataCode: string) => {
+    setFrom(value);
+    setFromIATA(iataCode);
+  };
+
+  const handleToChange = (value: string, iataCode: string) => {
+    setTo(value);
+    setToIATA(iataCode);
+  };
+
   const handleSearch = async () => {
-    const searchData = {
-      origin: from,
-      destination: to,
-      departure_date: departureDate?.toISOString().split("T")[0],
-      return_date: returnDate?.toISOString().split("T")[0],
-      passengers: [
-        { type: "adult", count: passengers.adults },
-        { type: "child", count: passengers.children },
-        { type: "infant_without_seat", count: passengers.infants },
-      ],
-      cabin_class: travelClass,
+    const formatDateForDuffel = (date: Date | null) => {
+      return date ? format(date, "yyyy-MM-dd") : "";
     };
 
-    try {
-      if (tripType === "return" || tripType === "oneway") {
-        const result = await createPartialOfferRequestAction({
-          parsedInput: searchData,
-        });
-        if (result.success) {
-          console.log("Partial offer request created:", result.data);
-          // Handle successful search
-        } else {
-          console.error(
-            "Failed to create partial offer request:",
-            result.error,
-          );
-          // Handle error
-        }
-      } else if (tripType === "stay") {
-        const result = await searchAccommodationAction(searchData);
-        if (result.success) {
-          console.log("Accommodation search results:", result.data);
-          // Handle successful search
-        } else {
-          console.error("Failed to search accommodation:", result.error);
-          // Handle error
-        }
-      }
+    const searchData = {
+      slices: [
+        {
+          origin: fromIATA,
+          destination: toIATA,
+          departure_date: formatDateForDuffel(departureDate),
+        },
+      ],
+      passengers: [
+        ...Array(passengers.adults).fill({
+          type: PASSENGER_TYPES.ADULT,
+          fare_type: "adult",
+        }),
+        ...Array(passengers.children).fill({
+          type: PASSENGER_TYPES.CHILD,
+          fare_type: "child",
+        }),
+        ...Array(passengers.infants).fill({
+          type: PASSENGER_TYPES.INFANT_WITHOUT_SEAT,
+          fare_type: "infant",
+        }),
+      ],
+      cabin_class: travelClass.toLowerCase() as keyof typeof CABIN_CLASSES,
+      private_fares: {},
+    };
 
-      // Log the search event (you might want to move this to a server action as well)
-      console.log("Search event:", {
-        event: "SearchTravel",
-        channel: "web",
-        data: searchData,
+    if (tripType === "return" && returnDate) {
+      searchData.slices.push({
+        origin: toIATA,
+        destination: fromIATA,
+        departure_date: formatDateForDuffel(returnDate),
       });
+    }
+
+    try {
+      if (tripType === "return" || tripType === "one_way") {
+        await createPartialOfferRequestAction(searchData);
+      }
     } catch (error) {
-      console.error("An error occurred during the search:", error);
-      // Handle general error
+      // Handle error silently or show a user-friendly message
     }
   };
 
@@ -193,20 +241,25 @@ export default function TravelSearch() {
       transition={{ duration: 0.5 }}
       className="w-full max-w-4xl mx-auto p-6 bg-background rounded-lg shadow-lg border"
     >
-      <motion.div layout className="flex flex-wrap gap-4 mb-4">
-        <Popover open={isTripTypeOpen} onOpenChange={setIsTripTypeOpen}>
-          <PopoverTrigger asChild>
+      <motion.div layout className="grid grid-cols-4 gap-2 mb-4">
+        <PopoverOrSheet>
+          <TriggerComponent asChild>
             <Button
               variant="outline"
               role="combobox"
               aria-expanded={isTripTypeOpen}
-              className="w-[120px] justify-between"
+              className="w-full justify-between"
             >
-              {tripType === "return" ? "Return" : "One way"}
-              <ChevronDownIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+              {renderTriggerContent(
+                <Icons.Airports className="h-4 w-4 mr-2" />,
+                tripType === "return" ? "Return" : "One way",
+              )}
             </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-[160px] p-0">
+          </TriggerComponent>
+          <ContentComponent
+            side={isMobile ? "bottom" : undefined}
+            className={isMobile ? "h-[50vh]" : "w-[160px] p-0"}
+          >
             <Button
               variant="ghost"
               className="w-full justify-start"
@@ -247,22 +300,27 @@ export default function TravelSearch() {
             >
               Nomad
             </Button>
-          </PopoverContent>
-        </Popover>
+          </ContentComponent>
+        </PopoverOrSheet>
 
-        <Popover open={isTravelClassOpen} onOpenChange={setIsTravelClassOpen}>
-          <PopoverTrigger asChild>
+        <PopoverOrSheet>
+          <TriggerComponent asChild>
             <Button
               variant="outline"
               role="combobox"
               aria-expanded={isTravelClassOpen}
-              className="w-[120px] justify-between"
+              className="w-full justify-between"
             >
-              {travelClass.charAt(0).toUpperCase() + travelClass.slice(1)}
-              <ChevronDownIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+              {renderTriggerContent(
+                <Icons.Cabin className="h-4 w-4 mr-2" />,
+                travelClass.charAt(0).toUpperCase() + travelClass.slice(1),
+              )}
             </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-[160px] p-0">
+          </TriggerComponent>
+          <ContentComponent
+            side={isMobile ? "bottom" : undefined}
+            className={isMobile ? "h-[50vh]" : "w-[160px] p-0"}
+          >
             <Button
               variant="ghost"
               className="w-full justify-start"
@@ -303,22 +361,22 @@ export default function TravelSearch() {
             >
               First
             </Button>
-          </PopoverContent>
-        </Popover>
-        <Popover>
-          <PopoverTrigger asChild>
-            <Button
-              variant="outline"
-              className="w-[200px] justify-start text-left"
-            >
-              <UserIcon className="mr-2 h-4 w-4" />
-              <span>
-                {totalPassengers} Passenger{totalPassengers !== 1 ? "s" : ""}
-              </span>
-              <ChevronDownIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+          </ContentComponent>
+        </PopoverOrSheet>
+
+        <PopoverOrSheet>
+          <TriggerComponent asChild>
+            <Button variant="outline" className="w-full justify-between">
+              {renderTriggerContent(
+                <UserIcon className="h-4 w-4 mr-2" />,
+                `${totalPassengers} Passenger${totalPassengers !== 1 ? "s" : ""}`,
+              )}
             </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-60">
+          </TriggerComponent>
+          <ContentComponent
+            side={isMobile ? "bottom" : undefined}
+            className={isMobile ? "h-[50vh]" : "w-60"}
+          >
             <div className="grid gap-1">
               <Counter
                 label="Adults"
@@ -342,22 +400,22 @@ export default function TravelSearch() {
                 onDecrement={() => updatePassengers("infants", false)}
               />
             </div>
-          </PopoverContent>
-        </Popover>
-        <Popover>
-          <PopoverTrigger asChild>
-            <Button
-              variant="outline"
-              className="w-[150px] justify-start text-left"
-            >
-              <LuggageIcon className="mr-2 h-4 w-4" />
-              <span>
-                {totalBaggage} Bag{totalBaggage !== 1 ? "s" : ""}
-              </span>
-              <ChevronDownIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+          </ContentComponent>
+        </PopoverOrSheet>
+
+        <PopoverOrSheet>
+          <TriggerComponent asChild>
+            <Button variant="outline" className="w-full justify-between">
+              {renderTriggerContent(
+                <LuggageIcon className="h-4 w-4 mr-2" />,
+                `${totalBaggage} Bag${totalBaggage !== 1 ? "s" : ""}`,
+              )}
             </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-60">
+          </TriggerComponent>
+          <ContentComponent
+            side={isMobile ? "bottom" : undefined}
+            className={isMobile ? "h-[50vh]" : "w-60"}
+          >
             <div className="grid gap-1">
               <Counter
                 label="Cabin"
@@ -374,75 +432,99 @@ export default function TravelSearch() {
                 onDecrement={() => updateBaggage("checked", false)}
               />
             </div>
-          </PopoverContent>
-        </Popover>
+          </ContentComponent>
+        </PopoverOrSheet>
       </motion.div>
-      <motion.div layout className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <LocationSelector
-          type="origin"
-          label="From"
-          value={from}
-          onChange={setFrom}
-        />
-        <LocationSelector
-          type="destination"
-          label="To"
-          value={to}
-          onChange={setTo}
-        />
-        <Popover
-          open={isCalendarOpen === "departure"}
-          onOpenChange={(open) => setIsCalendarOpen(open ? "departure" : null)}
-        >
-          <PopoverTrigger asChild>
-            <motion.div className="relative" layout>
-              <Input
-                placeholder="Departure"
-                value={formatDate(departureDate)}
-                readOnly
-                className="pl-10 cursor-pointer"
+
+      {isMobile ? (
+        <motion.div layout className="grid grid-cols-2 gap-4">
+          <Sheet>
+            <SheetTrigger asChild>
+              <Button
+                variant="outline"
+                className="w-full justify-between pl-3 pr-2"
+              >
+                <Icons.FlightsDeparture className="h-4 w-4 mr-2" />
+                <span className="flex-grow text-left">{from || "Origin"}</span>
+                <ChevronDownIcon className="h-4 w-4 ml-2" />
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="bottom" className="h-[80vh]">
+              <LocationSelector
+                type="origin"
+                placeholder="Origin"
+                value={from}
+                onChange={handleFromChange}
               />
-              <CalendarIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4" />
-            </motion.div>
-          </PopoverTrigger>
-          <PopoverContent className="w-auto p-0" align="start">
-            <Calendar
-              onSelectDate={(date) => {
-                setDepartureDate(date);
-                setIsCalendarOpen(null);
-              }}
-              onClose={() => setIsCalendarOpen(null)}
-              selectedDate={departureDate}
-              onAdjustDate={(days) =>
-                setDepartureDate(adjustDate(departureDate, days))
-              }
-            />
-          </PopoverContent>
-        </Popover>
-        <AnimatePresence>
+            </SheetContent>
+          </Sheet>
+
+          <Sheet>
+            <SheetTrigger asChild>
+              <Button
+                variant="outline"
+                className="w-full justify-between pl-3 pr-2"
+              >
+                <Icons.FlightsArrival className="h-4 w-4 mr-2" />
+                <span className="flex-grow text-left">
+                  {to || "Destination"}
+                </span>
+                <ChevronDownIcon className="h-4 w-4 ml-2" />
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="bottom" className="h-[80vh]">
+              <LocationSelector
+                type="destination"
+                placeholder="Destination"
+                value={to}
+                onChange={handleToChange}
+              />
+            </SheetContent>
+          </Sheet>
+
+          <Sheet>
+            <SheetTrigger asChild>
+              <Button
+                variant="outline"
+                className="w-full justify-between pl-3 pr-2"
+              >
+                <CalendarIcon className="h-4 w-4 mr-2" />
+                <span className="flex-grow text-left">
+                  {formatDate(departureDate) || "Departure"}
+                </span>
+                <ChevronDownIcon className="h-4 w-4 ml-2" />
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="bottom" className="h-[80vh]">
+              <Calendar
+                onSelectDate={(date) => {
+                  setDepartureDate(date);
+                  setIsCalendarOpen(null);
+                }}
+                onClose={() => setIsCalendarOpen(null)}
+                selectedDate={departureDate}
+                onAdjustDate={(days) =>
+                  setDepartureDate(adjustDate(departureDate, days))
+                }
+              />
+            </SheetContent>
+          </Sheet>
+
           {tripType === "return" && (
-            <Popover
-              open={isCalendarOpen === "return"}
-              onOpenChange={(open) => setIsCalendarOpen(open ? "return" : null)}
-            >
-              <PopoverTrigger asChild>
-                <motion.div
-                  className="relative"
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -20 }}
-                  transition={{ duration: 0.3 }}
+            <Sheet>
+              <SheetTrigger asChild>
+                <Button
+                  variant="outline"
+                  className="w-full justify-between pl-3 pr-2"
                 >
-                  <Input
-                    placeholder="Return"
-                    value={formatDate(returnDate)}
-                    readOnly
-                    className="pl-10 cursor-pointer"
-                  />
-                  <CalendarIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4" />
-                </motion.div>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
+                  <CalendarIcon className="h-4 w-4 mr-2" />
+                  <span className="flex-grow text-left">
+                    {formatDate(returnDate) || "Return"}
+                  </span>
+                  <ChevronDownIcon className="h-4 w-4 ml-2" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="bottom" className="h-[80vh]">
                 <Calendar
                   onSelectDate={(date) => {
                     setReturnDate(date);
@@ -454,11 +536,101 @@ export default function TravelSearch() {
                     setReturnDate(adjustDate(returnDate, days))
                   }
                 />
-              </PopoverContent>
-            </Popover>
+              </SheetContent>
+            </Sheet>
           )}
-        </AnimatePresence>
-      </motion.div>
+        </motion.div>
+      ) : (
+        <motion.div layout className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <LocationSelector
+            type="origin"
+            placeholder="Origin"
+            value={from}
+            onChange={handleFromChange}
+          />
+          <LocationSelector
+            type="destination"
+            placeholder="Destination"
+            value={to}
+            onChange={handleToChange}
+          />
+          <Popover
+            open={isCalendarOpen === "departure"}
+            onOpenChange={(open) =>
+              setIsCalendarOpen(open ? "departure" : null)
+            }
+          >
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                className="w-full justify-between pl-3 pr-2"
+              >
+                <CalendarIcon className="h-4 w-4 mr-2" />
+                <span className="flex-grow text-left">
+                  {formatDate(departureDate) || "Departure"}
+                </span>
+                <ChevronDownIcon className="h-4 w-4 ml-2" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="start">
+              <Calendar
+                onSelectDate={(date) => {
+                  setDepartureDate(date);
+                  setIsCalendarOpen(null);
+                }}
+                onClose={() => setIsCalendarOpen(null)}
+                selectedDate={departureDate}
+                onAdjustDate={(days) =>
+                  setDepartureDate(adjustDate(departureDate, days))
+                }
+              />
+            </PopoverContent>
+          </Popover>
+          <AnimatePresence>
+            {tripType === "return" && (
+              <Popover
+                open={isCalendarOpen === "return"}
+                onOpenChange={(open) =>
+                  setIsCalendarOpen(open ? "return" : null)
+                }
+              >
+                <PopoverTrigger asChild>
+                  <motion.div
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -20 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <Button
+                      variant="outline"
+                      className="w-full justify-between pl-3 pr-2"
+                    >
+                      <CalendarIcon className="h-4 w-4 mr-2" />
+                      <span className="flex-grow text-left">
+                        {formatDate(returnDate) || "Return"}
+                      </span>
+                      <ChevronDownIcon className="h-4 w-4 ml-2" />
+                    </Button>
+                  </motion.div>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    onSelectDate={(date) => {
+                      setReturnDate(date);
+                      setIsCalendarOpen(null);
+                    }}
+                    onClose={() => setIsCalendarOpen(null)}
+                    selectedDate={returnDate}
+                    onAdjustDate={(days) =>
+                      setReturnDate(adjustDate(returnDate, days))
+                    }
+                  />
+                </PopoverContent>
+              </Popover>
+            )}
+          </AnimatePresence>
+        </motion.div>
+      )}
       <motion.div layout className="flex items-center justify-between mt-4">
         <div className="flex items-center space-x-2">
           <Checkbox
@@ -475,7 +647,7 @@ export default function TravelSearch() {
         </div>
         <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
           <Button onClick={handleSearch}>
-            <SearchIcon className="mr-2 h-4 w-4" />
+            <Icons.Explore className="mr-2 h-4 w-4" />
             Explore
           </Button>
         </motion.div>

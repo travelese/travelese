@@ -17,9 +17,8 @@ export function FooterCTA() {
         Traveller Experience by Travelese.
       </span>
       <p className="text-[#878787] mt-6">
-        An all-in-one tool for travellers to manage their bookings, track
+        An all-in-one platform for authentic, immersive Traveller Experience.
         <br />
-        their travel plans, and get recommendations.
       </p>
 
       <div className="mt-10 md:mb-8">

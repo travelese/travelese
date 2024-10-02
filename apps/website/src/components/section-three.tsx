@@ -8,15 +8,19 @@ export function SectionThree() {
         <div className="flex flex-col md:space-x-12 md:flex-row">
           <div className="mt-6 md:max-w-[40%] md:mr-8 md:mb-8">
             <h3 className="font-medium text-xl md:text-2xl	mb-4">
-              Time track your projects
+              Travel Insights
             </h3>
 
             <p className="text-[#878787] mb-4 text-sm">
-              Effortlessly boost productivity and collaboration with our
-              advanced <br />
-              time tracking solution: gain insightful project overviews and
-              foster seamless collaboration amongst your team for optimal
-              efficiency and success.
+              Gain a deeper understanding of your own travel patterns and
+              preferences. Our platform analyzes your past trips, current
+              bookings, and future plans to provide you with personalized data
+              and actionable insights. <br />
+              Visualize your travel history, track your carbon footprint,
+              identify spending trends, and discover new destinations that align
+              with your interests. These data-driven insights help you make more
+              informed decisions, optimize your travel experiences, and
+              continually evolve as a traveler.
             </p>
 
             <div className="flex space-x-2 items-center mt-8 text-sm">
@@ -31,7 +35,7 @@ export function SectionThree() {
                   d="M6.55 13 .85 7.3l1.425-1.425L6.55 10.15 15.725.975 17.15 2.4 6.55 13Z"
                 />
               </svg>
-              <span className="text-[#878787]">Live time tracking</span>
+              <span className="text-[#878787]">Live Travel Insights</span>
             </div>
             <div className="flex space-x-2 items-center mt-1 text-sm">
               <svg
@@ -45,7 +49,7 @@ export function SectionThree() {
                   d="M6.55 13 .85 7.3l1.425-1.425L6.55 10.15 15.725.975 17.15 2.4 6.55 13Z"
                 />
               </svg>
-              <span className="text-[#878787]">Share with your clients</span>
+              <span className="text-[#878787]">Share with your community</span>
             </div>
           </div>
 

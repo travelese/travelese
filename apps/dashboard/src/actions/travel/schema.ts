@@ -6,15 +6,19 @@ export const createPartialOfferRequestSchema = z.object({
     z.object({
       origin: z.string(),
       destination: z.string(),
-      departure_time: z.object({
-        from: z.string().datetime(),
-        to: z.string().datetime(),
-      }),
-      departure_date: z.string().datetime(),
-      arrival_time: z.object({
-        from: z.string().datetime(),
-        to: z.string().datetime(),
-      }),
+      departure_time: z
+        .object({
+          from: z.string().datetime(),
+          to: z.string().datetime(),
+        })
+        .optional(),
+      departure_date: z.string(),
+      arrival_time: z
+        .object({
+          from: z.string().datetime(),
+          to: z.string().datetime(),
+        })
+        .optional(),
     }),
   ),
   private_fares: z.record(
@@ -50,7 +54,9 @@ export const createPartialOfferRequestSchema = z.object({
   cabin_class: z
     .enum(["first", "business", "premium_economy", "economy"])
     .optional(),
-  max_connections: z.number().optional(),
+  max_connections: z
+    .union([z.literal(0), z.literal(1), z.literal(2)])
+    .optional(),
 });
 
 export const getPartialOfferRequestSchema = z.object({
