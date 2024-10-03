@@ -46,9 +46,9 @@ export function Footer() {
                 {/* <li className="transition-colors text-[#878787]">
                   <Link href="/engine">Engine</Link>
                 </li> */}
-                <li className="transition-colors text-[#878787]">
+                {/* <li className="transition-colors text-[#878787]">
                   <Link href="/download">Download</Link>
-                </li>
+                </li> */}
               </ul>
             </div>
 
@@ -88,9 +88,9 @@ export function Footer() {
                 <li className="transition-colors text-[#878787]">
                   <Link href="/open-startup">Open startup</Link>
                 </li>
-                <li className="transition-colors text-[#878787]">
+                {/* <li className="transition-colors text-[#878787]">
                   <Link href="/oss-friends">OSS friends</Link>
-                </li>
+                </li> */}
               </ul>
             </div>
           </div>

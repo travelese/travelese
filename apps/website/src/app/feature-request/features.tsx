@@ -2,8 +2,7 @@ export const features = [
   {
     id: "stripe",
     name: "Stripe",
-    description:
-      "Use Stripe data to match against bank transactions, forecast revenue and calculate MRR.",
+    description: "Use Stripe ...",
     logo: (
       <svg
         xmlns="http://www.w3.org/2000/svg"

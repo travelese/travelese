@@ -1,9 +1,9 @@
 import Image from "next/image";
-import screen1 from "public/product-overview.jpg";
 import screen4 from "public/product-vault.jpg";
 import screen2 from "public/screen-2.png";
 import screen3 from "public/screen-3.png";
 import screen5 from "public/screen-5.png";
+import screen1 from "public/travel.png";
 import { CardStack } from "./card-stack";
 
 export function Screens() {
@@ -24,11 +24,11 @@ export function Screens() {
           items={[
             {
               id: 1,
-              name: "Overview",
+              name: "Travel",
               content: (
                 <Image
                   quality={100}
-                  alt="Dashboard - Overview"
+                  alt="Travel"
                   src={screen1}
                   width={1031}
                   height={670}
@@ -36,7 +36,7 @@ export function Screens() {
                   className="border border-border"
                 />
               ),
-            },
+            } /* ,
             {
               id: 2,
               name: "Tracker",
@@ -92,7 +92,7 @@ export function Screens() {
                   className="border border-border"
                 />
               ),
-            },
+            }, */,
           ]}
         />
       </div>

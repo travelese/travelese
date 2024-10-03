@@ -14,7 +14,7 @@ export function Hero() {
             variant="outline"
             className="rounded-full border-border flex space-x-2 items-center"
           >
-            <span className="font-mono text-xs">September Product Updates</span>
+            <span className="font-mono text-xs">October Product Updates</span>
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width={12}

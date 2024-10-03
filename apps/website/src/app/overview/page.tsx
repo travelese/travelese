@@ -30,7 +30,7 @@ export default function Page() {
         </div>
       </div>
 
-      <Image src={Overview} quality={100} alt="Overview" />
+      {/* <Image src={Overview} quality={100} alt="Overview" /> */}
 
       <div className="flex items-center flex-col text-center relative mt-28">
         <div className="max-w-[600px]">
@@ -44,12 +44,12 @@ export default function Page() {
           </p>
         </div>
 
-        <Image
+        {/* <Image
           src={Spending}
           quality={100}
           alt="Spending"
           className="mt-10 max-w-[834px] w-full"
-        />
+        /> */}
 
         <div className="mt-32 max-w-[550px]">
           <h4 className="font-medium text-xl md:text-2xl mb-4">

@@ -1,7 +1,7 @@
 import { BankAccountsChart } from "@/components/charts/bank-accounts-chart";
 import { BankConnectionsChart } from "@/components/charts/bank-connections-chart";
-import { InboxChart } from "@/components/charts/inbox-chart";
-import { ReportsChart } from "@/components/charts/reports-chart";
+import { FlightsChart } from "@/components/charts/flights-chart";
+import { StaysChart } from "@/components/charts/stays-chart";
 import { TrackerEntriesChart } from "@/components/charts/tracker-entries-chart";
 import { TrackerProjectsChart } from "@/components/charts/tracker-projects-chart";
 import { TransactionEnrichmentsChart } from "@/components/charts/transaction-enrichments-chart";
@@ -63,8 +63,8 @@ export default async function Page() {
             <TrackerEntriesChart />
             <TrackerProjectsChart /> 
             */}
-            <InboxChart />
-            <ReportsChart />
+            <FlightsChart />
+            <StaysChart />
           </div>
         </TabsContent>
 

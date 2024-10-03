@@ -35,11 +35,11 @@ export default function Page() {
 
       <div className="mt-6 mb-8">
         <p className="text-sm text-[#878787] mb-2">Best regards, Armin</p>
-        <Image
+        {/* <Image
           src={signature}
           alt="Signature"
           className="block w-[143px] h-[20px]"
-        />
+        /> */}
       </div>
     </div>
   );

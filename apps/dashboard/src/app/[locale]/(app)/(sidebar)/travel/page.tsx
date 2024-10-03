@@ -16,7 +16,7 @@ export default async function Travel() {
       </div>
       <ErrorBoundary errorComponent={ErrorFallback}>
         <Suspense fallback={<div>Loading...</div>}>
-          <OrbitItinerary />
+          {/* <OrbitItinerary /> */}
         </Suspense>
       </ErrorBoundary>
     </>

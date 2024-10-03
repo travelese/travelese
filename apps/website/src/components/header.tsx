@@ -89,7 +89,7 @@ export function Header() {
       title: "Features",
       cover: (
         <Link href="/#assistant" onClick={handleOnClick}>
-          <Image alt="Assistant" src={menuAssistant} quality={100} />
+          {/* <Image alt="Assistant" src={menuAssistant} quality={100} /> */}
         </Link>
       ),
       children: [
@@ -107,7 +107,7 @@ export function Header() {
           path: "/stays",
           title: "Stays",
           icon: <Icons.Stays size={20} />,
-        },
+        } /* ,
         {
           path: "/tracker",
           title: "Tracker",
@@ -117,7 +117,7 @@ export function Header() {
           path: "/invoice",
           title: "Invoice",
           icon: <Icons.Invoice size={20} />,
-        },
+        }, */,
       ],
     },
     {
@@ -132,15 +132,15 @@ export function Header() {
       title: "Story",
       path: "/story",
     },
-    {
+    /* {
       title: "Download",
       path: "/download",
-    },
+    }, */
     {
       title: "Community",
       cover: (
         <Link href="/engine" onClick={handleOnClick}>
-          <Image alt="Engine" src={menuEngine} quality={100} />
+          {/* <Image alt="Engine" src={menuEngine} quality={100} /> */}
         </Link>
       ),
       children: [
@@ -149,6 +149,8 @@ export function Header() {
           title: "Open Source",
           icon: <FaGithub size={19} />,
         },
+        ,
+        /*
         {
           path: "https://docs.travelese.ai",
           title: "Documentation",
@@ -158,17 +160,16 @@ export function Header() {
           path: "/engine",
           title: "Engine",
           icon: <MdOutlineMemory size={20} />,
-        },
-        {
+        }, */ {
           title: "Join the community",
           path: "https://go.travelese.ai/XTxOfuy",
           icon: <FaDiscord size={19} />,
-        },
+        } /* ,
         {
           title: "Apps & Integrations",
           path: "https://docs.travelese.ai",
           icon: <MdOutlineIntegrationInstructions size={20} />,
-        },
+        }, */,
       ],
     },
   ];

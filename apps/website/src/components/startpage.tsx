@@ -18,8 +18,8 @@ export function StartPage() {
       <Hero />
       <Screens />
       <SectionOne />
-      <SectionTwo />
-      <SectionThree />
+      {/* <SectionTwo /> */}
+      {/* <SectionThree /> */}
       {/* <SectionFour /> */}
       {/* <SectionFive /> */}
       <SectionSix />
