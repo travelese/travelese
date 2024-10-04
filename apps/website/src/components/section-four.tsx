@@ -49,7 +49,7 @@ export function SectionFour() {
           </ul>
 
           <CopyInput
-            value="inbox.f3f1s@midday.ai"
+            value="inbox.f3f1s@travelese.ai"
             className="max-w-[240px] mt-8"
           />
         </div>

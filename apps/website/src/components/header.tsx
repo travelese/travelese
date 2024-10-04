@@ -145,7 +145,7 @@ export function Header() {
       ),
       children: [
         {
-          path: "https://github.new/travelese",
+          path: "https://git.new/travelese",
           title: "Open Source",
           icon: <FaGithub size={19} />,
         },
