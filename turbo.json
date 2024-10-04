@@ -35,8 +35,7 @@
         "OPENPANEL_SECRET_KEY",
         "SENTRY_AUTH_TOKEN",
         "SENTRY_ORG",
-        "SENTRY_PROJECT_DASHBOARD",
-        "SENTRY_PROJECT_WEBSITE",
+        "SENTRY_PROJECT",
         "SENTRY_SUPPRESS_GLOBAL_ERROR_HANDLER_FILE_WARNING"
       ],
       "inputs": ["$TURBO_DEFAULT$", ".env"],
