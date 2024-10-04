@@ -97,7 +97,7 @@ const assets = [
 const repeated = [...assets, ...assets, ...assets, ...assets, ...assets];
 
 export function BrandCanvas() {
-  const [value, setValue] = useState("https://cdn.midday.ai/all.zip");
+  const [value, setValue] = useState("https://cdn.travelese.ai/all.zip");
   const ref = useRef();
   const { events } = useDraggable(ref);
 

@@ -1,5 +1,8 @@
 <!-- ![hero]() -->
-[![Production Deployment - Dashboard](https://github.com/arminbabaeistudio/travelese/actions/workflows/production-dashboard.yml/badge.svg)](https://github.com/arminbabaeistudio/travelese/actions/workflows/production-dashboard.yml)[![Production Deployment - Website](https://github.com/arminbabaeistudio/travelese/actions/workflows/production-website.yml/badge.svg)](https://github.com/arminbabaeistudio/travelese/actions/workflows/production-website.yml)[![Production Deployment - Engine](https://github.com/arminbabaeistudio/travelese/actions/workflows/production-engine.yml/badge.svg)](https://github.com/arminbabaeistudio/travelese/actions/workflows/production-engine.yml)
+
+[![Production Deployment - Dashboard](https://github.com/arminbabaeistudio/travelese/actions/workflows/production-dashboard.yml/badge.svg)](https://github.com/arminbabaeistudio/travelese/actions/workflows/production-dashboard.yml)
+[![Production Deployment - Website](https://github.com/arminbabaeistudio/travelese/actions/workflows/production-website.yml/badge.svg)](https://github.com/arminbabaeistudio/travelese/actions/workflows/production-website.yml)
+[![Production Deployment - Engine](https://github.com/arminbabaeistudio/travelese/actions/workflows/production-engine.yml/badge.svg)](https://github.com/arminbabaeistudio/travelese/actions/workflows/production-engine.yml)
 
 <p align="center">
 	<h1 align="center"><b>Travelese</b></h1>
@@ -21,13 +24,12 @@ Travelese
 
 ## Features
 
-**Flights**: <br/>
-**Stays**: <br/>
-**Assistant**: <br/>
+**Flights**: <br/> **Stays**: <br/> **Assistant**: <br/>
 
 ## Get started
 
-We are working on the documentation to get started with Travelese for local development: https://docs.travelese.ai
+We are working on the documentation to get started with Travelese for local
+development: https://docs.travelese.ai
 
 ## App Architecture
 
@@ -66,5 +68,4 @@ We are working on the documentation to get started with Travelese for local deve
 
 ## Repo Activity
 
-![Alt](https://repobeats.axiom.co/api/embed/713adc55c2e1509a17373b42320dc51710228e07.svg "Repobeats analytics image")
-
+![Alt](https://repobeats.axiom.co/api/embed/403f11a783943a4029fb5bd61edc38ffb9bf8fd9.svg "Repobeats analytics image")

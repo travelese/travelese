@@ -32,12 +32,12 @@ export const metadata: Metadata = {
     type: "website",
     images: [
       {
-        url: "https://cdn.midday.ai/opengraph-image.jpg",
+        url: "https://cdn.travelese.ai/opengraph-image.jpg",
         width: 800,
         height: 600,
       },
       {
-        url: "https://cdn.midday.ai/opengraph-image.jpg",
+        url: "https://cdn.travelese.ai/opengraph-image.jpg",
         width: 1800,
         height: 1600,
       },
@@ -48,12 +48,12 @@ export const metadata: Metadata = {
     description: "This is my portfolio.",
     images: [
       {
-        url: "https://cdn.midday.ai/opengraph-image.jpg",
+        url: "https://cdn.travelese.ai/opengraph-image.jpg",
         width: 800,
         height: 600,
       },
       {
-        url: "https://cdn.midday.ai/opengraph-image.jpg",
+        url: "https://cdn.travelese.ai/opengraph-image.jpg",
         width: 1800,
         height: 1600,
       },
