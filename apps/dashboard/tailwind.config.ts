@@ -3,20 +3,12 @@ import baseConfig from "@travelese/ui/tailwind.config";
 import type { Config } from "tailwindcss";
 
 export default {
+  presets: [orbitConfig, baseConfig],
   content: [
     "./src/**/*.{ts,tsx}",
     "../../packages/ui/src/**/*.{ts,tsx}",
     "../../packages/orbit/src/**/*.{ts,tsx}",
+    "../../node_modules/@kiwicom/orbit-components/**/*.js",
   ],
-  presets: [baseConfig],
-  theme: {
-    extend: {
-      ...orbitConfig.theme.extend,
-    },
-  },
-  plugins: [
-    require("@todesktop/tailwind-variants"),
-    ...baseConfig.plugins,
-    ...orbitConfig.plugins,
-  ],
+  plugins: [require("@todesktop/tailwind-variants")],
 } satisfies Config;
