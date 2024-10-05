@@ -1,8 +1,13 @@
 <!-- ![hero]() -->
 
-[![Production Deployment - Dashboard](https://github.com/arminbabaeistudio/travelese/actions/workflows/production-dashboard.yml/badge.svg)](https://github.com/arminbabaeistudio/travelese/actions/workflows/production-dashboard.yml)
-[![Production Deployment - Website](https://github.com/arminbabaeistudio/travelese/actions/workflows/production-website.yml/badge.svg)](https://github.com/arminbabaeistudio/travelese/actions/workflows/production-website.yml)
-[![Production Deployment - Engine](https://github.com/arminbabaeistudio/travelese/actions/workflows/production-engine.yml/badge.svg)](https://github.com/arminbabaeistudio/travelese/actions/workflows/production-engine.yml)
+[![Production Deployment - Dashboard]
+[![Production Deployment - Website](https://github.com/travelese/travelese/actions/workflows/production-website.yml/badge.svg)](https://github.com/travelese/travelese/actions/workflows/production-website.yml)
+[![Production Deployment - Engine]
+[![Production Deployment - Email](https://github.com/travelese/travelese/actions/workflows/production-email.yml/badge.svg)](https://github.com/travelese/travelese/actions/workflows/production-email.yml)
+[![Production Deployment - UI]
+[![Preview Deployment - Dashboard](https://github.com/travelese/travelese/actions/workflows/preview-dashboard.yaml/badge.svg)](https://github.com/travelese/travelese/actions/workflows/preview-dashboard.yaml)
+[![Preview Deployment - Website](https://github.com/travelese/travelese/actions/workflows/preview-website.yml/badge.svg)](https://github.com/travelese/travelese/actions/workflows/preview-website.yml)
+[![Preview Deployment - Engine](https://github.com/travelese/travelese/actions/workflows/preview-engine.yml/badge.svg)](https://github.com/travelese/travelese/actions/workflows/preview-engine.yml)
 
 <p align="center">
 	<h1 align="center"><b>Travelese</b></h1>
