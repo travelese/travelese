@@ -4,7 +4,7 @@ import app from "./app.png";
 import apps from "./apps.png";
 import engine from "./engine.png";
 import invoice from "./invoice.png";
-import ai from "./midday-ai.png";
+import ai from "./travelese-ai.png";
 import { Card } from "./ui";
 
 export function SectionNext() {

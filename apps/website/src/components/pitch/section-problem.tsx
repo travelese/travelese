@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import reciept from "./reciept.png";
+import ticket from "./ticket.png";
 import { Card } from "./ui";
 
 export function SectionProblem() {
@@ -27,26 +27,18 @@ export function SectionProblem() {
                   d="M0 67.333V.667l5 5 5-5 5 5 5-5 5 5 5-5 5 5 5-5 5 5 5-5 5 5 5-5v66.666l-5-5-5 5-5-5-5 5-5-5-5 5-5-5-5 5-5-5-5 5-5-5-5 5Zm10-16.666h40V44H10v6.667Zm0-13.334h40v-6.666H10v6.666ZM10 24h40v-6.667H10V24ZM6.667 57.667h46.666V10.333H6.667v47.334Z"
                 />
               </svg>
-              <h2 className="text-2xl">Disorganization</h2>
+              <h2 className="text-2xl">Fragmented workflow</h2>
 
-              <p className="text-[#878787] text-sm text-center">
-                Running a business is tough, and one of the biggest challenges
-                is disorganization. From scattered files to misplaced documents,
-                this lack of structure hampers productivity and wastes time.
-                Moreover, this disorganization often creates problems for your
-                accountant, leading to delays and errors in financial reporting.
-              </p>
+              <p className="text-[#878787] text-sm text-center">...</p>
             </Card>
             <div className="px-8">
-              <h2 className="text-6xl text-center leading-tight">
-                The current market for SMB financial tools is a mess.
-              </h2>
+              <h2 className="text-6xl text-center leading-tight">...</h2>
             </div>
           </div>
           <div>
             <Image
-              src={reciept}
-              alt="Reciept"
+              src={ticket}
+              alt="Ticket"
               width={650}
               height={875}
               quality={100}
@@ -83,14 +75,7 @@ export function SectionProblem() {
 
               <h2 className="text-2xl">Scattered workflow</h2>
 
-              <p className="text-[#878787] text-sm text-center">
-                Existing services often compound the problem by residing on
-                various platforms, resulting in a fragmented workflow. From
-                tracking time to managing finances and storing documents,
-                entrepreneurs navigate multiple interfaces and systems. This
-                scattered approach wastes time and money, increases the risk of
-                errors, and disrupts productivity.
-              </p>
+              <p className="text-[#878787] text-sm text-center">...</p>
             </Card>
             <Card className="min-h-[315px]">
               <svg
@@ -122,13 +107,7 @@ export function SectionProblem() {
 
               <h2 className="text-2xl">Old tech</h2>
 
-              <p className="text-[#878787] text-sm text-center">
-                Services are outdated and prioritize features tailored to
-                accountants rather than offering a user-friendly interface for
-                business owners. This approach often results in cumbersome
-                navigation and a disconnect between the software and the needs
-                of users.
-              </p>
+              <p className="text-[#878787] text-sm text-center">...</p>
             </Card>
           </div>
         </div>

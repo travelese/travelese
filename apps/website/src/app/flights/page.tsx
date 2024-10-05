@@ -1,13 +1,9 @@
 import { SubscribeInput } from "@/components/subscribe-input";
 import type { Metadata } from "next";
-import Image from "next/image";
-import engineSDK from "public/engine-sdk.png";
-import engine from "public/engine-ui.png";
 
 export const metadata: Metadata = {
-  title: "Engine",
-  description:
-    "Travelese engine streamlines banking integrations with a single API effortlessly connecting to multiple providers and get one unified format.",
+  title: "Flights",
+  description: "Travelese Flights.",
 };
 
 export default function Page() {
@@ -27,44 +23,7 @@ export default function Page() {
         </p>
       </div>
 
-      <SubscribeInput group="engine" />
-
-      {/* <div className="text-center flex flex-col items-center mt-[140px]">
-        <h3 className="mb-4 text-2xl font-medium">
-          Unlimited travel connections
-        </h3>
-        <p className="text-[#878787] font-sm max-w-[600px]">
-          Expand your market reach by enabling multiple banking providers with
-          just one click. We add even more providers in the future.
-        </p>
-
-        <Image
-          src={engine}
-          alt="Engine UI"
-          width={1026}
-          height={552}
-          className="mt-16"
-          quality={100}
-        />
-      </div> */}
-
-      {/* <div className="text-center flex flex-col items-center mt-24">
-        <h3 className="mb-4 text-2xl font-medium">
-          One SDK, implement in minutes
-        </h3>
-        <p className="text-[#878787] font-sm max-w-[600px]">
-          With Travelese Engine SDK you can implement travel providers in matter
-          of minutes.
-        </p>
-
-        <Image
-          src={engineSDK}
-          alt="Engine SDK"
-          width={740}
-          height={420}
-          className="mt-8"
-        />
-      </div> */}
+      <SubscribeInput group="flights" />
     </div>
   );
 }

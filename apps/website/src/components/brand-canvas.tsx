@@ -18,79 +18,7 @@ const assets = [
     key="1"
     src={require("public/branding/1.png")}
     width={600}
-    alt="keyboard"
-  />,
-  <Image
-    key="2"
-    src={require("public/branding/2.png")}
-    width={600}
     alt="founder"
-  />,
-  <Image
-    key="3"
-    src={require("public/branding/3.png")}
-    width={600}
-    alt="screens"
-  />,
-  <Image
-    key="1"
-    src={require("public/branding/11.png")}
-    width={600}
-    alt="screens"
-  />,
-  <Image
-    key="4"
-    src={require("public/branding/4.png")}
-    width={600}
-    alt="screens"
-  />,
-  <Image
-    key="5"
-    src={require("public/branding/5.png")}
-    width={600}
-    alt="screens"
-  />,
-  <Image
-    key="7"
-    src={require("public/branding/7.png")}
-    width={600}
-    alt="screens"
-  />,
-  <Image
-    key="8"
-    src={require("public/branding/8.png")}
-    width={600}
-    alt="screens"
-  />,
-  <Image
-    key="9"
-    src={require("public/branding/9.png")}
-    width={600}
-    alt="screens"
-  />,
-  <Image
-    key="10"
-    src={require("public/branding/10.png")}
-    width={600}
-    alt="screens"
-  />,
-  <Image
-    key="1"
-    src={require("public/branding/1.png")}
-    width={600}
-    alt="keyboard"
-  />,
-  <Image
-    key="2"
-    src={require("public/branding/2.png")}
-    width={600}
-    alt="founder"
-  />,
-  <Image
-    key="3"
-    src={require("public/branding/3.png")}
-    width={600}
-    alt="screens"
   />,
 ];
 

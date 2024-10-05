@@ -64,9 +64,9 @@ export function PitchCarusel() {
         <CarouselItem>
           <SectionSolution />
         </CarouselItem>
-        <CarouselItem>
+        {/* <CarouselItem>
           <SectionDemo playVideo={current === 4} />
-        </CarouselItem>
+        </CarouselItem> */}
         <CarouselItem>
           <SectionTraction />
         </CarouselItem>

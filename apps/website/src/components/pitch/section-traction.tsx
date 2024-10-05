@@ -50,12 +50,12 @@ export function SectionTraction() {
               <h2 className="text-2xl">Waitlist sign ups</h2>
 
               <p className="text-[#878787] text-sm text-center">
-                We have built Travelese in public on X and amassed nearly x
+                I have built Travelese in public on X and amassed nearly x
                 signups ready to start using Travelese.
               </p>
 
               <span className="mt-auto font-mono text-[80px] md:text-[122px]">
-                3453
+                0
               </span>
             </Card>
 

@@ -4,7 +4,7 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Pitch",
-  description: "Pitch deck",
+  description: "Travelese Pitch deck",
 };
 
 export default function Page() {
