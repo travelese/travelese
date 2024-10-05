@@ -1,5 +1,4 @@
 name: Production Deployment - Website
-
 env:
   VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
   VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_WEBSITE }}
@@ -17,10 +16,6 @@ jobs:
   deploy-production:
     runs-on: ubuntu-latest
     steps:
-      - name: Check environment variables
-        run: |
-          echo "NEXT_PUBLIC_SUPABASE_URL is set: ${{ env.NEXT_PUBLIC_SUPABASE_URL != '' }}"
-          echo "SUPABASE_SERVICE_ROLE_KEY is set: ${{ env.SUPABASE_SERVICE_ROLE_KEY != '' }}"
       - uses: actions/checkout@v4
       - uses: oven-sh/setup-bun@v1
         with:
