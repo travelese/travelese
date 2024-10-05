@@ -15,10 +15,6 @@ jobs:
   deploy-preview:
     runs-on: ubuntu-latest
     steps:
-      - name: Check environment variables
-        run: |
-          echo "NEXT_PUBLIC_SUPABASE_URL is set: ${{ env.NEXT_PUBLIC_SUPABASE_URL != '' }}"
-          echo "SUPABASE_SERVICE_ROLE_KEY is set: ${{ env.SUPABASE_SERVICE_ROLE_KEY != '' }}"
       - uses: actions/checkout@v4
       - uses: oven-sh/setup-bun@v1
         with:
