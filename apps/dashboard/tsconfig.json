@@ -3,7 +3,9 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@travelese/ui": ["../../packages/ui/src"],
+      "@travelese/orbit": ["../../packages/orbit/src"]
     },
     "strict": true
   },

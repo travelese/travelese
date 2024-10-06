@@ -2,6 +2,8 @@ import "@/styles/globals.css";
 import { Provider as Analytics } from "@travelese/events/client";
 import { cn } from "@travelese/ui/cn";
 import "@travelese/ui/globals.css";
+import "@travelese/orbit/globals.css";
+
 import { Toaster } from "@travelese/ui/toaster";
 import { GeistMono } from "geist/font/mono";
 import { GeistSans } from "geist/font/sans";
@@ -20,12 +22,12 @@ export const metadata: Metadata = {
       "Automate travel tasks, stay organized, and make informed decisions effortlessly.",
     images: [
       {
-        url: "https://cdn.midday.ai/opengraph-image.jpg",
+        url: "https://cdn.travelese.ai/opengraph-image.jpg",
         width: 800,
         height: 600,
       },
       {
-        url: "https://cdn.midday.ai/opengraph-image.jpg",
+        url: "https://cdn.travelese.ai/opengraph-image.jpg",
         width: 1800,
         height: 1600,
       },
@@ -39,12 +41,12 @@ export const metadata: Metadata = {
     siteName: "Travelese",
     images: [
       {
-        url: "https://cdn.midday.ai/opengraph-image.jpg",
+        url: "https://cdn.travelese.ai/opengraph-image.jpg",
         width: 800,
         height: 600,
       },
       {
-        url: "https://cdn.midday.ai/opengraph-image.jpg",
+        url: "https://cdn.travelese.ai/opengraph-image.jpg",
         width: 1800,
         height: 1600,
       },

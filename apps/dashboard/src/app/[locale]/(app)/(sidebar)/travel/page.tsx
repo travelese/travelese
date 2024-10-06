@@ -1,8 +1,10 @@
 import { ErrorFallback } from "@/components/error-fallback";
 import OrbitItinerary from "@/components/orbit-itinerary";
 import TravelSearch from "@/components/travel-search";
+import Provider from "@travelese/orbit/provider";
+import StyledComponentsRegistry from "@travelese/orbit/registry";
 import { ErrorBoundary } from "next/dist/client/components/error-boundary";
-import { Suspense } from "react";
+import React, { Suspense } from "react";
 
 export const metadata = {
   title: "Travel | Travelese",
@@ -16,7 +18,11 @@ export default async function Travel() {
       </div>
       <ErrorBoundary errorComponent={ErrorFallback}>
         <Suspense fallback={<div>Loading...</div>}>
-          <OrbitItinerary />
+          <Provider>
+            <StyledComponentsRegistry>
+              <OrbitItinerary />
+            </StyledComponentsRegistry>
+          </Provider>
         </Suspense>
       </ErrorBoundary>
     </>
