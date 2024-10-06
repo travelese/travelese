@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import Image from "next/image";
-import signature from "public/email/signature-dark.png";
 import founder from "public/founder.png";
 
 export const metadata: Metadata = {

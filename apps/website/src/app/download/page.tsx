@@ -7,8 +7,7 @@ import appIcon from "public/app-icon.png";
 
 export const metadata: Metadata = {
   title: "Download",
-  description:
-    "With Travelese on Mac you can access your travel data just one click away.",
+  description: "Download Travelese App.",
 };
 
 export default function Page() {

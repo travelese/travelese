@@ -18,7 +18,7 @@ import { motion } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import menuAssistant from "public/menu-assistant.jpg";
+import menuAssistant from "public/menu-assistant.png";
 import menuEngine from "public/menu-engine.png";
 import { useEffect, useState } from "react";
 import { FaDiscord, FaGithub } from "react-icons/fa";
@@ -89,7 +89,7 @@ export function Header() {
       title: "Features",
       cover: (
         <Link href="/#assistant" onClick={handleOnClick}>
-          {/* <Image alt="Assistant" src={menuAssistant} quality={100} /> */}
+          <Image alt="Assistant" src={menuAssistant} quality={100} />
         </Link>
       ),
       children: [
@@ -108,11 +108,6 @@ export function Header() {
           title: "Stays",
           icon: <Icons.Stays size={20} />,
         } /* ,
-        {
-          path: "/tracker",
-          title: "Tracker",
-          icon: <Icons.Tracker size={20} />,
-        },
         {
           path: "/invoice",
           title: "Invoice",
@@ -140,7 +135,7 @@ export function Header() {
       title: "Community",
       cover: (
         <Link href="/engine" onClick={handleOnClick}>
-          {/* <Image alt="Engine" src={menuEngine} quality={100} /> */}
+          <Image alt="Engine" src={menuEngine} quality={100} />
         </Link>
       ),
       children: [
@@ -149,7 +144,11 @@ export function Header() {
           title: "Open Source",
           icon: <FaGithub size={19} />,
         },
-        ,
+        {
+          title: "Join the community",
+          path: "https://go.travelese.ai/XTxOfuy",
+          icon: <FaDiscord size={19} />,
+        },
         /*
         {
           path: "https://docs.travelese.ai",
@@ -160,16 +159,12 @@ export function Header() {
           path: "/engine",
           title: "Engine",
           icon: <MdOutlineMemory size={20} />,
-        }, */ {
-          title: "Join the community",
-          path: "https://go.travelese.ai/XTxOfuy",
-          icon: <FaDiscord size={19} />,
-        } /* ,
+        },
         {
           title: "Apps & Integrations",
           path: "https://docs.travelese.ai",
           icon: <MdOutlineIntegrationInstructions size={20} />,
-        }, */,
+        }, */
       ],
     },
   ];
@@ -214,7 +209,7 @@ export function Header() {
                       <path
                         fill="currentColor"
                         fillRule="evenodd"
-                        d="M14.347 0a14.931 14.931 0 0 0-6.282 1.68l6.282 10.88V0Zm0 17.443L8.067 28.32a14.933 14.933 0 0 0 6.28 1.68V17.443ZM15.652 30V17.432l6.285 10.887A14.932 14.932 0 0 1 15.652 30Zm0-17.43V0c2.26.097 4.392.693 6.287 1.682l-6.287 10.889ZM2.336 23.068l10.884-6.284-6.284 10.884a15.093 15.093 0 0 1-4.6-4.6Zm25.33-16.132-10.88 6.282 6.282-10.88a15.094 15.094 0 0 1 4.598 4.598ZM2.335 6.934a15.094 15.094 0 0 1 4.6-4.6l6.284 10.884L2.335 6.934Zm-.654 1.13A14.931 14.931 0 0 0 0 14.35h12.568L1.681 8.064Zm0 13.873a14.932 14.932 0 0 1-1.68-6.282h12.562L1.682 21.938Zm15.754-7.587H30a14.93 14.93 0 0 0-1.68-6.285L17.435 14.35Zm10.884 7.586-10.878-6.28H30a14.932 14.932 0 0 1-1.68 6.28Zm-11.533-5.151 6.281 10.88a15.092 15.092 0 0 0 4.598-4.599l-10.88-6.281Z"
+                        d="M14.347 0a14.931 14.931 0 0 0-6.282 1.68l6.282 10.88V0Zm0 17.443L8.067 28.32a14.933 14.933 0 0 0 6.28 1.68V17.443ZM15.652 30V17.432l6.285 10.887A14.932 14.932 0 0 1 15.652 30Zm0-17.43V0c2.26.097 4.392.693 6.287 1.682l-6.287 10.889ZM2.336 23.068l10.884-6.284-6.284 10.88a15.093 15.093 0 0 1-4.6-4.6Zm25.33-16.132-10.88 6.282 6.282-10.88a15.094 15.094 0 0 1 4.598 4.598ZM2.335 6.934a15.094 15.094 0 0 1 4.6-4.6l6.284 10.884L2.335 6.934Zm-.654 1.13A14.931 14.931 0 0 0 0 14.35h12.568L1.681 8.064Zm0 13.873a14.932 14.932 0 0 1-1.68-6.282h12.562L1.682 21.938Zm15.754-7.587H30a14.93 14.93 0 0 0-1.68-6.285L17.435 14.35Zm10.884 7.586-10.878-6.28H30a14.932 14.932 0 0 1-1.68 6.28Zm-11.533-5.151 6.281 10.88a15.092 15.092 0 0 0 4.598-4.599l-10.88-6.281Z"
                         clipRule="evenodd"
                       />
                       <path
