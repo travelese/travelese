@@ -1,28 +1,19 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
-# Scripts
-.scripts
-scripts
-
 # dependencies
 node_modules
 .pnp
 .pnp.js
 
 # testing
-coverage
+/coverage
 
 # next.js
 .next/
-out/
-next-env.d.ts
-
-# expo
-.expo/
-dist/
+/out/
 
 # production
-build
+/build
 
 # misc
 .DS_Store
@@ -32,31 +23,61 @@ build
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-.pnpm-debug.log*
-bun.lockb
+
 # local env files
-.env
 .env*.local
+.dev.vars
 
 # vercel
 .vercel
 
 # typescript
 *.tsbuildinfo
+next-env.d.ts
 
-# turbo
+# Sentry Config File
+.env.sentry-build-plugin
+
+# Bun
+bun.lockb
+**/bun.lockb
+
+# IDE
+.vscode/
+.idea/
+
+# Logs
+logs
+*.log
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Build output
+/dist
+
+# Yarn
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions
+.pnp.*
+
+# Turborepo
 .turbo
 
-# react-email
-.react-email
-packages/email/public
-!packages/email/public/.gitkeep
-!packages/email/.react-email/.gitkeep
-
-# Storybook
-storybook-static
-tailwind.css
+# wrangler
+.wrangler
 
 # Supabase
 .branches
 .temp
+.env

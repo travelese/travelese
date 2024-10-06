@@ -18,7 +18,7 @@ import type {
 } from "@duffel/api/types";
 
 export const duffel = new Duffel({
-  token: env.DUFFEL_TRAVELESE_ACCESS_TOKEN,
+  token: env.DUFFEL_TRAVELESE_PRO_ACCESS_TOKEN,
 });
 
 export async function searchFlights(
