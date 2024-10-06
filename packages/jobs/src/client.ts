@@ -16,7 +16,7 @@ export const supabase = new Supabase<Database>({
 });
 
 const supabaseManagement = new SupabaseManagement({
-  id: "midday-supabase-management",
+  id: "travelese-supabase-management",
 });
 
 export const db = supabaseManagement.db(
