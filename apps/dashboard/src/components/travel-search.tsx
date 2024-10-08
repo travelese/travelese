@@ -1,40 +1,29 @@
 "use client";
 
-import { DuffelError } from "@duffel/api";
+import { useTravelSearchStore } from "@/store/travel";
+import type {
+  CreateOfferRequest,
+  CreateOfferRequestSlice,
+} from "@duffel/api/types";
 import { Button } from "@travelese/ui/button";
-import { Checkbox } from "@travelese/ui/checkbox";
 import { Icons } from "@travelese/ui/icons";
 import { Popover, PopoverContent, PopoverTrigger } from "@travelese/ui/popover";
 import { Sheet, SheetContent, SheetTrigger } from "@travelese/ui/sheet";
+import { useToast } from "@travelese/ui/use-toast";
 import { format } from "date-fns";
 import { AnimatePresence, motion } from "framer-motion";
-import {
-  CalendarIcon,
-  ChevronDownIcon,
-  LuggageIcon,
-  MinusIcon,
-  PlusIcon,
-  UserIcon,
-} from "lucide-react";
+import { useAction } from "next-safe-action/hooks";
 import { useEffect, useState } from "react";
+import {
+  type CABIN_CLASSES,
+  DUFFEL_PASSENGER_TYPES,
+} from "../actions/travel/constants";
+import { createBatchOfferRequestAction } from "../actions/travel/flights/create-batch-offer-request-action";
+import { createOfferRequestAction } from "../actions/travel/flights/create-offer-request-action";
 import { createPartialOfferRequestAction } from "../actions/travel/flights/create-partial-offer-request-action";
-import { searchAccommodationAction } from "../actions/travel/stays/search-accommodation-action";
 import { logger } from "../utils/logger";
 import LocationSelector from "./location-selector";
 import Calendar from "./travel-calendar";
-
-const PASSENGER_TYPES = {
-  ADULT: "adult",
-  CHILD: "child",
-  INFANT_WITHOUT_SEAT: "infant_without_seat",
-} as const;
-
-const CABIN_CLASSES = {
-  ECONOMY: "economy",
-  PREMIUM_ECONOMY: "premium_economy",
-  BUSINESS: "business",
-  FIRST: "first",
-} as const;
 
 interface CounterProps {
   label: string;
@@ -64,7 +53,7 @@ const Counter: React.FC<CounterProps> = ({
         disabled={value === 0}
         className="h-4 w-4"
       >
-        <MinusIcon className="h-4 w-4" />
+        <Icons.Minus className="h-4 w-4" />
       </Button>
       <motion.span
         key={value}
@@ -81,37 +70,56 @@ const Counter: React.FC<CounterProps> = ({
         onClick={onIncrement}
         className="h-4 w-4"
       >
-        <PlusIcon className="h-4 w-4" />
+        <Icons.Plus className="h-4 w-4" />
       </Button>
     </div>
   </div>
 );
 
 export default function TravelSearch() {
-  const [tripType, setTripType] = useState("return");
-  const [travelClass, setTravelClass] = useState("economy");
-  const [from, setFrom] = useState("");
-  const [fromIATA, setFromIATA] = useState("");
-  const [to, setTo] = useState("");
-  const [toIATA, setToIATA] = useState("");
-  const [departureDate, setDepartureDate] = useState<Date | null>(null);
-  const [returnDate, setReturnDate] = useState<Date | null>(null);
+  const { toast } = useToast();
+  const {
+    tripType,
+    setTripType,
+    travelClass,
+    setTravelClass,
+    from,
+    setFrom,
+    fromIATA,
+    setFromIATA,
+    to,
+    setTo,
+    toIATA,
+    setToIATA,
+    departureDate,
+    setDepartureDate,
+    returnDate,
+    setReturnDate,
+    passengers,
+    updatePassengers,
+    baggage,
+    updateBaggage,
+    checkAccommodation,
+    setCheckAccommodation,
+  } = useTravelSearchStore();
+
   const [isCalendarOpen, setIsCalendarOpen] = useState<
     "departure" | "return" | null
   >(null);
-  const [passengers, setPassengers] = useState({
-    adults: 1,
-    children: 0,
-    infants: 0,
-  });
-  const [baggage, setBaggage] = useState({
-    cabin: 0,
-    checked: 0,
-  });
-  const [checkAccommodation, setCheckAccommodation] = useState(false);
   const [isTripTypeOpen, setIsTripTypeOpen] = useState(false);
   const [isTravelClassOpen, setIsTravelClassOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+
+  const [flightLegs, setFlightLegs] = useState<CreateOfferRequestSlice[]>([
+    {
+      origin: fromIATA,
+      destination: toIATA,
+      departure_date: departureDate ? format(departureDate, "yyyy-MM-dd") : "",
+    },
+  ]);
+
+  const [stayDestination, setStayDestination] = useState("");
+  const [stayDates, setStayDates] = useState({ checkIn: null, checkOut: null });
 
   useEffect(() => {
     const checkMobile = () => {
@@ -121,6 +129,76 @@ export default function TravelSearch() {
     window.addEventListener("resize", checkMobile);
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
+
+  const {
+    execute: executeCreatePartialOfferRequest,
+    status: partialOfferStatus,
+  } = useAction(createPartialOfferRequestAction, {
+    onExecute: () => {
+      // Add any pre-execution logic here
+    },
+    onSuccess: (result) => {
+      toast({
+        title: "Search successful",
+        description: "Your travel options are ready to view.",
+      });
+      logger("Duffel API Response", result);
+    },
+    onError: (error) => {
+      toast({
+        title: "Search failed",
+        description:
+          "There was an error processing your request. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const { execute: executeCreateOfferRequest, status: offerStatus } = useAction(
+    createOfferRequestAction,
+    {
+      onExecute: () => {
+        // Add any pre-execution logic here
+      },
+      onSuccess: (result) => {
+        toast({
+          title: "Search successful",
+          description: "Your travel options are ready to view.",
+        });
+        logger("Duffel API Response", result);
+      },
+      onError: (error) => {
+        toast({
+          title: "Search failed",
+          description:
+            "There was an error processing your request. Please try again.",
+          variant: "destructive",
+        });
+      },
+    },
+  );
+
+  const { execute: executeCreateBatchOfferRequest, status: batchOfferStatus } =
+    useAction(createBatchOfferRequestAction, {
+      onExecute: () => {
+        // Add any pre-execution logic here
+      },
+      onSuccess: (result) => {
+        toast({
+          title: "Search successful",
+          description: "Your travel options are ready to view.",
+        });
+        logger("Duffel API Response", result);
+      },
+      onError: (error) => {
+        toast({
+          title: "Search failed",
+          description:
+            "There was an error processing your request. Please try again.",
+          variant: "destructive",
+        });
+      },
+    });
 
   const PopoverOrSheet = isMobile ? Sheet : Popover;
   const TriggerComponent = isMobile ? SheetTrigger : PopoverTrigger;
@@ -132,26 +210,11 @@ export default function TravelSearch() {
       <span className={`flex-grow text-left ${isMobile ? "hidden" : ""}`}>
         {text}
       </span>
-      <ChevronDownIcon className={`h-4 w-4 ml-2 ${isMobile ? "hidden" : ""}`} />
+      <Icons.ChevronDown
+        className={`h-4 w-4 ml-2 ${isMobile ? "hidden" : ""}`}
+      />
     </>
   );
-
-  const updatePassengers = (
-    type: keyof typeof passengers,
-    increment: boolean,
-  ) => {
-    setPassengers((prev) => ({
-      ...prev,
-      [type]: increment ? prev[type] + 1 : Math.max(0, prev[type] - 1),
-    }));
-  };
-
-  const updateBaggage = (type: keyof typeof baggage, increment: boolean) => {
-    setBaggage((prev) => ({
-      ...prev,
-      [type]: increment ? prev[type] + 1 : Math.max(0, prev[type] - 1),
-    }));
-  };
 
   const totalPassengers =
     passengers.adults + passengers.children + passengers.infants;
@@ -186,51 +249,65 @@ export default function TravelSearch() {
     setToIATA(iataCode);
   };
 
-  const handleSearch = async () => {
+  const handleCreateOfferRequest = async () => {
     const formatDateForDuffel = (date: Date | null) => {
       return date ? format(date, "yyyy-MM-dd") : "";
     };
 
-    const searchData = {
-      slices: [
-        {
-          origin: fromIATA,
-          destination: toIATA,
-          departure_date: formatDateForDuffel(departureDate),
-        },
-      ],
+    const baseSearchData: CreateOfferRequest = {
+      slices:
+        tripType === "multi_city"
+          ? flightLegs
+          : [
+              {
+                origin: fromIATA,
+                destination: toIATA,
+                departure_date: formatDateForDuffel(departureDate),
+              },
+            ],
       passengers: [
-        ...Array(passengers.adults).fill({
-          type: PASSENGER_TYPES.ADULT,
-          fare_type: "adult",
+        { type: DUFFEL_PASSENGER_TYPES.ADULT },
+        ...Array(passengers.adults - 1).fill({
+          type: DUFFEL_PASSENGER_TYPES.ADULT,
         }),
         ...Array(passengers.children).fill({
-          type: PASSENGER_TYPES.CHILD,
-          fare_type: "child",
+          type: DUFFEL_PASSENGER_TYPES.CHILD,
         }),
         ...Array(passengers.infants).fill({
-          type: PASSENGER_TYPES.INFANT_WITHOUT_SEAT,
-          fare_type: "infant",
+          type: DUFFEL_PASSENGER_TYPES.INFANT_WITHOUT_SEAT,
         }),
       ],
-      cabin_class: travelClass.toLowerCase() as keyof typeof CABIN_CLASSES,
+      cabin_class: travelClass as keyof typeof CABIN_CLASSES,
       private_fares: {},
     };
 
     if (tripType === "return" && returnDate) {
-      searchData.slices.push({
+      baseSearchData.slices.push({
         origin: toIATA,
         destination: fromIATA,
         departure_date: formatDateForDuffel(returnDate),
       });
     }
 
-    try {
-      if (tripType === "return" || tripType === "one_way") {
-        await createPartialOfferRequestAction(searchData);
-      }
-    } catch (error) {
-      // Handle error silently or show a user-friendly message
+    if (tripType === "return" || tripType === "one_way") {
+      await executeCreateOfferRequest({ parsedInput: baseSearchData });
+    } else if (tripType === "multi_city") {
+      await executeCreatePartialOfferRequest({ parsedInput: baseSearchData });
+    } else if (tripType === "nomad") {
+      await executeCreateBatchOfferRequest({ parsedInput: baseSearchData });
+    }
+  };
+
+  const addFlightLeg = () => {
+    setFlightLegs([
+      ...flightLegs,
+      { origin: "", destination: "", departure_date: "" },
+    ]);
+  };
+
+  const removeFlightLeg = (index: number) => {
+    if (flightLegs.length > 1) {
+      setFlightLegs(flightLegs.filter((_, i) => i !== index));
     }
   };
 
@@ -368,7 +445,7 @@ export default function TravelSearch() {
           <TriggerComponent asChild>
             <Button variant="outline" className="w-full justify-between">
               {renderTriggerContent(
-                <UserIcon className="h-4 w-4 mr-2" />,
+                <Icons.User className="h-4 w-4 mr-2" />,
                 `${totalPassengers} Passenger${totalPassengers !== 1 ? "s" : ""}`,
               )}
             </Button>
@@ -407,7 +484,7 @@ export default function TravelSearch() {
           <TriggerComponent asChild>
             <Button variant="outline" className="w-full justify-between">
               {renderTriggerContent(
-                <LuggageIcon className="h-4 w-4 mr-2" />,
+                <Icons.Luggage className="h-4 w-4 mr-2" />,
                 `${totalBaggage} Bag${totalBaggage !== 1 ? "s" : ""}`,
               )}
             </Button>
@@ -446,7 +523,7 @@ export default function TravelSearch() {
               >
                 <Icons.FlightsDeparture className="h-4 w-4 mr-2" />
                 <span className="flex-grow text-left">{from || "Origin"}</span>
-                <ChevronDownIcon className="h-4 w-4 ml-2" />
+                <Icons.ChevronDown className="h-4 w-4 ml-2" />
               </Button>
             </SheetTrigger>
             <SheetContent side="bottom" className="h-[80vh]">
@@ -469,7 +546,7 @@ export default function TravelSearch() {
                 <span className="flex-grow text-left">
                   {to || "Destination"}
                 </span>
-                <ChevronDownIcon className="h-4 w-4 ml-2" />
+                <Icons.ChevronDown className="h-4 w-4 ml-2" />
               </Button>
             </SheetTrigger>
             <SheetContent side="bottom" className="h-[80vh]">
@@ -488,11 +565,11 @@ export default function TravelSearch() {
                 variant="outline"
                 className="w-full justify-between pl-3 pr-2"
               >
-                <CalendarIcon className="h-4 w-4 mr-2" />
+                <Icons.Calendar className="h-4 w-4 mr-2" />
                 <span className="flex-grow text-left">
                   {formatDate(departureDate) || "Departure"}
                 </span>
-                <ChevronDownIcon className="h-4 w-4 ml-2" />
+                <Icons.ChevronDown className="h-4 w-4 ml-2" />
               </Button>
             </SheetTrigger>
             <SheetContent side="bottom" className="h-[80vh]">
@@ -517,11 +594,11 @@ export default function TravelSearch() {
                   variant="outline"
                   className="w-full justify-between pl-3 pr-2"
                 >
-                  <CalendarIcon className="h-4 w-4 mr-2" />
+                  <Icons.Calendar className="h-4 w-4 mr-2" />
                   <span className="flex-grow text-left">
                     {formatDate(returnDate) || "Return"}
                   </span>
-                  <ChevronDownIcon className="h-4 w-4 ml-2" />
+                  <Icons.ChevronDown className="h-4 w-4 ml-2" />
                 </Button>
               </SheetTrigger>
               <SheetContent side="bottom" className="h-[80vh]">
@@ -542,115 +619,260 @@ export default function TravelSearch() {
         </motion.div>
       ) : (
         <motion.div layout className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          {tripType === "multi_city" ? (
+            flightLegs.map((leg, index) => (
+              <div
+                key={index}
+                className="col-span-4 grid grid-cols-1 md:grid-cols-4 gap-4"
+              >
+                <LocationSelector
+                  type="origin"
+                  placeholder="Origin"
+                  value={leg.origin}
+                  onChange={(value, iataCode) => {
+                    const newLegs = [...flightLegs];
+                    newLegs[index].origin = iataCode;
+                    setFlightLegs(newLegs);
+                  }}
+                />
+                <LocationSelector
+                  type="destination"
+                  placeholder="Destination"
+                  value={leg.destination}
+                  onChange={(value, iataCode) => {
+                    const newLegs = [...flightLegs];
+                    newLegs[index].destination = iataCode;
+                    setFlightLegs(newLegs);
+                  }}
+                />
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className="w-full justify-between pl-3 pr-2"
+                    >
+                      <Icons.Calendar className="h-4 w-4 mr-2" />
+                      <span className="flex-grow text-left">
+                        {leg.departure_date || "Departure"}
+                      </span>
+                      <Icons.ChevronDown className="h-4 w-4 ml-2" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      onSelectDate={(date) => {
+                        const newLegs = [...flightLegs];
+                        newLegs[index].departure_date = format(
+                          date,
+                          "yyyy-MM-dd",
+                        );
+                        setFlightLegs(newLegs);
+                      }}
+                      onClose={() => {}}
+                      selectedDate={
+                        leg.departure_date ? new Date(leg.departure_date) : null
+                      }
+                      onAdjustDate={() => {}}
+                    />
+                  </PopoverContent>
+                </Popover>
+                {index > 0 && (
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => removeFlightLeg(index)}
+                    className="w-10 h-10"
+                  >
+                    <XIcon className="h-4 w-4" />
+                  </Button>
+                )}
+              </div>
+            ))
+          ) : (
+            <>
+              <LocationSelector
+                type="origin"
+                placeholder="Origin"
+                value={from}
+                onChange={handleFromChange}
+              />
+              <LocationSelector
+                type="destination"
+                placeholder="Destination"
+                value={to}
+                onChange={handleToChange}
+              />
+              <Popover
+                open={isCalendarOpen === "departure"}
+                onOpenChange={(open) =>
+                  setIsCalendarOpen(open ? "departure" : null)
+                }
+              >
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className="w-full justify-between pl-3 pr-2"
+                  >
+                    <Icons.Calendar className="h-4 w-4 mr-2" />
+                    <span className="flex-grow text-left">
+                      {formatDate(departureDate) || "Departure"}
+                    </span>
+                    <Icons.ChevronDown className="h-4 w-4 ml-2" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    onSelectDate={(date) => {
+                      setDepartureDate(date);
+                      setIsCalendarOpen(null);
+                    }}
+                    onClose={() => setIsCalendarOpen(null)}
+                    selectedDate={departureDate}
+                    onAdjustDate={(days) =>
+                      setDepartureDate(adjustDate(departureDate, days))
+                    }
+                  />
+                </PopoverContent>
+              </Popover>
+              <AnimatePresence>
+                {tripType === "return" && (
+                  <Popover
+                    open={isCalendarOpen === "return"}
+                    onOpenChange={(open) =>
+                      setIsCalendarOpen(open ? "return" : null)
+                    }
+                  >
+                    <PopoverTrigger asChild>
+                      <motion.div
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: -20 }}
+                        transition={{ duration: 0.3 }}
+                      >
+                        <Button
+                          variant="outline"
+                          className="w-full justify-between pl-3 pr-2"
+                        >
+                          <Icons.Calendar className="h-4 w-4 mr-2" />
+                          <span className="flex-grow text-left">
+                            {formatDate(returnDate) || "Return"}
+                          </span>
+                          <Icons.ChevronDown className="h-4 w-4 ml-2" />
+                        </Button>
+                      </motion.div>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        onSelectDate={(date) => {
+                          setReturnDate(date);
+                          setIsCalendarOpen(null);
+                        }}
+                        onClose={() => setIsCalendarOpen(null)}
+                        selectedDate={returnDate}
+                        onAdjustDate={(days) =>
+                          setReturnDate(adjustDate(returnDate, days))
+                        }
+                      />
+                    </PopoverContent>
+                  </Popover>
+                )}
+              </AnimatePresence>
+            </>
+          )}
+        </motion.div>
+      )}
+
+      {checkAccommodation && (
+        <motion.div
+          layout
+          className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4"
+        >
           <LocationSelector
-            type="origin"
-            placeholder="Origin"
-            value={from}
-            onChange={handleFromChange}
-          />
-          <LocationSelector
-            type="destination"
+            type="stays"
             placeholder="Destination"
-            value={to}
-            onChange={handleToChange}
+            value={stayDestination}
+            onChange={(value) => setStayDestination(value)}
           />
-          <Popover
-            open={isCalendarOpen === "departure"}
-            onOpenChange={(open) =>
-              setIsCalendarOpen(open ? "departure" : null)
-            }
-          >
+          <Popover>
             <PopoverTrigger asChild>
               <Button
                 variant="outline"
                 className="w-full justify-between pl-3 pr-2"
               >
-                <CalendarIcon className="h-4 w-4 mr-2" />
+                <Icons.Calendar className="h-4 w-4 mr-2" />
                 <span className="flex-grow text-left">
-                  {formatDate(departureDate) || "Departure"}
+                  {stayDates.checkIn
+                    ? format(stayDates.checkIn, "MMM dd, yyyy")
+                    : "Check-in"}
                 </span>
-                <ChevronDownIcon className="h-4 w-4 ml-2" />
+                <Icons.ChevronDown className="h-4 w-4 ml-2" />
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0" align="start">
               <Calendar
-                onSelectDate={(date) => {
-                  setDepartureDate(date);
-                  setIsCalendarOpen(null);
-                }}
-                onClose={() => setIsCalendarOpen(null)}
-                selectedDate={departureDate}
-                onAdjustDate={(days) =>
-                  setDepartureDate(adjustDate(departureDate, days))
+                onSelectDate={(date) =>
+                  setStayDates({ ...stayDates, checkIn: date })
                 }
+                onClose={() => {}}
+                selectedDate={stayDates.checkIn}
+                onAdjustDate={() => {}}
               />
             </PopoverContent>
           </Popover>
-          <AnimatePresence>
-            {tripType === "return" && (
-              <Popover
-                open={isCalendarOpen === "return"}
-                onOpenChange={(open) =>
-                  setIsCalendarOpen(open ? "return" : null)
-                }
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                className="w-full justify-between pl-3 pr-2"
               >
-                <PopoverTrigger asChild>
-                  <motion.div
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: -20 }}
-                    transition={{ duration: 0.3 }}
-                  >
-                    <Button
-                      variant="outline"
-                      className="w-full justify-between pl-3 pr-2"
-                    >
-                      <CalendarIcon className="h-4 w-4 mr-2" />
-                      <span className="flex-grow text-left">
-                        {formatDate(returnDate) || "Return"}
-                      </span>
-                      <ChevronDownIcon className="h-4 w-4 ml-2" />
-                    </Button>
-                  </motion.div>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    onSelectDate={(date) => {
-                      setReturnDate(date);
-                      setIsCalendarOpen(null);
-                    }}
-                    onClose={() => setIsCalendarOpen(null)}
-                    selectedDate={returnDate}
-                    onAdjustDate={(days) =>
-                      setReturnDate(adjustDate(returnDate, days))
-                    }
-                  />
-                </PopoverContent>
-              </Popover>
-            )}
-          </AnimatePresence>
+                <Icons.Calendar className="h-4 w-4 mr-2" />
+                <span className="flex-grow text-left">
+                  {stayDates.checkOut
+                    ? format(stayDates.checkOut, "MMM dd, yyyy")
+                    : "Check-out"}
+                </span>
+                <Icons.ChevronDown className="h-4 w-4 ml-2" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="start">
+              <Calendar
+                onSelectDate={(date) =>
+                  setStayDates({ ...stayDates, checkOut: date })
+                }
+                onClose={() => {}}
+                selectedDate={stayDates.checkOut}
+                onAdjustDate={() => {}}
+              />
+            </PopoverContent>
+          </Popover>
         </motion.div>
       )}
+
       <motion.div layout className="flex items-center justify-between mt-4">
-        <div className="flex items-center space-x-2">
-          <Checkbox
-            id="accommodation"
-            checked={checkAccommodation}
-            onCheckedChange={(checked) =>
-              setCheckAccommodation(checked as boolean)
-            }
-          />
-          <label htmlFor="accommodation">
-            Check accommodation with{" "}
-            <span className="font-semibold">Priceline</span>
-          </label>
-        </div>
-        <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-          <Button onClick={handleSearch}>
+        <Button
+          variant="outline"
+          onClick={() => setCheckAccommodation(!checkAccommodation)}
+          className="flex items-center"
+        >
+          <Icons.Bed className="mr-2 h-4 w-4" />
+          Stays
+        </Button>
+        <div className="flex space-x-2">
+          {tripType === "multi_city" && (
+            <Button
+              variant="outline"
+              onClick={addFlightLeg}
+              className="flex items-center"
+            >
+              <Icons.Plus className="mr-2 h-4 w-4" />
+              Add Flight
+            </Button>
+          )}
+          <Button onClick={handleCreateOfferRequest}>
             <Icons.Explore className="mr-2 h-4 w-4" />
             Explore
           </Button>
-        </motion.div>
+        </div>
       </motion.div>
     </motion.div>
   );

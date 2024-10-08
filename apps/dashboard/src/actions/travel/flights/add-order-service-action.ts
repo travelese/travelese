@@ -1,7 +1,9 @@
 "use server";
 
+import { duffel } from "@/utils/duffel";
+import { logger } from "@/utils/logger";
+import { DuffelError } from "@duffel/api";
 import { LogEvents } from "@travelese/events/events";
-import { duffel } from "../../../utils/duffel";
 import { authActionClient } from "../../safe-action";
 import { addOrderServiceSchema } from "../schema";
 
@@ -21,6 +23,15 @@ export const addOrderServiceAction = authActionClient
       });
       return response.data;
     } catch (error) {
+      if (error instanceof DuffelError) {
+        logger("Duffel API Error", {
+          message: error.message,
+          errors: error.errors,
+          meta: error.meta,
+        });
+      } else {
+        logger("Unexpected Error", error);
+      }
       throw new Error(
         `Failed to add order service: ${
           error instanceof Error ? error.message : "Unknown error"

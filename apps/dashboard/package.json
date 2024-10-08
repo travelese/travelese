@@ -38,6 +38,8 @@
     "@trigger.dev/sdk": "^3.0.5",
     "@uidotdev/usehooks": "^2.4.1",
     "@upstash/ratelimit": "^2.0.3",
+    "@vercel/flags": "^2.6.1",
+    "@vercel/toolbar": "^0.1.22",
     "ai": "3.3.40",
     "change-case": "^5.4.4",
     "dub": "^0.38.1",

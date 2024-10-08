@@ -1,4 +1,58 @@
 import { z } from "zod";
+import { CABIN_CLASSES, DUFFEL_PASSENGER_TYPES } from "./constants";
+
+export const createOfferRequestSchema = z.object({
+  parsedInput: z.object({
+    slices: z.array(
+      z.object({
+        origin: z.string(),
+        destination: z.string(),
+        departure_date: z.string(),
+      }),
+    ),
+    passengers: z.array(
+      z.object({
+        type: z.enum([
+          DUFFEL_PASSENGER_TYPES.ADULT,
+          DUFFEL_PASSENGER_TYPES.CHILD,
+          DUFFEL_PASSENGER_TYPES.INFANT_WITHOUT_SEAT,
+        ]),
+        given_name: z.string().optional(),
+        family_name: z.string().optional(),
+        loyalty_programme_accounts: z
+          .array(
+            z.object({
+              airline_iata_code: z.string(),
+              account_number: z.string(),
+            }),
+          )
+          .optional(),
+      }),
+    ),
+    cabin_class: z
+      .enum([
+        CABIN_CLASSES.FIRST,
+        CABIN_CLASSES.BUSINESS,
+        CABIN_CLASSES.PREMIUM_ECONOMY,
+        CABIN_CLASSES.ECONOMY,
+      ])
+      .optional(),
+    return_offers: z.boolean().optional(),
+    max_connections: z.number().min(0).max(2).optional(),
+    private_fares: z
+      .record(
+        z.string(),
+        z.array(
+          z.object({
+            corporate_code: z.string().optional(),
+            tracking_reference: z.string().optional(),
+            tour_code: z.string().optional(),
+          }),
+        ),
+      )
+      .optional(),
+  }),
+});
 
 export const createPartialOfferRequestSchema = z.object({
   supplier_timeout: z.number().optional(),
@@ -34,10 +88,9 @@ export const createPartialOfferRequestSchema = z.object({
   passengers: z.array(
     z.object({
       type: z.enum([
-        "adult",
-        "child",
-        "infant_without_seat",
-        "infant_with_seat",
+        DUFFEL_PASSENGER_TYPES.ADULT,
+        DUFFEL_PASSENGER_TYPES.CHILD,
+        DUFFEL_PASSENGER_TYPES.INFANT_WITHOUT_SEAT,
       ]),
       given_name: z.string().optional(),
       family_name: z.string().optional(),
@@ -52,7 +105,12 @@ export const createPartialOfferRequestSchema = z.object({
     }),
   ),
   cabin_class: z
-    .enum(["first", "business", "premium_economy", "economy"])
+    .enum([
+      CABIN_CLASSES.BUSINESS,
+      CABIN_CLASSES.ECONOMY,
+      CABIN_CLASSES.FIRST,
+      CABIN_CLASSES.PREMIUM_ECONOMY,
+    ])
     .optional(),
   max_connections: z
     .union([z.literal(0), z.literal(1), z.literal(2)])
@@ -77,6 +135,10 @@ export const listOffersSchema = z.object({
 });
 
 export const getOfferSchema = z.object({
+  id: z.string(),
+});
+
+export const getOfferRequestSchema = z.object({
   id: z.string(),
 });
 

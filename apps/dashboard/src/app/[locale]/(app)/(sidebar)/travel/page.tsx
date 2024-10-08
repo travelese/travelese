@@ -16,15 +16,18 @@ export default async function Travel() {
       <div className="flex justify-between py-6">
         <TravelSearch />
       </div>
+      {/*
       <ErrorBoundary errorComponent={ErrorFallback}>
+        
         <Suspense fallback={<div>Loading...</div>}>
           <Provider>
             <StyledComponentsRegistry>
-              <OrbitItinerary />
+               <OrbitItinerary />
             </StyledComponentsRegistry>
           </Provider>
         </Suspense>
       </ErrorBoundary>
+      */}
     </>
   );
 }

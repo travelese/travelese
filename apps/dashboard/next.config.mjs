@@ -2,6 +2,7 @@ import "./src/env.mjs";
 
 import bundleAnalyzer from "@next/bundle-analyzer";
 import { withSentryConfig } from "@sentry/nextjs";
+import withVercelToolbar from "@vercel/toolbar/plugins/next";
 
 const withBundleAnalyzer = bundleAnalyzer({
   enabled: process.env.ANALYZE === "true",
@@ -49,11 +50,15 @@ const config = {
   },
 };
 
-export default withSentryConfig(withBundleAnalyzer(config), {
-  silent: !process.env.CI,
-  telemetry: false,
-  widenClientFileUpload: true,
-  hideSourceMaps: true,
-  disableLogger: true,
-  tunnelRoute: "/monitoring",
-});
+const nextConfig = withVercelToolbar()(
+  withSentryConfig(withBundleAnalyzer(config), {
+    silent: !process.env.CI,
+    telemetry: false,
+    widenClientFileUpload: true,
+    hideSourceMaps: true,
+    disableLogger: true,
+    tunnelRoute: "/monitoring",
+  }),
+);
+
+export default nextConfig;
