@@ -1,9 +1,10 @@
 "use server";
 
+import { duffel } from "@/utils/duffel";
+import { logger } from "@/utils/logger";
 import { DuffelError } from "@duffel/api";
+import type { CreateOfferRequest, OfferRequest } from "@duffel/api/types";
 import { LogEvents } from "@travelese/events/events";
-import { duffel } from "../../../utils/duffel";
-import { logger } from "../../../utils/logger";
 import { authActionClient } from "../../safe-action";
 import { createPartialOfferRequestSchema } from "../schema";
 
@@ -18,25 +19,25 @@ export const createPartialOfferRequestAction = authActionClient
   })
   .action(async ({ parsedInput }) => {
     try {
-      const response = await duffel.partialOfferRequests.create({
-        ...parsedInput,
-      });
-      logger("Duffel API Response", response);
+      const response = await duffel.partialOfferRequests.create(
+        parsedInput as CreateOfferRequest,
+      );
 
-      return response.data;
+      return response.data as OfferRequest;
     } catch (error) {
       if (error instanceof DuffelError) {
         logger("Duffel API Error", {
-          type: error.type,
-          title: error.title,
-          status: error.status,
-          detail: error.detail,
+          message: error.message,
           errors: error.errors,
-          requestId: error.requestId,
+          meta: error.meta,
         });
       } else {
         logger("Unexpected Error", error);
       }
-      throw error;
+      throw new Error(
+        `Failed to create partial offer request: ${
+          error instanceof Error ? error.message : "Unknown error"
+        }`,
+      );
     }
   });

@@ -5,7 +5,6 @@ import { Button } from "@travelese/ui/button";
 import { Icons } from "@travelese/ui/icons";
 import { Input } from "@travelese/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@travelese/ui/popover";
-import { PlusIcon, SearchIcon, XIcon } from "lucide-react";
 import * as React from "react";
 import { listPlaceSuggestionsAction } from "../actions/travel/supporting-resources/list-place-suggestions-action";
 
@@ -13,7 +12,7 @@ interface LocationSelectorProps {
   placeholder: string;
   value: string;
   onChange: (value: string, iataCode: string) => void;
-  type: "origin" | "destination";
+  type: "origin" | "destination" | "stays";
 }
 
 export default function LocationSelector({
@@ -115,7 +114,7 @@ export default function LocationSelector({
             className="h-8 w-8"
             onClick={() => selectLocation(place)}
           >
-            <PlusIcon className="h-4 w-4" />
+            <Icons.Plus className="h-4 w-4" />
           </Button>
         </div>
       ))}
@@ -123,7 +122,11 @@ export default function LocationSelector({
   );
 
   const TypeIcon =
-    type === "origin" ? Icons.FlightsDeparture : Icons.FlightsArrival;
+    type === "origin"
+      ? Icons.FlightsDeparture
+      : type === "destination"
+        ? Icons.FlightsArrival
+        : Icons.City;
 
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
@@ -142,7 +145,7 @@ export default function LocationSelector({
                   clearSelection();
                 }}
               >
-                <XIcon className="h-4 w-4" />
+                <Icons.Clear className="h-4 w-4" />
               </Button>
             </div>
           ) : (
@@ -167,7 +170,7 @@ export default function LocationSelector({
               onChange={updateSearchQuery}
               className="pl-8"
             />
-            <SearchIcon className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4" />
+            <Icons.Search className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4" />
           </div>
         </div>
         <div className="max-h-[300px] overflow-auto">

@@ -1,5 +1,7 @@
 "use server";
 
+import { logger } from "@/utils/logger";
+import { DuffelError } from "@duffel/api";
 import type { Places } from "@duffel/api/Places/Suggestions/SuggestionsType";
 import { LogEvents } from "@travelese/events/events";
 import { duffel } from "../../../utils/duffel";
@@ -23,6 +25,15 @@ export const listPlaceSuggestionsAction = authActionClient
       });
       return response.data as Places[];
     } catch (error) {
+      if (error instanceof DuffelError) {
+        logger("Duffel API Error", {
+          message: error.message,
+          errors: error.errors,
+          meta: error.meta,
+        });
+      } else {
+        logger("Unexpected Error", error);
+      }
       throw new Error(
         `Failed to list place suggestions: ${
           error instanceof Error ? error.message : "Unknown error"

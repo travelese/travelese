@@ -1,7 +1,9 @@
 "use server";
 
+import { DuffelError } from "@duffel/api";
 import { LogEvents } from "@travelese/events/events";
 import { duffel } from "../../../utils/duffel";
+import { logger } from "../../../utils/logger";
 import { authActionClient } from "../../safe-action";
 import { listOffersSchema } from "../schema";
 
@@ -24,6 +26,15 @@ export const listOffersAction = authActionClient
       });
       return response.data;
     } catch (error) {
+      if (error instanceof DuffelError) {
+        logger("Duffel API Error", {
+          message: error.message,
+          errors: error.errors,
+          meta: error.meta,
+        });
+      } else {
+        logger("Unexpected Error", error);
+      }
       throw new Error(
         `Failed to list offers: ${
           error instanceof Error ? error.message : "Unknown error"

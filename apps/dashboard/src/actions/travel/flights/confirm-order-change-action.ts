@@ -1,7 +1,9 @@
 "use server";
 
+import { duffel } from "@/utils/duffel";
+import { logger } from "@/utils/logger";
+import { DuffelError } from "@duffel/api";
 import { LogEvents } from "@travelese/events/events";
-import { duffel } from "../../../utils/duffel";
 import { authActionClient } from "../../safe-action";
 import { confirmOrderChangeSchema } from "../schema";
 
@@ -19,6 +21,15 @@ export const confirmOrderChangeAction = authActionClient
       const response = await duffel.orderChanges.confirm(id);
       return response.data;
     } catch (error) {
+      if (error instanceof DuffelError) {
+        logger("Duffel API Error", {
+          message: error.message,
+          errors: error.errors,
+          meta: error.meta,
+        });
+      } else {
+        logger("Unexpected Error", error);
+      }
       throw new Error(
         `Failed to confirm order change: ${
           error instanceof Error ? error.message : "Unknown error"

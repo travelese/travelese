@@ -1,10 +1,9 @@
 import "@/styles/globals.css";
-import { Provider as Analytics } from "@travelese/events/client";
 import { cn } from "@travelese/ui/cn";
 import "@travelese/ui/globals.css";
-import "@travelese/orbit/globals.css";
-
+import { Provider as Analytics } from "@travelese/events/client";
 import { Toaster } from "@travelese/ui/toaster";
+import { VercelToolbar } from "@vercel/toolbar/next";
 import { GeistMono } from "geist/font/mono";
 import { GeistSans } from "geist/font/sans";
 import type { Metadata } from "next";
@@ -77,6 +76,7 @@ export default function Layout({
   children: ReactElement;
   params: { locale: string };
 }) {
+  const shouldInjectToolbar = process.env.NODE_ENV === "development";
   return (
     <html lang={locale} suppressHydrationWarning>
       <body
@@ -85,7 +85,10 @@ export default function Layout({
           "whitespace-pre-line overscroll-none",
         )}
       >
-        <Providers locale={locale}>{children}</Providers>
+        <Providers locale={locale}>
+          {children}
+          {shouldInjectToolbar && <VercelToolbar />}
+        </Providers>
         <Toaster />
         <Analytics />
       </body>
