@@ -316,7 +316,7 @@ export default function TravelSearch() {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-      className="w-full max-w-4xl mx-auto p-6 bg-background rounded-lg shadow-lg border"
+      className="w-full max-w-4xl mx-auto m-2 p-6 border"
     >
       <motion.div layout className="grid grid-cols-4 gap-2 mb-4">
         <PopoverOrSheet>
@@ -683,7 +683,7 @@ export default function TravelSearch() {
                     onClick={() => removeFlightLeg(index)}
                     className="w-10 h-10"
                   >
-                    <XIcon className="h-4 w-4" />
+                    <Icons.X className="h-4 w-4" />
                   </Button>
                 )}
               </div>

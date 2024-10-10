@@ -13,7 +13,7 @@
   },
   "dependencies": {
     "@calcom/embed-react": "^1.5.0",
-    "@duffel/api": "^2.13.0",
+    "@duffel/api": "^3.1.0",
     "@hookform/resolvers": "^3.9.0",
     "@openpanel/nextjs": "^1.0.3",
     "@openstatus/react": "^0.0.3",

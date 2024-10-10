@@ -26,9 +26,9 @@ body {
   border-color: transparent !important;
 }
 
-.skeleton-circle > *,
-.skeleton-box > *,
-.skeleton-line > * {
+.skeleton-circle>*,
+.skeleton-box>*,
+.skeleton-line>* {
   opacity: 0 !important;
 }
 
@@ -81,12 +81,15 @@ body {
   0% {
     transform: translateX(0rem);
   }
+
   25% {
     transform: translateX(0.5rem);
   }
+
   75% {
     transform: translateX(-0.5rem);
   }
+
   100% {
     transform: translateX(0rem);
   }
@@ -169,6 +172,7 @@ html.todesktop a {
     transform: scale(0);
     opacity: 1;
   }
+
   100% {
     transform: scale(4);
     opacity: 0;
@@ -191,9 +195,11 @@ html.todesktop-panel body {
 .color-picker .react-colorful {
   height: 240px;
 }
+
 .color-picker .react-colorful__saturation {
   border-radius: 4px 4px 0 0;
 }
+
 .color-picker .react-colorful__hue {
   height: 40px;
   border-radius: 0 0 4px 4px;

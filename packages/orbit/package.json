@@ -33,6 +33,7 @@
     "./provider": "./src/lib/provider.tsx",
     "./registry": "./src/lib/registry.tsx",
     "./tailwind.config": "./tailwind.config.ts",
-    "./globals.css": "./src/globals.css"
+    "./globals.css": "./src/globals.css",
+    "./postcss": "./postcss.config.js"
   }
 }
