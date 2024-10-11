@@ -1,6 +1,7 @@
 "use client";
 
 import { Button } from "@travelese/ui/button";
+import { addDays, format, isBefore, startOfDay } from "date-fns";
 import { AnimatePresence, motion } from "framer-motion";
 import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -10,6 +11,7 @@ interface CalendarProps {
   onClose: () => void;
   selectedDate: Date | null;
   onAdjustDate: (days: number) => void;
+  minDate?: Date;
 }
 
 const Calendar: React.FC<CalendarProps> = ({
@@ -17,6 +19,7 @@ const Calendar: React.FC<CalendarProps> = ({
   onClose,
   selectedDate,
   onAdjustDate,
+  minDate = startOfDay(new Date()),
 }) => {
   const [currentDate, setCurrentDate] = useState(selectedDate || new Date());
 
@@ -46,6 +49,10 @@ const Calendar: React.FC<CalendarProps> = ({
   const startDay = (year: number, month: number) =>
     new Date(year, month, 1).getDay();
 
+  const isDateDisabled = (date: Date) => {
+    return isBefore(date, minDate);
+  };
+
   const renderCalendar = (monthOffset: number) => {
     const date = new Date(
       currentDate.getFullYear(),
@@ -66,17 +73,20 @@ const Calendar: React.FC<CalendarProps> = ({
       const isSelected =
         selectedDate && dayDate.toDateString() === selectedDate.toDateString();
       const isToday = dayDate.toDateString() === new Date().toDateString();
+      const isDisabled = isDateDisabled(dayDate);
       calendarDays.push(
         <motion.button
           key={`day-${i}`}
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.9 }}
-          onClick={() => onSelectDate(dayDate)}
+          onClick={() => !isDisabled && onSelectDate(dayDate)}
           className={`h-8 w-8 rounded-full flex items-center justify-center text-sm
             ${isSelected ? "bg-primary text-primary-foreground" : ""}
             ${isToday && !isSelected ? "border border-primary" : ""}
-            ${!isSelected && !isToday ? "hover:bg-accent" : ""}
+            ${!isSelected && !isToday && !isDisabled ? "hover:bg-accent" : ""}
+            ${isDisabled ? "text-muted-foreground cursor-not-allowed" : ""}
           `}
+          disabled={isDisabled}
         >
           {i}
         </motion.button>,
@@ -85,7 +95,7 @@ const Calendar: React.FC<CalendarProps> = ({
 
     return (
       <div className="w-full">
-        <h3 className="mb-2">
+        <h3 className="mb-2 text-center font-semibold">
           {months[month]} {year}
         </h3>
         <div className="grid grid-cols-7 gap-1">
@@ -104,9 +114,9 @@ const Calendar: React.FC<CalendarProps> = ({
   };
 
   return (
-    <div className="p-4 rounded-lg shadow-lg w-[600px]">
+    <div className="p-4 rounded-lg shadow-lg w-[600px] bg-background">
       <div className="flex justify-between items-center mb-4">
-        <h2>Select date</h2>
+        <h2 className="text-lg font-semibold">Select date</h2>
         <div className="space-x-2">
           {[-5, -3, -1, 1, 3, 5].map((days) => (
             <Button
