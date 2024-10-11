@@ -15,7 +15,7 @@ import { cookies } from "next/headers";
 export const maxDuration = 30;
 
 export const metadata: Metadata = {
-  title: "Overview | Midday",
+  title: "Overview | Travelese",
 };
 
 const defaultValue = {
@@ -65,6 +65,12 @@ export default async function Overview({ searchParams }) {
             </div>
           </div>
         </div>
+
+        <Widgets
+          initialPeriod={initialPeriod}
+          disabled={isEmpty}
+          searchParams={searchParams}
+        />
       </div>
 
       <OverviewModal defaultOpen={isEmpty && !hideConnectFlow} />
