@@ -38,38 +38,39 @@ development: https://docs.travelese.ai
 
 ## App Architecture
 
-- Monorepo
-- Bun
-- React
-- TypeScript
-- Nextjs
-- Supabase
-- Shadcn
-- TailwindCSS
-- Biome
-- ToDesktop
-- Expo
-- Orbit
+- [Midday](https://midday.ai/)
+- [Shadcn](https://ui.shadcn.com/)
+- [Turborepo](https://turbo.build/)
+- [Nextjs](https://nextjs.org/)
+- [Bun](https://bun.sh/)
+- [React](https://react.dev/)
+- [TypeScript](https://www.typescriptlang.org/)
+- [Tailwind](https://tailwindcss.com/)
+- [Supabase](https://supabase.com/)
+- [Biome](https://biomejs.dev/)
+- [ToDesktop](https://www.todesktop.com/)
+- [Expo](https://expo.dev/)
 
 ### Hosting
 
-- Supabase (database, storage, realtime, auth)
-- Vercel (Website, edge-config, and metrics)
-- Upstash (redis)
+- [Supabase](https://supabase.com/) (database, storage, realtime, auth)
+- [Vercel](https://vercel.com/) (Website, edge-config, and metrics)
+- [Upstash](https://upstash.com/) (redis)
 
 ### Services
 
-- Github Actions (CI/CD)
-- Duffel (Flights and Stays)
-- Trigger.dev (background jobs)
-- Resend (email)
-- Novu (notifications)
-- Plaid (Bank connection in Canada and US)
-- Loops (Marketing email)
-- OpenPanel (Events and Analytics)
-- Dub (Short URLs)
-- Sentry (Error handling)
-- Cloudflare (CDN)
+- [Github Actions](https://github.com/features/actions) (CI/CD)
+- [Duffel](https://duffel.com/) (Flights and Stays)
+- [Trigger.dev](https://trigger.dev/) (background jobs)
+- [Resend](https://resend.com/) (email)
+- [Novu](https://novu.co/) (notifications)
+- [Plaid](https://plaid.com/) (Bank connection in Canada and US)
+- [Stripe](https://stripe.com/) (Payments)
+- [Loops](https://loops.so/) (Marketing email)
+- [OpenPanel](https://openpanel.com/) (Events and Analytics)
+- [Dub](https://dub.sh/) (Short URLs)
+- [Sentry](https://sentry.io/) (Error handling)
+- [Cloudflare](https://cloudflare.com/) (CDN)
 
 ## Repo Activity
 

@@ -5,7 +5,7 @@ import type { DateRange } from "react-day-picker";
 import { cn } from "../utils";
 import { Button } from "./button";
 import { Calendar } from "./calendar";
-import { Icons } from "./icons";
+import { Icons } from "./icons copy";
 import { Popover, PopoverContent, PopoverTrigger } from "./popover";
 
 type Props = {

@@ -4,8 +4,7 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"],
-      "@travelese/ui": ["../../packages/ui/src"],
-      "@travelese/orbit": ["../../packages/orbit/src"]
+      "@travelese/ui": ["../../packages/ui/src"]
     },
     "strict": true
   },

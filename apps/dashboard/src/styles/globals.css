@@ -228,3 +228,11 @@ html.todesktop-panel body {
 .remove-arrow {
   appearance: textfield;
 }
+
+input[type="time"]::-webkit-clear-button {
+  display: none;
+}
+
+input[type="time"]::-webkit-calendar-picker-indicator {
+  display: none;
+}

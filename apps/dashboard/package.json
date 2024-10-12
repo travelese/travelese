@@ -31,7 +31,6 @@
     "@travelese/kv": "workspace:*",
     "@travelese/location": "workspace:*",
     "@travelese/notification": "workspace:*",
-    "@travelese/orbit": "workspace:*",
     "@travelese/supabase": "workspace:*",
     "@travelese/ui": "workspace:*",
     "@travelese/utils": "workspace:*",

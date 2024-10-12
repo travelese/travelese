@@ -1,10 +1,8 @@
 import { ArchiveIcon } from "@radix-ui/react-icons";
 import { FaXTwitter } from "react-icons/fa6";
-import { FiGithub, FiLoader } from "react-icons/fi";
+import { FiGithub } from "react-icons/fi";
 import {
   MdAdd,
-  MdAirlineSeatReclineNormal,
-  MdAlarm,
   MdArrowBack,
   MdArrowLeft,
   MdArrowRight,
@@ -13,22 +11,18 @@ import {
   MdAttachMoney,
   MdAutoAwesome,
   MdBarChart,
-  MdBatteryCharging30,
   MdChangeHistory,
   MdChevronLeft,
   MdChevronRight,
   MdClose,
-  MdCloudQueue,
   MdDescription,
+  MdDownloading,
   MdDriveFileMove,
   MdEditCalendar,
   MdErrorOutline,
   MdExpandLess,
   MdExpandMore,
   MdFence,
-  MdFlight,
-  MdFlightLand,
-  MdFlightTakeoff,
   MdFolder,
   MdFolderSpecial,
   MdFolderZip,
@@ -38,31 +32,22 @@ import {
   MdKeyboardArrowLeft,
   MdKeyboardArrowRight,
   MdKeyboardArrowUp,
-  MdLocalHotel,
-  MdLocationCity,
   MdMenu,
   MdMoreHoriz,
   MdOutlineAccountBalance,
   MdOutlineAccountCircle,
-  MdOutlineAdd,
-  MdOutlineAirlineSeatLegroomReduced,
+  MdOutlineApps,
   MdOutlineArrowDownward,
   MdOutlineArrowForward,
   MdOutlineAttachFile,
   MdOutlineAutoAwesome,
-  MdOutlineBackpack,
   MdOutlineBackspace,
-  MdOutlineBed,
   MdOutlineBrokenImage,
-  MdOutlineBusinessCenter,
   MdOutlineCalendarMonth,
-  MdOutlineCalendarToday,
   MdOutlineCancel,
   MdOutlineCategory,
   MdOutlineChatBubbleOutline,
   MdOutlineClear,
-  MdOutlineClose,
-  MdOutlineConnectingAirports,
   MdOutlineContentCopy,
   MdOutlineCreateNewFolder,
   MdOutlineDashboardCustomize,
@@ -70,34 +55,25 @@ import {
   MdOutlineDescription,
   MdOutlineEmail,
   MdOutlineExitToApp,
-  MdOutlineExpandMore,
-  MdOutlineExplore,
   MdOutlineFace,
   MdOutlineFileDownload,
   MdOutlineFilterList,
-  MdOutlineFlightClass,
   MdOutlineForwardToInbox,
   MdOutlineHandyman,
   MdOutlineHourglassTop,
   MdOutlineInbox,
   MdOutlineInsertPhoto,
-  MdOutlineIntegrationInstructions,
   MdOutlineInventory2,
   MdOutlineListAlt,
-  MdOutlineLocalAirport,
-  MdOutlineLocationOn,
-  MdOutlineLuggage,
+  MdOutlineMoreTime,
   MdOutlineMoreVert,
   MdOutlineMoveToInbox,
   MdOutlineNotificationsNone,
   MdOutlineOpenInFull,
   MdOutlinePalette,
   MdOutlinePause,
-  MdOutlinePerson,
   MdOutlinePlayArrow,
-  MdOutlinePower,
   MdOutlineQuestionAnswer,
-  MdOutlineRemove,
   MdOutlineRepeat,
   MdOutlineSettings,
   MdOutlineStyle,
@@ -109,7 +85,6 @@ import {
   MdOutlineVisibility,
   MdOutlineVolumeOff,
   MdOutlineVolumeUp,
-  MdOutlineWifi,
   MdPause,
   MdPauseCircle,
   MdPeople,
@@ -127,7 +102,6 @@ import {
   MdSort,
   MdSubdirectoryArrowLeft,
   MdTopic,
-  MdTravelExplore,
   MdTrendingDown,
   MdTrendingUp,
 } from "react-icons/md";
@@ -137,15 +111,15 @@ export const Icons = {
   LogoSmall: (props: any) => (
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      width={35}
-      height={35}
+      width={32}
+      height={32}
       fill="none"
       {...props}
     >
       <path
         fill="currentColor"
         fillRule="evenodd"
-        d="M1 20.4294L13.4756 13.1971L1 13.197L1 8L29 8V13.1971L16.4441 13.1971L29 20.4294V26.703L15.1203 18.2085L1 27L1 20.4294Z"
+        d="M15.304 0c-2.41.103-4.681.739-6.7 1.792l6.7 11.606V0Zm0 18.603-6.7 11.605a15.927 15.927 0 0 0 6.7 1.792V18.603ZM16.697 32V18.595L23.4 30.206A15.928 15.928 0 0 1 16.697 32Zm0-18.594V0c2.41.103 4.684.74 6.704 1.794l-6.704 11.612Zm-14.205 11.2L14.1 17.904 7.398 29.51a16.1 16.1 0 0 1-4.906-4.905Zm27.02-17.208-11.607 6.701 6.701-11.607a16.101 16.101 0 0 1 4.905 4.906ZM2.49 7.396A16.1 16.1 0 0 1 7.398 2.49l6.704 11.61L2.49 7.396Zm-.697 1.206A15.927 15.927 0 0 0 0 15.306h13.406L1.793 8.602ZM1.794 23.4A15.927 15.927 0 0 1 0 16.699h13.401L1.794 23.4Zm16.805-8.095H32a15.927 15.927 0 0 0-1.792-6.702l-11.61 6.702ZM30.207 23.4l-11.604-6.7H32c-.104 2.41-.74 4.68-1.793 6.7Zm-12.3-5.494 6.699 11.604a16.1 16.1 0 0 0 4.904-4.905l-11.604-6.7Z"
         clipRule="evenodd"
       />
     </svg>
@@ -153,7 +127,7 @@ export const Icons = {
   LogoIcon: (props: any) => (
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      width={17}
+      width={16}
       height={17}
       fill="none"
       {...props}
@@ -161,7 +135,7 @@ export const Icons = {
       <path
         fill="currentColor"
         fillRule="evenodd"
-        d="M1 20.4294L13.4756 13.1971L1 13.197L1 8L29 8V13.1971L16.4441 13.1971L29 20.4294V26.703L15.1203 18.2085L1 27L1 20.4294Z"
+        d="M7.652.5a7.963 7.963 0 0 0-3.35.896l3.35 5.803V.5Zm0 9.301-3.35 5.803a7.963 7.963 0 0 0 3.35.896V9.801ZM8.35 16.5V9.798l3.351 5.805a7.963 7.963 0 0 1-3.351.897Zm0-9.297V.5a7.963 7.963 0 0 1 3.351.897L8.35 7.203Zm-7.103 5.6L7.05 9.452 3.7 15.256a8.05 8.05 0 0 1-2.454-2.453Zm13.51-8.604-5.804 3.35 3.351-5.803a8.05 8.05 0 0 1 2.453 2.453Zm-13.51 0a8.05 8.05 0 0 1 2.453-2.455L7.051 7.55 1.245 4.198Zm-.35.602A7.963 7.963 0 0 0 0 8.153h6.703L.896 4.801Zm.001 7.4A7.964 7.964 0 0 1 0 8.848h6.7L.898 12.2Zm8.402-4.048H16a7.964 7.964 0 0 0-.896-3.351L9.3 8.153Zm5.805 4.046L9.3 8.85H16a7.962 7.962 0 0 1-.896 3.35Zm-6.15-2.747 3.349 5.802a8.05 8.05 0 0 0 2.452-2.452l-5.802-3.35Z"
         clipRule="evenodd"
       />
     </svg>
@@ -169,21 +143,25 @@ export const Icons = {
   Logo: (props: any) => (
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      width={140}
-      height={30}
+      width={112}
+      height={28}
       fill="none"
       {...props}
     >
       <path
         fill="currentColor"
         fillRule="evenodd"
-        d="M132.056 11.633c.927 0 1.827.22 2.697.66.871.43 1.534.992 1.99 1.684.44.66.733 1.428.879 2.307.13.602.195 1.563.195 2.881h-9.582c.041 1.326.354 2.393.94 3.198.586.798 1.493 1.197 2.722 1.197 1.147 0 2.063-.379 2.747-1.136.39-.44.667-.948.83-1.526h2.16c-.057.48-.248 1.018-.573 1.612-.318.586-.676 1.066-1.075 1.44-.667.651-1.493 1.09-2.478 1.319a7.527 7.527 0 0 1-1.794.195c-1.628 0-3.007-.59-4.138-1.77-1.132-1.188-1.697-2.848-1.697-4.98 0-2.1.57-3.805 1.709-5.115 1.139-1.31 2.628-1.966 4.468-1.966Zm3.503 5.786c-.089-.952-.297-1.713-.622-2.282-.603-1.058-1.608-1.587-3.016-1.587-1.009 0-1.855.366-2.539 1.098-.683.725-1.045 1.648-1.086 2.771h7.263ZM115.917 20.898c.066.733.249 1.294.55 1.685.553.708 1.513 1.062 2.881 1.062.813 0 1.53-.175 2.148-.525.619-.358.928-.907.928-1.648 0-.561-.248-.989-.745-1.282-.317-.179-.944-.386-1.88-.622l-1.745-.44c-1.115-.276-1.937-.585-2.466-.927-.944-.594-1.416-1.416-1.416-2.466 0-1.237.443-2.238 1.33-3.003.896-.765 2.096-1.147 3.602-1.147 1.969 0 3.389.577 4.26 1.733.545.732.81 1.522.793 2.368h-2.075a2.546 2.546 0 0 0-.525-1.355c-.504-.578-1.379-.867-2.624-.867-.83 0-1.461.159-1.892.476-.424.318-.635.737-.635 1.258 0 .57.281 1.025.842 1.367.326.203.806.382 1.44.537l1.453.354c1.579.383 2.637.753 3.174 1.11.854.562 1.282 1.445 1.282 2.65 0 1.164-.444 2.169-1.331 3.015-.879.846-2.222 1.27-4.028 1.27-1.945 0-3.325-.44-4.138-1.319-.806-.887-1.237-1.981-1.294-3.284h2.111ZM106.056 11.633c.927 0 1.827.22 2.697.66.871.43 1.534.992 1.99 1.684.44.66.733 1.428.879 2.307.13.602.195 1.563.195 2.881h-9.582c.041 1.326.354 2.393.94 3.198.586.798 1.493 1.197 2.722 1.197 1.147 0 2.063-.379 2.747-1.136.39-.44.667-.948.83-1.526h2.16c-.057.48-.248 1.018-.573 1.612-.318.586-.676 1.066-1.075 1.44-.667.651-1.493 1.09-2.478 1.319a7.527 7.527 0 0 1-1.794.195c-1.628 0-3.007-.59-4.138-1.77-1.132-1.188-1.697-2.848-1.697-4.98 0-2.1.57-3.805 1.709-5.115 1.139-1.31 2.628-1.966 4.468-1.966Zm3.503 5.786c-.089-.952-.297-1.713-.622-2.282-.603-1.058-1.608-1.587-3.016-1.587-1.009 0-1.855.366-2.539 1.098-.683.725-1.045 1.648-1.086 2.771h7.263ZM94.672 7.068h2.198V25h-2.198V7.068ZM86.056 11.633c.927 0 1.827.22 2.697.66.871.43 1.534.992 1.99 1.684.44.66.733 1.428.88 2.307.13.602.194 1.563.194 2.881h-9.582c.04 1.326.354 2.393.94 3.198.586.798 1.493 1.197 2.722 1.197 1.147 0 2.063-.379 2.747-1.136.39-.44.667-.948.83-1.526h2.16c-.057.48-.248 1.018-.573 1.612-.318.586-.676 1.066-1.075 1.44-.667.651-1.493 1.09-2.478 1.319a7.528 7.528 0 0 1-1.794.195c-1.628 0-3.007-.59-4.138-1.77-1.131-1.188-1.697-2.848-1.697-4.98 0-2.1.57-3.805 1.709-5.115 1.14-1.31 2.629-1.966 4.468-1.966Zm3.503 5.786c-.09-.952-.297-1.713-.623-2.282-.602-1.058-1.607-1.587-3.015-1.587-1.009 0-1.855.366-2.539 1.098-.683.725-1.045 1.648-1.086 2.771h7.263ZM68.686 11.926l3.49 10.645 3.65-10.645h2.405L73.3 25h-2.344l-4.822-13.074h2.552ZM55.296 21.521c0 .635.232 1.135.696 1.502.464.366 1.013.549 1.648.549a5.01 5.01 0 0 0 2.246-.537c1.22-.594 1.83-1.567 1.83-2.918v-1.77c-.268.171-.614.313-1.037.427a8.857 8.857 0 0 1-1.245.245l-1.33.17c-.798.106-1.396.273-1.795.5-.675.383-1.013.994-1.013 1.832Zm5.322-4.443c.505-.066.842-.277 1.013-.635.098-.195.147-.476.147-.842 0-.75-.269-1.29-.806-1.624-.529-.342-1.29-.513-2.282-.513-1.148 0-1.962.31-2.442.928-.268.342-.444.85-.525 1.526h-2.05c.04-1.611.56-2.73 1.562-3.357 1.009-.635 2.177-.952 3.503-.952 1.538 0 2.788.293 3.748.879.952.586 1.428 1.497 1.428 2.734v7.532c0 .228.045.41.134.55.098.138.297.207.599.207.097 0 .207-.004.33-.012.121-.017.251-.037.39-.061v1.623a6.107 6.107 0 0 1-.782.183 5.69 5.69 0 0 1-.732.037c-.757 0-1.306-.269-1.648-.806-.179-.285-.305-.688-.378-1.208-.448.585-1.09 1.094-1.93 1.526-.837.43-1.76.646-2.77.646-1.213 0-2.206-.366-2.979-1.098-.765-.74-1.147-1.664-1.147-2.771 0-1.213.378-2.153 1.135-2.82.757-.667 1.75-1.078 2.979-1.233l3.503-.44ZM44.672 11.926h2.088v2.259c.17-.44.59-.973 1.257-1.6.667-.634 1.436-.952 2.307-.952.04 0 .11.004.208.013.097.008.264.024.5.048v2.32a3.271 3.271 0 0 0-.366-.05 4.67 4.67 0 0 0-.354-.011c-1.107 0-1.957.358-2.551 1.074a3.705 3.705 0 0 0-.891 2.454V25h-2.198V11.926ZM38.05 8.276h2.223v3.65h2.087v1.795h-2.087v8.532c0 .456.154.761.463.916.171.09.456.134.855.134h.342c.122-.008.264-.02.427-.036V25a4.902 4.902 0 0 1-.794.159 7.34 7.34 0 0 1-.879.049c-1.025 0-1.72-.26-2.087-.782-.366-.529-.55-1.212-.55-2.05V13.72h-1.77v-1.795h1.77v-3.65ZM2 20.43l12.476-7.233H2V8h28v5.197H17.444L30 20.43v6.274l-13.88-8.494L2 27v-6.57Z"
+        d="M12.434 0A12.94 12.94 0 0 0 6.99 1.456l5.444 9.43V0Zm0 15.116-5.443 9.428A12.942 12.942 0 0 0 12.434 26V15.116ZM13.566 26V15.108l5.447 9.435A12.94 12.94 0 0 1 13.566 26Zm0-15.107V0c1.959.084 3.806.6 5.447 1.458l-5.447 9.435ZM2.024 19.992l9.433-5.446-5.446 9.432a13.081 13.081 0 0 1-3.987-3.986ZM23.978 6.011l-9.43 5.444 5.445-9.43a13.082 13.082 0 0 1 3.985 3.986ZM2.023 6.009a13.081 13.081 0 0 1 3.988-3.986l5.446 9.433-9.434-5.447Zm-.566.98A12.94 12.94 0 0 0 0 12.436h10.892L1.457 6.99Zm0 12.024A12.94 12.94 0 0 1 0 13.568h10.888l-9.43 5.445Zm13.654-6.577h10.89a12.941 12.941 0 0 0-1.457-5.446l-9.433 5.446Zm9.432 6.575-9.428-5.443H26a12.94 12.94 0 0 1-1.457 5.443Zm-9.995-4.464 5.444 9.429a13.08 13.08 0 0 0 3.985-3.985l-9.429-5.444Z"
         clipRule="evenodd"
+      />
+      <path
+        fill="currentColor"
+        d="M37.36 10.52h1.2l.048 1.44c.384-1.04 1.264-1.632 2.448-1.632 1.216 0 2.096.656 2.464 1.792.368-1.152 1.264-1.792 2.592-1.792 1.696 0 2.688 1.184 2.688 3.216V19h-1.312v-5.072c0-1.552-.608-2.432-1.648-2.432-1.328 0-2.096.896-2.096 2.448V19h-1.312v-5.072c0-1.52-.624-2.432-1.648-2.432-1.312 0-2.112.928-2.112 2.432V19H37.36v-8.48Zm14.39 0h1.312V19H51.75v-8.48Zm-.032-1.328v-1.52h1.376v1.52h-1.376ZM63.333 7.64V19H62.15l-.048-1.248c-.48.896-1.392 1.44-2.704 1.44-2.448 0-3.584-2.08-3.584-4.432 0-2.352 1.136-4.432 3.584-4.432 1.248 0 2.144.48 2.624 1.344V7.64h1.312Zm-6.144 7.12c0 1.648.704 3.184 2.48 3.184 1.744 0 2.464-1.568 2.464-3.184 0-1.68-.72-3.232-2.464-3.232-1.776 0-2.48 1.536-2.48 3.232ZM73.6 7.64V19h-1.185l-.048-1.248c-.48.896-1.392 1.44-2.704 1.44-2.448 0-3.584-2.08-3.584-4.432 0-2.352 1.136-4.432 3.584-4.432 1.248 0 2.144.48 2.624 1.344V7.64h1.312Zm-6.145 7.12c0 1.648.704 3.184 2.48 3.184 1.744 0 2.464-1.568 2.464-3.184 0-1.68-.72-3.232-2.464-3.232-1.776 0-2.48 1.536-2.48 3.232Zm9.033-1.744c.336-1.648 1.648-2.688 3.456-2.688 2.192 0 3.408 1.28 3.408 3.552v3.408c0 .384.16.544.528.544h.336V19h-.56c-.864 0-1.616-.288-1.6-1.328-.368.8-1.328 1.52-2.672 1.52-1.68 0-3.04-.896-3.04-2.4 0-1.744 1.328-2.192 3.184-2.56l2.512-.48c-.016-1.472-.704-2.176-2.096-2.176-1.088 0-1.808.56-2.064 1.552l-1.392-.112Zm1.232 3.776c0 .688.592 1.248 1.84 1.232 1.408 0 2.512-.992 2.512-2.96v-.144l-2.032.352c-1.264.224-2.32.32-2.32 1.52Zm7.661-6.272h1.408l2.576 7.072 2.48-7.072h1.392l-3.44 9.552c-.32.912-.928 1.328-1.888 1.328H86.9v-1.168h.88c.432 0 .688-.16.848-.608l.304-.784h-.448l-3.104-8.32Z"
       />
     </svg>
   ),
   Overview: MdBarChart,
-  Apps: MdOutlineIntegrationInstructions,
+  Apps: MdOutlineApps,
   Transactions: MdOutlineListAlt,
   Invoice: MdOutlineDescription,
   Files: MdOutlineInventory2,
@@ -252,7 +230,6 @@ export const Icons = {
     </svg>
   ),
   Settings: MdOutlineSettings,
-  Travel: MdTravelExplore,
   Inbox: ArchiveIcon,
   Inbox2: MdOutlineInbox,
   Check: (props: any) => (
@@ -605,6 +582,7 @@ export const Icons = {
   AI: MdAutoAwesome,
   AIOutline: MdOutlineAutoAwesome,
   Tracker: MdOutlineTimer,
+  Time: MdOutlineMoreTime,
   WorkInProgress: MdOutlineHandyman,
   Add: MdAdd,
   DashboardCustomize: MdOutlineDashboardCustomize,
@@ -651,29 +629,5 @@ export const Icons = {
   ArrowRightAlt: MdArrowRightAlt,
   AccountCircle: MdOutlineAccountCircle,
   Repeat: MdOutlineRepeat,
-  FlightsDeparture: MdFlightTakeoff,
-  FlightsArrival: MdFlightLand,
-  Flights: MdFlight,
-  City: MdLocationCity,
-  Airport: MdOutlineLocalAirport,
-  Airports: MdOutlineConnectingAirports,
-  Cabin: MdOutlineFlightClass,
-  Explore: MdOutlineExplore,
-  Stays: MdLocalHotel,
-  Bed: MdOutlineBed,
-  Luggage: MdOutlineLuggage,
-  Minus: MdOutlineRemove,
-  Plus: MdOutlineAdd,
-  User: MdOutlinePerson,
-  Backpack: MdOutlineBackpack,
-  Briefcase: MdOutlineBusinessCenter,
-  SeatPitch: MdOutlineAirlineSeatLegroomReduced,
-  SeatRecline: MdAirlineSeatReclineNormal,
-  Wifi: MdOutlineWifi,
-  Power: MdOutlinePower,
-  BatteryCharging: MdBatteryCharging30,
-  CloudFog: MdCloudQueue,
-  Clock: MdAlarm,
-  Location: MdOutlineLocationOn,
-  Loader: FiLoader,
+  ProjectStatus: MdDownloading,
 };

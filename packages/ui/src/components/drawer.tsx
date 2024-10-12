@@ -1,6 +1,7 @@
+"use client";
+
 import * as React from "react";
 import { Drawer as DrawerPrimitive } from "vaul";
-
 import { cn } from "../utils";
 
 const Drawer = ({
@@ -41,12 +42,12 @@ const DrawerContent = React.forwardRef<
     <DrawerPrimitive.Content
       ref={ref}
       className={cn(
-        "fixed inset-x-0 bottom-0 z-50 mt-24 flex h-auto flex-col rounded-t-[10px] border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-950",
-        className,
+        "fixed inset-x-0 bottom-0 z-50 mt-24 flex h-auto flex-col rounded-t-[10px] border bg-background",
+        className
       )}
       {...props}
     >
-      <div className="mx-auto mt-4 h-2 w-[100px] rounded-full bg-zinc-100 dark:bg-zinc-800" />
+      <div className="mx-auto mt-4 h-2 w-[100px] rounded-full bg-accent" />
       {children}
     </DrawerPrimitive.Content>
   </DrawerPortal>
@@ -83,7 +84,7 @@ const DrawerTitle = React.forwardRef<
     ref={ref}
     className={cn(
       "text-lg font-semibold leading-none tracking-tight",
-      className,
+      className
     )}
     {...props}
   />
@@ -96,7 +97,7 @@ const DrawerDescription = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <DrawerPrimitive.Description
     ref={ref}
-    className={cn("text-sm text-zinc-500 dark:text-zinc-400", className)}
+    className={cn("text-sm text-muted-foreground", className)}
     {...props}
   />
 ));
@@ -104,13 +105,13 @@ DrawerDescription.displayName = DrawerPrimitive.Description.displayName;
 
 export {
   Drawer,
+  DrawerPortal,
+  DrawerOverlay,
+  DrawerTrigger,
   DrawerClose,
   DrawerContent,
-  DrawerDescription,
-  DrawerFooter,
   DrawerHeader,
-  DrawerOverlay,
-  DrawerPortal,
+  DrawerFooter,
   DrawerTitle,
-  DrawerTrigger,
+  DrawerDescription,
 };

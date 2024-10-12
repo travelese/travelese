@@ -1,5 +1,4 @@
 import * as React from "react";
-
 import { cn } from "../utils";
 
 const Card = React.forwardRef<
@@ -8,10 +7,7 @@ const Card = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <div
     ref={ref}
-    className={cn(
-      "rounded-xl border border-zinc-200 bg-white text-zinc-950 shadow dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-50",
-      className,
-    )}
+    className={cn("border bg-background text-card-foreground", className)}
     {...props}
   />
 ));
@@ -35,7 +31,10 @@ const CardTitle = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <h3
     ref={ref}
-    className={cn("font-semibold leading-none tracking-tight", className)}
+    className={cn(
+      "text-lg font-medium leading-none tracking-tight mb-2",
+      className
+    )}
     {...props}
   />
 ));
@@ -45,11 +44,7 @@ const CardDescription = React.forwardRef<
   HTMLParagraphElement,
   React.HTMLAttributes<HTMLParagraphElement>
 >(({ className, ...props }, ref) => (
-  <p
-    ref={ref}
-    className={cn("text-sm text-zinc-500 dark:text-zinc-400", className)}
-    {...props}
-  />
+  <p ref={ref} className={cn("text-sm text-[#606060]", className)} {...props} />
 ));
 CardDescription.displayName = "CardDescription";
 
@@ -67,7 +62,10 @@ const CardFooter = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <div
     ref={ref}
-    className={cn("flex items-center p-6 pt-0", className)}
+    className={cn(
+      "flex items-center p-6 border-t text-xs text-[#606060]",
+      className
+    )}
     {...props}
   />
 ));
@@ -75,9 +73,9 @@ CardFooter.displayName = "CardFooter";
 
 export {
   Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
   CardHeader,
+  CardFooter,
   CardTitle,
+  CardDescription,
+  CardContent,
 };

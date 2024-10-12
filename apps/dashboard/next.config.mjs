@@ -22,7 +22,6 @@ const config = {
   },
   transpilePackages: [
     "@travelese/ui",
-    "@travelese/orbit",
     "@travelese/jobs",
     "@travelese/tailwind",
   ],

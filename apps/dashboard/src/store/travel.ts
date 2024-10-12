@@ -1,6 +1,6 @@
 import { create } from "zustand";
 
-interface TravelSearchState {
+interface CreateOfferState {
   tripType: string;
   setTripType: (type: string) => void;
   travelClass: string;
@@ -22,17 +22,44 @@ interface TravelSearchState {
     children: number;
     infants: number;
   };
-  updatePassengers: (type: keyof typeof passengers, increment: boolean) => void;
+  updatePassengers: (
+    type: keyof CreateOfferState["passengers"],
+    increment: boolean,
+  ) => void;
   baggage: {
     cabin: number;
     checked: number;
   };
-  updateBaggage: (type: keyof typeof baggage, increment: boolean) => void;
-  checkAccommodation: boolean;
-  setCheckAccommodation: (check: boolean) => void;
+  updateBaggage: (
+    type: keyof CreateOfferState["baggage"],
+    increment: boolean,
+  ) => void;
+}
+
+interface SearchAccomodationState {
+  destination: string;
+  setDestination: (destination: string) => void;
+  checkInDate: Date | null;
+  setCheckInDate: (date: Date | null) => void;
+  checkOutDate: Date | null;
+  setCheckOutDate: (date: Date | null) => void;
+  guests: {
+    adults: number;
+    children: number;
+  };
+  updateGuests: (
+    type: keyof SearchAccomodationState["guests"],
+    increment: boolean,
+  ) => void;
+}
+
+interface TravelSearchState extends CreateOfferState, SearchAccomodationState {
+  searchType: "flight" | "accommodation" | "both";
+  setSearchType: (type: TravelSearchState["searchType"]) => void;
 }
 
 export const useTravelSearchStore = create<TravelSearchState>((set) => ({
+  // Flight search state
   tripType: "return",
   setTripType: (type) => set({ tripType: type }),
   travelClass: "economy",
@@ -76,6 +103,29 @@ export const useTravelSearchStore = create<TravelSearchState>((set) => ({
           : Math.max(0, state.baggage[type] - 1),
       },
     })),
-  checkAccommodation: false,
-  setCheckAccommodation: (check) => set({ checkAccommodation: check }),
+
+  // Accommodation search state
+  destination: "",
+  setDestination: (destination) => set({ destination }),
+  checkInDate: null,
+  setCheckInDate: (date) => set({ checkInDate: date }),
+  checkOutDate: null,
+  setCheckOutDate: (date) => set({ checkOutDate: date }),
+  guests: {
+    adults: 1,
+    children: 0,
+  },
+  updateGuests: (type, increment) =>
+    set((state) => ({
+      guests: {
+        ...state.guests,
+        [type]: increment
+          ? state.guests[type] + 1
+          : Math.max(0, state.guests[type] - 1),
+      },
+    })),
+
+  // Common state
+  searchType: "flight",
+  setSearchType: (type) => set({ searchType: type }),
 }));
