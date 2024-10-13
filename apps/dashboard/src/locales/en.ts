@@ -98,6 +98,27 @@ export default {
     loan: "Loan",
     other_liability: "Other Liability",
   },
+  travel_type: {
+    return: "Return",
+    one_way: "One way",
+    multi_city: "Multi city",
+    nomad: "Nomad",
+  },
+  travel_cabin: {
+    economy: "Economy",
+    premium_economy: "Premium",
+    business: "Business",
+    first_class: "First",
+  },
+  travel_passenger: {
+    adult: "Adult",
+    child: "Child",
+    infant_without_seat: "Infant",
+  },
+  travel_luggage: {
+    cabin: "Cabin",
+    checked: "Checked",
+  },
   tags: {
     bylaws: "Bylaws",
     shareholder_agreements: "Shareholder Agreements",
