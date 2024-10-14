@@ -13,7 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@travelese/ui/select";
-import { formatISO, subWeeks } from "date-fns";
+import { addMonths, formatISO, subWeeks } from "date-fns";
 import { formatDateRange } from "little-date";
 import { useAction } from "next-safe-action/hooks";
 import { parseAsString, useQueryStates } from "nuqs";
@@ -32,6 +32,14 @@ const periods = [
     label: "This week",
     range: {
       from: subWeeks(new Date(), 1),
+      to: new Date(),
+    },
+  },
+  {
+    value: "1m",
+    label: "Next month",
+    range: {
+      from: addMonths(new Date(), 1),
       to: new Date(),
     },
   },
@@ -125,11 +133,9 @@ export function TravelPeriod({ defaultValue, disabled }: Props) {
               from: params.from && new Date(params.from),
               to: params.to && new Date(params.to),
             }}
-            defaultMonth={
-              new Date(new Date().setMonth(new Date().getMonth() - 1))
-            }
+            defaultMonth={new Date(new Date().setMonth(new Date().getMonth()))}
             initialFocus
-            toDate={new Date()}
+            fromDate={new Date()}
             onSelect={handleChangePeriod}
           />
         </PopoverContent>

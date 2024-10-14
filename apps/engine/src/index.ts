@@ -17,7 +17,6 @@ import transactionsRoutes from "./routes/transactions";
 
 const app = new OpenAPIHono<{ Bindings: Bindings }>({
   defaultHook: (result, c) => {
-    console.log(result);
     if (!result.success) {
       return c.json({ success: false, errors: result.error.errors }, 422);
     }

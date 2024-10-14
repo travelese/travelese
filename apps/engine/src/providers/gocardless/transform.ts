@@ -75,8 +75,6 @@ export const transformTransactionName = (transaction: Transaction) => {
     return capitalCase(remittanceInformation);
   }
 
-  console.log("No transaction name", transaction);
-
   return "No information";
 };
 

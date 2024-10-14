@@ -69,17 +69,28 @@ export const WelcomeEmail = ({ fullName = "Armin Babaei" }: WelcomeProps) => {
 
             <span className="font-medium">Hi {firstName},</span>
             <Text className="text-[#121212]">
-              Welcome to Travelese! I'm Armin, the founder.
+              I'm Armin. Founder of Travelese.
               <br />
               <br />
-              I've been working on Travelese for the past months, and during
-              this time, we've implemented the basic functionality to get
-              started. However, with your feedback, we can make the right
-              decisions to help run your business smarter.
+              My goal with Travelese is to revolutionize the traveler
+              experience, creating authentic and personalized journeys that
+              connect you with real humans and local communities.
+              <br />
+              <br />I believe that travel should be about more than just booking
+              flights and hotels - it should be about immersing yourself in
+              local cultures, trying new foods, and experiencing the beauty of
+              our world.
+              <br />
+              <br />I believe we deserve better - rockets instead of cheap
+              flights, Concordes instead of low-cost carriers, good food instead
+              of tourist traps, and authentic experiences instead of overcrowded
+              destinations. Travelese is built to promote abundance and love,
+              not scarcity.
               <br />
               <br />
-              During our beta phase, you may encounter some bugs, but we
-              genuinely want all your feedback.
+              And, we're not stopping at Earth. I'm gearing up for space travel,
+              and I want Travelese to help humanity explore the stars and other
+              planets.
               <br />
               <br />
               Should you have any questions, please don't hesitate to reply
@@ -95,19 +106,19 @@ export const WelcomeEmail = ({ fullName = "Armin Babaei" }: WelcomeProps) => {
 
             <br />
 
-            <Img
+            {/* <Img
               src={`${baseUrl}/founder.jpeg`}
               alt="Founder"
               className="my-0 mx-auto block w-full"
-            />
+            /> */}
 
-            <Text className="text-[#707070]">Best regards, founder</Text>
+            <Text className="text-[#707070]">With love, Armin</Text>
 
-            <Img
+            {/* <Img
               src={`${baseUrl}/signature.png`}
               alt="Signature"
               className="block w-full w-[143px] h-[20px]"
-            />
+            /> */}
 
             <br />
             <br />

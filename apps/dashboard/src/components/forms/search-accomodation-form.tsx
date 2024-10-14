@@ -91,7 +91,6 @@ export default function SearchAccommodationForm() {
           title: "Search successful",
           description: "Your accommodation options are ready to view.",
         });
-        console.log("Accommodation search result:", result);
         setIsSearching(false);
       },
       onError: () => {

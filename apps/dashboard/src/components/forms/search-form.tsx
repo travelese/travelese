@@ -133,17 +133,6 @@ export default function SearchForm() {
     return "";
   };
 
-  const handleSearch = () => {
-    console.log("Search with:", {
-      selectedFrom,
-      selectedTo,
-      dateRange,
-      passengers,
-      cabin,
-    });
-    // Implement search functionality here
-  };
-
   const renderInput = () => {
     let placeholder = "Search for flights...";
     if (stage === "from") placeholder = "Flying from...";

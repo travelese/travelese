@@ -24,34 +24,25 @@ export function EnrollMFA() {
   const [otpValue, setOtpValue] = useState("");
 
   const onComplete = async (code: string) => {
-    console.log("onComplete called with code:", code);
     setError(false);
 
     if (!isValidating) {
       setValidating(true);
 
       try {
-        console.log("Calling supabase.auth.mfa.challenge");
         const challenge = await supabase.auth.mfa.challenge({ factorId });
-        console.log("Challenge response:", challenge);
-
-        console.log("Calling supabase.auth.mfa.verify");
         const verify = await supabase.auth.mfa.verify({
           factorId,
           challengeId: challenge.data.id,
           code,
         });
-        console.log("Verify response:", verify);
 
         if (verify.data) {
-          console.log("Verification successful, redirecting");
           router.replace("/");
         } else {
-          console.log("Verification failed");
           setError(true);
         }
       } catch (error) {
-        console.error("Error during MFA verification:", error);
         setError(true);
       } finally {
         setValidating(false);
@@ -60,19 +51,15 @@ export function EnrollMFA() {
   };
 
   const handleOtpChange = (value: string) => {
-    console.log("OTP changed:", value);
     setOtpValue(value);
     if (value.length === 6) {
-      console.log("OTP complete, calling onComplete");
       onComplete(value);
     }
   };
 
   useEffect(() => {
     async function enroll() {
-      console.log("Enrolling MFA");
       try {
-        console.log("Calling supabase.auth.mfa.enroll");
         const { data, error } = await supabase.auth.mfa.enroll({
           factorType: "totp",
           issuer: "app.travelese.ai",
@@ -83,7 +70,6 @@ export function EnrollMFA() {
           throw error;
         }
 
-        console.log("MFA enrollment successful:", data);
         setFactorId(data.id);
         setQR(data.totp.qr_code);
         setSecret(data.totp.secret);
@@ -97,7 +83,6 @@ export function EnrollMFA() {
   }, []);
 
   const handleOnCancel = () => {
-    console.log("Cancel clicked, unenrolling MFA");
     supabase.auth.mfa.unenroll({
       factorId,
     });

@@ -1,3 +1,4 @@
+import type { TZDate } from "@date-fns/tz";
 import { format, isSameYear } from "date-fns";
 
 export function formatSize(bytes: number): string {
@@ -44,6 +45,10 @@ export function formatAmount({
 export function secondsToHoursAndMinutes(seconds: number) {
   const hours = Math.floor(seconds / 3600);
   const minutes = Math.floor((seconds % 3600) / 60);
+
+  if (hours && minutes) {
+    return `${hours}:${minutes.toString().padStart(2, "0")}h`;
+  }
 
   if (hours) {
     return `${hours}h`;
@@ -100,4 +105,27 @@ export function formatAccountName({
   }
 
   return name;
+}
+
+export function formatDateRange(dates: TZDate[]): string {
+  if (!dates.length) return "";
+
+  const formatFullDate = (date: TZDate) => format(date, "MMM d");
+  const formatDay = (date: TZDate) => format(date, "d");
+
+  if (dates.length === 1 || dates[0].getTime() === dates[1]?.getTime()) {
+    return formatFullDate(dates[0]);
+  }
+
+  const startDate = dates[0];
+  const endDate = dates[1];
+
+  if (!startDate || !endDate) return "";
+
+  if (startDate.getMonth() === endDate.getMonth()) {
+    // Same month
+    return `${format(startDate, "MMM")} ${formatDay(startDate)} - ${formatDay(endDate)}`;
+  }
+  // Different months
+  return `${formatFullDate(startDate)} - ${formatFullDate(endDate)}`;
 }
