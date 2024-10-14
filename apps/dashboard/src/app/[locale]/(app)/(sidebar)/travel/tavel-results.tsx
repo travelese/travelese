@@ -1,4 +1,4 @@
-import { Flights } from "@/components/widgets/travel";
+import { Travel } from "@/components/widgets/travel";
 import {
   Carousel,
   CarouselContent,
@@ -9,7 +9,7 @@ import {
 import React from "react";
 
 export function TravelResults() {
-  const items = [<Flights key="flights-widget" />];
+  const items = [<Travel key="travel-widget" />];
 
   return (
     <Carousel

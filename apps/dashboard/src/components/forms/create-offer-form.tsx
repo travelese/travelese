@@ -9,7 +9,6 @@ import { createOfferRequestAction } from "@/actions/travel/flights/create-offer-
 import { createPartialOfferRequestAction } from "@/actions/travel/flights/create-partial-offer-request-action";
 import { createOfferRequestSchema } from "@/actions/travel/schema";
 import LocationSelector from "@/components/location-selector";
-import Calendar from "@/components/travel-calendar";
 import { logger } from "@/utils/logger";
 import type { CreateOfferRequestSlice } from "@duffel/api/types";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -22,7 +21,6 @@ import {
   FormMessage,
 } from "@travelese/ui/form";
 import { Icons } from "@travelese/ui/icons";
-import { Popover, PopoverContent, PopoverTrigger } from "@travelese/ui/popover";
 import { SubmitButton } from "@travelese/ui/submit-button";
 import { useToast } from "@travelese/ui/use-toast";
 import { addDays, format, isBefore, startOfDay } from "date-fns";
@@ -328,11 +326,11 @@ export default function CreateOfferForm() {
                   )}
                 />
                 <SubmitButton
-                  type="submit"
                   disabled={isSearching}
                   isSubmitting={isSearching}
+                  onClick={isSearching ? handleStopSearch : undefined}
                 >
-                  Search
+                  <Icons.LogoSmall />
                 </SubmitButton>
               </>
             )}

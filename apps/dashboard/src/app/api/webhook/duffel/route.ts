@@ -1,11 +1,8 @@
-import { env } from "@/env.mjs";
 import crypto from "node:crypto";
+import { env } from "@/env.mjs";
 
 export async function POST(request: Request) {
-  console.log("Received webhook request");
-  console.log("Headers:", Object.fromEntries(request.headers));
-
-  const DUFFEL_WEBHOOK_SECRET = env.DUFFEL_TRAVELESE_WEBHOOK_SECRET!;
+  const DUFFEL_WEBHOOK_SECRET = env.DUFFEL_TRAVELESE_PRO_WEBHOOK_SECRET!;
 
   if (!DUFFEL_WEBHOOK_SECRET) {
     throw new Error(

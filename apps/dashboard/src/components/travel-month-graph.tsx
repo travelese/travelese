@@ -1,6 +1,6 @@
 "use client";
 
-import { useTrackerStore } from "@/store/tracker";
+import { useTravelStore } from "@/store/travel";
 import { cn } from "@travelese/ui/cn";
 import {
   eachDayOfInterval,
@@ -15,9 +15,9 @@ import {
   startOfMonth,
   startOfWeek,
 } from "date-fns";
-import { TrackerDayCard } from "./tracker-day-card";
+import { TravelDayCard } from "./travel-day-card";
 
-export function TrackerMonthGraph({
+export function TravelMonthGraph({
   date,
   onSelect,
   data,
@@ -27,7 +27,7 @@ export function TrackerMonthGraph({
   hideDaysIndicators,
   weekStartsOn,
 }) {
-  const { isTracking } = useTrackerStore();
+  const { isTracking } = useTravelStore();
   const currentDate = new Date(date);
 
   const weeks = eachWeekOfInterval(
@@ -65,7 +65,7 @@ export function TrackerMonthGraph({
       const isoDate = formatISO(dayInWeek, { representation: "date" });
 
       return (
-        <TrackerDayCard
+        <TravelDayCard
           key={isoDate}
           date={dayInWeek}
           data={data && data[isoDate]}

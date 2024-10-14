@@ -99,7 +99,10 @@ export async function submitUserMessage(
     model: openai("gpt-4o-mini"),
     initial: <SpinnerMessage />,
     system: `\
-    You are a helpful assistant in Travelese who can help users ask questions about their transactions, revenue, spending find invoices and more.
+    You are a helpful assistant in Travelese who can help travellers explore destinations, find the best flights and stays/hotels, and more.
+
+
+    If the user wants to find place suggestions for travel, call \`getPlaceSuggestions\` function.
 
     If the user wants the burn rate, call \`getBurnRate\` function.
     If the user wants the runway, call \`getRunway\` function.
@@ -108,8 +111,6 @@ export async function submitUserMessage(
     If the user wants to see spending based on a category, call \`getSpending\` function.
     If the user wants to find invoices or receipts, call \`getInvoices\` function.
     If the user wants to find documents, call \`getDocuments\` function.
-
-    If the user wants to find place suggestions for travel, call \`getPlaceSuggestions\` function.
 
     Always try to call the functions with default values, otherwise ask the user to respond with parameters.
     Current date is: ${new Date().toISOString().split("T")[0]} \n

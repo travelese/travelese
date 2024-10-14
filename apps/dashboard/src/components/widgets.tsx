@@ -21,13 +21,6 @@ type Props = {
 
 export function Widgets({ disabled, initialPeriod, searchParams }: Props) {
   const items = [
-    <Insights key="insights" />,
-    <Spending
-      disabled={disabled}
-      initialPeriod={initialPeriod}
-      key="spending"
-      currency={searchParams?.currency}
-    />,
     <Tracker key="tracker" date={searchParams?.date} hideDaysIndicators />,
     <Transactions key="transactions" disabled={disabled} />,
     <Inbox key="inbox" disabled={disabled} />,

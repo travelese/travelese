@@ -15,53 +15,49 @@ export function getPlaceSuggestionsTools({ aiState }: Args) {
       query: z.string().describe("The search query for place suggestions"),
     }),
     generate: async (args) => {
-      const { query } = args;
       const toolCallId = nanoid();
 
-      try {
-        const suggestions = await listPlaceSuggestionsAction({ query });
+      const { query } = args;
 
-        const props = {
-          suggestions,
-          query,
-        };
+      const suggestions = await listPlaceSuggestionsAction({ query });
 
-        aiState.done({
-          ...aiState.get(),
-          messages: [
-            ...aiState.get().messages,
-            {
-              id: nanoid(),
-              role: "assistant",
-              content: [
-                {
-                  type: "tool-call",
-                  toolName: "getPlaceSuggestions",
-                  toolCallId,
-                  args,
-                },
-              ],
-            },
-            {
-              id: nanoid(),
-              role: "tool",
-              content: [
-                {
-                  type: "tool-result",
-                  toolName: "getPlaceSuggestions",
-                  toolCallId,
-                  result: props,
-                },
-              ],
-            },
-          ],
-        });
+      const props = {
+        suggestions,
+        query,
+      };
 
-        return <PlaceSuggestionsUI {...props} />;
-      } catch (error) {
-        console.error("Failed to fetch place suggestions:", error);
-        return <div>Failed to fetch place suggestions. Please try again.</div>;
-      }
+      aiState.done({
+        ...aiState.get(),
+        messages: [
+          ...aiState.get().messages,
+          {
+            id: nanoid(),
+            role: "assistant",
+            content: [
+              {
+                type: "tool-call",
+                toolName: "getPlaceSuggestions",
+                toolCallId,
+                args,
+              },
+            ],
+          },
+          {
+            id: nanoid(),
+            role: "tool",
+            content: [
+              {
+                type: "tool-result",
+                toolName: "getPlaceSuggestions",
+                toolCallId,
+                result: props,
+              },
+            ],
+          },
+        ],
+      });
+
+      return <PlaceSuggestionsUI {...props} />;
     },
   };
 }

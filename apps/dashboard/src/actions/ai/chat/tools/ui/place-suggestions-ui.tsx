@@ -17,8 +17,10 @@ export function PlaceSuggestionsUI({ suggestions, query }: Props) {
   }
 
   return (
-    <BotCard>
-      <h3 className="text-sm font-semibold mb-2">Suggestions for "{query}":</h3>
+    <BotCard className="font-sans space-y-4">
+      <p className="font-mono">
+        Here are some place suggestions for "{query}":
+      </p>
       <ul className="space-y-2">
         {suggestions.map((place) => (
           <li key={place.id} className="text-sm">
