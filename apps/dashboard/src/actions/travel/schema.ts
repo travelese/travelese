@@ -1,6 +1,43 @@
 import { z } from "zod";
 import { CABIN_CLASSES, DUFFEL_PASSENGER_TYPES } from "./constants";
 
+export const changeTravelTypeSchema = z.enum([
+  "return",
+  "one_way",
+  "multi_city",
+  "nomad",
+]);
+
+export const changeTravelCabinSchema = z.enum([
+  "economy",
+  "premium_economy",
+  "business",
+  "first_class",
+]);
+
+export const changeTravelPassengerSchema = z.enum([
+  "adult",
+  "child",
+  "infant_without_seat",
+]);
+
+export const changeTravelLuggageSchema = z.enum(["cabin", "checked"]);
+
+export const changeTravelPeriodSchema = z.object({
+  from: z.string(),
+  to: z.string().optional(),
+});
+
+const travelTypeSchema = z.enum(["one_way", "return", "multi_city", "nomad"]);
+
+export const createTravelShareSchema = z.object({
+  baseUrl: z.string().url(),
+  from: z.string(),
+  to: z.string(),
+  type: travelTypeSchema,
+  expiresAt: z.string().datetime().optional(),
+});
+
 export const createOfferRequestSchema = z.object({
   parsedInput: z.object({
     slices: z.array(

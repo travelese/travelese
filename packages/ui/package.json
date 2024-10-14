@@ -76,7 +76,9 @@
     "./use-toast": "./src/components/use-toast.tsx",
     "./cn": "./src/utils/cn.ts",
     "./truncate": "./src/utils/truncate.ts",
-    "./hooks": "./src/hooks/index.ts"
+    "./hooks": "./src/hooks/index.ts",
+    "./slider": "./src/components/slider.tsx",
+    "./badge": "./src/components/badge.tsx"
   },
   "dependencies": {
     "@mui/icons-material": "^6.1.0",
@@ -98,6 +100,7 @@
     "@radix-ui/react-scroll-area": "^1.1.0",
     "@radix-ui/react-select": "^2.1.1",
     "@radix-ui/react-separator": "^1.1.0",
+    "@radix-ui/react-slider": "^1.2.1",
     "@radix-ui/react-slot": "^1.1.0",
     "@radix-ui/react-switch": "^1.1.0",
     "@radix-ui/react-tabs": "^1.1.0",

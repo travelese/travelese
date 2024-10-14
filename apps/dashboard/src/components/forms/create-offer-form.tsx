@@ -8,7 +8,6 @@ import { createBatchOfferRequestAction } from "@/actions/travel/flights/create-b
 import { createOfferRequestAction } from "@/actions/travel/flights/create-offer-request-action";
 import { createPartialOfferRequestAction } from "@/actions/travel/flights/create-partial-offer-request-action";
 import { createOfferRequestSchema } from "@/actions/travel/schema";
-import { Counter } from "@/components/counter";
 import LocationSelector from "@/components/location-selector";
 import Calendar from "@/components/travel-calendar";
 import { logger } from "@/utils/logger";
@@ -24,6 +23,7 @@ import {
 } from "@travelese/ui/form";
 import { Icons } from "@travelese/ui/icons";
 import { Popover, PopoverContent, PopoverTrigger } from "@travelese/ui/popover";
+import { SubmitButton } from "@travelese/ui/submit-button";
 import { useToast } from "@travelese/ui/use-toast";
 import { addDays, format, isBefore, startOfDay } from "date-fns";
 import { useAction } from "next-safe-action/hooks";
@@ -198,229 +198,9 @@ export default function CreateOfferForm() {
   const tripType = form.watch("tripType");
 
   return (
-    <div className="p-6 bg-background border shadow-sm">
+    <div className="p-3 bg-background shadow-sm">
       <Form {...form}>
         <form onSubmit={form.handleSubmit(handleCreateOfferRequest)}>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-4">
-            <FormField
-              control={form.control}
-              name="tripType"
-              render={({ field }) => (
-                <FormItem>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <FormControl>
-                        <Button
-                          variant="outline"
-                          role="combobox"
-                          className="w-full justify-between"
-                        >
-                          <Icons.Airports className="h-4 w-4 mr-2" />
-                          <span className="flex-grow text-left">
-                            {field.value.charAt(0).toUpperCase() +
-                              field.value.slice(1).replace("_", " ")}
-                          </span>
-                          <Icons.ChevronDown className="h-4 w-4 ml-2" />
-                        </Button>
-                      </FormControl>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-[200px] p-0">
-                      {["return", "one_way", "multi_city", "nomad"].map(
-                        (type) => (
-                          <Button
-                            key={type}
-                            variant="ghost"
-                            className="w-full justify-start"
-                            onClick={() => {
-                              field.onChange(type);
-                              if (type === "one_way") {
-                                form.setValue("parsedInput.slices", [
-                                  form.getValues("parsedInput.slices")[0],
-                                ]);
-                              } else if (
-                                type === "multi_city" ||
-                                type === "nomad"
-                              ) {
-                                setFlightSegments([
-                                  {
-                                    origin: "",
-                                    destination: "",
-                                    departure_date: "",
-                                  },
-                                ]);
-                                form.setValue("parsedInput.slices", [
-                                  {
-                                    origin: "",
-                                    destination: "",
-                                    departure_date: "",
-                                  },
-                                ]);
-                              }
-                            }}
-                          >
-                            {type.charAt(0).toUpperCase() +
-                              type.slice(1).replace("_", " ")}
-                          </Button>
-                        ),
-                      )}
-                    </PopoverContent>
-                  </Popover>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="parsedInput.cabin_class"
-              render={({ field }) => (
-                <FormItem>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <FormControl>
-                        <Button
-                          variant="outline"
-                          role="combobox"
-                          className="w-full justify-between"
-                        >
-                          <Icons.Cabin className="h-4 w-4 mr-2" />
-                          <span className="flex-grow text-left">
-                            {field.value.charAt(0).toUpperCase() +
-                              field.value.slice(1).replace("_", " ")}
-                          </span>
-                          <Icons.ChevronDown className="h-4 w-4 ml-2" />
-                        </Button>
-                      </FormControl>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-[200px] p-0">
-                      {Object.values(CABIN_CLASSES).map((classType) => (
-                        <Button
-                          key={classType}
-                          variant="ghost"
-                          className="w-full justify-start"
-                          onClick={() => field.onChange(classType)}
-                        >
-                          {classType.charAt(0).toUpperCase() +
-                            classType.slice(1).replace("_", " ")}
-                        </Button>
-                      ))}
-                    </PopoverContent>
-                  </Popover>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="parsedInput.passengers"
-              render={({ field }) => (
-                <FormItem>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <FormControl>
-                        <Button
-                          variant="outline"
-                          className="w-full justify-between"
-                        >
-                          <Icons.User className="h-4 w-4 mr-2" />
-                          <span className="flex-grow text-left">
-                            {totalPassengers}{" "}
-                            {totalPassengers === 1 ? "Passenger" : "Passengers"}
-                          </span>
-                          <Icons.ChevronDown className="h-4 w-4 ml-2" />
-                        </Button>
-                      </FormControl>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-60">
-                      <div className="grid gap-1">
-                        {Object.values(DUFFEL_PASSENGER_TYPES).map((type) => (
-                          <Counter
-                            key={type}
-                            label={
-                              type.charAt(0).toUpperCase() +
-                              type.slice(1).replace("_", " ")
-                            }
-                            subLabel=""
-                            value={
-                              field.value.filter((p: any) => p.type === type)
-                                .length
-                            }
-                            onIncrement={() => {
-                              field.onChange([...field.value, { type }]);
-                            }}
-                            onDecrement={() => {
-                              const index = field.value.findIndex(
-                                (p: any) => p.type === type,
-                              );
-                              if (index !== -1) {
-                                const newPassengers = [...field.value];
-                                newPassengers.splice(index, 1);
-                                field.onChange(newPassengers);
-                              }
-                            }}
-                          />
-                        ))}
-                      </div>
-                    </PopoverContent>
-                  </Popover>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="parsedInput.bags"
-              render={({ field }) => (
-                <FormItem>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <FormControl>
-                        <Button
-                          variant="outline"
-                          className="w-full justify-between"
-                        >
-                          <Icons.Luggage className="h-4 w-4 mr-2" />
-                          <span className="flex-grow text-left">
-                            {field.value || 0}{" "}
-                            {field.value === 1 ? "Bag" : "Bags"}
-                          </span>
-                          <Icons.ChevronDown className="h-4 w-4 ml-2" />
-                        </Button>
-                      </FormControl>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-60">
-                      <Counter
-                        label="Cabin"
-                        subLabel="baggage"
-                        value={field.value || 0}
-                        onIncrement={() =>
-                          field.onChange((field.value || 0) + 1)
-                        }
-                        onDecrement={() =>
-                          field.onChange(Math.max(0, (field.value || 0) - 1))
-                        }
-                      />
-                      <Counter
-                        label="Checked"
-                        subLabel="baggage"
-                        value={field.value || 0}
-                        onIncrement={() =>
-                          field.onChange((field.value || 0) + 1)
-                        }
-                        onDecrement={() =>
-                          field.onChange(Math.max(0, (field.value || 0) - 1))
-                        }
-                      />
-                    </PopoverContent>
-                  </Popover>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-
           <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-4">
             {tripType === "multi_city" || tripType === "nomad" ? (
               flightSegments.map((segment, index) => (
@@ -468,38 +248,6 @@ export default function CreateOfferForm() {
                             }}
                           />
                         </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name={`parsedInput.slices.${index}.departure_date`}
-                    render={({ field }) => (
-                      <FormItem className="flex flex-col">
-                        <Popover>
-                          <PopoverTrigger asChild>
-                            <FormControl>
-                              <Button
-                                variant="outline"
-                                className="w-full justify-between pl-3 pr-2"
-                              >
-                                <Icons.Calendar className="h-4 w-4 mr-2" />
-                                {field.value}
-                                <Icons.ChevronDown className="h-4 w-4 ml-2" />
-                              </Button>
-                            </FormControl>
-                          </PopoverTrigger>
-                          <PopoverContent className="w-auto p-0" align="start">
-                            <Calendar
-                              onSelectDate={handleDateSelect(index)}
-                              onClose={() => {}}
-                              selectedDate={new Date(field.value)}
-                              onAdjustDate={handleDateAdjust(index)}
-                              minDate={today}
-                            />
-                          </PopoverContent>
-                        </Popover>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -579,93 +327,13 @@ export default function CreateOfferForm() {
                     </FormItem>
                   )}
                 />
-                <FormField
-                  control={form.control}
-                  name="parsedInput.slices.0.departure_date"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-col">
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <FormControl>
-                            <Button
-                              variant="outline"
-                              className="w-full justify-between pl-3 pr-2"
-                            >
-                              <Icons.Calendar className="h-4 w-4 mr-2" />
-                              {field.value}
-                              <Icons.ChevronDown className="h-4 w-4 ml-2" />
-                            </Button>
-                          </FormControl>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0" align="start">
-                          <Calendar
-                            onSelectDate={handleDateSelect(0)}
-                            onClose={() => {}}
-                            selectedDate={new Date(field.value)}
-                            onAdjustDate={handleDateAdjust(0)}
-                            minDate={today}
-                          />
-                        </PopoverContent>
-                      </Popover>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                {tripType === "return" ? (
-                  <FormField
-                    control={form.control}
-                    name="parsedInput.slices.1.departure_date"
-                    render={({ field }) => (
-                      <FormItem className="flex flex-col">
-                        <Popover>
-                          <PopoverTrigger asChild>
-                            <FormControl>
-                              <Button
-                                variant="outline"
-                                className="w-full justify-between pl-3 pr-2"
-                              >
-                                <Icons.Calendar className="h-4 w-4 mr-2" />
-                                {field.value}
-                                <Icons.ChevronDown className="h-4 w-4 ml-2" />
-                              </Button>
-                            </FormControl>
-                          </PopoverTrigger>
-                          <PopoverContent className="w-auto p-0" align="start">
-                            <Calendar
-                              onSelectDate={handleDateSelect(1)}
-                              onClose={() => {}}
-                              selectedDate={new Date(field.value)}
-                              onAdjustDate={handleDateAdjust(1)}
-                              minDate={
-                                new Date(
-                                  form.getValues(
-                                    "parsedInput.slices.0.departure_date",
-                                  ),
-                                )
-                              }
-                            />
-                          </PopoverContent>
-                        </Popover>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                ) : (
-                  <div /> // Empty div to maintain grid layout
-                )}
-                <Button
+                <SubmitButton
                   type="submit"
-                  size="icon"
                   disabled={isSearching}
-                  onClick={isSearching ? handleStopSearch : undefined}
-                  className="w-10 h-10"
+                  isSubmitting={isSearching}
                 >
-                  {isSearching ? (
-                    <Icons.Loader className="h-4 w-4 animate-spin" />
-                  ) : (
-                    <Icons.Travel className="h-4 w-4" />
-                  )}
-                </Button>
+                  Search
+                </SubmitButton>
               </>
             )}
           </div>

@@ -1,6 +1,7 @@
 "use client";
 
 import { FlightsModal } from "@/components/modals/flights-modal";
+import { Badge } from "@travelese/ui/badge";
 import { Button } from "@travelese/ui/button";
 import { Dialog, DialogTrigger } from "@travelese/ui/dialog";
 import { Separator } from "@travelese/ui/separator";
@@ -99,7 +100,7 @@ export function FlightsList() {
   };
 
   return (
-    <div className="mb-16">
+    <>
       {flight && (
         <TooltipProvider>
           <div className="space-y-4">
@@ -146,11 +147,12 @@ export function FlightsList() {
               <span>{flight.outbound.departureTime}</span>
               <span>{flight.outbound.arrivalTime}</span>
             </div>
-            <Separator className="my-2" />
-            <div className="text-sm text-center my-2">
+            <Badge
+              variant="secondary"
+              className="text-sm text-center my-2 justify-center"
+            >
               {flight.stayDuration}
-            </div>
-            <Separator className="my-2" />
+            </Badge>
             <div className="flex justify-between items-center">
               <span className="text-sm">{flight.inbound.date} • Inbound</span>
               <Tooltip>
@@ -239,6 +241,6 @@ export function FlightsList() {
           </div>
         </TooltipProvider>
       )}
-    </div>
+    </>
   );
 }
