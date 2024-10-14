@@ -130,6 +130,7 @@ import {
   MdTravelExplore,
   MdTrendingDown,
   MdTrendingUp,
+  MdDownloading,
 } from "react-icons/md";
 import { PiDiscordLogo } from "react-icons/pi";
 
@@ -676,4 +677,5 @@ export const Icons = {
   Clock: MdAlarm,
   Location: MdOutlineLocationOn,
   Loader: FiLoader,
+  ProjectStatus: MdDownloading,
 };

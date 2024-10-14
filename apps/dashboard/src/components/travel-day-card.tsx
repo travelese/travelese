@@ -8,7 +8,7 @@ import {
 } from "@travelese/ui/hover-card";
 import { format, isSameDay } from "date-fns";
 
-export function TrackerDayCard({
+export function TravelDayCard({
   date,
   data,
   outOfRange,

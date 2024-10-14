@@ -85,7 +85,7 @@ export function Footer({ baseUrl }: Props) {
               </Link>
             </Row>
 
-            <Row className="mb-1.5">
+            {/* <Row className="mb-1.5">
               <Link
                 className="text-[#707070] text-[14px]"
                 href="https://go.travelese.ai/hhYt47S"
@@ -101,7 +101,7 @@ export function Footer({ baseUrl }: Props) {
               >
                 Download
               </Link>
-            </Row>
+            </Row> */}
           </Section>
         }
         columnOneStyles={{ paddingRight: 0, paddingLeft: 0, width: 185 }}
@@ -151,14 +151,14 @@ export function Footer({ baseUrl }: Props) {
               </Link>
             </Row>
 
-            <Row className="mb-1.5">
+            {/* <Row className="mb-1.5">
               <Link
                 className="text-[#707070] text-[14px]"
                 href="https://go.travelese.ai/wXccEF50"
               >
                 Branding
               </Link>
-            </Row>
+            </Row> */}
 
             <Row className="mb-1.5">
               <Link
@@ -200,14 +200,14 @@ export function Footer({ baseUrl }: Props) {
                 Open startup
               </Link>
             </Row>
-            <Row className="mb-1.5">
+            {/* <Row className="mb-1.5">
               <Link
                 className="text-[#707070] text-[14px]"
                 href="https://go.travelese.ai/rZrELLy"
               >
                 OSS Friends
               </Link>
-            </Row>
+            </Row> */}
           </Section>
         }
         columnThreeStyles={{ paddingRight: 0, paddingLeft: 0, width: 185 }}

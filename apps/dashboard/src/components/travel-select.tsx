@@ -12,7 +12,7 @@ import {
 } from "date-fns";
 import { useHotkeys } from "react-hotkeys-hook";
 
-export function TrackerSelect({ date, className, onSelect, disableKeyboard }) {
+export function TravelSelect({ date, className, onSelect, disableKeyboard }) {
   const currentDate = date ? new Date(date) : new Date();
 
   const selectPrevMonth = () => {

@@ -1,7 +1,7 @@
 import CreateOfferForm from "@/components/forms/create-offer-form";
 import { TravelSelectors } from "@/components/travel/travel-selectors";
 import { Cookies } from "@/utils/constants";
-import { startOfMonth, startOfYear, subMonths } from "date-fns";
+import { addWeeks } from "date-fns";
 import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import { TravelResults } from "./tavel-results";
@@ -11,21 +11,36 @@ export const metadata: Metadata = {
 };
 
 const defaultValue = {
-  from: subMonths(startOfMonth(new Date()), 12).toISOString(),
-  to: new Date().toISOString(),
+  from: new Date().toISOString(),
+  to: addWeeks(new Date(), 1).toISOString(),
   period: "weekly",
 };
 
-export default async function Travel() {
+export default async function Travel({ searchParams }) {
   const travelType = cookies().get(Cookies.TravelType)?.value ?? "return";
+
+  const initialPeriod = cookies().has(Cookies.TravelPeriod)
+    ? JSON.parse(cookies().get(Cookies.TravelPeriod)?.value ?? "trip")
+    : {
+        id: "this_week",
+        from: new Date().toISOString(),
+        to: addWeeks(new Date(), 1).toISOString(),
+      };
+
+  const value = {
+    ...(searchParams.from && { from: searchParams.from }),
+    ...(searchParams.to && { to: searchParams.to }),
+  };
 
   return (
     <>
-      <div className="h-[180px] mb-4">
-        <TravelSelectors defaultValue={defaultValue} />
+      <div>
+        <div className="h-[180px] mb-4">
+          <TravelSelectors defaultValue={defaultValue} />
 
-        <div className="mt-8 relative">
-          <CreateOfferForm />
+          <div className="mt-8 relative">
+            <CreateOfferForm />
+          </div>
         </div>
       </div>
 

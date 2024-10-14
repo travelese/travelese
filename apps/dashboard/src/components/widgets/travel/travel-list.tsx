@@ -1,20 +1,15 @@
 "use client";
 
-import { FlightsModal } from "@/components/modals/flights-modal";
 import { Badge } from "@travelese/ui/badge";
-import { Button } from "@travelese/ui/button";
-import { Dialog, DialogTrigger } from "@travelese/ui/dialog";
-import { Separator } from "@travelese/ui/separator";
+import { Icons } from "@travelese/ui/icons";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@travelese/ui/tooltip";
-import { motion } from "framer-motion";
 import {
   ArrowRight,
-  ChevronDown,
   Maximize2,
   MonitorPlay,
   Power,
@@ -22,15 +17,12 @@ import {
   Ruler,
   Wifi,
 } from "lucide-react";
-import { useState } from "react";
 
-export function FlightsWidgetSkeleton() {
+export function TravelListSkeleton() {
   return null;
 }
 
-export function FlightsList() {
-  const [isModalOpen, setIsModalOpen] = useState(false);
-
+export function TravelList() {
   const flight = {
     outbound: {
       date: "Thu 14 Nov",
@@ -147,12 +139,11 @@ export function FlightsList() {
               <span>{flight.outbound.departureTime}</span>
               <span>{flight.outbound.arrivalTime}</span>
             </div>
-            <Badge
-              variant="secondary"
-              className="text-sm text-center my-2 justify-center"
-            >
-              {flight.stayDuration}
-            </Badge>
+            <div className="flex justify-center my-2">
+              <Badge variant="secondary" className="text-sm text-center">
+                {flight.stayDuration}
+              </Badge>
+            </div>
             <div className="flex justify-between items-center">
               <span className="text-sm">{flight.inbound.date} • Inbound</span>
               <Tooltip>
@@ -196,48 +187,6 @@ export function FlightsList() {
               <span>{flight.inbound.departureTime}</span>
               <span>{flight.inbound.arrivalTime}</span>
             </div>
-          </div>
-          <div className="space-y-4 flex justify-between items-center">
-            <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-              <DialogTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="text-zinc-300 hover:text-zinc-100 rounded-none"
-                >
-                  <ChevronDown className="h-4 w-4" />
-                </Button>
-              </DialogTrigger>
-              <FlightsModal
-                flight={flight}
-                onClose={() => setIsModalOpen(false)}
-              />
-            </Dialog>
-            <motion.div
-              className="relative w-24 h-10"
-              whileHover={{ rotateX: 180 }}
-              style={{ transformStyle: "preserve-3d" }}
-            >
-              <motion.div
-                className="absolute w-full h-full flex items-center justify-center bg-zinc-700 text-zinc-100 rounded-none"
-                style={{ backfaceVisibility: "hidden" }}
-              >
-                {flight.currency}
-                {flight.price}
-              </motion.div>
-              <motion.div
-                className="absolute w-full h-full flex items-center justify-center bg-zinc-600 text-zinc-100 rounded-none"
-                style={{ backfaceVisibility: "hidden", rotateX: 180 }}
-              >
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="rounded-none w-full h-full"
-                >
-                  Select
-                </Button>
-              </motion.div>
-            </motion.div>
           </div>
         </TooltipProvider>
       )}

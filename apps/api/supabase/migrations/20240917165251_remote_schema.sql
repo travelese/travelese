@@ -2099,4 +2099,3 @@ CREATE TRIGGER trigger_calculate_transaction_base_amount_before_insert BEFORE IN
 
 CREATE TRIGGER enrich_transaction BEFORE INSERT ON public.transactions FOR EACH ROW EXECUTE FUNCTION update_enrich_transaction();
 
-
