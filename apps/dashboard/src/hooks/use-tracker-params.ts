@@ -25,8 +25,6 @@ export function useTrackerParams(initialDate?: string) {
     end: parseAsString,
   });
 
-  logger("Current tracker params", params);
-
   return {
     ...params,
     setParams,

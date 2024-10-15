@@ -4,7 +4,7 @@ import { TriggerClient } from "@trigger.dev/sdk";
 import { Supabase, SupabaseManagement } from "@trigger.dev/supabase";
 
 export const client = new TriggerClient({
-  id: "travelese-iso3",
+  id: "travelese-dashboard-dy6W",
   apiKey: process.env.TRIGGER_API_KEY,
   apiUrl: process.env.TRIGGER_API_URL,
 });

@@ -10,7 +10,7 @@ import {
   CommandItem,
   CommandList,
 } from "./command";
-import { Icons } from "./icons copy";
+import { Icons } from "./icons";
 
 export type Option = Record<"id" | "name", string> & Record<string, string>;
 

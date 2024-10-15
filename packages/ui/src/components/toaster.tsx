@@ -1,7 +1,7 @@
 "use client";
 
 import { Loader2 } from "lucide-react";
-import { Icons } from "./icons copy";
+import { Icons } from "./icons";
 import { Progress } from "./progress";
 import {
   Toast,

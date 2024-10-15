@@ -2087,7 +2087,7 @@ CREATE TRIGGER trigger_calculate_bank_account_base_balance_before_insert BEFORE 
 
 CREATE TRIGGER trigger_calculate_bank_account_base_balance_before_update BEFORE UPDATE OF balance ON public.bank_accounts FOR EACH ROW WHEN ((old.balance IS DISTINCT FROM new.balance)) EXECUTE FUNCTION calculate_bank_account_base_balance();
 
-CREATE TRIGGER embed_document AFTER INSERT ON public.documents FOR EACH ROW EXECUTE FUNCTION supabase_functions.http_request('https://pytddvqiozwrhfbwqazp.supabase.co/functions/v1/generate-document-embedding', 'POST', '{"Content-type":"application/json"}', '{}', '5000');
+CREATE TRIGGER embed_document AFTER INSERT ON public.documents FOR EACH ROW EXECUTE FUNCTION supabase_functions.http_request('https://jylavktzapdciiteepdf.supabase.co/functions/v1/generate-document-embedding', 'POST', '{"Content-type":"application/json"}', '{}', '5000');
 
 CREATE TRIGGER trigger_calculate_inbox_base_amount_before_update BEFORE UPDATE ON public.inbox FOR EACH ROW WHEN ((old.amount IS DISTINCT FROM new.amount)) EXECUTE FUNCTION calculate_inbox_base_amount();
 

@@ -95,17 +95,13 @@ export function TrackerCalendar({
   };
 
   const handleMouseUp = () => {
-    logger("handleMouseUp called", { localRange, isDragging });
     setIsDragging(false);
     if (localRange[0] && localRange[1]) {
       let start = new TZDate(localRange[0], "UTC");
       let end = new TZDate(localRange[1], "UTC");
       if (start > end) [start, end] = [end, start];
-
-      logger("Setting range", { range: [localRange[0], localRange[1]] });
       setParams({ range: [localRange[0], localRange[1]] });
     } else if (localRange[0]) {
-      logger("Setting selectedDate", { selectedDate: localRange[0] });
       setParams({ selectedDate: localRange[0] });
     }
     setLocalRange(["", null]);

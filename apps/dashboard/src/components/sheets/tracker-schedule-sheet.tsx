@@ -30,15 +30,6 @@ export function TrackerScheduleSheet({
     !create &&
     (Boolean(projectId) || range?.length === 2 || Boolean(selectedDate));
 
-  logger("TrackerScheduleSheet state", {
-    update,
-    create,
-    projectId,
-    range,
-    selectedDate,
-    isOpen,
-  });
-
   if (isDesktop) {
     return (
       <Sheet

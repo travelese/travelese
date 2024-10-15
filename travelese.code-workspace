@@ -8,6 +8,7 @@
     "files.exclude": {
       "packages/supabase/functions/": true
     },
-    "github-actions.workflows.pinned.workflows": []
+    "github-actions.workflows.pinned.workflows": [],
+    "deno.enable": false
   }
 }

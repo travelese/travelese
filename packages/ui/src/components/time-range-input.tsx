@@ -2,7 +2,7 @@
 
 import { differenceInMinutes, parse } from "date-fns";
 import { useEffect, useState } from "react";
-import { Icons } from "./icons copy";
+import { Icons } from "./icons";
 
 export function TimeRangeInput({
   value,

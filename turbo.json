@@ -31,7 +31,7 @@
         "BASELIME_SERVICE",
         "BASELIME_API_KEY",
         "OPENAI_API_KEY",
-        "MISTRAL_API_KEY",
+        "GROG_API_KEY",
         "OPENPANEL_SECRET_KEY",
         "SENTRY_AUTH_TOKEN",
         "SENTRY_ORG",
