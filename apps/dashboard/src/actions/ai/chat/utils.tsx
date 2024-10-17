@@ -2,8 +2,7 @@ import { BotMessage, UserMessage } from "@/components/chat/messages";
 import type { Chat } from "../types";
 import { BurnRateUI } from "./tools/ui/burn-rate-ui";
 import { DocumentsUI } from "./tools/ui/documents-ui";
-import { OfferRequestUI } from "./tools/ui/offer-request-ui";
-import { PlaceSuggestionsUI } from "./tools/ui/place-suggestions-ui";
+import { FlightsUI } from "./tools/ui/flights-ui";
 import { ProfitUI } from "./tools/ui/profit-ui";
 import { ReportUI } from "./tools/ui/report-ui";
 import { RevenueUI } from "./tools/ui/revenue-ui";
@@ -58,12 +57,8 @@ function getUIComponentFromMessage(message) {
           return <RevenueUI {...tool.result} />;
         }
 
-        case "getPlaceSuggestions": {
-          return <PlaceSuggestionsUI {...tool.result} />;
-        }
-
-        case "createOfferRequest": {
-          return <OfferRequestUI offerRequest={tool.result} />;
+        case "searchFlights": {
+          return <FlightsUI offerRequest={tool.result} />;
         }
 
         default:

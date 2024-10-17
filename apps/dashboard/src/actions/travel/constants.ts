@@ -1,3 +1,9 @@
+export const TRAVEL_TYPES = {
+  ONE_WAY: "one_way",
+  RETURN: "return",
+  MULTI_CITY: "multi_city",
+} as const;
+
 export const CABIN_CLASSES = {
   FIRST: "first",
   BUSINESS: "business",

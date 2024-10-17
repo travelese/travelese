@@ -2,29 +2,32 @@ import type { MutableAIState } from "@/actions/ai/types";
 import { createOfferRequestAction } from "@/actions/travel/flights/create-offer-request-action";
 import { listPlaceSuggestionsAction } from "@/actions/travel/supporting-resources/list-place-suggestions-action";
 import type { Offer } from "@duffel/api/types";
+import { addWeeks, formatISO } from "date-fns";
 import { nanoid } from "nanoid";
 import { z } from "zod";
-import { OfferRequestUI } from "./ui/offer-request-ui";
+import { FlightsUI } from "./ui/flights-ui";
+
 type Args = {
   aiState: MutableAIState;
 };
 
-export function createOfferRequestTool({ aiState }: Args) {
+export function searchFlights({ aiState }: Args) {
   return {
-    description: "Create a flight offer request",
+    description: "Search for flights",
     parameters: z.object({
       origin: z.string().describe("Origin city or airport"),
       destination: z.string().describe("Destination city or airport"),
       departure_date: z
-        .string()
-        .optional()
-        .describe("Departure date in YYYY-MM-DD format (optional)"),
+        .date()
+        .transform((date) => formatISO(date, { representation: "date" }))
+        .describe("Departure date"),
       return_date: z
-        .string()
+        .date()
         .optional()
-        .describe(
-          "Return date in YYYY-MM-DD format (optional for one-way flights)",
-        ),
+        .transform(
+          (date) => date && formatISO(date, { representation: "date" }),
+        )
+        .describe("Return date"),
       adults: z.number().default(1).describe("Number of adult passengers"),
       children: z.number().default(0).describe("Number of child passengers"),
       infants: z.number().default(0).describe("Number of infant passengers"),
@@ -64,11 +67,7 @@ export function createOfferRequestTool({ aiState }: Args) {
       }
 
       // Set departure date to next week if not provided
-      const departureDate =
-        departure_date ||
-        new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
-          .toISOString()
-          .split("T")[0];
+      const departureDate = departure_date || new Date(addWeeks(new Date(), 1));
 
       const passengers = [
         ...Array(adults).fill({ type: "adult" }),
@@ -155,7 +154,7 @@ export function createOfferRequestTool({ aiState }: Args) {
         ],
       });
 
-      return <OfferRequestUI offerRequest={props} />;
+      return <FlightsUI offerRequest={props} />;
     },
   };
 }

@@ -6,10 +6,15 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@travelese/ui/carousel";
+import { formatISO } from "date-fns";
 import React from "react";
-
 export function TravelResults() {
-  const items = [<Travel key="travel-widget" />];
+  const items = [
+    <Travel
+      key="travel-widget"
+      date={formatISO(new Date(), { representation: "date" })}
+    />,
+  ];
 
   return (
     <Carousel

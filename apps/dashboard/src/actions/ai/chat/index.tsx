@@ -18,16 +18,15 @@ import { headers } from "next/headers";
 import { getAssistantSettings, saveChat } from "../storage";
 import type { AIState, Chat, ClientMessage, UIState } from "../types";
 import { getBurnRateTool } from "./tools/burn-rate";
-import { createOfferRequestTool } from "./tools/create-offer-request";
 import { getForecastTool } from "./tools/forecast";
 import { getDocumentsTool } from "./tools/get-documents";
 import { getInvoicesTool } from "./tools/get-invoces";
 import { getTransactionsTool } from "./tools/get-transactions";
-import { getPlaceSuggestionsTools } from "./tools/list-place-suggestions";
 import { getProfitTool } from "./tools/profit";
 import { createReport } from "./tools/report";
 import { getRevenueTool } from "./tools/revenue";
 import { getRunwayTool } from "./tools/runway";
+import { searchFlights } from "./tools/search-flights";
 import { getSpendingTool } from "./tools/spending";
 
 const ratelimit = new Ratelimit({
@@ -99,8 +98,7 @@ export async function submitUserMessage(
     initial: <SpinnerMessage />,
     system: `\
       You are a helpful assistant in Travelese who can help travellers explore destinations, find the best flights and stays/hotels, and more.
-      If the user wants to find place suggestions for travel, call \`getPlaceSuggestions\` function.
-      If the user wants to search for flights, call \`createOfferRequestTool\` function with the following parameters:
+      If the user wants to search for flights, call \`searchFlights\` function with the following parameters:
       - origin: IATA code of the departure airport
       - destination: IATA code of the arrival airport
       - departure_date: in YYYY-MM-DD format
@@ -194,11 +192,7 @@ export async function submitUserMessage(
         dateFrom: defaultValues.from,
         dateTo: defaultValues.to,
       }),
-      getPlaceSuggestions: getPlaceSuggestionsTools({
-        aiState,
-        query: content,
-      }),
-      createOfferRequest: createOfferRequestTool({ aiState }),
+      searchFlights: searchFlights({ aiState }),
     },
   });
 

@@ -20,6 +20,7 @@ import {
   MdClose,
   MdCloudQueue,
   MdDescription,
+  MdDownloading,
   MdDriveFileMove,
   MdEditCalendar,
   MdErrorOutline,
@@ -41,6 +42,7 @@ import {
   MdLocalHotel,
   MdLocationCity,
   MdMenu,
+  MdModeOfTravel,
   MdMoreHoriz,
   MdOutlineAccountBalance,
   MdOutlineAccountCircle,
@@ -130,7 +132,6 @@ import {
   MdTravelExplore,
   MdTrendingDown,
   MdTrendingUp,
-  MdDownloading,
 } from "react-icons/md";
 import { PiDiscordLogo } from "react-icons/pi";
 
@@ -678,4 +679,5 @@ export const Icons = {
   Location: MdOutlineLocationOn,
   Loader: FiLoader,
   ProjectStatus: MdDownloading,
+  ModeOfTravel: MdModeOfTravel,
 };

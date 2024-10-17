@@ -1,4 +1,4 @@
-import CreateOfferForm from "@/components/forms/create-offer-form";
+import SearchFlightsForm from "@/components/forms/search-flights-form";
 import { TravelSelectors } from "@/components/travel/travel-selectors";
 import { Cookies } from "@/utils/constants";
 import { addWeeks } from "date-fns";
@@ -17,10 +17,10 @@ const defaultValue = {
 };
 
 export default async function Travel({ searchParams }) {
-  const travelType = cookies().get(Cookies.TravelType)?.value ?? "return";
+  const travelMode = cookies().get(Cookies.TravelMode)?.value ?? "flights";
 
   const initialPeriod = cookies().has(Cookies.TravelPeriod)
-    ? JSON.parse(cookies().get(Cookies.TravelPeriod)?.value ?? "trip")
+    ? JSON.parse(cookies().get(Cookies.TravelPeriod)?.value)
     : {
         id: "this_week",
         from: new Date().toISOString(),
@@ -35,11 +35,11 @@ export default async function Travel({ searchParams }) {
   return (
     <>
       <div>
-        <div className="h-[180px] mb-4">
+        <div className="h-[530px] mb-4">
           <TravelSelectors defaultValue={defaultValue} />
 
           <div className="mt-8 relative">
-            <CreateOfferForm />
+            <SearchFlightsForm />
           </div>
         </div>
       </div>

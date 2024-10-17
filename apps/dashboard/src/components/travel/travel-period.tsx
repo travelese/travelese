@@ -13,7 +13,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@travelese/ui/select";
-import { addMonths, formatISO, subWeeks } from "date-fns";
+import {
+  formatISO,
+  startOfMonth,
+  startOfYear,
+  subMonths,
+  subWeeks,
+} from "date-fns";
 import { formatDateRange } from "little-date";
 import { useAction } from "next-safe-action/hooks";
 import { parseAsString, useQueryStates } from "nuqs";
@@ -28,23 +34,55 @@ type Props = {
 
 const periods = [
   {
-    value: "1w",
-    label: "This week",
+    value: "4w",
+    label: "Last 4 weeks",
     range: {
-      from: subWeeks(new Date(), 1),
+      from: subWeeks(new Date(), 4),
       to: new Date(),
     },
   },
   {
-    value: "1m",
-    label: "Next month",
+    value: "3m",
+    label: "Last 3 months",
     range: {
-      from: addMonths(new Date(), 1),
+      from: subMonths(new Date(), 3),
+      to: new Date(),
+    },
+  },
+  {
+    value: "12m",
+    label: "Last 12 months",
+    range: {
+      from: subMonths(new Date(), 12),
+      to: new Date(),
+    },
+  },
+  {
+    value: "mtd",
+    label: "Month to date",
+    range: {
+      from: startOfMonth(new Date()),
+      to: new Date(),
+    },
+  },
+  {
+    value: "ytd",
+    label: "Year to date",
+    range: {
+      from: startOfYear(new Date()),
+      to: new Date(),
+    },
+  },
+  {
+    value: "all",
+    label: "All time",
+    range: {
+      // Can't get older data than this
+      from: new Date("2020-01-01"),
       to: new Date(),
     },
   },
 ];
-
 export function TravelPeriod({ defaultValue, disabled }: Props) {
   const { execute } = useAction(changeTravelPeriodAction);
 
@@ -133,9 +171,11 @@ export function TravelPeriod({ defaultValue, disabled }: Props) {
               from: params.from && new Date(params.from),
               to: params.to && new Date(params.to),
             }}
-            defaultMonth={new Date(new Date().setMonth(new Date().getMonth()))}
+            defaultMonth={
+              new Date(new Date().setMonth(new Date().getMonth() - 1))
+            }
             initialFocus
-            fromDate={new Date()}
+            toDate={new Date()}
             onSelect={handleChangePeriod}
           />
         </PopoverContent>

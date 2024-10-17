@@ -98,6 +98,10 @@ export default {
     loan: "Loan",
     other_liability: "Other Liability",
   },
+  travel_mode: {
+    flights: "Flights",
+    stays: "Stays",
+  },
   travel_type: {
     return: "Return",
     one_way: "One way",

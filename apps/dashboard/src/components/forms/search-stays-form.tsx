@@ -64,7 +64,7 @@ const Counter: React.FC<CounterProps> = ({
   </div>
 );
 
-export default function SearchAccommodationForm() {
+export default function SearchStaysForm() {
   const { toast } = useToast();
   const [isSearching, setIsSearching] = useState(false);
 

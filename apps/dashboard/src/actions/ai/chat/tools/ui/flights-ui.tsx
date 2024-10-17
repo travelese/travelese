@@ -7,7 +7,7 @@ type Props = {
   };
 };
 
-export function OfferRequestUI({ offerRequest }: Props) {
+export function FlightsUI({ offerRequest }: Props) {
   return (
     <BotCard>
       <h3 className="text-lg font-semibold mb-2">Flight Options</h3>

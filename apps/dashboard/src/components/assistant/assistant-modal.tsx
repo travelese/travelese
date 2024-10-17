@@ -8,7 +8,7 @@ import { Assistant } from ".";
 export function AssistantModal() {
   const { isOpen, setOpen } = useAssistantStore();
 
-  useHotkeys("meta+k", () => setOpen(), {
+  useHotkeys("meta+t", () => setOpen(), {
     enableOnFormTags: true,
   });
 
