@@ -18,11 +18,12 @@ import { headers } from "next/headers";
 import { getAssistantSettings, saveChat } from "../storage";
 import type { AIState, Chat, ClientMessage, UIState } from "../types";
 import { getBurnRateTool } from "./tools/burn-rate";
+import { createOfferRequestTool } from "./tools/create-offer-request";
 import { getForecastTool } from "./tools/forecast";
 import { getDocumentsTool } from "./tools/get-documents";
 import { getInvoicesTool } from "./tools/get-invoces";
 import { getTransactionsTool } from "./tools/get-transactions";
-import { getPlaceSuggestionsTools } from "./tools/place-suggestions";
+import { getPlaceSuggestionsTools } from "./tools/list-place-suggestions";
 import { getProfitTool } from "./tools/profit";
 import { createReport } from "./tools/report";
 import { getRevenueTool } from "./tools/revenue";
@@ -46,7 +47,6 @@ export async function submitUserMessage(
   const aiState = getMutableAIState<typeof AI>();
 
   if (!success) {
-    logger("Rate limit exceeded", { ip });
     aiState.update({
       ...aiState.get(),
       messages: [
@@ -94,24 +94,32 @@ export async function submitUserMessage(
   let textStream: undefined | ReturnType<typeof createStreamableValue<string>>;
   let textNode: undefined | React.ReactNode;
 
-  logger("Calling OpenAI API");
   const result = await streamUI({
     model: openai("gpt-4o-mini"),
     initial: <SpinnerMessage />,
     system: `\
-    You are a helpful assistant in Travelese who can help travellers explore destinations, find the best flights and stays/hotels, and more.
-    If the user wants to find place suggestions for travel, call \`getPlaceSuggestions\` function.
-    If the user wants the burn rate, call \`getBurnRate\` function.
-    If the user wants the runway, call \`getRunway\` function.
-    If the user wants the profit, call \`getProfit\` function.
-    If the user wants to find transactions or expenses, call \`getTransactions\` function.
-    If the user wants to see spending based on a category, call \`getSpending\` function.
-    If the user wants to find invoices or receipts, call \`getInvoices\` function.
-    If the user wants to find documents, call \`getDocuments\` function.
+      You are a helpful assistant in Travelese who can help travellers explore destinations, find the best flights and stays/hotels, and more.
+      If the user wants to find place suggestions for travel, call \`getPlaceSuggestions\` function.
+      If the user wants to search for flights, call \`createOfferRequestTool\` function with the following parameters:
+      - origin: IATA code of the departure airport
+      - destination: IATA code of the arrival airport
+      - departure_date: in YYYY-MM-DD format
+      - return_date: in YYYY-MM-DD format (optional for one-way flights)
+      - adults: number of adult passengers
+      - children: number of child passengers
+      - infants: number of infant passengers
+      - cabin_class: economy, premium_economy, business, or first
+      If the user wants the burn rate, call \`getBurnRate\` function.
+      If the user wants the runway, call \`getRunway\` function.
+      If the user wants the profit, call \`getProfit\` function.
+      If the user wants to find transactions or expenses, call \`getTransactions\` function.
+      If the user wants to see spending based on a category, call \`getSpending\` function.
+      If the user wants to find invoices or receipts, call \`getInvoices\` function.
+      If the user wants to find documents, call \`getDocuments\` function.
 
-    Always try to call the functions with default values, otherwise ask the user to respond with parameters.
-    Current date is: ${new Date().toISOString().split("T")[0]} \n
-    `,
+      Always try to call the functions with default values, otherwise ask the user to respond with parameters.
+      Current date is: ${new Date().toISOString().split("T")[0]} \n
+      `,
     messages: [
       ...aiState.get().messages.map((message: any) => ({
         role: message.role,
@@ -139,7 +147,6 @@ export async function submitUserMessage(
             },
           ],
         });
-        logger("OpenAI API response completed", { content });
       } else {
         textStream.update(delta);
       }
@@ -187,11 +194,13 @@ export async function submitUserMessage(
         dateFrom: defaultValues.from,
         dateTo: defaultValues.to,
       }),
-      getPlaceSuggestions: getPlaceSuggestionsTools({ aiState }),
+      getPlaceSuggestions: getPlaceSuggestionsTools({
+        aiState,
+        query: content,
+      }),
+      createOfferRequest: createOfferRequestTool({ aiState }),
     },
   });
-
-  logger("OpenAI API call completed");
 
   return {
     id: nanoid(),

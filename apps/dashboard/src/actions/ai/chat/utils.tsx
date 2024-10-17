@@ -2,6 +2,7 @@ import { BotMessage, UserMessage } from "@/components/chat/messages";
 import type { Chat } from "../types";
 import { BurnRateUI } from "./tools/ui/burn-rate-ui";
 import { DocumentsUI } from "./tools/ui/documents-ui";
+import { OfferRequestUI } from "./tools/ui/offer-request-ui";
 import { PlaceSuggestionsUI } from "./tools/ui/place-suggestions-ui";
 import { ProfitUI } from "./tools/ui/profit-ui";
 import { ReportUI } from "./tools/ui/report-ui";
@@ -59,6 +60,10 @@ function getUIComponentFromMessage(message) {
 
         case "getPlaceSuggestions": {
           return <PlaceSuggestionsUI {...tool.result} />;
+        }
+
+        case "createOfferRequest": {
+          return <OfferRequestUI offerRequest={tool.result} />;
         }
 
         default:
