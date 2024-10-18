@@ -1,6 +1,8 @@
 import { z } from "zod";
 import { CABIN_CLASSES, DUFFEL_PASSENGER_TYPES } from "./constants";
 
+export const changeTravelModeSchema = z.enum(["flights", "stays"]);
+
 export const changeTravelTypeSchema = z.enum([
   "return",
   "one_way",

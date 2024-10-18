@@ -3,7 +3,6 @@
 import type { Places } from "@duffel/api/types";
 import { Button } from "@travelese/ui/button";
 import { Icons } from "@travelese/ui/icons";
-import { Input } from "@travelese/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@travelese/ui/popover";
 import * as React from "react";
 import { listPlaceSuggestionsAction } from "../actions/travel/supporting-resources/list-place-suggestions-action";
@@ -60,25 +59,12 @@ export default function LocationSelector({
   const updateSearchQuery = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newQuery = e.target.value;
     setSearchQuery(newQuery);
-    onChange(newQuery);
+    onChange(newQuery, "");
   };
 
   const clearSelection = () => {
     onChange("", "");
     setSearchQuery("");
-  };
-
-  const renderSelectedValue = () => {
-    const selectedPlace = places.find((p) =>
-      p.type === "city"
-        ? `${p.name} (${p.iata_code})` === value
-        : `${p.city_name} (${p.iata_code})` === value,
-    );
-    return selectedPlace
-      ? selectedPlace.type === "city"
-        ? `${selectedPlace.name} (${selectedPlace.iata_code})`
-        : `${selectedPlace.city_name} (${selectedPlace.iata_code})`
-      : value;
   };
 
   const renderPlaceList = (placeList: Places[], title: string) => (
@@ -128,52 +114,56 @@ export default function LocationSelector({
         ? Icons.FlightsArrival
         : Icons.City;
 
+  const displayValue = React.useMemo(() => {
+    const selectedPlace = places.find((p) => p.iata_code === value);
+    if (selectedPlace) {
+      return selectedPlace.type === "city"
+        ? `${selectedPlace.name} (${selectedPlace.iata_code})`
+        : `${selectedPlace.city_name} (${selectedPlace.iata_code})`;
+    }
+    return value || placeholder;
+  }, [value, places, placeholder]);
+
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
       <PopoverTrigger asChild>
-        <div className="relative">
-          {value ? (
-            <div className="flex items-center bg-background border border-input rounded-md px-3 py-2">
-              <TypeIcon className="h-4 w-4 mr-2" />
-              <span className="flex-grow">{renderSelectedValue()}</span>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-4 w-4 p-0"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  clearSelection();
-                }}
-              >
-                <Icons.Clear className="h-4 w-4" />
-              </Button>
-            </div>
-          ) : (
-            <Input
-              placeholder={placeholder}
-              className="pl-10 pr-4"
-              onClick={() => setIsOpen(true)}
-              readOnly
-            />
+        <Button
+          variant="outline"
+          role="combobox"
+          aria-expanded={isOpen}
+          className="w-full justify-start text-left font-normal"
+          onClick={() => setIsOpen(!isOpen)}
+        >
+          <TypeIcon className="mr-2 h-4 w-4 shrink-0" />
+          <span className="flex-grow truncate">{displayValue}</span>
+          {value && (
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-4 w-4 p-0 ml-2"
+              onClick={(e) => {
+                e.stopPropagation();
+                clearSelection();
+              }}
+            >
+              <Icons.Clear className="h-4 w-4" />
+            </Button>
           )}
-          {!value && (
-            <TypeIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4" />
-          )}
-        </div>
+        </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-100 p-0" align="start">
-        <div className="p-4 border-b">
+      <PopoverContent className="w-100 p-0">
+        <div className="p-2 border-border">
           <div className="relative">
-            <Input
+            <input
               placeholder="Search places..."
               value={searchQuery}
               onChange={updateSearchQuery}
-              className="pl-8"
+              className="pl-8 border-border"
             />
             <Icons.Search className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4" />
           </div>
         </div>
-        <div className="max-h-[300px] overflow-auto">
+        <div className="w-[300px] overflow-auto">
           {cities.length > 0 && renderPlaceList(cities, "Cities")}
           {airports.length > 0 && renderPlaceList(airports, "Airports")}
           {places.length === 0 && searchQuery.length > 0 && (

@@ -3,6 +3,7 @@ export const Cookies = {
   SpendingPeriod: "spending-period",
   ChartType: "chart-type",
   TravelType: "travel-type",
+  TravelMode: "travel-mode",
   TravelPeriod: "travel-period",
   TravelCabin: "travel-cabin",
   TravelPassenger: "travel-passenger",
