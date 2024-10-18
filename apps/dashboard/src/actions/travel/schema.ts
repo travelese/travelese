@@ -16,7 +16,7 @@ export const changeTravelCabinSchema = z.enum([
   "first_class",
 ]);
 
-export const changeTravelPassengerSchema = z.enum([
+export const changeTravelTravellerSchema = z.enum([
   "adult",
   "child",
   "infant_without_seat",

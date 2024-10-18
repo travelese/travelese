@@ -151,7 +151,7 @@ export function TravelLocation({
           )}
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-100 p-0">
+      <PopoverContent className="w-100 p-0" sideOffset={10}>
         <div className="p-2 border-border">
           <div className="relative">
             <input
