@@ -6,7 +6,7 @@ export const Cookies = {
   TravelMode: "travel-mode",
   TravelPeriod: "travel-period",
   TravelCabin: "travel-cabin",
-  TravelPassenger: "travel-passenger",
+  TravelTraveller: "travel-traveller",
   TravelLuggage: "travel-luggage",
   TransactionsPeriod: "transactions-period",
   TransactionsColumns: "transactions-columns",

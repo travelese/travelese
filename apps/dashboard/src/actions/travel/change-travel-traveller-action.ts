@@ -5,16 +5,16 @@ import { addYears } from "date-fns";
 import { revalidateTag } from "next/cache";
 import { cookies } from "next/headers";
 import { authActionClient } from "../safe-action";
-import { changeTravelPassengerSchema } from "./schema";
+import { changeTravelTravellerSchema } from "./schema";
 
-export const changeTravelPassengerAction = authActionClient
-  .schema(changeTravelPassengerSchema)
+export const changeTravelTravellerAction = authActionClient
+  .schema(changeTravelTravellerSchema)
   .metadata({
-    name: "change-travel-passenger",
+    name: "change-travel-traveller",
   })
   .action(async ({ parsedInput: value, ctx: { user } }) => {
     cookies().set({
-      name: Cookies.TravelPassenger,
+      name: Cookies.TravelTraveller,
       value,
       expires: addYears(new Date(), 1),
     });

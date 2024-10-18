@@ -6,7 +6,7 @@ import { Button } from "@travelese/ui/button";
 import { Icons } from "@travelese/ui/icons";
 import { Popover, PopoverContent, PopoverTrigger } from "@travelese/ui/popover";
 import { useOptimisticAction } from "next-safe-action/hooks";
-import { parseAsString, useQueryStates } from "nuqs";
+import { parseAsString, useQueryState } from "nuqs";
 
 const cabinClasses = [
   "economy",
@@ -23,9 +23,10 @@ type Props = {
 
 export function TravelCabin({ initialValue, disabled }: Props) {
   const t = useI18n();
-  const [{ cabinClass }, setQueryStates] = useQueryStates({
-    cabinClass: parseAsString.withDefault(initialValue),
-  });
+  const [cabinClass, setCabinClass] = useQueryState(
+    "cabinClass",
+    parseAsString.withDefault(initialValue),
+  );
 
   const { execute, optimisticState } = useOptimisticAction(
     changeTravelCabinAction,
@@ -35,9 +36,9 @@ export function TravelCabin({ initialValue, disabled }: Props) {
     },
   );
 
-  const cabinChange = (cabinClass: CabinClass) => {
-    setQueryStates({ cabinClass });
-    execute(cabinClass);
+  const cabinChange = (newCabinClass: CabinClass) => {
+    setCabinClass(newCabinClass);
+    execute(newCabinClass);
   };
 
   return (
@@ -55,7 +56,7 @@ export function TravelCabin({ initialValue, disabled }: Props) {
           <Icons.ChevronDown className="ml-2 h-4 w-4" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[225px]">
+      <PopoverContent className="w-[225px]" sideOffset={10}>
         {cabinClasses.map((cabinClass) => (
           <Button
             key={cabinClass}

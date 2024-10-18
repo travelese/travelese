@@ -1,3 +1,9 @@
+import {
+  Child,
+  Infant,
+  Passenger,
+  Passengers,
+} from "@kiwicom/orbit-components/icons";
 import { ArchiveIcon } from "@radix-ui/react-icons";
 import { FaXTwitter } from "react-icons/fa6";
 import { FiGithub, FiLoader } from "react-icons/fi";
@@ -184,14 +190,6 @@ export const Icons = {
       />
     </svg>
   ),
-  Overview: MdBarChart,
-  Apps: MdOutlineIntegrationInstructions,
-  Transactions: MdOutlineListAlt,
-  Invoice: MdOutlineDescription,
-  Files: MdOutlineInventory2,
-  X: FaXTwitter,
-  Discord: PiDiscordLogo,
-  GithubOutline: FiGithub,
   Apple: (props: any) => (
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -253,10 +251,6 @@ export const Icons = {
       />
     </svg>
   ),
-  Settings: MdOutlineSettings,
-  Travel: MdTravelExplore,
-  Inbox: ArchiveIcon,
-  Inbox2: MdOutlineInbox,
   Check: (props: any) => (
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -327,8 +321,6 @@ export const Icons = {
       />
     </svg>
   ),
-  Close: MdClose,
-  Remove: MdRemove,
   ChartGantt: (props: any) => (
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -560,6 +552,20 @@ export const Icons = {
       </g>
     </svg>
   ),
+  Overview: MdBarChart,
+  Apps: MdOutlineIntegrationInstructions,
+  Transactions: MdOutlineListAlt,
+  Invoice: MdOutlineDescription,
+  Files: MdOutlineInventory2,
+  X: FaXTwitter,
+  Discord: PiDiscordLogo,
+  GithubOutline: FiGithub,
+  Settings: MdOutlineSettings,
+  Travel: MdTravelExplore,
+  Inbox: ArchiveIcon,
+  Inbox2: MdOutlineInbox,
+  Close: MdClose,
+  Remove: MdRemove,
   Fence: MdFence,
   Refresh: MdRefresh,
   Currency: MdAttachMoney,
@@ -680,4 +686,8 @@ export const Icons = {
   Loader: FiLoader,
   ProjectStatus: MdDownloading,
   ModeOfTravel: MdModeOfTravel,
+  Passenger: Passenger,
+  Passengers: Passengers,
+  Child: Child,
+  Infant: Infant,
 };
