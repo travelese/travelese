@@ -6,28 +6,39 @@ import { Button } from "@travelese/ui/button";
 import { Icons } from "@travelese/ui/icons";
 import { Popover, PopoverContent, PopoverTrigger } from "@travelese/ui/popover";
 import { useOptimisticAction } from "next-safe-action/hooks";
+import { parseAsString, useQueryStates } from "nuqs";
 
-const options = [
+const cabinClasses = [
   "economy",
   "premium_economy",
   "business",
   "first_class",
 ] as const;
+type CabinClass = (typeof cabinClasses)[number];
 
 type Props = {
-  initialValue: (typeof options)[number];
+  initialValue: CabinClass;
   disabled?: boolean;
 };
 
 export function TravelCabin({ initialValue, disabled }: Props) {
   const t = useI18n();
+  const [{ cabinClass }, setQueryStates] = useQueryStates({
+    cabinClass: parseAsString.withDefault(initialValue),
+  });
+
   const { execute, optimisticState } = useOptimisticAction(
     changeTravelCabinAction,
     {
-      currentState: initialValue,
+      currentState: cabinClass,
       updateFn: (_, newState) => newState,
     },
   );
+
+  const cabinChange = (cabinClass: CabinClass) => {
+    setQueryStates({ cabinClass });
+    execute(cabinClass);
+  };
 
   return (
     <Popover>
@@ -38,19 +49,21 @@ export function TravelCabin({ initialValue, disabled }: Props) {
           disabled={disabled}
         >
           <Icons.Cabin className="h-4 w-4 mr-2" />
-          <span>{t(`travel_cabin.${optimisticState}`)}</span>
+          <span className="flex-grow line-clamp-1 text-ellipsis text-left">
+            {t(`travel_cabin.${optimisticState}`)}
+          </span>
           <Icons.ChevronDown className="ml-2 h-4 w-4" />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-[225px]">
-        {options.map((option) => (
+        {cabinClasses.map((cabinClass) => (
           <Button
-            key={option}
+            key={cabinClass}
             variant="ghost"
             className="w-full justify-start"
-            onClick={() => execute(option)}
+            onClick={() => cabinChange(cabinClass)}
           >
-            {t(`travel_cabin.${option}`)}
+            {t(`travel_cabin.${cabinClass}`)}
           </Button>
         ))}
       </PopoverContent>

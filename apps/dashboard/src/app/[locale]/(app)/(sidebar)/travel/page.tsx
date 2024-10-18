@@ -10,35 +10,20 @@ export const metadata: Metadata = {
   title: "Travel | Travelese",
 };
 
-const defaultValue = {
-  from: new Date().toISOString(),
-  to: addWeeks(new Date(), 1).toISOString(),
-  period: "weekly",
-};
+// const defaultValue = {
+//   from: new Date().toISOString(),
+//   to: addWeeks(new Date(), 1).toISOString(),
+//   period: "weekly",
+// };
 
-export default async function Travel({ searchParams }) {
-  const travelMode = cookies().get(Cookies.TravelMode)?.value ?? "flights";
-
-  const initialPeriod = cookies().has(Cookies.TravelPeriod)
-    ? JSON.parse(cookies().get(Cookies.TravelPeriod)?.value)
-    : {
-        id: "this_week",
-        from: new Date().toISOString(),
-        to: addWeeks(new Date(), 1).toISOString(),
-      };
-
-  const value = {
-    ...(searchParams.from && { from: searchParams.from }),
-    ...(searchParams.to && { to: searchParams.to }),
-  };
-
+export default async function Travel() {
   return (
     <>
       <div>
         <div className="h-[530px] mb-4">
-          <TravelSelectors defaultValue={defaultValue} />
+          {/* <TravelSelectors defaultValue={defaultValue} /> */}
 
-          <div className="mt-8 relative">
+          <div className="mt-8 relative p-6 bg-background border-border shadow-sm items-center justify-center">
             <SearchFlightsForm />
           </div>
         </div>

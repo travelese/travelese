@@ -52,7 +52,7 @@ export function TravelPassenger({ initialValue, disabled }: Props) {
           disabled={disabled}
         >
           <Icons.User className="h-4 w-4 mr-2" />
-          <span>
+          <span className="flex-grow line-clamp-1 text-ellipsis text-left">
             {totalPassengers > 0 ? `${totalPassengers} ` : ""}
             {totalPassengers === 1 ? "Passenger" : "Passengers"}
           </span>

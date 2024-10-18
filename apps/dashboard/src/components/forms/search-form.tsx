@@ -6,8 +6,8 @@ import { Calendar } from "@travelese/ui/calendar";
 import { Input } from "@travelese/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@travelese/ui/popover";
 import { format } from "date-fns";
-import { ArrowUpIcon, CalendarIcon, XIcon } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { Icons } from "@travelese/ui/icons";
 
 const cities = [
   "New York",
@@ -146,7 +146,7 @@ export default function SearchForm() {
         {selectedFrom && (
           <Badge variant="secondary" className="flex items-center">
             {selectedFrom}
-            <XIcon
+            <Icons.close
               className="ml-1 h-3 w-3 cursor-pointer"
               onClick={() => handleRemove("from")}
             />
@@ -154,10 +154,10 @@ export default function SearchForm() {
         )}
         {selectedTo && (
           <>
-            <ArrowUpIcon className="rotate-90" />
+            <Icons.ArrowDown className="rotate-90" />
             <Badge variant="secondary" className="flex items-center">
               {selectedTo}
-              <XIcon
+              <Icons.close
                 className="ml-1 h-3 w-3 cursor-pointer"
                 onClick={() => handleRemove("to")}
               />
@@ -167,7 +167,7 @@ export default function SearchForm() {
         {dateRange[0] && dateRange[1] && (
           <Badge variant="secondary" className="flex items-center">
             {formatDateRange()}
-            <XIcon
+            <Icons.Clear
               className="ml-1 h-3 w-3 cursor-pointer"
               onClick={() => handleRemove("dates")}
             />
@@ -177,7 +177,7 @@ export default function SearchForm() {
           <Badge variant="secondary" className="flex items-center">
             {passengers}{" "}
             {Number.parseInt(passengers) === 1 ? "passenger" : "passengers"}
-            <XIcon
+            <Icons.Clear
               className="ml-1 h-3 w-3 cursor-pointer"
               onClick={() => handleRemove("passengers")}
             />
@@ -186,7 +186,7 @@ export default function SearchForm() {
         {cabin && (
           <Badge variant="secondary" className="flex items-center">
             {cabin}
-            <XIcon
+            <Icons.Clear
               className="ml-1 h-3 w-3 cursor-pointer"
               onClick={() => handleRemove("cabin")}
             />
@@ -212,7 +212,7 @@ export default function SearchForm() {
           className="absolute right-2 top-1/2 transform -translate-y-1/2"
           onClick={() => inputRef.current?.focus()}
         >
-          <ArrowUpIcon />
+          <Icons.ArrowDown />
         </Button>
         {suggestions.length > 0 && (
           <div className="absolute w-full border rounded-b-md mt-1 overflow-hidden z-10">
@@ -248,9 +248,9 @@ export default function SearchForm() {
         {stage === "complete" && (
           <Button
             className="absolute right-2 top-1/2 transform -translate-y-1/2"
-            onClick={handleSearch}
+            onClick={() => {}}
           >
-            Search Flights
+            Search
           </Button>
         )}
       </div>

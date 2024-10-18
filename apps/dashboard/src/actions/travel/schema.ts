@@ -1,5 +1,4 @@
 import { z } from "zod";
-import { CABIN_CLASSES, DUFFEL_PASSENGER_TYPES } from "./constants";
 
 export const changeTravelModeSchema = z.enum(["flights", "stays"]);
 
@@ -51,11 +50,7 @@ export const createOfferRequestSchema = z.object({
     ),
     passengers: z.array(
       z.object({
-        type: z.enum([
-          DUFFEL_PASSENGER_TYPES.ADULT,
-          DUFFEL_PASSENGER_TYPES.CHILD,
-          DUFFEL_PASSENGER_TYPES.INFANT_WITHOUT_SEAT,
-        ]),
+        type: z.enum(["adult", "child", "infant_without_seat"]),
         given_name: z.string().optional(),
         family_name: z.string().optional(),
         loyalty_programme_accounts: z
@@ -69,12 +64,7 @@ export const createOfferRequestSchema = z.object({
       }),
     ),
     cabin_class: z
-      .enum([
-        CABIN_CLASSES.FIRST,
-        CABIN_CLASSES.BUSINESS,
-        CABIN_CLASSES.PREMIUM_ECONOMY,
-        CABIN_CLASSES.ECONOMY,
-      ])
+      .enum(["first", "business", "premium_economy", "economy"])
       .optional(),
     return_offers: z.boolean().optional(),
     max_connections: z.number().min(0).max(2).optional(),
@@ -126,11 +116,7 @@ export const createPartialOfferRequestSchema = z.object({
   ),
   passengers: z.array(
     z.object({
-      type: z.enum([
-        DUFFEL_PASSENGER_TYPES.ADULT,
-        DUFFEL_PASSENGER_TYPES.CHILD,
-        DUFFEL_PASSENGER_TYPES.INFANT_WITHOUT_SEAT,
-      ]),
+      type: z.enum(["adult", "child", "infant_without_seat"]),
       given_name: z.string().optional(),
       family_name: z.string().optional(),
       loyalty_programme_accounts: z
@@ -144,12 +130,7 @@ export const createPartialOfferRequestSchema = z.object({
     }),
   ),
   cabin_class: z
-    .enum([
-      CABIN_CLASSES.BUSINESS,
-      CABIN_CLASSES.ECONOMY,
-      CABIN_CLASSES.FIRST,
-      CABIN_CLASSES.PREMIUM_ECONOMY,
-    ])
+    .enum(["business", "economy", "first", "premium_economy"])
     .optional(),
   max_connections: z
     .union([z.literal(0), z.literal(1), z.literal(2)])

@@ -6,7 +6,7 @@ import { Button } from "@travelese/ui/button";
 import { Icons } from "@travelese/ui/icons";
 import { Popover, PopoverContent, PopoverTrigger } from "@travelese/ui/popover";
 import { useOptimisticAction } from "next-safe-action/hooks";
-import { useState } from "react";
+import { parseAsJson, useQueryStates } from "nuqs";
 
 const luggageTypes = ["cabin", "checked"] as const;
 type LuggageType = (typeof luggageTypes)[number];
@@ -19,22 +19,24 @@ type Props = {
 
 export function TravelLuggage({ initialValue, disabled }: Props) {
   const t = useI18n();
-  const [counts, setCounts] = useState<LuggageCounts>(initialValue);
+  const [{ luggage }, setQueryStates] = useQueryStates({
+    luggage: parseAsJson<LuggageCounts>().withDefault(initialValue),
+  });
 
   const { execute, optimisticState } = useOptimisticAction(
     changeTravelLuggageAction,
     {
-      currentState: counts,
+      currentState: luggage,
       updateFn: (_, newState) => newState,
     },
   );
 
-  const handleCountChange = (type: LuggageType, change: number) => {
+  const countChange = (type: LuggageType, change: number) => {
     const newCounts = {
-      ...counts,
-      [type]: Math.max(0, (counts[type] || 0) + change),
+      ...luggage,
+      [type]: Math.max(0, (luggage[type] || 0) + change),
     };
-    setCounts(newCounts);
+    setQueryStates({ luggage: newCounts });
     execute(newCounts);
   };
 
@@ -52,7 +54,7 @@ export function TravelLuggage({ initialValue, disabled }: Props) {
           disabled={disabled}
         >
           <Icons.Luggage className="h-4 w-4 mr-2" />
-          <span>
+          <span className="flex-grow line-clamp-1 text-ellipsis text-left">
             {totalLuggage > 0 ? `${totalLuggage} ` : ""}
             {totalLuggage === 1 ? "Bag" : "Bags"}
           </span>
@@ -72,7 +74,7 @@ export function TravelLuggage({ initialValue, disabled }: Props) {
                 <Button
                   variant="outline"
                   size="icon"
-                  onClick={() => handleCountChange(type, -1)}
+                  onClick={() => countChange(type, -1)}
                   disabled={!optimisticState[type]}
                   aria-label={`Decrease ${type} count`}
                   className="h-8 w-8"
@@ -85,7 +87,7 @@ export function TravelLuggage({ initialValue, disabled }: Props) {
                 <Button
                   variant="outline"
                   size="icon"
-                  onClick={() => handleCountChange(type, 1)}
+                  onClick={() => countChange(type, 1)}
                   aria-label={`Increase ${type} count`}
                   className="h-8 w-8"
                 >

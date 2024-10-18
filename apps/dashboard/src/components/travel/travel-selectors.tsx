@@ -15,7 +15,7 @@ export async function TravelSelectors({ defaultValue }) {
       </div>
 
       <div className="flex space-x-2">
-        <TravelPeriod defaultValue={defaultValue} />
+        {/* <TravelPeriod defaultValue={defaultValue} /> */}
         <TravelFiltersServer />
         <TravelMore defaultValue={defaultValue} mode={travelMode} />
       </div>
