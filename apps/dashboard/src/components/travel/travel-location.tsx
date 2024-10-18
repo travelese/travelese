@@ -5,7 +5,7 @@ import { Button } from "@travelese/ui/button";
 import { Icons } from "@travelese/ui/icons";
 import { Popover, PopoverContent, PopoverTrigger } from "@travelese/ui/popover";
 import * as React from "react";
-import { listPlaceSuggestionsAction } from "../actions/travel/supporting-resources/list-place-suggestions-action";
+import { listPlaceSuggestionsAction } from "../../actions/travel/supporting-resources/list-place-suggestions-action";
 
 interface LocationSelectorProps {
   placeholder: string;
@@ -14,7 +14,7 @@ interface LocationSelectorProps {
   type: "origin" | "destination" | "stays";
 }
 
-export default function LocationSelector({
+export function TravelLocation({
   placeholder,
   value,
   onChange,

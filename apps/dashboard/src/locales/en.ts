@@ -121,6 +121,7 @@ export default {
   },
   travel_luggage: {
     cabin: "Cabin",
+    carry_on: "Carry on",
     checked: "Checked",
   },
   tags: {

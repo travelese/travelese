@@ -34,7 +34,9 @@ export function TravelType({ initialValue, disabled }: Props) {
           disabled={disabled}
         >
           <Icons.Airports className="h-4 w-4 mr-2" />
-          <span>{t(`travel_type.${optimisticState}`)}</span>
+          <span className="flex-grow line-clamp-1 text-ellipsis text-left">
+            {t(`travel_type.${optimisticState}`)}
+          </span>
           <ChevronDown className="ml-2 h-4 w-4" />
         </Button>
       </PopoverTrigger>
