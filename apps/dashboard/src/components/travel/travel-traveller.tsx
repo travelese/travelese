@@ -37,8 +37,7 @@ export function TravelTraveller({ initialValue, disabled }: Props) {
       initialValue={initialValue}
       disabled={disabled}
       action={changeTravelTravellerAction}
-      singularLabel="Traveller"
-      pluralLabel="Travellers"
+      stateKey="travellerCounts"
     />
   );
 }

@@ -19,9 +19,7 @@ interface ItemCounterProps {
   initialValue: Record<string, number>;
   disabled?: boolean;
   action: (newState: Record<string, number>) => Promise<Record<string, number>>;
-  buttonLabel?: string;
-  singularLabel?: string;
-  pluralLabel?: string;
+  stateKey: string;
 }
 
 export function ItemCounter({
@@ -29,30 +27,31 @@ export function ItemCounter({
   initialValue,
   disabled = false,
   action,
-  buttonLabel,
-  singularLabel,
-  pluralLabel,
+  stateKey,
 }: ItemCounterProps) {
   const t = useI18n();
-  const [{ itemCounts }, setQueryStates] = useQueryStates({
-    itemCounts: parseAsJson<Record<string, number>>().withDefault(initialValue),
+  const [counts, setCounts] = useQueryStates({
+    [stateKey]: parseAsJson<Record<string, number>>().withDefault(initialValue),
   });
 
   const { execute, optimisticState } = useOptimisticAction(action, {
-    currentState: itemCounts,
+    currentState: counts[stateKey],
     updateFn: (_, newState) => newState,
   });
 
   const handleCountChange = (id: string, change: number) => {
     const newCounts = {
-      ...itemCounts,
-      [id]: Math.max(0, (itemCounts[id] || 0) + change),
+      ...counts[stateKey],
+      [id]: Math.max(0, (counts[stateKey]?.[id] || 0) + change),
     };
-    setQueryStates({ itemCounts: newCounts });
+    setCounts({ [stateKey]: newCounts });
     execute(newCounts);
   };
 
-  const totalItems = Object.values(optimisticState).reduce((a, b) => a + b, 0);
+  const totalItems = Object.values(optimisticState || {}).reduce(
+    (a, b) => a + b,
+    0,
+  );
 
   return (
     <Popover>
@@ -66,7 +65,7 @@ export function ItemCounter({
             {items.map((item) => (
               <span key={item.id} className="flex items-center space-x-1">
                 <span className="mr-1">{item.icon}</span>
-                {optimisticState[item.id] || 0}
+                {optimisticState?.[item.id] || 0}
               </span>
             ))}
           </div>
@@ -93,14 +92,14 @@ export function ItemCounter({
                   variant="outline"
                   size="icon"
                   onClick={() => handleCountChange(item.id, -1)}
-                  disabled={!optimisticState[item.id]}
+                  disabled={!optimisticState?.[item.id]}
                   aria-label={`Decrease ${item.label} count`}
                   className="h-8 w-8"
                 >
                   <Icons.Minus className="h-4 w-4" />
                 </Button>
                 <div className="w-8 text-center">
-                  {optimisticState[item.id] || 0}
+                  {optimisticState?.[item.id] || 0}
                 </div>
                 <Button
                   variant="outline"

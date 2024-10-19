@@ -8,6 +8,7 @@ import {
 } from "@travelese/ui/carousel";
 import { formatISO } from "date-fns";
 import React from "react";
+
 export function TravelResults() {
   const items = [
     <Travel

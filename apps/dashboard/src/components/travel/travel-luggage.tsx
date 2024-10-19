@@ -31,7 +31,7 @@ export function TravelLuggage({ initialValue, disabled }: Props) {
       initialValue={initialValue}
       disabled={disabled}
       action={changeTravelLuggageAction}
-      stateKey="luggage"
+      stateKey="luggageCounts"
     />
   );
 }

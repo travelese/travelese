@@ -1,8 +1,8 @@
-import SearchFlightsForm from "@/components/forms/search-flights-form";
+import { SearchFlightsForm } from "@/components/forms/search-flights-form";
+import { TravelResults } from "@/components/travel/tavel-results";
 import { TravelSelectors } from "@/components/travel/travel-selectors";
 import { addWeeks } from "date-fns";
 import type { Metadata } from "next";
-import { TravelResults } from "./tavel-results";
 
 export const metadata: Metadata = {
   title: "Travel | Travelese",
