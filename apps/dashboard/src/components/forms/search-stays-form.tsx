@@ -2,7 +2,7 @@
 
 import { searchAccommodationSchema } from "@/actions/travel/schema";
 import { searchAccommodationAction } from "@/actions/travel/stays/search-accommodation-action";
-import LocationSelector from "@/components/location-selector";
+import { TravelLocation } from "@/components/travel/travel-location";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@travelese/ui/button";
 import { Calendar } from "@travelese/ui/calendar";
@@ -151,7 +151,7 @@ export default function SearchStaysForm() {
             render={({ field }) => (
               <FormItem className="col-span-full md:col-span-2">
                 <FormControl>
-                  <LocationSelector
+                  <TravelLocation
                     type="stays"
                     placeholder="Destination"
                     value={field.value}
@@ -162,6 +162,7 @@ export default function SearchStaysForm() {
               </FormItem>
             )}
           />
+
           <FormField
             control={form.control}
             name="checkIn"
@@ -198,6 +199,7 @@ export default function SearchStaysForm() {
               </FormItem>
             )}
           />
+
           <FormField
             control={form.control}
             name="checkOut"
@@ -276,6 +278,7 @@ export default function SearchStaysForm() {
               </FormItem>
             )}
           />
+
           <FormField
             control={form.control}
             name="rooms"
@@ -322,7 +325,7 @@ export default function SearchStaysForm() {
           >
             {isSearching ? (
               <>
-                <Icons.Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                <Icons.Loader className="mr-2 h-4 w-4 animate-spin" />
                 Stop
               </>
             ) : (

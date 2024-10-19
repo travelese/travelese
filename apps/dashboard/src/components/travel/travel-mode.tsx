@@ -40,7 +40,7 @@ export function TravelMode({ initialValue, disabled }: Props) {
           <ChevronDown className="ml-2 h-4 w-4" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[225px]">
+      <PopoverContent className="w-[225px]" sideOffset={10}>
         {options.map((option) => (
           <Button
             key={option}

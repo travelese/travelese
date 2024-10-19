@@ -4,7 +4,8 @@ import type { Places } from "@duffel/api/types";
 import { Button } from "@travelese/ui/button";
 import { Icons } from "@travelese/ui/icons";
 import { Popover, PopoverContent, PopoverTrigger } from "@travelese/ui/popover";
-import * as React from "react";
+import { useQueryState } from "nuqs";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { listPlaceSuggestionsAction } from "../../actions/travel/supporting-resources/list-place-suggestions-action";
 
 interface LocationSelectorProps {
@@ -20,11 +21,12 @@ export function TravelLocation({
   onChange,
   type,
 }: LocationSelectorProps) {
-  const [isOpen, setIsOpen] = React.useState(false);
-  const [searchQuery, setSearchQuery] = React.useState("");
-  const [places, setPlaces] = React.useState<Places[]>([]);
+  const [isOpen, setIsOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [places, setPlaces] = useState<Places[]>([]);
+  const [_, setLocationState] = useQueryState(type);
 
-  const fetchPlaces = React.useCallback(async (query: string) => {
+  const fetchPlaces = useCallback(async (query: string) => {
     if (query.length < 1) {
       setPlaces([]);
       return;
@@ -38,7 +40,7 @@ export function TravelLocation({
     }
   }, []);
 
-  React.useEffect(() => {
+  useEffect(() => {
     fetchPlaces(searchQuery);
   }, [searchQuery, fetchPlaces]);
 
@@ -52,11 +54,12 @@ export function TravelLocation({
         : `${place.city_name} (${place.iata_code})`;
     const iataCode =
       place.type === "city" ? place.iata_city_code : place.iata_code;
-    onChange(selectedValue, iataCode);
+    onChange(selectedValue, iataCode ?? "");
+    setLocationState(iataCode);
     setIsOpen(false);
   };
 
-  const updateSearchQuery = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const updateSearchQuery = (e: ChangeEvent<HTMLInputElement>) => {
     const newQuery = e.target.value;
     setSearchQuery(newQuery);
     onChange(newQuery, "");
@@ -65,6 +68,7 @@ export function TravelLocation({
   const clearSelection = () => {
     onChange("", "");
     setSearchQuery("");
+    setLocationState(null);
   };
 
   const renderPlaceList = (placeList: Places[], title: string) => (
@@ -114,7 +118,7 @@ export function TravelLocation({
         ? Icons.FlightsArrival
         : Icons.City;
 
-  const displayValue = React.useMemo(() => {
+  const displayValue = useMemo(() => {
     const selectedPlace = places.find((p) => p.iata_code === value);
     if (selectedPlace) {
       return selectedPlace.type === "city"
@@ -151,7 +155,7 @@ export function TravelLocation({
           )}
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-100 p-0">
+      <PopoverContent className="w-100 p-0" sideOffset={10}>
         <div className="p-2 border-border">
           <div className="relative">
             <input

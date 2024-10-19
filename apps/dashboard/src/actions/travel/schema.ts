@@ -2,6 +2,8 @@ import { z } from "zod";
 
 export const changeTravelModeSchema = z.enum(["flights", "stays"]);
 
+const travelTypeSchema = z.enum(["one_way", "return", "multi_city", "nomad"]);
+
 export const changeTravelTypeSchema = z.enum([
   "return",
   "one_way",
@@ -16,7 +18,7 @@ export const changeTravelCabinSchema = z.enum([
   "first_class",
 ]);
 
-export const changeTravelPassengerSchema = z.enum([
+export const changeTravelTravellerSchema = z.enum([
   "adult",
   "child",
   "infant_without_seat",
@@ -29,8 +31,6 @@ export const changeTravelPeriodSchema = z.object({
   to: z.string().optional(),
 });
 
-const travelTypeSchema = z.enum(["one_way", "return", "multi_city", "nomad"]);
-
 export const createTravelShareSchema = z.object({
   baseUrl: z.string().url(),
   from: z.string(),
@@ -40,47 +40,45 @@ export const createTravelShareSchema = z.object({
 });
 
 export const createOfferRequestSchema = z.object({
-  parsedInput: z.object({
-    slices: z.array(
-      z.object({
-        origin: z.string(),
-        destination: z.string(),
-        departure_date: z.string(),
-      }),
-    ),
-    passengers: z.array(
-      z.object({
-        type: z.enum(["adult", "child", "infant_without_seat"]),
-        given_name: z.string().optional(),
-        family_name: z.string().optional(),
-        loyalty_programme_accounts: z
-          .array(
-            z.object({
-              airline_iata_code: z.string(),
-              account_number: z.string(),
-            }),
-          )
-          .optional(),
-      }),
-    ),
-    cabin_class: z
-      .enum(["first", "business", "premium_economy", "economy"])
-      .optional(),
-    return_offers: z.boolean().optional(),
-    max_connections: z.number().min(0).max(2).optional(),
-    private_fares: z
-      .record(
-        z.string(),
-        z.array(
+  slices: z.array(
+    z.object({
+      origin: z.string(),
+      destination: z.string(),
+      departure_date: z.string(),
+    }),
+  ),
+  passengers: z.array(
+    z.object({
+      type: z.enum(["adult", "child", "infant_without_seat"]),
+      given_name: z.string().optional(),
+      family_name: z.string().optional(),
+      loyalty_programme_accounts: z
+        .array(
           z.object({
-            corporate_code: z.string().optional(),
-            tracking_reference: z.string().optional(),
-            tour_code: z.string().optional(),
+            airline_iata_code: z.string(),
+            account_number: z.string(),
           }),
-        ),
-      )
-      .optional(),
-  }),
+        )
+        .optional(),
+    }),
+  ),
+  cabin_class: z
+    .enum(["first", "business", "premium_economy", "economy"])
+    .optional(),
+  return_offers: z.boolean().optional(),
+  max_connections: z.number().int().min(0).max(2).optional(),
+  private_fares: z
+    .record(
+      z.string(),
+      z.array(
+        z.object({
+          corporate_code: z.string().optional(),
+          tracking_reference: z.string().optional(),
+          tour_code: z.string().optional(),
+        }),
+      ),
+    )
+    .optional(),
 });
 
 export const createPartialOfferRequestSchema = z.object({
