@@ -1,11 +1,17 @@
 "use client";
 
-import { searchAccommodationSchema } from "@/actions/travel/schema";
-import { searchAccommodationAction } from "@/actions/travel/stays/search-accommodation-action";
+import { createOfferRequestAction } from "@/actions/travel/create-offer-request-action";
+import { createPartialOfferRequestAction } from "@/actions/travel/create-partial-offer-request-action";
+import { createOfferRequestSchema } from "@/actions/travel/schema";
+import { TravelCabin } from "@/components/travel/travel-cabin";
 import { TravelLocation } from "@/components/travel/travel-location";
+import { TravelBaggage } from "@/components/travel/travel-baggage";
+import { TravelPeriod } from "@/components/travel/travel-period";
+import { TravelTraveller } from "@/components/travel/travel-traveller";
+import { TravelType } from "@/components/travel/travel-type";
+import type { OfferRequest } from "@duffel/api/types";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@travelese/ui/button";
-import { Calendar } from "@travelese/ui/calendar";
 import {
   Form,
   FormControl,
@@ -14,148 +20,212 @@ import {
   FormMessage,
 } from "@travelese/ui/form";
 import { Icons } from "@travelese/ui/icons";
-import { Popover, PopoverContent, PopoverTrigger } from "@travelese/ui/popover";
+import { SubmitButton } from "@travelese/ui/submit-button";
 import { useToast } from "@travelese/ui/use-toast";
-import { addDays, format, isBefore, startOfTomorrow } from "date-fns";
 import { useAction } from "next-safe-action/hooks";
-import { useState } from "react";
+import {
+  parseAsArrayOf,
+  parseAsString,
+  useQueryState,
+  useQueryStates,
+} from "nuqs";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 
-interface CounterProps {
-  label: string;
-  subLabel: string;
-  value: number;
-  onIncrement: () => void;
-  onDecrement: () => void;
-}
-
-const Counter: React.FC<CounterProps> = ({
-  label,
-  subLabel,
-  value,
-  onIncrement,
-  onDecrement,
-}) => (
-  <div className="flex items-center justify-between py-2">
-    <div className="flex flex-col">
-      <span className="text-sm">{label}</span>
-      <span className="text-xs text-muted-foreground">{subLabel}</span>
-    </div>
-    <div className="flex items-center">
-      <Button
-        variant="outline"
-        size="icon"
-        onClick={onDecrement}
-        disabled={value === 0}
-        className="h-8 w-8"
-      >
-        <Icons.Minus className="h-4 w-4" />
-      </Button>
-      <span className="mx-4 w-6 text-center">{value}</span>
-      <Button
-        variant="outline"
-        size="icon"
-        onClick={onIncrement}
-        className="h-8 w-8"
-      >
-        <Icons.Plus className="h-4 w-4" />
-      </Button>
-    </div>
-  </div>
-);
-
-export default function SearchStaysForm() {
+export function SearchFlightsForm() {
   const { toast } = useToast();
   const [isSearching, setIsSearching] = useState(false);
 
-  const tomorrow = startOfTomorrow();
-  const defaultCheckIn = format(tomorrow, "yyyy-MM-dd");
-  const defaultCheckOut = format(addDays(tomorrow, 4), "yyyy-MM-dd");
+  const [travelType] = useQueryState("travel_type");
+  const [queryParams, setQueryParams] = useQueryStates(
+    {
+      index: parseAsArrayOf(parseAsString),
+      origin: parseAsArrayOf(parseAsString),
+      destination: parseAsArrayOf(parseAsString),
+      from: parseAsArrayOf(parseAsString),
+      to: parseAsArrayOf(parseAsString),
+      cabinClass: parseAsString,
+      passengers: parseAsString,
+    },
+    { history: "push" },
+  );
 
-  const form = useForm({
-    resolver: zodResolver(searchAccommodationSchema),
-    defaultValues: {
-      destination: "",
-      checkIn: defaultCheckIn,
-      checkOut: defaultCheckOut,
-      guests: 1,
-      rooms: 1,
+  const createOfferRequest = useAction(createOfferRequestAction, {
+    onSuccess: ({ data: offerRequest }) => {
+      toast({
+        duration: 3500,
+        title: "Search completed",
+        description: "The search has been completed.",
+        variant: "success",
+      });
+      onCreate?.(offerRequest as OfferRequest);
+    },
+    onError: () => {
+      toast({
+        duration: 3500,
+        title: "Something went wrong please try again.",
+        variant: "error",
+      });
     },
   });
 
-  const { execute: executeSearchAccommodation } = useAction(
-    searchAccommodationAction,
-    {
-      onSuccess: (result) => {
-        toast({
-          title: "Search successful",
-          description: "Your accommodation options are ready to view.",
-        });
-        setIsSearching(false);
-      },
-      onError: () => {
-        toast({
-          title: "Search failed",
-          description:
-            "There was an error processing your request. Please try again.",
-          variant: "destructive",
-        });
-        setIsSearching(false);
-      },
+  const createPartialOfferRequest = useAction(createPartialOfferRequestAction, {
+    onSuccess: ({ data: offerRequest }) => {
+      toast({
+        duration: 3500,
+        title: "Search completed",
+        description: "The search has been completed.",
+        variant: "success",
+      });
+      onCreate?.(offerRequest as OfferRequest);
     },
-  );
+    onError: () => {
+      toast({
+        duration: 3500,
+        variant: "error",
+        title: "Something went wrong please try again.",
+      });
+    },
+  });
 
-  const handleSearchAccommodation = async (data: any) => {
-    setIsSearching(true);
-    try {
-      await executeSearchAccommodation(data);
-      toast({
-        title: "Search initiated",
-        description: "Searching for accommodation options.",
+  const form = useForm({
+    resolver: zodResolver(createOfferRequestSchema),
+    defaultValues: {
+      slices: [],
+      passengers: [{ type: "adult" }],
+      cabinClass: queryParams.cabinClass || "economy",
+      travelType: travelType || "one_way",
+      bags: { carry_on: 0, cabin: 0, checked: 0 },
+    },
+  });
+
+  useEffect(() => {
+    const slices = [];
+    const origins = queryParams.origin || [];
+    const destinations = queryParams.destination || [];
+    const fromDates = queryParams.from || [];
+    const toDates = queryParams.to || [];
+
+    if (travelType === "multi_city") {
+      for (
+        let i = 0;
+        i < Math.max(origins.length, destinations.length, fromDates.length);
+        i++
+      ) {
+        slices.push({
+          index: i,
+          origin: origins[i] || "",
+          destination: destinations[i] || "",
+          departure_date: fromDates[i] || "",
+        });
+      }
+    } else if (travelType === "return") {
+      slices.push({
+        index: 0,
+        origin: origins[0] || "",
+        destination: destinations[0] || "",
+        departure_date: fromDates[0] || "",
+        return_date: toDates[0] || "",
       });
-    } catch (error) {
-      toast({
-        title: "Search failed",
-        description:
-          "There was an error processing your request. Please try again.",
-        variant: "destructive",
+    } else {
+      // one_way
+      slices.push({
+        index: 0,
+        origin: origins[0] || "",
+        destination: destinations[0] || "",
+        departure_date: fromDates[0] || "",
       });
-    } finally {
-      setIsSearching(false);
+    }
+
+    form.setValue("slices", slices);
+    form.setValue("travelType", travelType || "one_way");
+  }, [queryParams, travelType, form]);
+
+  const addFlightSegment = () => {
+    const currentSlices = form.getValues("slices");
+    if (currentSlices.length < 3) {
+      form.setValue("slices", [
+        ...currentSlices,
+        {
+          index: currentSlices.length,
+          origin: "",
+          destination: "",
+          departure_date: "",
+        },
+      ]);
     }
   };
 
-  const handleStopSearch = () => {
-    setIsSearching(false);
-    // Implement logic to cancel ongoing API requests if possible
-    toast({
-      title: "Search stopped",
-      description: "The search has been cancelled.",
-    });
-  };
-
-  const isDateDisabled = (date: Date) => {
-    return isBefore(date, tomorrow);
+  const removeFlightSegment = (indexToRemove: number) => {
+    const currentSlices = form.getValues("slices");
+    if (currentSlices.length > 1) {
+      const newSlices = currentSlices
+        .filter((slice) => slice.index !== indexToRemove)
+        .map((slice, i) => ({ ...slice, index: i }));
+      form.setValue("slices", newSlices);
+    }
   };
 
   return (
     <Form {...form}>
       <form
-        onSubmit={form.handleSubmit(handleSearchAccommodation)}
-        className="w-full max-w-4xl mx-auto m-2 p-6 border"
+        onSubmit={form.handleSubmit((data) => {
+          if (data.travelType === "multi_city") {
+            createPartialOfferRequest.execute(data);
+          } else {
+            createOfferRequest.execute(data);
+          }
+        })}
       >
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-3 mx-auto max-w-4xl">
           <FormField
             control={form.control}
-            name="destination"
+            name="travelType"
             render={({ field }) => (
-              <FormItem className="col-span-full md:col-span-2">
+              <FormItem>
                 <FormControl>
-                  <TravelLocation
-                    type="stays"
-                    placeholder="Destination"
-                    value={field.value}
-                    onChange={(value) => field.onChange(value)}
+                  <TravelType
+                    {...field}
+                    defaultValue={field.value}
+                    onChange={(value) => {
+                      field.onChange(value);
+                      if (value === "one_way") {
+                        form.setValue("slices", [
+                          {
+                            index: 0,
+                            origin: "",
+                            destination: "",
+                            departure_date: "",
+                          },
+                        ]);
+                      } else if (value === "return") {
+                        form.setValue("slices", [
+                          {
+                            index: 0,
+                            origin: "",
+                            destination: "",
+                            departure_date: "",
+                            return_date: "",
+                          },
+                        ]);
+                      } else if (value === "multi_city") {
+                        form.setValue("slices", [
+                          {
+                            index: 0,
+                            origin: "",
+                            destination: "",
+                            departure_date: "",
+                          },
+                          {
+                            index: 1,
+                            origin: "",
+                            destination: "",
+                            departure_date: "",
+                          },
+                        ]);
+                      }
+                    }}
+                    disabled={isSearching}
                   />
                 </FormControl>
                 <FormMessage />
@@ -165,36 +235,18 @@ export default function SearchStaysForm() {
 
           <FormField
             control={form.control}
-            name="checkIn"
+            name="cabinClass"
             render={({ field }) => (
-              <FormItem className="col-span-1">
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <FormControl>
-                      <Button
-                        variant="outline"
-                        className="w-full justify-between pl-3 pr-2"
-                      >
-                        <Icons.Calendar className="h-4 w-4 mr-2" />
-                        <span className="flex-grow text-left">
-                          {field.value || "Check-in"}
-                        </span>
-                        <Icons.ChevronDown className="h-4 w-4 ml-2" />
-                      </Button>
-                    </FormControl>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={field.value ? new Date(field.value) : undefined}
-                      onSelect={(date) =>
-                        field.onChange(date ? format(date, "yyyy-MM-dd") : "")
-                      }
-                      disabled={isDateDisabled}
-                      initialFocus
-                    />
-                  </PopoverContent>
-                </Popover>
+              <FormItem>
+                <FormControl>
+                  <TravelCabin
+                    defaultValue={field.value}
+                    onChange={(value) => {
+                      field.onChange(value);
+                    }}
+                    disabled={isSearching}
+                  />
+                </FormControl>
                 <FormMessage />
               </FormItem>
             )}
@@ -202,139 +254,159 @@ export default function SearchStaysForm() {
 
           <FormField
             control={form.control}
-            name="checkOut"
+            name="passengers"
             render={({ field }) => (
-              <FormItem className="col-span-1">
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <FormControl>
-                      <Button
-                        variant="outline"
-                        className="w-full justify-between pl-3 pr-2"
-                      >
-                        <Icons.Calendar className="h-4 w-4 mr-2" />
-                        <span className="flex-grow text-left">
-                          {field.value || "Check-out"}
-                        </span>
-                        <Icons.ChevronDown className="h-4 w-4 ml-2" />
-                      </Button>
-                    </FormControl>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={field.value ? new Date(field.value) : undefined}
-                      onSelect={(date) =>
-                        field.onChange(date ? format(date, "yyyy-MM-dd") : "")
-                      }
-                      disabled={(date) =>
-                        isDateDisabled(date) ||
-                        isBefore(date, new Date(form.getValues("checkIn")))
-                      }
-                      initialFocus
-                    />
-                  </PopoverContent>
-                </Popover>
+              <FormItem>
+                <FormControl>
+                  <TravelTraveller
+                    defaultValue={field.value}
+                    onChange={(value) => {
+                      field.onChange(value);
+                    }}
+                    disabled={isSearching}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="bags"
+            render={({ field }) => (
+              <FormItem>
+                <FormControl>
+                  <TravelBaggage
+                    defaultValue={field.value}
+                    onChange={(value) => {
+                      field.onChange(value);
+                    }}
+                    disabled={isSearching}
+                  />
+                </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
         </div>
 
-        <div className="grid grid-cols-2 gap-4 mb-4">
-          <FormField
-            control={form.control}
-            name="guests"
-            render={({ field }) => (
-              <FormItem>
-                <Popover>
-                  <PopoverTrigger asChild>
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-2 mb-3 mx-auto max-w-4xl">
+          {form.watch("slices").map((slice) => (
+            <div
+              key={slice.index}
+              className="col-span-full grid grid-cols-1 md:grid-cols-4 gap-2"
+            >
+              <FormField
+                control={form.control}
+                name={`slices.${slice.index}.origin`}
+                render={({ field }) => (
+                  <FormItem>
                     <FormControl>
-                      <Button
-                        variant="outline"
-                        className="w-full justify-between"
-                      >
-                        <Icons.User className="h-4 w-4 mr-2" />
-                        <span className="flex-grow text-left">
-                          {field.value} {field.value === 1 ? "Guest" : "Guests"}
-                        </span>
-                        <Icons.ChevronDown className="h-4 w-4 ml-2" />
-                      </Button>
+                      <TravelLocation
+                        type="origin"
+                        placeholder="Origin"
+                        value={field.value}
+                        onChange={(value, iataCode) => {
+                          field.onChange(iataCode);
+                        }}
+                      />
                     </FormControl>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-60">
-                    <Counter
-                      label="Guests"
-                      subLabel=""
-                      value={field.value}
-                      onIncrement={() => field.onChange(field.value + 1)}
-                      onDecrement={() =>
-                        field.onChange(Math.max(1, field.value - 1))
-                      }
-                    />
-                  </PopoverContent>
-                </Popover>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-          <FormField
-            control={form.control}
-            name="rooms"
-            render={({ field }) => (
-              <FormItem>
-                <Popover>
-                  <PopoverTrigger asChild>
+              <FormField
+                control={form.control}
+                name={`slices.${slice.index}.destination`}
+                render={({ field }) => (
+                  <FormItem>
                     <FormControl>
-                      <Button
-                        variant="outline"
-                        className="w-full justify-between"
-                      >
-                        <Icons.Bed className="h-4 w-4 mr-2" />
-                        <span className="flex-grow text-left">
-                          {field.value} {field.value === 1 ? "Room" : "Rooms"}
-                        </span>
-                        <Icons.ChevronDown className="h-4 w-4 ml-2" />
-                      </Button>
+                      <TravelLocation
+                        type="destination"
+                        placeholder="Destination"
+                        value={field.value}
+                        onChange={(value, iataCode) => {
+                          field.onChange(iataCode);
+                        }}
+                      />
                     </FormControl>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-60">
-                    <Counter
-                      label="Rooms"
-                      subLabel=""
-                      value={field.value}
-                      onIncrement={() => field.onChange(field.value + 1)}
-                      onDecrement={() =>
-                        field.onChange(Math.max(1, field.value - 1))
-                      }
-                    />
-                  </PopoverContent>
-                </Popover>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-        <div className="flex items-center justify-end mt-4">
-          <Button
-            type="submit"
-            disabled={isSearching}
-            onClick={isSearching ? handleStopSearch : undefined}
+              <FormField
+                control={form.control}
+                name={`slices.${slice.index}.departure_date`}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <TravelPeriod
+                        defaultValue={{
+                          from: field.value,
+                          to: slice.return_date || field.value,
+                        }}
+                        onChange={(value) => {
+                          field.onChange(value.from);
+                          if (
+                            form.watch("travelType") === "return" &&
+                            slice.index === 0
+                          ) {
+                            form.setValue("slices.0.return_date", value.to);
+                          }
+                        }}
+                        isRange={
+                          form.watch("travelType") === "return" &&
+                          slice.index === 0
+                        }
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {form.watch("travelType") === "multi_city" && (
+                <div className="flex space-x-1">
+                  {slice.index > 1 && (
+                    <Button
+                      type="button"
+                      size="icon"
+                      variant="outline"
+                      onClick={() => removeFlightSegment(slice.index)}
+                      className="w-10 h-10 flex-1"
+                    >
+                      <Icons.Close className="h-4 w-4" />
+                    </Button>
+                  )}
+                  {slice.index === form.watch("slices").length - 1 &&
+                    form.watch("slices").length < 3 && (
+                      <Button
+                        type="button"
+                        size="icon"
+                        variant="outline"
+                        onClick={addFlightSegment}
+                        className="w-10 h-10 flex-1"
+                      >
+                        <Icons.Plus className="h-4 w-4" />
+                      </Button>
+                    )}
+                </div>
+              )}
+            </div>
+          ))}
+
+          <SubmitButton
+            isSubmitting={
+              createOfferRequest.isExecuting ||
+              createPartialOfferRequest.isExecuting
+            }
+            className="w-full col-span-full"
           >
-            {isSearching ? (
-              <>
-                <Icons.Loader className="mr-2 h-4 w-4 animate-spin" />
-                Stop
-              </>
-            ) : (
-              <>
-                <Icons.Search className="mr-2 h-4 w-4" />
-                Search Accommodation
-              </>
-            )}
-          </Button>
+            Search
+          </SubmitButton>
         </div>
       </form>
     </Form>

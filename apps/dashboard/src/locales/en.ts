@@ -106,7 +106,7 @@ export default {
     return: "Return",
     one_way: "One way",
     multi_city: "Multi city",
-    nomad: "Nomad",
+    digital_nomad: "Digital Nomad",
   },
   travel_cabin: {
     economy: "Economy",
@@ -119,7 +119,7 @@ export default {
     child: "Child",
     infant_without_seat: "Infant",
   },
-  travel_luggage: {
+  travel_baggage: {
     cabin: "Cabin",
     carry_on: "Carry on",
     checked: "Checked",

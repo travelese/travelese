@@ -1,11 +1,11 @@
 "use client";
 
-import { createOfferRequestAction } from "@/actions/travel/flights/create-offer-request-action";
-import { createPartialOfferRequestAction } from "@/actions/travel/flights/create-partial-offer-request-action";
+import { createOfferRequestAction } from "@/actions/travel/create-offer-request-action";
+import { createPartialOfferRequestAction } from "@/actions/travel/create-partial-offer-request-action";
 import { createOfferRequestSchema } from "@/actions/travel/schema";
 import { TravelCabin } from "@/components/travel/travel-cabin";
 import { TravelLocation } from "@/components/travel/travel-location";
-import { TravelLuggage } from "@/components/travel/travel-luggage";
+import { TravelBaggage } from "@/components/travel/travel-baggage";
 import { TravelPeriod } from "@/components/travel/travel-period";
 import { TravelTraveller } from "@/components/travel/travel-traveller";
 import { TravelType } from "@/components/travel/travel-type";
@@ -37,7 +37,7 @@ export function SearchFlightsForm() {
       destination: parseAsString,
       departureDate: parseAsString,
       returnDate: parseAsString,
-      tripType: parseAsString,
+      travelType: parseAsString,
       cabinClass: parseAsString,
       passengers: parseAsString,
     },
@@ -82,33 +82,28 @@ export function SearchFlightsForm() {
     },
   });
 
-  const stopSearch = () => {
-    setIsSearching(false);
-    toast({
-      duration: 3500,
-      variant: "success",
-      title: "Search stopped",
-      description: "The search has been cancelled.",
-    });
-  };
-
   const addFlightSegment = () => {
     const currentSlices = form.getValues("slices");
     if (currentSlices.length < 3) {
       form.setValue("slices", [
         ...currentSlices,
-        { origin: "", destination: "", departure_date: "" },
+        {
+          index: currentSlices.length,
+          origin: "",
+          destination: "",
+          departure_date: "",
+        },
       ]);
     }
   };
 
-  const removeFlightSegment = (index: number) => {
+  const removeFlightSegment = (indexToRemove: number) => {
     const currentSlices = form.getValues("slices");
     if (currentSlices.length > 1) {
-      form.setValue(
-        "slices",
-        currentSlices.filter((_, i) => i !== index),
-      );
+      const newSlices = currentSlices
+        .filter((slice) => slice.index !== indexToRemove)
+        .map((slice, i) => ({ ...slice, index: i }));
+      form.setValue("slices", newSlices);
     }
   };
 
@@ -117,33 +112,24 @@ export function SearchFlightsForm() {
     defaultValues: {
       slices: [
         {
+          index: 0,
           origin: queryParams.origin || "",
           destination: queryParams.destination || "",
           departure_date: queryParams.departureDate || "",
         },
-        {
-          origin: queryParams.destination || "",
-          destination: queryParams.origin || "",
-          departure_date: queryParams.returnDate || "",
-        },
       ],
-      passengers: JSON.parse(
-        queryParams.passengers ||
-          '{"adult":1,"child":0,"infant_without_seat":0}',
-      ),
-      cabin_class: queryParams.cabinClass || "economy",
-      tripType: queryParams.tripType || "return",
-      bags: { cabin: 0, checked: 0 },
+      passengers: [{ type: "adult" }],
+      cabinClass: queryParams.cabinClass || "economy",
+      travelType: queryParams.travelType || "return",
+      bags: { carry_on: 0, cabin: 0, checked: 0 },
     },
   });
-
-  const offerRequest = form.watch();
 
   return (
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit((data) => {
-          if (data.tripType === "multi_city") {
+          if (data.travelType === "multi_city") {
             createPartialOfferRequest.execute(data);
           } else {
             createOfferRequest.execute(data);
@@ -153,18 +139,23 @@ export function SearchFlightsForm() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-3 mx-auto max-w-4xl">
           <FormField
             control={form.control}
-            name="tripType"
+            name="travelType"
             render={({ field }) => (
               <FormItem>
                 <FormControl>
                   <TravelType
                     {...field}
-                    initialValue={field.value}
+                    defaultValue={field.value}
                     onChange={(value) => {
                       field.onChange(value);
                       if (value === "one_way") {
                         form.setValue("slices", [
-                          { origin: "", destination: "", departure_date: "" },
+                          {
+                            index: 0,
+                            origin: "",
+                            destination: "",
+                            departure_date: "",
+                          },
                         ]);
                       } else if (
                         value === "return" &&
@@ -172,7 +163,12 @@ export function SearchFlightsForm() {
                       ) {
                         form.setValue("slices", [
                           ...form.getValues("slices"),
-                          { origin: "", destination: "", departure_date: "" },
+                          {
+                            index: 1,
+                            origin: "",
+                            destination: "",
+                            departure_date: "",
+                          },
                         ]);
                       } else if (
                         value === "multi_city" &&
@@ -180,7 +176,12 @@ export function SearchFlightsForm() {
                       ) {
                         form.setValue("slices", [
                           ...form.getValues("slices"),
-                          { origin: "", destination: "", departure_date: "" },
+                          {
+                            index: form.getValues("slices").length,
+                            origin: "",
+                            destination: "",
+                            departure_date: "",
+                          },
                         ]);
                       }
                     }}
@@ -194,12 +195,12 @@ export function SearchFlightsForm() {
 
           <FormField
             control={form.control}
-            name="cabin_class"
+            name="cabinClass"
             render={({ field }) => (
               <FormItem>
                 <FormControl>
                   <TravelCabin
-                    initialValue={field.value}
+                    defaultValue={field.value}
                     onChange={(value) => {
                       field.onChange(value);
                     }}
@@ -218,7 +219,7 @@ export function SearchFlightsForm() {
               <FormItem>
                 <FormControl>
                   <TravelTraveller
-                    initialValue={field.value}
+                    defaultValue={field.value}
                     onChange={(value) => {
                       field.onChange(value);
                     }}
@@ -236,8 +237,8 @@ export function SearchFlightsForm() {
             render={({ field }) => (
               <FormItem>
                 <FormControl>
-                  <TravelLuggage
-                    initialValue={field.value}
+                  <TravelBaggage
+                    defaultValue={field.value}
                     onChange={(value) => {
                       field.onChange(value);
                     }}
@@ -251,15 +252,15 @@ export function SearchFlightsForm() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-4 gap-2 mb-3 mx-auto max-w-4xl">
-          {form.watch("tripType") === "multi_city" ? (
-            form.watch("slices").map((slice, index) => (
+          {form.watch("travelType") === "multi_city" ? (
+            form.watch("slices").map((slice) => (
               <div
-                key={index}
+                key={slice.index}
                 className="col-span-full grid grid-cols-1 md:grid-cols-4 gap-2"
               >
                 <FormField
                   control={form.control}
-                  name={`slices.${index}.origin`}
+                  name={`slices.${slice.index}.origin`}
                   render={({ field }) => (
                     <FormItem>
                       <FormControl>
@@ -279,7 +280,7 @@ export function SearchFlightsForm() {
 
                 <FormField
                   control={form.control}
-                  name={`slices.${index}.destination`}
+                  name={`slices.${slice.index}.destination`}
                   render={({ field }) => (
                     <FormItem>
                       <FormControl>
@@ -299,17 +300,18 @@ export function SearchFlightsForm() {
 
                 <FormField
                   control={form.control}
-                  name={`slices.${index}.departure_date`}
+                  name={`slices.${slice.index}.departure_date`}
                   render={({ field }) => (
                     <FormItem>
                       <FormControl>
                         <TravelPeriod
                           defaultValue={{
                             from: field.value,
-                            to: field.value,
+                            to: field.value, // Keep this for range
                           }}
+                          travelType={form.watch("travelType")} // Pass travelType
                           onChange={(value) => {
-                            field.onChange(value);
+                            field.onChange(value.from); // Handle single date logic
                           }}
                         />
                       </FormControl>
@@ -318,13 +320,13 @@ export function SearchFlightsForm() {
                   )}
                 />
 
-                {index === form.watch("slices").length - 1 && (
+                {slice.index === form.watch("slices").length - 1 && (
                   <div className="flex space-x-1">
                     <Button
                       type="button"
                       size="icon"
                       variant="outline"
-                      onClick={() => removeFlightSegment(index)}
+                      onClick={() => removeFlightSegment(slice.index)}
                       disabled={form.watch("slices").length <= 1}
                       className="w-10 h-10 flex-1"
                     >
@@ -407,10 +409,11 @@ export function SearchFlightsForm() {
                     <TravelPeriod
                       defaultValue={{
                         from: field.value,
-                        to: field.value,
+                        to: field.value, // Keep this for range
                       }}
+                      travelType={form.watch("travelType")} // Pass travelType
                       onChange={(value) => {
-                        field.onChange(value);
+                        field.onChange(value.from); // Handle single date logic
                       }}
                     />
                     <FormMessage />

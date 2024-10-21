@@ -1,10 +1,10 @@
 "use server";
 
+import { authActionClient } from "@/actions/safe-action";
 import { Cookies } from "@/utils/constants";
 import { addYears } from "date-fns";
 import { revalidateTag } from "next/cache";
 import { cookies } from "next/headers";
-import { authActionClient } from "../safe-action";
 import { changeTravelTypeSchema } from "./schema";
 
 export const changeTravelTypeAction = authActionClient

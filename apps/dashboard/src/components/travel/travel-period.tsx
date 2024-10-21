@@ -14,7 +14,6 @@ import {
   SelectValue,
 } from "@travelese/ui/select";
 import {
-  addDays,
   addMonths,
   addWeeks,
   endOfDay,
@@ -29,10 +28,11 @@ import { parseAsString, useQueryStates } from "nuqs";
 
 type Props = {
   defaultValue: {
-    to: string | undefined;
-    from: string | undefined;
+    to?: string; // Optional for return trips
+    from?: string; // Optional for all types
   };
-  disabled?: string;
+  travelType: "one_way" | "multi_city" | "return"; // Added travelType prop
+  disabled?: boolean;
 };
 
 const today = startOfDay(new Date());
@@ -56,7 +56,7 @@ const periods = [
   },
 ];
 
-export function TravelPeriod({ defaultValue, disabled }: Props) {
+export function TravelPeriod({ defaultValue, travelType, disabled }: Props) {
   const { execute } = useAction(changeTravelPeriodAction);
 
   const [params, setParams] = useQueryStates(
@@ -69,7 +69,7 @@ export function TravelPeriod({ defaultValue, disabled }: Props) {
     },
   );
 
-  const handleChangePeriod = (
+  const handleRangePeriodChange = (
     range: { from: Date | null; to: Date | null } | undefined,
     period?: string,
   ) => {
@@ -83,6 +83,18 @@ export function TravelPeriod({ defaultValue, disabled }: Props) {
         ? formatISO(range.to, { representation: "date" })
         : params.to,
       period,
+    };
+
+    setParams(newRange);
+    execute(newRange);
+  };
+
+  const handleSingleDateChange = (date: Date | null) => {
+    if (!date) return;
+
+    const newRange = {
+      from: formatISO(date, { representation: "date" }),
+      // No 'to' field for single date selection
     };
 
     setParams(newRange);
@@ -117,7 +129,7 @@ export function TravelPeriod({ defaultValue, disabled }: Props) {
             <Select
               defaultValue={params.period ?? undefined}
               onValueChange={(value) =>
-                handleChangePeriod(
+                handleRangePeriodChange(
                   periods.find((p) => p.value === value)?.range,
                   value,
                 )
@@ -138,19 +150,37 @@ export function TravelPeriod({ defaultValue, disabled }: Props) {
             </Select>
           </div>
 
-          <Calendar
-            mode="range"
-            numberOfMonths={2}
-            today={new Date()}
-            selected={{
-              from: isValid(fromDate) ? fromDate : undefined,
-              to: isValid(toDate) ? toDate : undefined,
-            }}
-            defaultMonth={today}
-            initialFocus
-            fromDate={today}
-            onSelect={handleChangePeriod}
-          />
+          {/* Render Calendar based on travelType */}
+          {travelType === "return" ? (
+            // Calendar for Return Trips (Range)
+            <Calendar
+              mode="range"
+              numberOfMonths={2}
+              today={new Date()}
+              selected={{
+                from: isValid(fromDate) ? fromDate : undefined,
+                to: isValid(toDate) ? toDate : undefined,
+              }}
+              defaultMonth={today}
+              initialFocus
+              fromDate={today}
+              onSelect={handleRangePeriodChange}
+            />
+          ) : (
+            // Calendar for One-Way and Multi-City Trips (Single)
+            <Calendar
+              mode="single" // Single mode for one-way and multi-city
+              numberOfMonths={2}
+              today={new Date()}
+              selected={{
+                from: isValid(fromDate) ? fromDate : undefined,
+              }}
+              defaultMonth={today}
+              initialFocus
+              fromDate={today}
+              onSelect={(date) => handleSingleDateChange(date)} // Only set from date
+            />
+          )}
         </PopoverContent>
       </Popover>
     </div>

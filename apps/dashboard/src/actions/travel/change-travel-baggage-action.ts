@@ -1,20 +1,20 @@
 "use server";
 
+import { authActionClient } from "@/actions/safe-action";
 import { Cookies } from "@/utils/constants";
 import { addYears } from "date-fns";
 import { revalidateTag } from "next/cache";
 import { cookies } from "next/headers";
-import { authActionClient } from "../safe-action";
-import { changeTravelLuggageSchema } from "./schema";
+import { changeTravelBaggageSchema } from "./schema";
 
-export const changeTravelLuggageAction = authActionClient
-  .schema(changeTravelLuggageSchema)
+export const changeTravelBaggageAction = authActionClient
+  .schema(changeTravelBaggageSchema)
   .metadata({
-    name: "change-travel-luggage",
+    name: "change-travel-baggage",
   })
   .action(async ({ parsedInput: value, ctx: { user } }) => {
     cookies().set({
-      name: Cookies.TravelLuggage,
+      name: Cookies.TravelBaggage,
       value,
       expires: addYears(new Date(), 1),
     });
