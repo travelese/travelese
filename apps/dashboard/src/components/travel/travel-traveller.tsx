@@ -2,65 +2,55 @@
 
 import { changeTravelTravellerAction } from "@/actions/travel/change-travel-traveller-action";
 import { ItemCounter, ItemType } from "@/components/item-counter";
+import { useI18n } from "@/locales/client";
 import { Icons } from "@travelese/ui/icons";
 import { useOptimisticAction } from "next-safe-action/hooks";
-import { parseAsJson, useQueryStates } from "nuqs";
-
-const travellerTypes: ItemType[] = [
-  {
-    id: "adult",
-    label: "Adults",
-    subLabel: "12+",
-    icon: <Icons.User className="h-4 w-4" />,
-  },
-  {
-    id: "child",
-    label: "Children",
-    subLabel: "2-11",
-    icon: <Icons.Child className="h-4 w-4" />,
-  },
-  {
-    id: "infant_without_seat",
-    label: "Infants",
-    subLabel: "Under 2",
-    icon: <Icons.Infant className="h-4 w-4" />,
-  },
-];
 
 type Props = {
-  defaultValue: Array<{ type: string }>; // Expect an array of passenger objects
+  value: Array<{ type: string }>;
   disabled?: boolean;
+  onChange: (value: Array<{ type: string }>) => void;
 };
 
-export function TravelTraveller({ defaultValue, disabled }: Props) {
-  // Initialize state with the default value
-  const [params, setParams] = useQueryStates(
+export function TravelTraveller({ value, disabled, onChange }: Props) {
+  const t = useI18n();
+
+  const travellerTypes: ItemType[] = [
     {
-      passengers:
-        parseAsJson<Array<{ type: string }>>().withDefault(defaultValue),
+      id: "adult",
+      label: t("travel_passenger.adult"),
+      subLabel: "12+",
+      icon: <Icons.User className="h-4 w-4" />,
     },
     {
-      shallow: false,
+      id: "child",
+      label: t("travel_passenger.child"),
+      subLabel: "2-11",
+      icon: <Icons.Child className="h-4 w-4" />,
     },
-  );
+    {
+      id: "infant_without_seat",
+      label: t("travel_passenger.infant_without_seat"),
+      subLabel: "Under 2",
+      icon: <Icons.Infant className="h-4 w-4" />,
+    },
+  ];
 
   const { execute, optimisticState } = useOptimisticAction(
     changeTravelTravellerAction,
     {
-      currentState: params.passengers,
+      currentState: value,
       updateFn: (_, newState) => newState,
     },
   );
 
-  // Check if optimisticState is an array; if not, initialize it
   const currentPassengers = Array.isArray(optimisticState)
     ? optimisticState
-    : [];
+    : value;
 
   const handleTravellerChange = (newCounts: Record<string, number>) => {
     const newPassengers = [];
 
-    // Build the passenger array based on counts
     for (const type of travellerTypes) {
       const count = newCounts[type.id] || 0;
       for (let i = 0; i < count; i++) {
@@ -68,9 +58,8 @@ export function TravelTraveller({ defaultValue, disabled }: Props) {
       }
     }
 
-    // Update the query state with the new passengers array
-    setParams({ passengers: newPassengers });
-    execute(newPassengers); // Execute the optimistic action with the new passengers
+    execute(newPassengers);
+    onChange(newPassengers);
   };
 
   return (
