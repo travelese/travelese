@@ -1,18 +1,19 @@
 "use client";
 
-import type { Places } from "@duffel/api/types";
+import { listPlaceSuggestionsAction } from "@/actions/travel/list-place-suggestions-action";
+import type { Places } from "@duffel/api/Places/Suggestions/SuggestionsType";
 import { Button } from "@travelese/ui/button";
 import { Icons } from "@travelese/ui/icons";
 import { Popover, PopoverContent, PopoverTrigger } from "@travelese/ui/popover";
-import { useQueryState } from "nuqs";
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { listPlaceSuggestionsAction } from "../../actions/travel/supporting-resources/list-place-suggestions-action";
+import { useAction } from "next-safe-action/hooks";
+import { parseAsString, useQueryState } from "nuqs";
+import { useMemo, useState } from "react";
 
 interface LocationSelectorProps {
   placeholder: string;
   value: string;
   onChange: (value: string, iataCode: string) => void;
-  type: "origin" | "destination" | "stays";
+  type: "origin" | "destination";
 }
 
 export function TravelLocation({
@@ -23,27 +24,13 @@ export function TravelLocation({
 }: LocationSelectorProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [places, setPlaces] = useState<Places[]>([]);
-  const [_, setLocationState] = useQueryState(type);
+  const [locationState, setLocationState] = useQueryState(type, parseAsString);
 
-  const fetchPlaces = useCallback(async (query: string) => {
-    if (query.length < 1) {
-      setPlaces([]);
-      return;
-    }
-    try {
-      const result = await listPlaceSuggestionsAction({ query });
-      setPlaces(result?.data || []);
-    } catch (error) {
-      console.error("Failed to fetch places:", error);
-      setPlaces([]);
-    }
-  }, []);
+  const { execute: fetchPlaces, result } = useAction(
+    listPlaceSuggestionsAction,
+  );
 
-  useEffect(() => {
-    fetchPlaces(searchQuery);
-  }, [searchQuery, fetchPlaces]);
-
+  const places = result?.data || [];
   const cities = places.filter((place) => place.type === "city");
   const airports = places.filter((place) => place.type === "airport");
 
@@ -55,13 +42,16 @@ export function TravelLocation({
     const iataCode =
       place.type === "city" ? place.iata_city_code : place.iata_code;
     onChange(selectedValue, iataCode ?? "");
-    setLocationState(iataCode);
+    setLocationState(iataCode ?? null);
     setIsOpen(false);
   };
 
-  const updateSearchQuery = (e: ChangeEvent<HTMLInputElement>) => {
+  const updateSearchQuery = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newQuery = e.target.value;
     setSearchQuery(newQuery);
+    if (newQuery.length >= 1) {
+      fetchPlaces({ query: newQuery });
+    }
     onChange(newQuery, "");
   };
 
@@ -155,7 +145,7 @@ export function TravelLocation({
           )}
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-100 p-0" sideOffset={10}>
+      <PopoverContent className="w-full p-0" sideOffset={10}>
         <div className="p-2 border-border">
           <div className="relative">
             <input
@@ -167,7 +157,7 @@ export function TravelLocation({
             <Icons.Search className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4" />
           </div>
         </div>
-        <div className="w-[300px] overflow-auto">
+        <div className="w-[350px] overflow-auto">
           {cities.length > 0 && renderPlaceList(cities, "Cities")}
           {airports.length > 0 && renderPlaceList(airports, "Airports")}
           {places.length === 0 && searchQuery.length > 0 && (

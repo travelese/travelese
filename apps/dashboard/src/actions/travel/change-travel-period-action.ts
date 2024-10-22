@@ -1,7 +1,7 @@
 "use server";
 
+import { authActionClient } from "@/actions/safe-action";
 import { revalidateTag } from "next/cache";
-import { authActionClient } from "../safe-action";
 import { changeTravelPeriodSchema } from "./schema";
 
 export const changeTravelPeriodAction = authActionClient

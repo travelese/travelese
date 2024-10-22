@@ -6,7 +6,7 @@ import { Button } from "@travelese/ui/button";
 import { Icons } from "@travelese/ui/icons";
 import { Popover, PopoverContent, PopoverTrigger } from "@travelese/ui/popover";
 import { useOptimisticAction } from "next-safe-action/hooks";
-import { parseAsString, useQueryState } from "nuqs";
+import { parseAsString, useQueryStates } from "nuqs";
 
 const cabinClasses = [
   "economy",
@@ -14,31 +14,38 @@ const cabinClasses = [
   "business",
   "first_class",
 ] as const;
+
 type CabinClass = (typeof cabinClasses)[number];
 
 type Props = {
-  initialValue: CabinClass;
+  defaultValue: CabinClass;
   disabled?: boolean;
+  onChange?: (value: CabinClass) => void;
 };
 
-export function TravelCabin({ initialValue, disabled }: Props) {
+export function TravelCabin({ defaultValue, disabled, onChange }: Props) {
   const t = useI18n();
-  const [cabinClass, setCabinClass] = useQueryState(
-    "cabinClass",
-    parseAsString.withDefault(initialValue),
+  const [params, setParams] = useQueryStates(
+    {
+      travel_cabin: parseAsString.withDefault(defaultValue),
+    },
+    {
+      shallow: false,
+    },
   );
 
   const { execute, optimisticState } = useOptimisticAction(
     changeTravelCabinAction,
     {
-      currentState: cabinClass,
+      currentState: params.travel_cabin as CabinClass,
       updateFn: (_, newState) => newState,
     },
   );
 
-  const cabinChange = (newCabinClass: CabinClass) => {
-    setCabinClass(newCabinClass);
+  const handleCabinChange = (newCabinClass: CabinClass) => {
+    setParams({ travel_cabin: newCabinClass });
     execute(newCabinClass);
+    onChange?.(newCabinClass);
   };
 
   return (
@@ -49,7 +56,7 @@ export function TravelCabin({ initialValue, disabled }: Props) {
           className="w-full justify-between"
           disabled={disabled}
         >
-          <Icons.Cabin className="h-4 w-4 mr-2" />
+          <Icons.CabinClass className="h-4 w-4 mr-2" />
           <span className="flex-grow line-clamp-1 text-ellipsis text-left">
             {t(`travel_cabin.${optimisticState}`)}
           </span>
@@ -62,7 +69,7 @@ export function TravelCabin({ initialValue, disabled }: Props) {
             key={cabinClass}
             variant="ghost"
             className="w-full justify-start"
-            onClick={() => cabinChange(cabinClass)}
+            onClick={() => handleCabinChange(cabinClass)}
           >
             {t(`travel_cabin.${cabinClass}`)}
           </Button>

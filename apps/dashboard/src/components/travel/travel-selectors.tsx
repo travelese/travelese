@@ -11,7 +11,7 @@ export async function TravelSelectors({ defaultValue }) {
   return (
     <div className="flex justify-between mt-6 space-x-2">
       <div className="flex space-x-2">
-        <TravelMode initialValue={travelMode} />
+        <TravelMode initialValue={travelMode as "stays" | "flights"} />
       </div>
 
       <div className="flex space-x-2">

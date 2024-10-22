@@ -1,24 +1,29 @@
 "use server";
 
+import { authActionClient } from "@/actions/safe-action";
 import { duffel } from "@/utils/duffel";
 import { logger } from "@/utils/logger";
 import { DuffelError } from "@duffel/api";
 import { LogEvents } from "@travelese/events/events";
-import { authActionClient } from "../../safe-action";
-import { getOrderChangeSchema } from "../schema";
+import { listOffersSchema } from "./schema";
 
-export const getOrderChangeAction = authActionClient
-  .schema(getOrderChangeSchema)
+export const listOffersAction = authActionClient
+  .schema(listOffersSchema)
   .metadata({
-    name: "get-order-change",
+    name: "list-offers",
     track: {
-      event: LogEvents.GetOrderChange.name,
-      channel: LogEvents.GetOrderChange.channel,
+      event: LogEvents.ListOffers.name,
+      channel: LogEvents.ListOffers.channel,
     },
   })
-  .action(async ({ parsedInput }) => {
+  .action(async ({ offer_request_id, limit, after, before }) => {
     try {
-      const response = await duffel.orderChanges.get(parsedInput.id);
+      const response = await duffel.offers.list({
+        offer_request_id,
+        limit,
+        after,
+        before,
+      });
       return response.data;
     } catch (error) {
       if (error instanceof DuffelError) {
@@ -31,7 +36,7 @@ export const getOrderChangeAction = authActionClient
         logger("Unexpected Error", error);
       }
       throw new Error(
-        `Failed to get order change: ${
+        `Failed to list offers: ${
           error instanceof Error ? error.message : "Unknown error"
         }`,
       );

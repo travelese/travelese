@@ -1,12 +1,12 @@
 "use server";
 
+import { authActionClient } from "@/actions/safe-action";
 import { duffel } from "@/utils/duffel";
 import { logger } from "@/utils/logger";
 import { DuffelError } from "@duffel/api";
 import type { CreateOfferRequest, OfferRequest } from "@duffel/api/types";
 import { LogEvents } from "@travelese/events/events";
-import { authActionClient } from "../../safe-action";
-import { createPartialOfferRequestSchema } from "../schema";
+import { createPartialOfferRequestSchema } from "./schema";
 
 export const createPartialOfferRequestAction = authActionClient
   .schema(createPartialOfferRequestSchema)

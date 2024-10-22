@@ -1,4 +1,7 @@
 import {
+  BaggageCabinLight,
+  BaggageChecked10Light,
+  BaggagePersonalLight,
   Child,
   Infant,
   Passenger,
@@ -665,7 +668,7 @@ export const Icons = {
   City: MdLocationCity,
   Airport: MdOutlineLocalAirport,
   Airports: MdOutlineConnectingAirports,
-  Cabin: MdOutlineFlightClass,
+  CabinClass: MdOutlineFlightClass,
   Explore: MdOutlineExplore,
   Stays: MdLocalHotel,
   Bed: MdOutlineBed,
@@ -690,4 +693,7 @@ export const Icons = {
   Passengers: Passengers,
   Child: Child,
   Infant: Infant,
+  CarryOn: BaggagePersonalLight,
+  Checked: BaggageChecked10Light,
+  Cabin: BaggageCabinLight,
 };

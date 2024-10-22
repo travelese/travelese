@@ -5,36 +5,44 @@ import { useI18n } from "@/locales/client";
 import { Button } from "@travelese/ui/button";
 import { Icons } from "@travelese/ui/icons";
 import { Popover, PopoverContent, PopoverTrigger } from "@travelese/ui/popover";
-import { ChevronDown } from "lucide-react";
 import { useOptimisticAction } from "next-safe-action/hooks";
-import { parseAsString, useQueryState } from "nuqs";
+import { parseAsString, useQueryStates } from "nuqs";
 
-const options = ["return", "one_way", "multi_city", "nomad"] as const;
-type TravelType = (typeof options)[number];
+const travelTypes = [
+  "return",
+  "one_way",
+  "multi_city",
+  "digital_nomad",
+] as const;
+type TravelType = (typeof travelTypes)[number];
 
 type Props = {
-  initialValue: TravelType;
+  defaultValue: TravelType;
   disabled?: boolean;
   onChange?: (value: TravelType) => void;
 };
 
-export function TravelType({ initialValue, disabled, onChange }: Props) {
+export function TravelType({ defaultValue, disabled, onChange }: Props) {
   const t = useI18n();
-  const [travelType, setTravelType] = useQueryState(
-    "tripType",
-    parseAsString.withDefault(initialValue),
+  const [params, setParams] = useQueryStates(
+    {
+      travel_type: parseAsString.withDefault(defaultValue),
+    },
+    {
+      shallow: false,
+    },
   );
 
   const { execute, optimisticState } = useOptimisticAction(
     changeTravelTypeAction,
     {
-      currentState: travelType,
+      currentState: params.travel_type as TravelType,
       updateFn: (_, newState) => newState,
     },
   );
 
   const handleTravelTypeChange = (newTravelType: TravelType) => {
-    setTravelType(newTravelType);
+    setParams({ travel_type: newTravelType });
     execute(newTravelType);
     onChange?.(newTravelType);
   };
@@ -51,18 +59,18 @@ export function TravelType({ initialValue, disabled, onChange }: Props) {
           <span className="flex-grow line-clamp-1 text-ellipsis text-left">
             {t(`travel_type.${optimisticState}`)}
           </span>
-          <ChevronDown className="ml-2 h-4 w-4" />
+          <Icons.ChevronDown className="ml-2 h-4 w-4" />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-[225px]" sideOffset={10}>
-        {options.map((option) => (
+        {travelTypes.map((travelType) => (
           <Button
-            key={option}
+            key={travelType}
             variant="ghost"
             className="w-full justify-start"
-            onClick={() => handleTravelTypeChange(option)}
+            onClick={() => handleTravelTypeChange(travelType)}
           >
-            {t(`travel_type.${option}`)}
+            {t(`travel_type.${travelType}`)}
           </Button>
         ))}
       </PopoverContent>
