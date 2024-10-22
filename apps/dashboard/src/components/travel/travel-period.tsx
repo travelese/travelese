@@ -1,6 +1,7 @@
 "use client";
 
 import { changeTravelPeriodAction } from "@/actions/travel/change-travel-period-action";
+import { useI18n } from "@/locales/client";
 import { Button } from "@travelese/ui/button";
 import { Calendar } from "@travelese/ui/calendar";
 import { Icons } from "@travelese/ui/icons";
@@ -23,49 +24,54 @@ import {
   startOfDay,
 } from "date-fns";
 import { formatDateRange } from "little-date";
-import { useAction } from "next-safe-action/hooks";
-import { parseAsString, useQueryStates } from "nuqs";
+import { useOptimisticAction } from "next-safe-action/hooks";
 
 type Props = {
-  defaultValue: {
-    to?: string; // Optional for return trips
-    from?: string; // Optional for all types
+  index?: number;
+  value: {
+    from: string;
+    to?: string;
   };
-  travelType: "one_way" | "multi_city" | "return"; // Added travelType prop
+  travelType: "one_way" | "multi_city" | "return";
   disabled?: boolean;
+  onChange: (value: { from: string; to?: string }) => void;
 };
 
 const today = startOfDay(new Date());
 
-const periods = [
-  {
-    value: "1w",
-    label: "Next week",
-    range: {
-      from: today,
-      to: endOfDay(addWeeks(today, 1)),
-    },
-  },
-  {
-    value: "1m",
-    label: "Next month",
-    range: {
-      from: today,
-      to: endOfDay(addMonths(today, 1)),
-    },
-  },
-];
+export function TravelPeriod({
+  index,
+  value,
+  travelType,
+  disabled,
+  onChange,
+}: Props) {
+  const t = useI18n();
 
-export function TravelPeriod({ defaultValue, travelType, disabled }: Props) {
-  const { execute } = useAction(changeTravelPeriodAction);
-
-  const [params, setParams] = useQueryStates(
+  const periods = [
     {
-      from: parseAsString.withDefault(defaultValue.from ?? ""),
-      to: parseAsString.withDefault(defaultValue.to ?? ""),
+      value: "1w",
+      label: t("Next week"),
+      range: {
+        from: today,
+        to: endOfDay(addWeeks(today, 1)),
+      },
     },
     {
-      shallow: false,
+      value: "1m",
+      label: t("Next month"),
+      range: {
+        from: today,
+        to: endOfDay(addMonths(today, 1)),
+      },
+    },
+  ];
+
+  const { execute, optimisticState } = useOptimisticAction(
+    changeTravelPeriodAction,
+    {
+      currentState: value,
+      updateFn: (_, newState) => newState,
     },
   );
 
@@ -78,15 +84,12 @@ export function TravelPeriod({ defaultValue, travelType, disabled }: Props) {
     const newRange = {
       from: range.from
         ? formatISO(range.from, { representation: "date" })
-        : params.from,
-      to: range.to
-        ? formatISO(range.to, { representation: "date" })
-        : params.to,
-      period,
+        : value.from,
+      to: range.to ? formatISO(range.to, { representation: "date" }) : value.to,
     };
 
-    setParams(newRange);
     execute(newRange);
+    onChange(newRange);
   };
 
   const handleSingleDateChange = (date: Date | null) => {
@@ -94,20 +97,20 @@ export function TravelPeriod({ defaultValue, travelType, disabled }: Props) {
 
     const newRange = {
       from: formatISO(date, { representation: "date" }),
-      // No 'to' field for single date selection
     };
 
-    setParams(newRange);
     execute(newRange);
+    onChange(newRange);
   };
 
-  const fromDate = params.from ? parseISO(params.from) : null;
-  const toDate = params.to ? parseISO(params.to) : null;
+  const fromDate = optimisticState.from ? parseISO(optimisticState.from) : null;
+  const toDate = optimisticState.to ? parseISO(optimisticState.to) : null;
 
-  const displayDateRange =
-    isValid(fromDate) && isValid(toDate)
+  const displayDateRange = isValid(fromDate)
+    ? isValid(toDate)
       ? formatDateRange(fromDate, toDate, { includeTime: false })
-      : "Select dates";
+      : formatDateRange(fromDate, fromDate, { includeTime: false })
+    : t("Select dates");
 
   return (
     <div className="flex space-x-4">
@@ -127,7 +130,7 @@ export function TravelPeriod({ defaultValue, travelType, disabled }: Props) {
         >
           <div className="p-4 pb-0">
             <Select
-              defaultValue={params.period ?? undefined}
+              defaultValue={optimisticState.period ?? undefined}
               onValueChange={(value) =>
                 handleRangePeriodChange(
                   periods.find((p) => p.value === value)?.range,
@@ -136,7 +139,7 @@ export function TravelPeriod({ defaultValue, travelType, disabled }: Props) {
               }
             >
               <SelectTrigger className="w-full">
-                <SelectValue placeholder="Select a period" />
+                <SelectValue placeholder={t("Select a period")} />
               </SelectTrigger>
               <SelectContent>
                 <SelectGroup>
@@ -150,9 +153,7 @@ export function TravelPeriod({ defaultValue, travelType, disabled }: Props) {
             </Select>
           </div>
 
-          {/* Render Calendar based on travelType */}
           {travelType === "return" ? (
-            // Calendar for Return Trips (Range)
             <Calendar
               mode="range"
               numberOfMonths={2}
@@ -167,18 +168,15 @@ export function TravelPeriod({ defaultValue, travelType, disabled }: Props) {
               onSelect={handleRangePeriodChange}
             />
           ) : (
-            // Calendar for One-Way and Multi-City Trips (Single)
             <Calendar
-              mode="single" // Single mode for one-way and multi-city
+              mode="single"
               numberOfMonths={2}
               today={new Date()}
-              selected={{
-                from: isValid(fromDate) ? fromDate : undefined,
-              }}
+              selected={isValid(fromDate) ? fromDate : undefined}
               defaultMonth={today}
               initialFocus
               fromDate={today}
-              onSelect={(date) => handleSingleDateChange(date)} // Only set from date
+              onSelect={(date) => handleSingleDateChange(date)}
             />
           )}
         </PopoverContent>

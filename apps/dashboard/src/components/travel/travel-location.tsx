@@ -1,12 +1,12 @@
 "use client";
 
 import { listPlaceSuggestionsAction } from "@/actions/travel/list-place-suggestions-action";
+import { useI18n } from "@/locales/client";
 import type { Places } from "@duffel/api/Places/Suggestions/SuggestionsType";
 import { Button } from "@travelese/ui/button";
 import { Icons } from "@travelese/ui/icons";
 import { Popover, PopoverContent, PopoverTrigger } from "@travelese/ui/popover";
 import { useAction } from "next-safe-action/hooks";
-import { parseAsString, useQueryState } from "nuqs";
 import { useMemo, useState } from "react";
 
 interface LocationSelectorProps {
@@ -22,9 +22,9 @@ export function TravelLocation({
   onChange,
   type,
 }: LocationSelectorProps) {
+  const t = useI18n();
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [locationState, setLocationState] = useQueryState(type, parseAsString);
 
   const { execute: fetchPlaces, result } = useAction(
     listPlaceSuggestionsAction,
@@ -42,7 +42,6 @@ export function TravelLocation({
     const iataCode =
       place.type === "city" ? place.iata_city_code : place.iata_code;
     onChange(selectedValue, iataCode ?? "");
-    setLocationState(iataCode ?? null);
     setIsOpen(false);
   };
 
@@ -58,7 +57,6 @@ export function TravelLocation({
   const clearSelection = () => {
     onChange("", "");
     setSearchQuery("");
-    setLocationState(null);
   };
 
   const renderPlaceList = (placeList: Places[], title: string) => (
@@ -74,7 +72,7 @@ export function TravelLocation({
           tabIndex={0}
         >
           <div className="flex items-center">
-            {title === "Cities" ? (
+            {title === t("Cities") ? (
               <Icons.City className="w-5 h-5 mr-3" />
             ) : (
               <Icons.Airport className="w-5 h-5 mr-3" />
@@ -149,7 +147,7 @@ export function TravelLocation({
         <div className="p-2 border-border">
           <div className="relative">
             <input
-              placeholder="Search places..."
+              placeholder={t("Search places...")}
               value={searchQuery}
               onChange={updateSearchQuery}
               className="pl-8 border-border"
@@ -158,10 +156,12 @@ export function TravelLocation({
           </div>
         </div>
         <div className="w-[350px] overflow-auto">
-          {cities.length > 0 && renderPlaceList(cities, "Cities")}
-          {airports.length > 0 && renderPlaceList(airports, "Airports")}
+          {cities.length > 0 && renderPlaceList(cities, t("Cities"))}
+          {airports.length > 0 && renderPlaceList(airports, t("Airports"))}
           {places.length === 0 && searchQuery.length > 0 && (
-            <div className="p-4 text-center text-sm">No locations found</div>
+            <div className="p-4 text-center text-sm">
+              {t("No locations found")}
+            </div>
           )}
         </div>
       </PopoverContent>

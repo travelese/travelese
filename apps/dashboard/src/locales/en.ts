@@ -108,7 +108,7 @@ export default {
     multi_city: "Multi city",
     digital_nomad: "Digital Nomad",
   },
-  travel_cabin: {
+  cabin_class: {
     economy: "Economy",
     premium_economy: "Premium",
     business: "Business",

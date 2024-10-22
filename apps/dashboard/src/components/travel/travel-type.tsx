@@ -6,7 +6,6 @@ import { Button } from "@travelese/ui/button";
 import { Icons } from "@travelese/ui/icons";
 import { Popover, PopoverContent, PopoverTrigger } from "@travelese/ui/popover";
 import { useOptimisticAction } from "next-safe-action/hooks";
-import { parseAsString, useQueryStates } from "nuqs";
 
 const travelTypes = [
   "return",
@@ -17,34 +16,25 @@ const travelTypes = [
 type TravelType = (typeof travelTypes)[number];
 
 type Props = {
-  defaultValue: TravelType;
+  value: TravelType;
   disabled?: boolean;
-  onChange?: (value: TravelType) => void;
+  onChange: (value: TravelType) => void;
 };
 
-export function TravelType({ defaultValue, disabled, onChange }: Props) {
+export function TravelType({ value, disabled, onChange }: Props) {
   const t = useI18n();
-  const [params, setParams] = useQueryStates(
-    {
-      travel_type: parseAsString.withDefault(defaultValue),
-    },
-    {
-      shallow: false,
-    },
-  );
 
   const { execute, optimisticState } = useOptimisticAction(
     changeTravelTypeAction,
     {
-      currentState: params.travel_type as TravelType,
+      currentState: value,
       updateFn: (_, newState) => newState,
     },
   );
 
   const handleTravelTypeChange = (newTravelType: TravelType) => {
-    setParams({ travel_type: newTravelType });
     execute(newTravelType);
-    onChange?.(newTravelType);
+    onChange(newTravelType);
   };
 
   return (

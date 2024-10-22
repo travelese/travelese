@@ -2,64 +2,57 @@
 
 import { changeTravelBaggageAction } from "@/actions/travel/change-travel-baggage-action";
 import { ItemCounter, ItemType } from "@/components/item-counter";
+import { useI18n } from "@/locales/client";
 import { Icons } from "@travelese/ui/icons";
 import { useOptimisticAction } from "next-safe-action/hooks";
-import { parseAsJson, useQueryStates } from "nuqs";
-
-const baggageTypes: ItemType[] = [
-  {
-    id: "carry_on",
-    label: "Carry On",
-    subLabel: "Baggage",
-    icon: <Icons.CarryOn className="h-4 w-4" />,
-  },
-  {
-    id: "cabin",
-    label: "Cabin",
-    subLabel: "Baggage",
-    icon: <Icons.Cabin className="h-4 w-4" />,
-  },
-  {
-    id: "checked",
-    label: "Checked",
-    subLabel: "Baggage",
-    icon: <Icons.Checked className="h-4 w-4" />,
-  },
-];
 
 type Props = {
-  defaultValue: Record<string, number>;
+  value: Record<string, number>;
   disabled?: boolean;
+  onChange: (value: Record<string, number>) => void;
 };
 
-export function TravelBaggage({ defaultValue, disabled }: Props) {
-  const [params, setParams] = useQueryStates(
+export function TravelBaggage({ value, disabled, onChange }: Props) {
+  const t = useI18n();
+
+  const baggageTypes: ItemType[] = [
     {
-      travel_baggage:
-        parseAsJson<Record<string, number>>().withDefault(defaultValue),
+      id: "carry_on",
+      label: t("travel_baggage.carry_on"),
+      subLabel: "Baggage",
+      icon: <Icons.CarryOn className="h-4 w-4" />,
     },
     {
-      shallow: false,
+      id: "cabin",
+      label: t("travel_baggage.cabin"),
+      subLabel: "Baggage",
+      icon: <Icons.Cabin className="h-4 w-4" />,
     },
-  );
+    {
+      id: "checked",
+      label: t("travel_baggage.checked"),
+      subLabel: "Baggage",
+      icon: <Icons.Checked className="h-4 w-4" />,
+    },
+  ];
 
   const { execute, optimisticState } = useOptimisticAction(
     changeTravelBaggageAction,
     {
-      currentState: params.travel_baggage,
+      currentState: value,
       updateFn: (_, newState) => newState,
     },
   );
 
   const handleBaggageChange = (newCounts: Record<string, number>) => {
-    setParams({ travel_baggage: newCounts });
     execute(newCounts);
+    onChange(newCounts);
   };
 
   return (
     <ItemCounter
       items={baggageTypes}
-      value={optimisticState || defaultValue}
+      value={optimisticState || value}
       onChange={handleBaggageChange}
       disabled={disabled}
     />
