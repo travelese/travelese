@@ -1,4 +1,4 @@
-import { SearchFlightsForm } from "@/components/forms/search-flights-form";
+import { TravelSearchCard } from "@/components/cards/search-travel-card";
 import { TravelResults } from "@/components/travel/travel-results";
 import { TravelSelectors } from "@/components/travel/travel-selectors";
 import { addWeeks } from "date-fns";
@@ -21,8 +21,8 @@ export default async function Travel() {
         <div className="h-[530px] mb-4">
           <TravelSelectors defaultValue={defaultValue} />
 
-          <div className="mt-8 relative p-6 bg-background border-border shadow-sm items-center justify-center">
-            <SearchFlightsForm />
+          <div className="mt-8 relative">
+            <TravelSearchCard />
           </div>
         </div>
       </div>
