@@ -1,41 +1,40 @@
 "use client";
 
 import { changeTravelCabinAction } from "@/actions/travel/change-travel-class-action";
+import { changeTravelCabinSchema } from "@/actions/travel/schema";
 import { useI18n } from "@/locales/client";
 import { Button } from "@travelese/ui/button";
 import { Icons } from "@travelese/ui/icons";
 import { Popover, PopoverContent, PopoverTrigger } from "@travelese/ui/popover";
 import { useOptimisticAction } from "next-safe-action/hooks";
-
-const cabinClasses = [
-  "economy",
-  "premium_economy",
-  "business",
-  "first_class",
-] as const;
-
-type CabinClass = (typeof cabinClasses)[number];
+import { parseAsString, useQueryState } from "nuqs";
 
 type Props = {
-  value: CabinClass;
   disabled?: boolean;
-  onChange: (value: CabinClass) => void;
 };
 
-export function TravelCabin({ value, disabled, onChange }: Props) {
+export function TravelCabin({ disabled }: Props) {
   const t = useI18n();
+
+  const [cabinClass, setCabinClass] = useQueryState(
+    "cabin_class",
+    parseAsString.withDefault("economy"),
+  );
 
   const { execute, optimisticState } = useOptimisticAction(
     changeTravelCabinAction,
     {
-      currentState: value,
+      currentState: cabinClass,
       updateFn: (_, newState) => newState,
     },
   );
 
-  const handleCabinChange = (newCabinClass: CabinClass) => {
-    execute(newCabinClass);
-    onChange(newCabinClass);
+  const handleCabinChange = (newCabinClass: string) => {
+    const result = changeTravelCabinSchema.safeParse(newCabinClass);
+    if (result.success) {
+      execute(newCabinClass);
+      setCabinClass(newCabinClass);
+    }
   };
 
   return (
@@ -54,7 +53,7 @@ export function TravelCabin({ value, disabled, onChange }: Props) {
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-[225px]" sideOffset={10}>
-        {cabinClasses.map((cabinClass) => (
+        {Object.values(changeTravelCabinSchema.enum).map((cabinClass) => (
           <Button
             key={cabinClass}
             variant="ghost"

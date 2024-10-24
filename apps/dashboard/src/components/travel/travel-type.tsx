@@ -1,40 +1,47 @@
 "use client";
 
 import { changeTravelTypeAction } from "@/actions/travel/change-travel-type-action";
+import { changeTravelTypeSchema } from "@/actions/travel/schema";
 import { useI18n } from "@/locales/client";
 import { Button } from "@travelese/ui/button";
 import { Icons } from "@travelese/ui/icons";
 import { Popover, PopoverContent, PopoverTrigger } from "@travelese/ui/popover";
 import { useOptimisticAction } from "next-safe-action/hooks";
-
-const travelTypes = [
-  "return",
-  "one_way",
-  "multi_city",
-  "digital_nomad",
-] as const;
-type TravelType = (typeof travelTypes)[number];
+import { parseAsString, useQueryState } from "nuqs";
+import { useEffect } from "react";
 
 type Props = {
-  value: TravelType;
   disabled?: boolean;
-  onChange: (value: TravelType) => void;
 };
 
-export function TravelType({ value, disabled, onChange }: Props) {
+export function TravelType({ disabled }: Props) {
   const t = useI18n();
+
+  const [travelType, setTravelType] = useQueryState(
+    "travel_type",
+    parseAsString.withDefault("return"),
+  );
 
   const { execute, optimisticState } = useOptimisticAction(
     changeTravelTypeAction,
     {
-      currentState: value,
+      currentState: travelType,
       updateFn: (_, newState) => newState,
     },
   );
 
-  const handleTravelTypeChange = (newTravelType: TravelType) => {
-    execute(newTravelType);
-    onChange(newTravelType);
+  useEffect(() => {
+    if (!travelType) {
+      setTravelType("return");
+    }
+  }, [travelType, setTravelType]);
+
+  const handleTravelTypeChange = (newType: string) => {
+    const result = changeTravelTypeSchema.safeParse(newType);
+    if (result.success) {
+      execute(newType);
+      setTravelType(newType);
+    }
   };
 
   return (
@@ -53,17 +60,18 @@ export function TravelType({ value, disabled, onChange }: Props) {
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-[225px]" sideOffset={10}>
-        {travelTypes.map((travelType) => (
+        {Object.values(changeTravelTypeSchema.enum).map((type) => (
           <Button
-            key={travelType}
+            key={type}
             variant="ghost"
             className="w-full justify-start"
-            onClick={() => handleTravelTypeChange(travelType)}
+            onClick={() => handleTravelTypeChange(type)}
           >
-            {t(`travel_type.${travelType}`)}
+            {t(`travel_type.${type}`)}
           </Button>
         ))}
       </PopoverContent>
     </Popover>
   );
 }
+

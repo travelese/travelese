@@ -1,6 +1,7 @@
 "use client";
 
 import { changeTravelPeriodAction } from "@/actions/travel/change-travel-period-action";
+import { changeTravelPeriodSchema } from "@/actions/travel/schema";
 import { useI18n } from "@/locales/client";
 import { Button } from "@travelese/ui/button";
 import { Calendar } from "@travelese/ui/calendar";
@@ -25,28 +26,28 @@ import {
 } from "date-fns";
 import { formatDateRange } from "little-date";
 import { useOptimisticAction } from "next-safe-action/hooks";
+import { parseAsString, useQueryState } from "nuqs";
 
 type Props = {
-  index?: number;
-  value: {
-    from: string;
-    to?: string;
-  };
-  travelType: "one_way" | "multi_city" | "return";
+  index: number;
   disabled?: boolean;
-  onChange: (value: { from: string; to?: string }) => void;
+  travelType: string;
 };
 
 const today = startOfDay(new Date());
 
-export function TravelPeriod({
-  index,
-  value,
-  travelType,
-  disabled,
-  onChange,
-}: Props) {
+export function TravelPeriod({ index, disabled, travelType }: Props) {
   const t = useI18n();
+
+  const [fromDate, setFromDate] = useQueryState(
+    `slices.${index}.from_date`,
+    parseAsString.withDefault(""),
+  );
+
+  const [toDate, setToDate] = useQueryState(
+    `slices.${index + 1}.to_date`,
+    parseAsString.withDefault(""),
+  );
 
   const periods = [
     {
@@ -70,26 +71,37 @@ export function TravelPeriod({
   const { execute, optimisticState } = useOptimisticAction(
     changeTravelPeriodAction,
     {
-      currentState: value,
+      currentState: {
+        from: fromDate,
+        to: travelType === "return" ? toDate : undefined,
+      },
       updateFn: (_, newState) => newState,
     },
   );
 
   const handleRangePeriodChange = (
     range: { from: Date | null; to: Date | null } | undefined,
-    period?: string,
+    periodValue?: string,
   ) => {
     if (!range) return;
 
     const newRange = {
       from: range.from
         ? formatISO(range.from, { representation: "date" })
-        : value.from,
-      to: range.to ? formatISO(range.to, { representation: "date" }) : value.to,
+        : fromDate,
+      to: range.to
+        ? formatISO(range.to, { representation: "date" })
+        : undefined,
     };
 
-    execute(newRange);
-    onChange(newRange);
+    const result = changeTravelPeriodSchema.safeParse(newRange);
+    if (result.success) {
+      execute(newRange);
+      setFromDate(newRange.from);
+      if (newRange.to && travelType === "return") {
+        setToDate(newRange.to);
+      }
+    }
   };
 
   const handleSingleDateChange = (date: Date | null) => {
@@ -99,17 +111,22 @@ export function TravelPeriod({
       from: formatISO(date, { representation: "date" }),
     };
 
-    execute(newRange);
-    onChange(newRange);
+    const result = changeTravelPeriodSchema.safeParse(newRange);
+    if (result.success) {
+      execute(newRange);
+      setFromDate(newRange.from);
+    }
   };
 
-  const fromDate = optimisticState.from ? parseISO(optimisticState.from) : null;
-  const toDate = optimisticState.to ? parseISO(optimisticState.to) : null;
+  const parsedFromDate = optimisticState.from
+    ? parseISO(optimisticState.from)
+    : null;
+  const parsedToDate = optimisticState.to ? parseISO(optimisticState.to) : null;
 
-  const displayDateRange = isValid(fromDate)
-    ? isValid(toDate)
-      ? formatDateRange(fromDate, toDate, { includeTime: false })
-      : formatDateRange(fromDate, fromDate, { includeTime: false })
+  const displayDateRange = isValid(parsedFromDate)
+    ? isValid(parsedToDate)
+      ? formatDateRange(parsedFromDate, parsedToDate, { includeTime: false })
+      : formatDateRange(parsedFromDate, parsedFromDate, { includeTime: false })
     : t("Select dates");
 
   return (
@@ -135,8 +152,7 @@ export function TravelPeriod({
                 handleRangePeriodChange(
                   periods.find((p) => p.value === value)?.range,
                   value,
-                )
-              }
+                )}
             >
               <SelectTrigger className="w-full">
                 <SelectValue placeholder={t("Select a period")} />
@@ -153,32 +169,34 @@ export function TravelPeriod({
             </Select>
           </div>
 
-          {travelType === "return" ? (
-            <Calendar
-              mode="range"
-              numberOfMonths={2}
-              today={new Date()}
-              selected={{
-                from: isValid(fromDate) ? fromDate : undefined,
-                to: isValid(toDate) ? toDate : undefined,
-              }}
-              defaultMonth={today}
-              initialFocus
-              fromDate={today}
-              onSelect={handleRangePeriodChange}
-            />
-          ) : (
-            <Calendar
-              mode="single"
-              numberOfMonths={2}
-              today={new Date()}
-              selected={isValid(fromDate) ? fromDate : undefined}
-              defaultMonth={today}
-              initialFocus
-              fromDate={today}
-              onSelect={(date) => handleSingleDateChange(date)}
-            />
-          )}
+          {travelType === "return" && index === 0
+            ? (
+              <Calendar
+                mode="range"
+                numberOfMonths={2}
+                today={new Date()}
+                selected={{
+                  from: isValid(parsedFromDate) ? parsedFromDate : undefined,
+                  to: isValid(parsedToDate) ? parsedToDate : undefined,
+                }}
+                defaultMonth={today}
+                initialFocus
+                fromDate={today}
+                onSelect={handleRangePeriodChange}
+              />
+            )
+            : (
+              <Calendar
+                mode="single"
+                numberOfMonths={2}
+                today={new Date()}
+                selected={isValid(parsedFromDate) ? parsedFromDate : undefined}
+                defaultMonth={today}
+                initialFocus
+                fromDate={today}
+                onSelect={(date) => handleSingleDateChange(date)}
+              />
+            )}
         </PopoverContent>
       </Popover>
     </div>

@@ -1,14 +1,5 @@
 import { z } from "zod";
 
-export const changeTravelModeSchema = z.enum(["flights", "stays"]);
-
-const travelTypeSchema = z.enum([
-  "one_way",
-  "return",
-  "multi_city",
-  "digital_nomad",
-]);
-
 export const changeTravelTypeSchema = z.enum([
   "return",
   "one_way",
@@ -43,21 +34,6 @@ export const changeTravelLocationSchema = z.object({
 export const changeTravelPeriodSchema = z.object({
   from: z.string(),
   to: z.string().optional(),
-});
-
-export const createTravelShareSchema = z.object({
-  baseUrl: z.string().url(),
-  from: z.string(),
-  to: z.string(),
-  type: travelTypeSchema,
-  expiresAt: z.string().datetime().optional(),
-});
-
-export const listPlaceSuggestionsSchema = z.object({
-  query: z.string(),
-  rad: z.string().optional(),
-  lat: z.string().optional(),
-  lng: z.string().optional(),
 });
 
 export const createOfferRequestSchema = z.object({
@@ -101,6 +77,8 @@ export const createOfferRequestSchema = z.object({
     )
     .optional(),
 });
+
+export type CreateOfferRequestValues = z.infer<typeof createOfferRequestSchema>;
 
 export const createPartialOfferRequestSchema = z.object({
   supplier_timeout: z.number().optional(),
@@ -156,28 +134,13 @@ export const createPartialOfferRequestSchema = z.object({
     .optional(),
 });
 
-export const listOffersSchema = z.object({
-  offer_request_id: z.string(),
-  limit: z.number().optional(),
-  after: z.string().optional(),
-  before: z.string().optional(),
-});
+export type CreatePartialOfferRequestValues = z.infer<
+  typeof createPartialOfferRequestSchema
+>;
 
-export const searchAccommodationSchema = z.object({
-  check_in_date: z.string(),
-  check_out_date: z.string(),
-  rooms: z.number(),
-  guests: z.array(
-    z.object({
-      type: z.enum(["adult", "child", "infant"]),
-      age: z.number().optional(),
-    }),
-  ),
-  location: z.object({
-    radius: z.number(),
-    geographic_coordinates: z.object({
-      longitude: z.number(),
-      latitude: z.number(),
-    }),
-  }),
+export const listPlaceSuggestionsSchema = z.object({
+  query: z.string(),
+  rad: z.string().optional(),
+  lat: z.string().optional(),
+  lng: z.string().optional(),
 });

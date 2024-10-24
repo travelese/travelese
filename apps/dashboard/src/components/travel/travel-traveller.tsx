@@ -5,15 +5,19 @@ import { ItemCounter, ItemType } from "@/components/item-counter";
 import { useI18n } from "@/locales/client";
 import { Icons } from "@travelese/ui/icons";
 import { useOptimisticAction } from "next-safe-action/hooks";
+import { parseAsJson, useQueryState } from "nuqs";
 
 type Props = {
-  value: Array<{ type: string }>;
   disabled?: boolean;
-  onChange: (value: Array<{ type: string }>) => void;
 };
 
-export function TravelTraveller({ value, disabled, onChange }: Props) {
+export function TravelTraveller({ disabled }: Props) {
   const t = useI18n();
+
+  const [passengers, setPassengers] = useQueryState(
+    "passengers",
+    parseAsJson<Array<{ type: string }>>().withDefault([{ type: "adult" }]),
+  );
 
   const travellerTypes: ItemType[] = [
     {
@@ -39,14 +43,14 @@ export function TravelTraveller({ value, disabled, onChange }: Props) {
   const { execute, optimisticState } = useOptimisticAction(
     changeTravelTravellerAction,
     {
-      currentState: value,
+      currentState: passengers,
       updateFn: (_, newState) => newState,
     },
   );
 
   const currentPassengers = Array.isArray(optimisticState)
     ? optimisticState
-    : value;
+    : passengers;
 
   const handleTravellerChange = (newCounts: Record<string, number>) => {
     const newPassengers = [];
@@ -59,7 +63,7 @@ export function TravelTraveller({ value, disabled, onChange }: Props) {
     }
 
     execute(newPassengers);
-    onChange(newPassengers);
+    setPassengers(newPassengers);
   };
 
   return (
