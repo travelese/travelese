@@ -27,4 +27,5 @@ export const searchParamsCache = createSearchParamsCache({
   destination: parseAsString,
   departure_date: parseAsString,
   return_date: parseAsString,
+  requestId: parseAsString,
 });

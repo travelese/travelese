@@ -2,6 +2,7 @@
 
 import { SearchFlightsForm } from "@/components/forms/search-flights-form";
 import { Card, CardContent, CardHeader, CardTitle } from "@travelese/ui/card";
+import { useState } from "react";
 
 export function TravelSearchCard({
   userId,
@@ -17,7 +18,7 @@ export function TravelSearchCard({
         <SearchFlightsForm
           userId={userId}
           currency={currency}
-          onCreate={() => { }}
+          onCreate={() => {}}
         />
       </CardContent>
     </Card>

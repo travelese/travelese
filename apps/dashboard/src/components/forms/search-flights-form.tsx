@@ -2,14 +2,14 @@
 
 import { createOfferRequestAction } from "@/actions/travel/create-offer-request-action";
 import { createPartialOfferRequestAction } from "@/actions/travel/create-partial-offer-request-action";
+import { listOffersAction } from "@/actions/travel/list-offers-action";
 import { createOfferRequestSchema } from "@/actions/travel/schema";
+import { TravelBaggage } from "@/components/travel/travel-baggage";
 import { TravelCabin } from "@/components/travel/travel-cabin";
 import { TravelLocation } from "@/components/travel/travel-location";
-import { TravelBaggage } from "@/components/travel/travel-baggage";
 import { TravelPeriod } from "@/components/travel/travel-period";
 import { TravelTraveller } from "@/components/travel/travel-traveller";
 import { TravelType } from "@/components/travel/travel-type";
-import type { OfferRequest } from "@duffel/api/types";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@travelese/ui/button";
 import {
@@ -27,7 +27,15 @@ import { parseAsJson, parseAsString, useQueryStates } from "nuqs";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 
-export function SearchFlightsForm() {
+export function SearchFlightsForm({
+  userId,
+  currency,
+  onCreate,
+}: {
+  userId: string;
+  currency: string;
+  onCreate: (listOffersId: string) => void;
+}) {
   const { toast } = useToast();
   const [isSearching, setIsSearching] = useState(false);
 
@@ -48,45 +56,53 @@ export function SearchFlightsForm() {
         { origin: "", destination: "", departure_date: "" },
         { origin: "", destination: "", departure_date: "" },
       ]),
+      bags: parseAsJson<{
+        carry_on: number;
+        cabin: number;
+        checked: number;
+      }>().withDefault({ carry_on: 0, cabin: 0, checked: 0 }),
+      currency: parseAsString.withDefault("USD"),
     },
     { history: "push" },
   );
 
-  const createOfferRequest = useAction(createOfferRequestAction, {
-    onSuccess: ({ data: offerRequest }) => {
+  const listOffers = useAction(listOffersAction, {
+    onSuccess: ({ data: offers }) => {
+      onCreate(listOffersId);
+
       toast({
-        duration: 3500,
-        title: "Search completed",
-        description: "The search has been completed.",
+        title: "Flights Found",
+        description: `Found ${offers.length} flight options`,
         variant: "success",
       });
-      onCreate?.(offerRequest as OfferRequest);
     },
-    onError: () => {
+  });
+
+  const createOfferRequest = useAction(createOfferRequestAction, {
+    onSuccess: ({ data: offerRequest }) => {
+      onCreate(offerRequest?.id);
+
       toast({
-        duration: 3500,
-        title: "Something went wrong please try again.",
-        variant: "error",
+        title: "Offer Request Created",
+        description: `Offer Request ID: ${offerRequest?.id}`,
+        variant: "success",
       });
+
+      listOffers.execute({ offer_request_id: offerRequest.id });
     },
   });
 
   const createPartialOfferRequest = useAction(createPartialOfferRequestAction, {
     onSuccess: ({ data: offerRequest }) => {
+      onCreate(offerRequest?.id);
+
       toast({
-        duration: 3500,
-        title: "Search completed",
-        description: "The search has been completed.",
+        title: "Offer Request Created",
+        description: `Offer Request ID: ${offerRequest?.id}`,
         variant: "success",
       });
-      onCreate?.(offerRequest as OfferRequest);
-    },
-    onError: () => {
-      toast({
-        duration: 3500,
-        variant: "error",
-        title: "Something went wrong please try again.",
-      });
+
+      listOffers.execute({ offer_request_id: offerRequest.id });
     },
   });
 
@@ -179,16 +195,17 @@ export function SearchFlightsForm() {
                           },
                         ];
                       } else if (value === "multi_city") {
-                        newSlices = currentSlices.length < 2
-                          ? [
-                            ...currentSlices,
-                            {
-                              origin: "",
-                              destination: "",
-                              departure_date: "",
-                            },
-                          ]
-                          : currentSlices;
+                        newSlices =
+                          currentSlices.length < 2
+                            ? [
+                                ...currentSlices,
+                                {
+                                  origin: "",
+                                  destination: "",
+                                  departure_date: "",
+                                },
+                              ]
+                            : currentSlices;
                       }
 
                       form.setValue("slices", newSlices);
@@ -298,7 +315,7 @@ export function SearchFlightsForm() {
                               setQueryParams((prev) => ({
                                 ...prev,
                                 slices: prev.slices.map((s, i) =>
-                                  i === index ? { ...s, origin: iataCode } : s
+                                  i === index ? { ...s, origin: iataCode } : s,
                                 ),
                               }));
                             }}
@@ -326,7 +343,7 @@ export function SearchFlightsForm() {
                                 slices: prev.slices.map((s, i) =>
                                   i === index
                                     ? { ...s, destination: iataCode }
-                                    : s
+                                    : s,
                                 ),
                               }));
                             }}
@@ -346,12 +363,13 @@ export function SearchFlightsForm() {
                           <TravelPeriod
                             value={{
                               from: field.value,
-                              to: form.watch("travel_type") === "return" &&
+                              to:
+                                form.watch("travel_type") === "return" &&
                                 index === 0
-                                ? form.watch(
-                                  `slices.${index + 1}.departure_date`,
-                                )
-                                : undefined,
+                                  ? form.watch(
+                                      `slices.${index + 1}.departure_date`,
+                                    )
+                                  : undefined,
                             }}
                             travelType={form.watch("travel_type")}
                             index={index}
@@ -363,19 +381,19 @@ export function SearchFlightsForm() {
                                   i === index
                                     ? { ...s, departure_date: value.from }
                                     : form.watch("travel_type") === "return" &&
-                                      i === index + 1 &&
-                                      value.to
+                                        i === index + 1 &&
+                                        value.to
                                       ? {
-                                        ...s,
-                                        departure_date: value.to,
-                                        origin: form.getValues(
-                                          `slices.${index}.destination`,
-                                        ),
-                                        destination: form.getValues(
-                                          `slices.${index}.origin`,
-                                        ),
-                                      }
-                                      : s
+                                          ...s,
+                                          departure_date: value.to,
+                                          origin: form.getValues(
+                                            `slices.${index}.destination`,
+                                          ),
+                                          destination: form.getValues(
+                                            `slices.${index}.origin`,
+                                          ),
+                                        }
+                                      : s,
                                 ),
                               }));
                               if (
@@ -423,16 +441,16 @@ export function SearchFlightsForm() {
                         >
                           <Icons.Plus className="h-4 w-4" />
                         </Button>
-                        <Button
-                          type="submit"
+                        <SubmitButton
+                          isSubmitting={
+                            createOfferRequest.isExecuting ||
+                            createPartialOfferRequest.isExecuting
+                          }
+                          className="w-full"
                           size="icon"
-                          disabled={isSearching}
-                          className="w-10 h-10 flex-1"
                         >
-                          {createPartialOfferRequest.status === "executing"
-                            ? <Icons.Loader className="h-4 w-4 animate-spin" />
-                            : <Icons.Travel className="h-4 w-4" />}
-                        </Button>
+                          <Icons.Travel className="h-4 w-4" />
+                        </SubmitButton>
                       </div>
                     )}
 
@@ -440,14 +458,16 @@ export function SearchFlightsForm() {
                     index === form.watch("slices").length - 1) ||
                     (form.watch("travel_type") === "return" &&
                       index === 0)) && (
-                      <SubmitButton
-                        isSubmitting={createOfferRequest.isExecuting ||
-                          createPartialOfferRequest.isExecuting}
-                        className="w-full"
-                      >
-                        Search
-                      </SubmitButton>
-                    )}
+                    <SubmitButton
+                      isSubmitting={
+                        createOfferRequest.isExecuting ||
+                        createPartialOfferRequest.isExecuting
+                      }
+                      className="w-full"
+                    >
+                      Search
+                    </SubmitButton>
+                  )}
                 </>
               )}
             </div>

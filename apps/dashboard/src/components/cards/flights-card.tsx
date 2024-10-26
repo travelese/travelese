@@ -1,3 +1,8 @@
+import type {
+  BaggageType,
+  OfferSliceSegment,
+} from "@duffel/api/booking/Offers/OfferTypes";
+import type { Offer, OfferSlice } from "@duffel/api/types";
 import {
   Accordion,
   AccordionContent,
@@ -33,11 +38,6 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@travelese/ui/tooltip";
-import type {
-  BaggageType,
-  OfferSliceSegment,
-} from "@duffel/api/booking/Offers/OfferTypes";
-import type { Offer, OfferSlice } from "@duffel/api/types";
 import {
   ArmchairIcon,
   ArrowUpDownIcon,
@@ -213,7 +213,7 @@ const FlightSummary: React.FC<FlightSummaryProps> = React.memo(
           </div>
           <Separator className="flex-1 sm:block" aria-hidden="true" />
           <div className="items-center text-sm p-2">
-            <span className="sr-only">Number of stops: </span>
+            <span className="sr-only">Number of stops:</span>
             <StopInfo />
           </div>{" "}
           <Avatar className="text-muted-foreground">
@@ -317,9 +317,9 @@ const IncludedItems: React.FC<IncludedItemsProps> = React.memo(
                     <div className="flex items-center space-x-1 rounded-full p-1 cursor-help">
                       <span className="text-sm">{count}</span>
                       <Icon className="h-4 w-4" aria-hidden="true" />
-                      <span className="sr-only">{`${count} ${label}${
-                        count > 1 ? "s" : ""
-                      }`}</span>
+                      <span className="sr-only">
+                        {`${count} ${label}${count > 1 ? "s" : ""}`}
+                      </span>
                     </div>
                   </TooltipTrigger>
                   <TooltipContent>
@@ -380,8 +380,9 @@ const IncludedItems: React.FC<IncludedItemsProps> = React.memo(
 IncludedItems.displayName = "IncludedItems";
 
 const FlightsCard: React.FC<FlightsCardProps> = ({ offer, onSelect }) => {
-  if (!offer || !Array.isArray(offer.slices) || offer.slices.length === 0)
+  if (!offer || !Array.isArray(offer.slices) || offer.slices.length === 0) {
     return null;
+  }
 
   const [outbound, inbound] = offer.slices;
   const emission = offer.total_emissions_kg || "N/A";
@@ -604,10 +605,14 @@ const AirportInfo: React.FC<{
   align: "left" | "right";
 }> = ({ icon: Icon, code, name, terminal, align }) => (
   <div
-    className={`flex flex-col ${align === "left" ? "items-start" : "items-end"}`}
+    className={`flex flex-col ${
+      align === "left" ? "items-start" : "items-end"
+    }`}
   >
     <div
-      className={`flex items-center ${align === "right" ? "flex-row-reverse" : ""}`}
+      className={`flex items-center ${
+        align === "right" ? "flex-row-reverse" : ""
+      }`}
     >
       <Icon className="w-5 h-5" />
       <div

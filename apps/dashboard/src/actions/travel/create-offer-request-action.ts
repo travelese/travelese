@@ -53,7 +53,10 @@ export const createOfferRequestAction = authActionClient
           logger("Unexpected Error", error);
         }
         throw new Error(
-          `Failed to create OfferRequest: ${error instanceof Error ? error.message : "Unknown error"}`,
+          `Failed to create OfferRequest: ${
+            error instanceof Error ? error.message : "Unknown error"
+          }`,
         );
       }
-    });
+    },
+  );
