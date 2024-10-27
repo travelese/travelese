@@ -2,7 +2,7 @@ import { OpenTrackerSheet } from "@/components/open-tracker-sheet";
 import { Table } from "@/components/tables/tracker";
 import { Loading } from "@/components/tables/tracker/loading";
 import { TrackerCalendar } from "@/components/tracker-calendar";
-import { TrackerSearchFilter } from "@/components/tracker-search-filters";
+import { TrackerSearchFilter } from "@/components/tracker-search-filter";
 import {
   getTrackerRecordsByRange,
   getUser,
@@ -12,7 +12,7 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 
 export const metadata: Metadata = {
-  title: "Tracker | Midday",
+  title: "Tracker | Travelese",
 };
 
 type Props = {

@@ -1,5 +1,6 @@
 import { AI } from "@/actions/ai/chat";
 import { Header } from "@/components/header";
+import { GlobalSheets } from "@/components/sheets/global-sheets";
 import { Sidebar } from "@/components/sidebar";
 import { setupAnalytics } from "@travelese/events/server";
 import { getCountryCode } from "@travelese/location";
@@ -103,6 +104,10 @@ export default async function Layout({
         />
         <ExportStatus />
         <HotKeys />
+
+        <Suspense>
+          <GlobalSheets defaultCurrency={currencies[countryCode]} />
+        </Suspense>
       </AI>
     </div>
   );
