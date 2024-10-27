@@ -124,4 +124,3 @@ grant update on table "public"."total_amount" to "service_role";
 
 CREATE TRIGGER enrich_transaction AFTER INSERT ON public.transactions FOR EACH ROW EXECUTE FUNCTION update_enrich_transaction();
 
-

@@ -530,3 +530,28 @@ export async function createProject(
     .select()
     .single();
 }
+
+type CreateBookingParams = {
+  name: string;
+  description?: string;
+  estimate?: number;
+  billable?: boolean;
+  rate?: number;
+  currency?: string;
+};
+
+export async function createBooking(
+  supabase: Client,
+  params: CreateBookingParams,
+) {
+  const { data: userData } = await getCurrentUserTeamQuery(supabase);
+
+  return supabase
+    .from("travel_bookings")
+    .insert({
+      ...params,
+      team_id: userData?.team_id,
+    })
+    .select()
+    .single();
+}

@@ -1,7 +1,7 @@
 "use client";
 
 import { createTrackerEntriesAction } from "@/actions/create-tracker-entries-action";
-import { deleteTrackerEntryAction } from "@/actions/delete-tracker-entries";
+import { deleteTrackerEntryAction } from "@/actions/delete-tracker-entry";
 import { useTrackerParams } from "@/hooks/use-tracker-params";
 import { secondsToHoursAndMinutes } from "@/utils/format";
 import {

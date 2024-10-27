@@ -1,4 +1,4 @@
-import { useTrackerParams } from "@/hooks/use-tracker-params";
+import { useTravelParams } from "@/hooks/use-travel-params";
 import { TZDate } from "@date-fns/tz";
 import { Button } from "@travelese/ui/button";
 import { cn } from "@travelese/ui/cn";
@@ -10,8 +10,8 @@ type Props = {
   dateFormat?: string;
 };
 
-export function TrackerMonthSelect({ className, dateFormat = "MMM" }: Props) {
-  const { date, setParams } = useTrackerParams();
+export function TravelMonthSelect({ className, dateFormat = "MMM" }: Props) {
+  const { date, setParams } = useTravelParams();
   const currentDate = date
     ? new TZDate(date, "UTC")
     : new TZDate(new Date(), "UTC");

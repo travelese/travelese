@@ -48,7 +48,7 @@ const statusFilters = [
   { id: "completed", name: "Completed" },
 ];
 
-export function TrackerSearchFilter({ members }: Props) {
+export function TravelSearchFilter({ members }: Props) {
   const [prompt, setPrompt] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
   const [streaming, setStreaming] = useState(false);

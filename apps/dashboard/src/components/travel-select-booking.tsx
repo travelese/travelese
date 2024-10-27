@@ -1,18 +1,18 @@
 "use client";
 
-import { createProjectAction } from "@/actions/project/create-project-action";
+import { createBookingAction } from "@/actions/booking/create-booking-action";
 import { createClient } from "@travelese/supabase/client";
-import { getTrackerProjectsQuery } from "@travelese/supabase/queries";
+import { getTravelBookingsQuery } from "@travelese/supabase/queries";
 import { Combobox } from "@travelese/ui/combobox";
 import { useToast } from "@travelese/ui/use-toast";
 import { useAction } from "next-safe-action/hooks";
 import { useEffect, useState } from "react";
 
-type Props = {
+type Props = {``
   teamId: string;
   selectedId?: string;
   onSelect: (selected: Option) => void;
-  onCreate: (project: { id: string; name: string }) => void;
+  onCreate: (booking: { id: string; name: string }) => void;
 };
 
 type Option = {
@@ -20,7 +20,7 @@ type Option = {
   name: string;
 };
 
-export function TrackerSelectProject({
+export function TravelSelectBooking({
   teamId,
   selectedId,
   onSelect,
@@ -33,10 +33,10 @@ export function TrackerSelectProject({
   const [value, setValue] = useState<Option | undefined>();
 
   useEffect(() => {
-    const foundProject = data?.find((project) => project?.id === selectedId);
+    const foundBooking = data?.find((booking) => booking?.id === selectedId);
 
-    if (foundProject) {
-      setValue({ id: foundProject.id, name: foundProject.name });
+    if (foundBooking) {
+      setValue({ id: foundBooking.id, name: foundBooking.name });
     }
   }, [selectedId]);
 
@@ -45,10 +45,10 @@ export function TrackerSelectProject({
     onSelect(selected);
   };
 
-  const createProject = useAction(createProjectAction, {
-    onSuccess: ({ data: project }) => {
-      onCreate?.(project);
-      handleSelect(project);
+  const createBooking = useAction(createBookingAction, {
+    onSuccess: ({ data: booking }) => {
+      onCreate?.(booking);
+      handleSelect(booking);
     },
     onError: () => {
       toast({
@@ -59,28 +59,28 @@ export function TrackerSelectProject({
     },
   });
 
-  const fetchProjects = async () => {
+  const fetchBookings = async () => {
     setLoading(true);
 
-    const { data: projectsData } = await getTrackerProjectsQuery(supabase, {
+    const { data: bookingsData } = await getTravelBookingsQuery(supabase, {
       teamId,
       sort: ["status", "asc"],
     });
 
     setLoading(false);
-    setData(projectsData);
+    setData(bookingsData);
 
-    const foundProject = projectsData.find(
-      (project) => project?.id === selectedId,
+    const foundBooking = bookingsData.find(
+      (project) => projet?.id === selectedId,
     );
 
-    if (foundProject) {
-      setValue({ id: foundProject.id, name: foundProject.name });
+    if (foundBooking) {
+      setValue({ id: foundBooking.id, name: foundBooking.name });
     }
   };
 
   useEffect(() => {
-    fetchProjects();
+    fetchBookings();
   }, []);
 
   return (
@@ -93,7 +93,7 @@ export function TrackerSelectProject({
       options={data}
       value={value}
       isLoading={isLoading}
-      onCreate={(name) => createProject.execute({ name })}
+      onCreate={(name) => createBooking.execute({ name })}
     />
   );
 }

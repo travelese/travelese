@@ -2,17 +2,18 @@
 
 import { createServerClient } from "@supabase/ssr";
 import type { Database } from "@travelese/supabase/types";
+import { unstable_cache } from "next/cache";
 
 export async function fetchStats() {
   const supabase = createServerClient<Database>(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    process.env.SUPABASE_SERVICE_KEY!,
     {
       cookies: {
-        getAll() {
+        get() {
           return null;
         },
-        setAll() {
+        set() {
           return null;
         },
         remove() {
@@ -24,7 +25,7 @@ export async function fetchStats() {
 
   const supabaseStorage = createServerClient<Database>(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    process.env.SUPABASE_SERVICE_KEY!,
     {
       cookies: {
         get() {
@@ -42,7 +43,7 @@ export async function fetchStats() {
   );
 
   const [
-    { count: travellers },
+    { count: users },
     { count: transactions },
     { count: bankAccounts },
     { count: trackerEntries },
@@ -96,7 +97,7 @@ export async function fetchStats() {
   ]);
 
   return {
-    travellers,
+    users,
     transactions,
     bankAccounts,
     trackerEntries,

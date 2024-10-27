@@ -57,6 +57,7 @@ import {
   MdOutlineAccountCircle,
   MdOutlineAdd,
   MdOutlineAirlineSeatLegroomReduced,
+  MdOutlineApps,
   MdOutlineArrowDownward,
   MdOutlineArrowForward,
   MdOutlineAttachFile,
@@ -98,6 +99,7 @@ import {
   MdOutlineLocalAirport,
   MdOutlineLocationOn,
   MdOutlineLuggage,
+  MdOutlineMoreTime,
   MdOutlineMoreVert,
   MdOutlineMoveToInbox,
   MdOutlineNotificationsNone,
@@ -696,4 +698,5 @@ export const Icons = {
   CarryOn: BaggagePersonalLight,
   Checked: BaggageChecked10Light,
   Cabin: BaggageCabinLight,
+  Time: MdOutlineMoreTime,
 };

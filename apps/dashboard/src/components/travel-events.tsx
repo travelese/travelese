@@ -3,10 +3,10 @@
 import { secondsToHoursAndMinutes } from "@/utils/format";
 import { cn } from "@travelese/ui/cn";
 
-export function TrackerEvents({
+export function TravelEvents({
   data,
   isToday,
-}: { data: TrackerEvent[]; isToday: boolean }) {
+}: { data: TravelEvent[]; isToday: boolean }) {
   return (
     <div className="flex flex-col space-y-2 font-sans w-full">
       {data && data.length > 0 && (

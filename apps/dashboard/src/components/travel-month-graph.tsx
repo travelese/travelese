@@ -22,12 +22,12 @@ export function TravelMonthGraph({
   onSelect,
   data,
   showCurrentDate,
-  projectId,
+  bookingId,
   disableHover,
   hideDaysIndicators,
   weekStartsOn,
 }) {
-  const { isTracking } = useTravelStore();
+  const { isTraveling } = useTravelStore();
   const currentDate = new Date(date);
 
   const weeks = eachWeekOfInterval(
@@ -49,7 +49,7 @@ export function TravelMonthGraph({
   const handleOnSelect = (params) => {
     if (onSelect) {
       onSelect({
-        projectId: params.projectId || projectId || "new",
+        bookingId: params.bookingId || bookingId || "new",
         day: formatISO(params.day, { representation: "date" }),
       });
     }
@@ -74,7 +74,9 @@ export function TravelMonthGraph({
           isActive={
             showCurrentDate && isSameDay(new Date(dayInWeek), currentDate)
           }
-          isTracking={isTracking && isSameDay(new Date(dayInWeek), new Date())}
+          isTraveling={
+            isTraveling && isSameDay(new Date(dayInWeek), new Date())
+          }
           outOfRange={
             isBefore(dayInWeek, firstDay) || isAfter(dayInWeek, lastDay)
           }

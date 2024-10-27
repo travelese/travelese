@@ -1,4 +1,5 @@
-import { Travel } from "@/components/widgets/travel";
+import FlightsCard from "@/components/cards/flights-card";
+import { client as RedisClient } from "@travelese/kv";
 import {
   Carousel,
   CarouselContent,
@@ -6,16 +7,17 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@travelese/ui/carousel";
-import { formatISO } from "date-fns";
-import React from "react";
+import { parseAsString, useQueryState } from "nuqs";
 
-export function TravelResults() {
-  const items = [
-    <Travel
-      key="travel-widget"
-      date={formatISO(new Date(), { representation: "date" })}
-    />,
-  ];
+export async function TravelResults() {
+  const [listOffersId] = useQueryState("listOffersId", parseAsString);
+
+  const offers = await RedisClient.smembers(`list-offers:${listOffersId}`);
+  const parsedOffers = offers.map((offer) => JSON.parse(offer));
+
+  const items = parsedOffers.map((offer) => (
+    <FlightsCard key={offer.id} offer={offer} />
+  ));
 
   return (
     <Carousel

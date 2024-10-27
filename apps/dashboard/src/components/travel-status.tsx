@@ -3,7 +3,7 @@
 import { useI18n } from "@/locales/client";
 import { cn } from "@travelese/ui/cn";
 
-export function TrackerStatus({ status }) {
+export function TravelStatus({ status }) {
   const t = useI18n();
 
   return (
@@ -14,7 +14,7 @@ export function TrackerStatus({ status }) {
           status === "completed" && "bg-primary",
         )}
       />
-      <span>{t(`tracker_status.${status}`)}</span>
+      <span>{t(`travel_status.${status}`)}</span>
     </div>
   );
 }

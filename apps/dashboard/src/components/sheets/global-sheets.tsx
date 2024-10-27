@@ -1,4 +1,5 @@
 import { Cookies } from "@/utils/constants";
+import { logger } from "@/utils/logger";
 import { getUser } from "@travelese/supabase/cached-queries";
 import { cookies } from "next/headers";
 import { TrackerCreateSheet } from "./tracker-create-sheet";
@@ -12,6 +13,12 @@ type Props = {
 export async function GlobalSheets({ defaultCurrency }: Props) {
   const { data: userData } = await getUser();
   const projectId = cookies().get(Cookies.LastProject)?.value;
+
+  logger("GlobalSheets Server Props:", {
+    userData,
+    projectId,
+    defaultCurrency,
+  });
 
   return (
     <>
