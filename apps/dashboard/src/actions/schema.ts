@@ -334,6 +334,31 @@ export const deleteProjectSchema = z.object({
   id: z.string().uuid(),
 });
 
+export const createBookingSchema = z.object({
+  name: z.string().min(1),
+  description: z.string().optional(),
+  estimate: z.number().optional(),
+  billable: z.boolean().optional().default(false),
+  rate: z.number().min(1).optional(),
+  currency: z.string().optional(),
+  status: z.enum(["in_progress", "completed"]).optional(),
+});
+
+export const updateBookingSchema = z.object({
+  id: z.string().uuid(),
+  name: z.string().min(1).optional(),
+  description: z.string().optional(),
+  estimate: z.number().optional(),
+  billable: z.boolean().optional().default(false),
+  rate: z.number().min(1).optional(),
+  currency: z.string().optional(),
+  status: z.enum(["in_progress", "completed"]).optional(),
+});
+
+export const deleteBookingSchema = z.object({
+  id: z.string().uuid(),
+});
+
 export const deleteEntriesSchema = z.object({
   id: z.string().uuid(),
 });
@@ -349,6 +374,11 @@ export const createReportSchema = z.object({
 export const createProjectReportSchema = z.object({
   baseUrl: z.string().url(),
   projectId: z.string().uuid(),
+});
+
+export const createBookingReportSchema = z.object({
+  baseUrl: z.string().url(),
+  bookingId: z.string().uuid(),
 });
 
 export const updateEntriesSchema = z.object({

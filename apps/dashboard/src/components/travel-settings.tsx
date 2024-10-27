@@ -23,7 +23,7 @@ type Props = {
   weekStartsOnMonday: boolean;
 };
 
-export function TrackerSettings({ timeFormat, weekStartsOnMonday }: Props) {
+export function TravelSettings({ timeFormat, weekStartsOnMonday }: Props) {
   const updateUser = useAction(updateUserAction);
 
   const handleUpdateUser = (data: UpdateUserFormValues) => {

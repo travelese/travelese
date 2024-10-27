@@ -1,16 +1,16 @@
 import { secondsToHoursAndMinutes } from "@/utils/format";
 import { format } from "date-fns";
-import { CreateRecordForm } from "./forms/create-record-form";
+import { TravelRecordForm } from "./forms/travel-record-form";
 import { RecordSkeleton, UpdateRecordForm } from "./forms/update-record-form";
 
-export function TrackerEntriesList({
+export function TravelEntriesList({
   data,
   date,
   user,
   isLoading,
   onCreate,
   onDelete,
-  projectId,
+  bookingId,
 }) {
   const currentDate = date ? new Date(date) : new Date();
   const totalDuration = data?.reduce(
@@ -38,10 +38,10 @@ export function TrackerEntriesList({
         />
       ))}
 
-      <CreateRecordForm
+      <TravelRecordForm
         userId={user.id}
         onCreate={onCreate}
-        projectId={projectId}
+        bookingId={bookingId}
       />
     </div>
   );

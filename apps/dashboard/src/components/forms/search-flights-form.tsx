@@ -61,13 +61,18 @@ export function SearchFlightsForm({
         cabin: number;
         checked: number;
       }>().withDefault({ carry_on: 0, cabin: 0, checked: 0 }),
-      currency: parseAsString.withDefault("USD"),
+      listOffersId: parseAsString.withDefault(""),
     },
     { history: "push" },
   );
 
   const listOffers = useAction(listOffersAction, {
-    onSuccess: ({ data: offers }) => {
+    onSuccess: ({ data: { offers, listOffersId } }) => {
+      setQueryParams((prev) => ({
+        ...prev,
+        listOffersId,
+      }));
+
       onCreate(listOffersId);
 
       toast({

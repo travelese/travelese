@@ -2,7 +2,6 @@
 
 import { useTrackerParams } from "@/hooks/use-tracker-params";
 import { formatAmount, secondsToHoursAndMinutes } from "@/utils/format";
-import { logger } from "@/utils/logger";
 import { TZDate } from "@date-fns/tz";
 import { cn } from "@travelese/ui/cn";
 import { Icons } from "@travelese/ui/icons";
@@ -100,6 +99,7 @@ export function TrackerCalendar({
       let start = new TZDate(localRange[0], "UTC");
       let end = new TZDate(localRange[1], "UTC");
       if (start > end) [start, end] = [end, start];
+
       setParams({ range: [localRange[0], localRange[1]] });
     } else if (localRange[0]) {
       setParams({ selectedDate: localRange[0] });

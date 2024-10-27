@@ -27,7 +27,7 @@ type Props = {
   rate: number;
 };
 
-export function TrackerExportCSV({
+export function TravelExportCSV({
   name,
   teamId,
   projectId,

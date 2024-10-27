@@ -1,6 +1,6 @@
 "use client";
 
-import { TrackerMonthSelect } from "@/components/tracker-month-select";
+import { TravelMonthSelect } from "@/components/travel-month-select";
 import { secondsToHoursAndMinutes } from "@/utils/format";
 
 type Props = {
@@ -17,7 +17,7 @@ export function TravelHeader({ totalDuration }: Props) {
         </span>
       </div>
 
-      <TrackerMonthSelect />
+      <TravelMonthSelect />
     </div>
   );
 }

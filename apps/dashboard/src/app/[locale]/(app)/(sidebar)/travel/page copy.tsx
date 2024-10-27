@@ -1,10 +1,10 @@
-import { OpenTrackerSheet } from "@/components/open-tracker-sheet";
-import { Table } from "@/components/tables/tracker";
-import { Loading } from "@/components/tables/tracker/loading";
-import { TrackerCalendar } from "@/components/tracker-calendar";
-import { TrackerSearchFilter } from "@/components/tracker-search-filters";
+import { OpenTravelSheet } from "@/components/open-travel-sheet";
+import { Table } from "@/components/tables/travel";
+import { Loading } from "@/components/tables/travel/loading";
+import { TravelCalendar } from "@/components/travel-calendar";
+import { TravelSearchFilter } from "@/components/travel-search-filters";
 import {
-  getTrackerRecordsByRange,
+  getTravelBookingsByRange,
   getUser,
 } from "@travelese/supabase/cached-queries";
 import { endOfMonth, formatISO, startOfMonth } from "date-fns";
@@ -12,7 +12,7 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 
 export const metadata: Metadata = {
-  title: "Tracker | Midday",
+  title: "Tracker | Travelese",
 };
 
 type Props = {
@@ -25,7 +25,7 @@ type Props = {
   };
 };
 
-export default async function Tracker({ searchParams }: Props) {
+export default async function Travel({ searchParams }: Props) {
   const status = searchParams?.statuses;
   const sort = searchParams?.sort?.split(":") ?? ["status", "asc"];
 
@@ -34,7 +34,7 @@ export default async function Tracker({ searchParams }: Props) {
 
   const [{ data: userData }, { data, meta }] = await Promise.all([
     getUser(),
-    getTrackerRecordsByRange({
+    getTravelBookingsByRange({
       from: formatISO(startOfMonth(new Date(currentDate)), {
         representation: "date",
       }),
@@ -46,7 +46,7 @@ export default async function Tracker({ searchParams }: Props) {
 
   return (
     <div>
-      <TrackerCalendar
+      <TravelCalendar
         weekStartsOnMonday={userData?.week_starts_on_monday}
         timeFormat={userData?.time_format}
         data={data}
@@ -57,8 +57,8 @@ export default async function Tracker({ searchParams }: Props) {
         <h2 className="text-md font-medium">Projects</h2>
 
         <div className="flex space-x-2">
-          <TrackerSearchFilter />
-          <OpenTrackerSheet />
+          <TravelSearchFilter />
+          <OpenTravelSheet />
         </div>
       </div>
 

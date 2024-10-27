@@ -1,3 +1,4 @@
+import { logger } from "@/utils/logger";
 import { formatISO } from "date-fns";
 import {
   parseAsArrayOf,
@@ -7,13 +8,13 @@ import {
   useQueryStates,
 } from "nuqs";
 
-export function useTrackerParams(initialDate?: string) {
+export function useTravelParams(initialDate?: string) {
   const [params, setParams] = useQueryStates({
     date: parseAsString.withDefault(
       initialDate ?? formatISO(new Date(), { representation: "date" }),
     ),
     create: parseAsBoolean,
-    projectId: parseAsString,
+    bookingId: parseAsString,
     update: parseAsBoolean,
     selectedDate: parseAsString,
     range: parseAsArrayOf(parseAsString),
