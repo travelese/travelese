@@ -19,7 +19,7 @@ import type { DateRange } from "react-day-picker";
 
 type Props = {
   name: string;
-  projectId: string;
+  bookingId: string;
   currency: string;
   billable: boolean;
   teamId: string;
@@ -30,7 +30,7 @@ type Props = {
 export function TravelExportCSV({
   name,
   teamId,
-  projectId,
+  bookingId,
   currency,
   userId,
   billable,
@@ -46,14 +46,14 @@ export function TravelExportCSV({
 
   async function downloadCSV() {
     const query = supabase
-      .from("tracker_entries")
+      .from("travel_entries")
       .select(
-        "date, description, duration, assigned:assigned_id(id, full_name), project:project_id(id, name)",
+        "date, description, duration, assigned:assigned_id(id, full_name), booking:booking_id(id, name)",
       )
       .eq("team_id", teamId)
       .gte("date", new UTCDate(date?.from)?.toISOString())
       .lte("date", new UTCDate(date?.to)?.toISOString())
-      .eq("project_id", projectId)
+      .eq("booking_id", bookingId)
       .order("date");
 
     if (!includeTeam) {

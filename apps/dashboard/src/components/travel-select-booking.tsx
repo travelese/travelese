@@ -8,7 +8,7 @@ import { useToast } from "@travelese/ui/use-toast";
 import { useAction } from "next-safe-action/hooks";
 import { useEffect, useState } from "react";
 
-type Props = {``
+type Props = {
   teamId: string;
   selectedId?: string;
   onSelect: (selected: Option) => void;
@@ -71,7 +71,7 @@ export function TravelSelectBooking({
     setData(bookingsData);
 
     const foundBooking = bookingsData.find(
-      (project) => projet?.id === selectedId,
+      (booking) => projet?.id === selectedId,
     );
 
     if (foundBooking) {
@@ -86,7 +86,7 @@ export function TravelSelectBooking({
   return (
     <Combobox
       key={value?.id}
-      placeholder="Search or create project"
+      placeholder="Search or create booking"
       classNameList="-top-[4px] border-t-0 rounded-none rounded-b-md"
       className="w-full bg-transparent px-12 border py-3"
       onSelect={handleSelect}

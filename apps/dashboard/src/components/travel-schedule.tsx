@@ -11,11 +11,11 @@ import {
   getDates,
   getSlotFromDate,
   getTimeFromDate,
-  transformTrackerData,
+  transformTravelData,
   updateEventTime,
-} from "@/utils/tracker";
+} from "@/utils/travel";
 import { createClient } from "@travelese/supabase/client";
-import { getTrackerRecordsByDateQuery } from "@travelese/supabase/queries";
+import { getTravelRecordsByDateQuery } from "@travelese/supabase/queries";
 import { cn } from "@travelese/ui/cn";
 import {
   ContextMenu,
@@ -39,10 +39,10 @@ import {
 import { useAction } from "next-safe-action/hooks";
 import React, { useEffect, useRef, useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
-import { TravelRecordForm } from "./forms/travel-record-form";
+import { TravelBookingForm } from "./forms/travel-booking-form";
 import { TravelDaySelect } from "./travel-day-select";
 
-interface TravelRecord {
+interface TravelBooking {
   id: string;
   start: Date;
   end: Date;
@@ -60,33 +60,37 @@ type Props = {
   teamId: string;
   userId: string;
   timeFormat: number;
-  projectId?: string;
+  bookingId?: string;
 };
 
 export function TravelSchedule({
   teamId,
   userId,
   timeFormat,
-  projectId,
+  bookingId,
 }: Props) {
   const supabase = createClient();
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const { selectedDate, range } = useTravelParams();
-  const [selectedEvent, setSelectedEvent] = useState<TravelRecord | null>(null);
+  const [selectedEvent, setSelectedEvent] = useState<TravelBooking | null>(
+    null,
+  );
   const hours = Array.from({ length: 24 }, (_, i) => i);
-  const [data, setData] = useState<TravelRecord[]>([]);
+  const [data, setData] = useState<TravelBooking[]>([]);
   const [isDragging, setIsDragging] = useState(false);
   const [dragStartSlot, setDragStartSlot] = useState<number | null>(null);
   const [totalDuration, setTotalDuration] = useState(0);
-  const [resizingEvent, setResizingEvent] = useState<TravelRecord | null>(null);
+  const [resizingEvent, setResizingEvent] = useState<TravelBooking | null>(
+    null,
+  );
   const [resizeStartY, setResizeStartY] = useState(0);
   const [resizeType, setResizeType] = useState<"top" | "bottom" | null>(null);
-  const [movingEvent, setMovingEvent] = useState<TravelRecord | null>(null);
+  const [movingEvent, setMovingEvent] = useState<TravelBooking | null>(null);
   const [moveStartY, setMoveStartY] = useState(0);
   const [isContextMenuOpen, setIsContextMenuOpen] = useState(false);
-  const [selectedProjectId, setSelectedProjectId] = useState<string | null>(
-    projectId ?? null,
+  const [selectedBookingId, setSelectedBookingId] = useState<string | null>(
+    bookingId ?? null,
   );
 
   const createTravelEntries = useAction(createTravelEntriesAction, {
@@ -205,7 +209,7 @@ export function TravelSchedule({
     setIsDragging(true);
     setDragStartSlot(slot);
 
-    const newEvent = createNewEvent(slot, selectedProjectId);
+    const newEvent = createNewEvent(slot, selectedBookingId);
 
     setData((prevData) => [...prevData, newEvent]);
     setSelectedEvent(newEvent);
@@ -309,7 +313,7 @@ export function TravelSchedule({
 
   const handleEventResizeStart = (
     e: React.MouseEvent,
-    event: TravelRecord,
+    event: TravelBooking,
     type: "top" | "bottom",
   ) => {
     if (event.id !== NEW_EVENT_ID) {
@@ -321,7 +325,7 @@ export function TravelSchedule({
     }
   };
 
-  const handleEventMoveStart = (e: React.MouseEvent, event: TravelRecord) => {
+  const handleEventMoveStart = (e: React.MouseEvent, event: TravelBooking) => {
     e.stopPropagation();
     // Delete unsaved event if it exists
     setData((prevData) => prevData.filter((e) => e.id !== NEW_EVENT_ID));
@@ -330,7 +334,7 @@ export function TravelSchedule({
     setSelectedEvent(event);
   };
 
-  const handleEventClick = (event: TravelRecord) => {
+  const handleEventClick = (event: TravelBooking) => {
     if (selectedEvent && selectedEvent.id === NEW_EVENT_ID) {
       setData((prevData) => prevData.filter((e) => e.id !== selectedEvent.id));
     }
@@ -342,7 +346,7 @@ export function TravelSchedule({
     start: string;
     end: string;
     assigned_id: string;
-    project_id: string;
+    booking_id: string;
     description?: string;
   }) => {
     const dates = getDates(selectedDate, sortedRange);
@@ -359,7 +363,7 @@ export function TravelSchedule({
       dates,
       team_id: teamId,
       assigned_id: values.assigned_id,
-      project_id: values.project_id,
+      booking_id: values.booking_id,
       description: values.description || "",
       duration: Math.max(0, differenceInSeconds(endDate, startDate)),
     };
@@ -491,7 +495,7 @@ export function TravelSchedule({
         </div>
       </ScrollArea>
 
-      <TravelRecordForm
+      <TravelBookingForm
         eventId={currentOrNewEvent?.id}
         onCreate={handleCreateEvent}
         isSaving={createTravelEntries.isExecuting}

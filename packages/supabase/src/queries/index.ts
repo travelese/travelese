@@ -1217,14 +1217,14 @@ export async function getTravelBookingsQuery(
   };
 }
 
-type GetTravelBookingsByDateParams = {
+type GetTravelRecordsByDateParams = {
   teamId: string;
   date: string;
   bookingId?: string;
   userId?: string;
 };
 
-export async function getTravelBookingsByDateQuery(
+export async function getTravelRecordsByDateQuery(
   supabase: Client,
   params: GetTravelRecordsByDateParams,
 ) {
@@ -1261,7 +1261,7 @@ export async function getTravelBookingsByDateQuery(
   };
 }
 
-export type GetTravelBookingsByRangeParams = {
+export type GetTravelRecordsByRangeParams = {
   teamId: string;
   from: string;
   to: string;
@@ -1269,7 +1269,7 @@ export type GetTravelBookingsByRangeParams = {
   userId?: string;
 };
 
-export async function getTravelBookingsByRangeQuery(
+export async function getTravelRecordsByRangeQuery(
   supabase: Client,
   params: GetTravelRecordsByRangeParams,
 ) {

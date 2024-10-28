@@ -1,6 +1,6 @@
 import { secondsToHoursAndMinutes } from "@/utils/format";
 import { format } from "date-fns";
-import { TravelRecordForm } from "./forms/travel-record-form";
+import { TravelBookingForm } from "./forms/travel-booking-form";
 import { RecordSkeleton, UpdateRecordForm } from "./forms/update-record-form";
 
 export function TravelEntriesList({
@@ -38,7 +38,7 @@ export function TravelEntriesList({
         />
       ))}
 
-      <TravelRecordForm
+      <TravelBookingForm
         userId={user.id}
         onCreate={onCreate}
         bookingId={bookingId}

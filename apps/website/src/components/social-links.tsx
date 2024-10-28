@@ -24,22 +24,6 @@ export function SocialLinks() {
         <a
           target="_blank"
           rel="noreferrer"
-          href="https://go.travelese.ai/wHbE80j"
-        >
-          <span className="sr-only">Instagram</span>
-          <FaInstagram size={22} className="fill-[#878787]" />
-        </a>
-      </li>
-      {/*  <li>
-        <a target="_blank" rel="noreferrer" href="https://go.travelese.ai/">
-          <span className="sr-only">Producthunt</span>
-          <FaProductHunt size={22} className="fill-[#878787]" />
-        </a>
-      </li> */}
-      <li>
-        <a
-          target="_blank"
-          rel="noreferrer"
           href="https://go.travelese.ai/XTxOfuy"
         >
           <span className="sr-only">Discord</span>
@@ -56,6 +40,22 @@ export function SocialLinks() {
           <FaYoutube size={22} className="fill-[#878787]" />
         </a>
       </li>
+      {/*  <li>
+        <a
+          target="_blank"
+          rel="noreferrer"
+          href="https://go.travelese.ai/wHbE80j"
+        >
+          <span className="sr-only">Instagram</span>
+          <FaInstagram size={22} className="fill-[#878787]" />
+        </a>
+      </li>
+      <li>
+        <a target="_blank" rel="noreferrer" href="https://go.travelese.ai/">
+          <span className="sr-only">Producthunt</span>
+          <FaProductHunt size={22} className="fill-[#878787]" />
+        </a>
+      </li>
       <li>
         <a
           target="_blank"
@@ -65,7 +65,7 @@ export function SocialLinks() {
           <span className="sr-only">LinkedIn</span>
           <FaLinkedinIn size={22} className="fill-[#878787]" />
         </a>
-      </li>
+      </li> */}
     </ul>
   );
 }

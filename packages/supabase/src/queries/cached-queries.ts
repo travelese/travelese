@@ -14,8 +14,8 @@ import {
   type GetTrackerProjectsQueryParams,
   type GetTrackerRecordsByRangeParams,
   type GetTransactionsParams,
-  type GetTravelBookingsByRangeParams,
   type GetTravelBookingsQueryParams,
+  type GetTravelRecordsByRangeParams,
   getBankAccountsCurrenciesQuery,
   getBankConnectionsByTeamIdQuery,
   getBurnRateQuery,
@@ -33,8 +33,8 @@ import {
   getTrackerProjectsQuery,
   getTrackerRecordsByRangeQuery,
   getTransactionsQuery,
-  getTravelBookingsByRangeQuery,
   getTravelBookingsQuery,
+  getTravelRecordsByRangeQuery,
   getUserInvitesQuery,
   getUserQuery,
 } from "../queries";
@@ -391,8 +391,8 @@ export const getTravelBookings = async (
   )(params);
 };
 
-export const getTravelBookingsByRange = async (
-  params: Omit<GetTravelBookingsByRangeParams, "teamId">,
+export const getTravelRecordsByRange = async (
+  params: Omit<GetTravelRecordsByRangeParams, "teamId">,
 ) => {
   const supabase = createClient();
   const user = await getUser();
@@ -400,15 +400,15 @@ export const getTravelBookingsByRange = async (
 
   return unstable_cache(
     async () => {
-      return getTravelBookingsByRangeQuery(supabase, {
+      return getTravelRecordsByRangeQuery(supabase, {
         ...params,
         teamId,
         userId: user?.data?.id,
       });
     },
-    ["travel_bookings", teamId],
+    ["travel_entries", teamId],
     {
-      tags: [`travel_bookings_${teamId}`],
+      tags: [`travel_entries_${teamId}`],
       revalidate: 180,
     },
   )(params);

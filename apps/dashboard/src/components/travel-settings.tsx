@@ -27,7 +27,7 @@ export function TravelSettings({ timeFormat, weekStartsOnMonday }: Props) {
   const updateUser = useAction(updateUserAction);
 
   const handleUpdateUser = (data: UpdateUserFormValues) => {
-    updateUser.execute({ ...data, revalidatePath: "/tracker" });
+    updateUser.execute({ ...data, revalidatePath: "/travel" });
   };
 
   return (

@@ -1,33 +1,90 @@
 import { TravelSearchCard } from "@/components/cards/search-travel-card";
+import { OpenTravelSheet } from "@/components/open-travel-sheet";
+import { Table } from "@/components/tables/travel";
+import { Loading } from "@/components/tables/travel/loading";
+import { TravelCalendar } from "@/components/travel-calendar";
+import { TravelSearchFilter } from "@/components/travel-search-filters";
 import { TravelResults } from "@/components/travel/travel-results";
 import { TravelSelectors } from "@/components/travel/travel-selectors";
-import { addWeeks } from "date-fns";
+import {
+  getTravelRecordsByRange,
+  getUser,
+} from "@travelese/supabase/cached-queries";
+import { addWeeks, endOfMonth, formatISO, startOfMonth } from "date-fns";
 import type { Metadata } from "next";
+import { Suspense } from "react";
 
 export const metadata: Metadata = {
   title: "Travel | Travelese",
 };
 
-const defaultValue = {
+/* const defaultValue = {
   from: new Date().toISOString(),
   to: addWeeks(new Date(), 1).toISOString(),
   period: "weekly",
+}; */
+
+type Props = {
+  searchParams: {
+    statuses: string;
+    sort: string;
+    q: string;
+    start?: string;
+    end?: string;
+  };
 };
 
-export default async function Travel() {
-  return (
-    <>
-      <div>
-        <div className="h-[530px] mb-4">
-          <TravelSelectors defaultValue={defaultValue} />
+export default async function Travel({ searchParams }: Props) {
+  const status = searchParams?.statuses;
+  const sort = searchParams?.sort?.split(":") ?? ["status", "asc"];
 
-          <div className="mt-8 relative">
-            <TravelSearchCard />
-          </div>
+  const currentDate =
+    searchParams?.date ?? formatISO(new Date(), { representation: "date" });
+
+  const [{ data: userData }, { data, meta }] = await Promise.all([
+    getUser(),
+    getTravelRecordsByRange({
+      from: formatISO(startOfMonth(new Date(currentDate)), {
+        representation: "date",
+      }),
+      to: formatISO(endOfMonth(new Date(currentDate)), {
+        representation: "date",
+      }),
+    }),
+  ]);
+
+  return (
+    <div>
+      <div className="mt-8 relative">
+        <TravelSearchCard userId={userData?.id} currency={userData?.currency} />
+      </div>
+
+      <TravelCalendar
+        weekStartsOnMonday={userData?.week_starts_on_monday}
+        timeFormat={userData?.time_format}
+        data={data}
+        meta={meta}
+      />
+
+      <div className="mt-14 mb-6 flex items-center justify-between space-x-4">
+        <h2 className="text-md font-medium">Projects</h2>
+
+        <div className="flex space-x-2">
+          <TravelSearchFilter />
+          <OpenTravelSheet />
         </div>
       </div>
 
-      <TravelResults />
-    </>
+      <Suspense key={status} fallback={<Loading />}>
+        <Table
+          status={status}
+          sort={sort}
+          q={searchParams?.q}
+          start={searchParams?.start}
+          end={searchParams?.end}
+          userId={userData?.id}
+        />
+      </Suspense>
+    </div>
   );
 }

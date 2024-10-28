@@ -22,7 +22,7 @@ type TravelMeta = {
   totalDuration?: number;
 };
 
-type TravelRecord = {
+type TravelBooking = {
   id: string;
   duration: number;
   date: string;
@@ -31,7 +31,7 @@ type TravelRecord = {
 type Props = {
   date?: string;
   meta?: TravelMeta;
-  data?: Record<string, TravelRecord[]>;
+  data?: Record<string, TravelBooking[]>;
   weekStartsOnMonday?: boolean;
 };
 
