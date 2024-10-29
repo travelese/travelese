@@ -1,4 +1,4 @@
-import { NEW_EVENT_ID } from "@/utils/tracker";
+import { NEW_EVENT_ID } from "@/utils/travel";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Form, FormControl, FormField, FormItem } from "@travelese/ui/form";
 import { Input } from "@travelese/ui/input";
@@ -14,7 +14,7 @@ import { TravelSelectBooking } from "../travel-select-booking";
 const formSchema = z.object({
   id: z.string().optional(),
   duration: z.number().min(1),
-  project_id: z.string(),
+  booking_id: z.string(),
   assigned_id: z.string().optional(),
   description: z.string().optional(),
   start: z.string(),
@@ -108,7 +108,7 @@ export function TravelBookingForm({
 
         <FormField
           control={form.control}
-          name="project_id"
+          name="booking_id"
           render={({ field }) => (
             <FormItem className="w-full">
               <FormControl>

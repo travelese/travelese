@@ -2,11 +2,11 @@
 
 import { authActionClient } from "@/actions/safe-action";
 import { duffel } from "@/utils/duffel";
+import { logger } from "@/utils/logger";
+import { DuffelError } from "@duffel/api";
 import type { CreateOfferRequest, OfferRequest } from "@duffel/api/types";
 import { LogEvents } from "@travelese/events/events";
 import { createOfferRequestSchema } from "./schema";
-import { DuffelError } from "@duffel/api";
-import { logger } from "@/utils/logger";
 
 export const createOfferRequestAction = authActionClient
   .schema(createOfferRequestSchema)

@@ -1,11 +1,9 @@
-import { TravelSearchCard } from "@/components/cards/search-travel-card";
 import { OpenTravelSheet } from "@/components/open-travel-sheet";
 import { Table } from "@/components/tables/travel";
 import { Loading } from "@/components/tables/travel/loading";
 import { TravelCalendar } from "@/components/travel-calendar";
+import { TravelSearchCard } from "@/components/travel-search-card";
 import { TravelSearchFilter } from "@/components/travel-search-filters";
-import { TravelResults } from "@/components/travel/travel-results";
-import { TravelSelectors } from "@/components/travel/travel-selectors";
 import {
   getTravelRecordsByRange,
   getUser,
@@ -17,12 +15,6 @@ import { Suspense } from "react";
 export const metadata: Metadata = {
   title: "Travel | Travelese",
 };
-
-/* const defaultValue = {
-  from: new Date().toISOString(),
-  to: addWeeks(new Date(), 1).toISOString(),
-  period: "weekly",
-}; */
 
 type Props = {
   searchParams: {
@@ -67,7 +59,7 @@ export default async function Travel({ searchParams }: Props) {
       />
 
       <div className="mt-14 mb-6 flex items-center justify-between space-x-4">
-        <h2 className="text-md font-medium">Projects</h2>
+        <h2 className="text-md font-medium">Bookings</h2>
 
         <div className="flex space-x-2">
           <TravelSearchFilter />

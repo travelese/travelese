@@ -1,13 +1,13 @@
 "use server";
 
-import { filterTrackerSchema } from "@/actions/schema";
+import { filterTravelSchema } from "@/actions/schema";
 import { openai } from "@ai-sdk/openai";
 import { streamObject } from "ai";
 import { createStreamableValue } from "ai/rsc";
 
 const VALID_FILTERS = ["name", "start", "end", "status"];
 
-export async function generateTrackerFilters(prompt: string, context?: string) {
+export async function generateTravelFilters(prompt: string, context?: string) {
   const stream = createStreamableValue();
 
   (async () => {
@@ -17,7 +17,7 @@ export async function generateTrackerFilters(prompt: string, context?: string) {
                Current date is: ${new Date().toISOString().split("T")[0]} \n
                ${context}
       `,
-      schema: filterTrackerSchema.pick({
+      schema: filterTravelSchema.pick({
         ...(VALID_FILTERS.reduce((acc, filter) => {
           acc[filter] = true;
           return acc;

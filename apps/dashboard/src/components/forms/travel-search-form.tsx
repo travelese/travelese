@@ -1,8 +1,5 @@
 "use client";
 
-import { createOfferRequestAction } from "@/actions/create-offer-request-action";
-import { createPartialOfferRequestAction } from "@/actions/create-partial-offer-request-action";
-import { listOffersAction } from "@/actions/list-offers-action";
 import { createOfferRequestSchema } from "@/actions/schema";
 import { TravelBaggage } from "@/components/travel/travel-baggage";
 import { TravelCabin } from "@/components/travel/travel-cabin";
@@ -21,94 +18,34 @@ import {
 } from "@travelese/ui/form";
 import { Icons } from "@travelese/ui/icons";
 import { SubmitButton } from "@travelese/ui/submit-button";
-import { useToast } from "@travelese/ui/use-toast";
-import { useAction } from "next-safe-action/hooks";
-import { parseAsJson, parseAsString, useQueryStates } from "nuqs";
-import { useState } from "react";
 import { useForm } from "react-hook-form";
 
-export function SearchFlightsForm({
-  userId,
-  currency,
-  onCreate,
-}: {
-  userId: string;
-  currency: string;
-  onCreate: (listOffersId: string) => void;
-}) {
-  const { toast } = useToast();
-  const [isSearching, setIsSearching] = useState(false);
+interface Props {
+  defaultValues: {
+    slices: Array<{
+      origin: string;
+      destination: string;
+      departure_date: string;
+    }>;
+    passengers: Array<{ type: string }>;
+    cabin_class: string;
+    travel_type: string;
+    bags: { carry_on: number; cabin: number; checked: number };
+  };
+  onSubmit: (data: any) => void;
+  isSubmitting: boolean;
+  onQueryParamsChange: (updates: any) => void;
+}
 
-  const [queryParams, setQueryParams] = useQueryStates(
-    {
-      travel_type: parseAsString.withDefault("return"),
-      cabin_class: parseAsString.withDefault("economy"),
-      passengers: parseAsJson<Array<{ type: string }>>().withDefault([
-        { type: "adult" },
-      ]),
-      slices: parseAsJson<
-        Array<{
-          origin: string;
-          destination: string;
-          departure_date: string;
-        }>
-      >().withDefault([
-        { origin: "", destination: "", departure_date: "" },
-        { origin: "", destination: "", departure_date: "" },
-      ]),
-      bags: parseAsJson<{
-        carry_on: number;
-        cabin: number;
-        checked: number;
-      }>().withDefault({ carry_on: 0, cabin: 0, checked: 0 }),
-      listOffersId: parseAsString.withDefault(""),
-    },
-    { history: "push" },
-  );
-
-  const listOffers = useAction(listOffersAction, {
-    onSuccess: ({ data: { offers, listOffersId } }) => {
-      setQueryParams((prev) => ({
-        ...prev,
-        listOffersId,
-      }));
-
-      onCreate(listOffersId);
-
-      toast({
-        title: "Flights Found",
-        description: `Found ${offers.length} flight options`,
-        variant: "success",
-      });
-    },
-  });
-
-  const createOfferRequest = useAction(createOfferRequestAction, {
-    onSuccess: ({ data: offerRequest }) => {
-      onCreate(offerRequest?.id);
-
-      toast({
-        title: "Offer Request Created",
-        description: `Offer Request ID: ${offerRequest?.id}`,
-        variant: "success",
-      });
-
-      listOffers.execute({ offer_request_id: offerRequest.id });
-    },
-  });
-
-  const createPartialOfferRequest = useAction(createPartialOfferRequestAction, {
-    onSuccess: ({ data: offerRequest }) => {
-      onCreate(offerRequest?.id);
-
-      toast({
-        title: "Offer Request Created",
-        description: `Offer Request ID: ${offerRequest?.id}`,
-        variant: "success",
-      });
-
-      listOffers.execute({ offer_request_id: offerRequest.id });
-    },
+export function TravelSearchForm({
+  defaultValues,
+  onSubmit,
+  isSubmitting,
+  onQueryParamsChange,
+}: Props) {
+  const form = useForm({
+    resolver: zodResolver(createOfferRequestSchema),
+    defaultValues,
   });
 
   const addFlightSegment = () => {
@@ -116,10 +53,7 @@ export function SearchFlightsForm({
     if (currentSlices.length < 3) {
       const newSlice = { origin: "", destination: "", departure_date: "" };
       form.setValue("slices", [...currentSlices, newSlice]);
-      setQueryParams((prev) => ({
-        ...prev,
-        slices: [...prev.slices, newSlice],
-      }));
+      onQueryParamsChange({ slices: [...currentSlices, newSlice] });
     }
   };
 
@@ -130,35 +64,13 @@ export function SearchFlightsForm({
         (_, index) => index !== indexToRemove,
       );
       form.setValue("slices", newSlices);
-      setQueryParams((prev) => ({
-        ...prev,
-        slices: newSlices,
-      }));
+      onQueryParamsChange({ slices: newSlices });
     }
   };
 
-  const form = useForm({
-    resolver: zodResolver(createOfferRequestSchema),
-    defaultValues: {
-      slices: queryParams.slices,
-      passengers: queryParams.passengers,
-      cabin_class: queryParams.cabin_class,
-      travel_type: queryParams.travel_type,
-      bags: { carry_on: 0, cabin: 0, checked: 0 },
-    },
-  });
-
   return (
     <Form {...form}>
-      <form
-        onSubmit={form.handleSubmit((data) => {
-          if (data.travel_type === "multi_city") {
-            createPartialOfferRequest.execute(data);
-          } else {
-            createOfferRequest.execute(data);
-          }
-        })}
-      >
+      <form onSubmit={form.handleSubmit(onSubmit)}>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-3 mx-auto max-w-4xl">
           <FormField
             control={form.control}
@@ -170,10 +82,7 @@ export function SearchFlightsForm({
                     value={field.value}
                     onChange={(value) => {
                       field.onChange(value);
-                      setQueryParams((prev) => ({
-                        ...prev,
-                        travel_type: value,
-                      }));
+                      onQueryParamsChange({ travel_type: value });
 
                       const currentSlices = form.getValues("slices");
                       let newSlices;
@@ -214,12 +123,9 @@ export function SearchFlightsForm({
                       }
 
                       form.setValue("slices", newSlices);
-                      setQueryParams((prev) => ({
-                        ...prev,
-                        slices: newSlices,
-                      }));
+                      onQueryParamsChange({ slices: newSlices });
                     }}
-                    disabled={isSearching}
+                    disabled={isSubmitting}
                   />
                 </FormControl>
                 <FormMessage />
@@ -237,12 +143,9 @@ export function SearchFlightsForm({
                     value={field.value}
                     onChange={(value) => {
                       field.onChange(value);
-                      setQueryParams((prev) => ({
-                        ...prev,
-                        cabin_class: value,
-                      }));
+                      onQueryParamsChange({ cabin_class: value });
                     }}
-                    disabled={isSearching}
+                    disabled={isSubmitting}
                   />
                 </FormControl>
                 <FormMessage />
@@ -260,12 +163,9 @@ export function SearchFlightsForm({
                     value={field.value}
                     onChange={(value) => {
                       field.onChange(value);
-                      setQueryParams((prev) => ({
-                        ...prev,
-                        passengers: value,
-                      }));
+                      onQueryParamsChange({ passengers: value });
                     }}
-                    disabled={isSearching}
+                    disabled={isSubmitting}
                   />
                 </FormControl>
                 <FormMessage />
@@ -283,12 +183,9 @@ export function SearchFlightsForm({
                     value={field.value}
                     onChange={(value) => {
                       field.onChange(value);
-                      setQueryParams((prev) => ({
-                        ...prev,
-                        travel_baggage: value,
-                      }));
+                      onQueryParamsChange({ bags: value });
                     }}
-                    disabled={isSearching}
+                    disabled={isSubmitting}
                   />
                 </FormControl>
                 <FormMessage />
@@ -317,12 +214,15 @@ export function SearchFlightsForm({
                             value={field.value}
                             onChange={(value, iataCode) => {
                               field.onChange(iataCode);
-                              setQueryParams((prev) => ({
-                                ...prev,
-                                slices: prev.slices.map((s, i) =>
-                                  i === index ? { ...s, origin: iataCode } : s,
-                                ),
-                              }));
+                              onQueryParamsChange({
+                                slices: form
+                                  .getValues("slices")
+                                  .map((s, i) =>
+                                    i === index
+                                      ? { ...s, origin: iataCode }
+                                      : s,
+                                  ),
+                              });
                             }}
                           />
                         </FormControl>
@@ -343,14 +243,15 @@ export function SearchFlightsForm({
                             value={field.value}
                             onChange={(value, iataCode) => {
                               field.onChange(iataCode);
-                              setQueryParams((prev) => ({
-                                ...prev,
-                                slices: prev.slices.map((s, i) =>
-                                  i === index
-                                    ? { ...s, destination: iataCode }
-                                    : s,
-                                ),
-                              }));
+                              onQueryParamsChange({
+                                slices: form
+                                  .getValues("slices")
+                                  .map((s, i) =>
+                                    i === index
+                                      ? { ...s, destination: iataCode }
+                                      : s,
+                                  ),
+                              });
                             }}
                           />
                         </FormControl>
@@ -380,9 +281,8 @@ export function SearchFlightsForm({
                             index={index}
                             onChange={(value) => {
                               field.onChange(value.from);
-                              setQueryParams((prev) => ({
-                                ...prev,
-                                slices: prev.slices.map((s, i) =>
+                              const updates = {
+                                slices: form.getValues("slices").map((s, i) =>
                                   i === index
                                     ? { ...s, departure_date: value.from }
                                     : form.watch("travel_type") === "return" &&
@@ -400,7 +300,9 @@ export function SearchFlightsForm({
                                         }
                                       : s,
                                 ),
-                              }));
+                              };
+                              onQueryParamsChange(updates);
+
                               if (
                                 value.to &&
                                 index === 0 &&
@@ -447,10 +349,7 @@ export function SearchFlightsForm({
                           <Icons.Plus className="h-4 w-4" />
                         </Button>
                         <SubmitButton
-                          isSubmitting={
-                            createOfferRequest.isExecuting ||
-                            createPartialOfferRequest.isExecuting
-                          }
+                          isSubmitting={isSubmitting}
                           className="w-full"
                           size="icon"
                         >
@@ -464,10 +363,7 @@ export function SearchFlightsForm({
                     (form.watch("travel_type") === "return" &&
                       index === 0)) && (
                     <SubmitButton
-                      isSubmitting={
-                        createOfferRequest.isExecuting ||
-                        createPartialOfferRequest.isExecuting
-                      }
+                      isSubmitting={isSubmitting}
                       className="w-full"
                     >
                       Search

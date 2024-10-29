@@ -1,48 +1,48 @@
 "use client";
 
-import { useTrackerParams } from "@/hooks/use-tracker-params";
+import { useTravelParams } from "@/hooks/use-travel-params";
 import { Drawer, DrawerContent } from "@travelese/ui/drawer";
 import { useMediaQuery } from "@travelese/ui/hooks";
 import { Sheet, SheetContent } from "@travelese/ui/sheet";
 import React from "react";
-import { TrackerSchedule } from "../tracker-schedule";
+import { TravelSchedule } from "../travel-schedule";
 
 type Props = {
   teamId: string;
   userId: string;
   timeFormat: number;
-  lastProjectId?: string;
+  lastBookingId?: string;
 };
 
-export function TrackerScheduleSheet({
+export function TravelScheduleSheet({
   teamId,
   userId,
   timeFormat,
-  lastProjectId,
+  lastBookingId,
 }: Props) {
   const isDesktop = useMediaQuery("(min-width: 768px)");
-  const { setParams, projectId, range, selectedDate, update, create } =
-    useTrackerParams();
+  const { setParams, bookingId, range, selectedDate, update, create } =
+    useTravelParams();
 
   const isOpen =
     !update &&
     !create &&
-    (Boolean(projectId) || range?.length === 2 || Boolean(selectedDate));
+    (Boolean(bookingId) || range?.length === 2 || Boolean(selectedDate));
 
   if (isDesktop) {
     return (
       <Sheet
         open={isOpen}
         onOpenChange={() =>
-          setParams({ projectId: null, range: null, selectedDate: null })
+          setParams({ bookingId: null, range: null, selectedDate: null })
         }
       >
         <SheetContent>
-          <TrackerSchedule
+          <TravelSchedule
             teamId={teamId}
             userId={userId}
             timeFormat={timeFormat}
-            projectId={lastProjectId}
+            bookingId={lastBookingId}
           />
         </SheetContent>
       </Sheet>
@@ -54,16 +54,16 @@ export function TrackerScheduleSheet({
       open={isOpen}
       onOpenChange={(open: boolean) => {
         if (!open) {
-          setParams({ projectId: null, range: null, selectedDate: null });
+          setParams({ bookingId: null, range: null, selectedDate: null });
         }
       }}
     >
       <DrawerContent>
-        <TrackerSchedule
+        <TravelSchedule
           teamId={teamId}
           userId={userId}
           timeFormat={timeFormat}
-          projectId={lastProjectId}
+          bookingId={lastBookingId}
         />
       </DrawerContent>
     </Drawer>

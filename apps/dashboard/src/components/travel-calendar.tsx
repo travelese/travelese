@@ -261,7 +261,7 @@ function CalendarHeader({
                   minimumFractionDigits: 0,
                   maximumFractionDigits: 0,
                 })} this month`
-              : "Nothing billable yet"}
+              : "Nothing booked yet"}
           </p>
           <TooltipProvider delayDuration={100}>
             <Tooltip>
