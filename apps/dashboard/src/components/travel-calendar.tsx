@@ -1,6 +1,6 @@
 "use client";
 
-import { useTrackerParams } from "@/hooks/use-tracker-params";
+import { useTravelParams } from "@/hooks/use-travel-params";
 import { formatAmount, secondsToHoursAndMinutes } from "@/utils/format";
 import { TZDate } from "@date-fns/tz";
 import { cn } from "@travelese/ui/cn";
@@ -47,7 +47,7 @@ export function TravelCalendar({
     range,
     setParams,
     selectedDate,
-  } = useTrackerParams();
+  } = useTravelParams();
   const [localRange, setLocalRange] = useState<[string, string | null]>([
     "",
     null,
@@ -188,22 +188,22 @@ function CalendarHeader({
   timeFormat,
   weekStartsOnMonday,
 }: CalendarHeaderProps) {
-  const projectTotals = Object.entries(data).reduce(
+  const bookingTotals = Object.entries(data).reduce(
     (acc, [_, events]) => {
       for (const event of events) {
-        const projectName = event.project?.name;
-        if (projectName) {
-          if (!acc[projectName]) {
-            acc[projectName] = {
+        const bookingName = event.booking?.name;
+        if (bookingName) {
+          if (!acc[bookingName]) {
+            acc[bookingName] = {
               duration: 0,
               amount: 0,
-              currency: event.project.currency,
-              rate: event.project.rate,
+              currency: event.booking.currency,
+              rate: event.booking.rate,
             };
           }
-          const project = acc[projectName];
-          project.duration += event.duration;
-          project.amount = (project.duration / 3600) * project.rate;
+          const booking = acc[bookingName];
+          booking.duration += event.duration;
+          booking.amount = (booking.duration / 3600) * booking.rate;
         }
       }
       return acc;
@@ -214,7 +214,7 @@ function CalendarHeader({
     >,
   );
 
-  const sortedProjects = Object.entries(projectTotals)
+  const sortedBookings = Object.entries(bookingTotals)
     .sort(([, a], [, b]) => b.duration - a.duration)
     .map(([name, { duration, amount, currency }]) => ({
       name,
@@ -223,7 +223,7 @@ function CalendarHeader({
       currency,
     }));
 
-  const mostUsedCurrency = Object.values(projectTotals).reduce(
+  const mostUsedCurrency = Object.values(bookingTotals).reduce(
     (acc, { currency }) => {
       if (currency !== null) {
         acc[currency] = (acc[currency] || 0) + 1;
@@ -261,7 +261,7 @@ function CalendarHeader({
                   minimumFractionDigits: 0,
                   maximumFractionDigits: 0,
                 })} this month`
-              : "Nothing billable yet"}
+              : "Nothing booked yet"}
           </p>
           <TooltipProvider delayDuration={100}>
             <Tooltip>
@@ -278,21 +278,21 @@ function CalendarHeader({
                     Breakdown
                   </div>
                   <ul className="space-y-2 flex flex-col p-4">
-                    {!Object.keys(projectTotals).length && (
-                      <span>No tracked time.</span>
+                    {!Object.keys(bookingTotals).length && (
+                      <span>No traveled time.</span>
                     )}
-                    {sortedProjects.map((project) => (
-                      <li key={project.name} className="flex justify-between">
-                        <span>{project.name}</span>
+                    {sortedBookings.map((booking) => (
+                      <li key={booking.name} className="flex justify-between">
+                        <span>{booking.name}</span>
 
                         <div className="flex space-x-2 items-center">
                           <span className="text-primary text-xs">
-                            {secondsToHoursAndMinutes(project.duration)}
+                            {secondsToHoursAndMinutes(booking.duration)}
                           </span>
                           <span className="text-primary text-xs">
                             {formatAmount({
-                              currency: project.currency,
-                              amount: project.amount,
+                              currency: booking.currency,
+                              amount: booking.amount,
                               minimumFractionDigits: 0,
                               maximumFractionDigits: 0,
                             })}
@@ -323,7 +323,7 @@ type CalendarGridProps = {
   calendarDays: TZDate[];
   currentDate: TZDate;
   selectedDate: string;
-  data: Record<string, TrackerEvent[]>;
+  data: Record<string, TravelEvent[]>;
   range: [string, string] | null;
   localRange: [string, string | null];
   isDragging: boolean;
@@ -379,7 +379,7 @@ type CalendarDayProps = {
   date: TZDate;
   currentDate: TZDate;
   selectedDate: string;
-  data: Record<string, TrackerEvent[]>;
+  data: Record<string, TravelEvent[]>;
   range: [string, string] | null;
   localRange: [string, string | null];
   isDragging: boolean;
@@ -439,7 +439,7 @@ function CalendarDay({
       )}
     >
       <div>{format(date, "d")}</div>
-      <TrackerEvents data={data[formattedDate]} isToday={isToday(date)} />
+      <TravelEvents data={data[formattedDate]} isToday={isToday(date)} />
     </div>
   );
 }

@@ -1,7 +1,7 @@
 "use client";
 
-import { changeTravelTravellerAction } from "@/actions/travel/change-travel-traveller-action";
-import { ItemCounter, ItemType } from "@/components/item-counter";
+import { changeTravelTravellerAction } from "@/actions/change-travel-traveller-action";
+import { ItemCounter, type ItemType } from "@/components/item-counter";
 import { useI18n } from "@/locales/client";
 import { Icons } from "@travelese/ui/icons";
 import { useOptimisticAction } from "next-safe-action/hooks";

@@ -10,7 +10,7 @@ export function EmptyState() {
     <div className="flex items-center justify-center ">
       <div className="flex flex-col items-center mt-14">
         <div className="text-center mb-6 space-y-2">
-          <h2 className="font-medium text-lg">No projects</h2>
+          <h2 className="font-medium text-lg">No bookings</h2>
           <p className="text-[#606060] text-sm">
             You haven't created any bookings yet. <br />
             Go ahead and create your first one.
@@ -25,7 +25,7 @@ export function EmptyState() {
             })
           }
         >
-          Create project
+          Create booking
         </Button>
       </div>
     </div>

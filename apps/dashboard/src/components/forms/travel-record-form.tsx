@@ -1,4 +1,4 @@
-import { NEW_EVENT_ID } from "@/utils/tracker";
+import { NEW_EVENT_ID } from "@/utils/travel";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Form, FormControl, FormField, FormItem } from "@travelese/ui/form";
 import { Input } from "@travelese/ui/input";
@@ -9,12 +9,12 @@ import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { AssignUser } from "../assign-user";
-import { TrackerSelectProject } from "../tracker-select-project";
+import { TravelSelectBooking } from "../travel-select-booking";
 
 const formSchema = z.object({
   id: z.string().optional(),
   duration: z.number().min(1),
-  project_id: z.string(),
+  booking_id: z.string(),
   assigned_id: z.string().optional(),
   description: z.string().optional(),
   start: z.string(),
@@ -26,23 +26,23 @@ type Props = {
   userId: string;
   teamId: string;
   onCreate: (values: z.infer<typeof formSchema>) => void;
-  projectId?: string | null;
+  bookingId?: string | null;
   start?: string;
   end?: string;
-  onSelectProject: (selected: { id: string; name: string }) => void;
+  onSelectBooking: (selected: { id: string; name: string }) => void;
   description?: string;
   isSaving: boolean;
 };
 
-export function TrackerRecordForm({
+export function TravelBookingForm({
   eventId,
   userId,
   teamId,
   onCreate,
-  projectId,
+  bookingId,
   start,
   end,
-  onSelectProject,
+  onSelectBooking,
   description,
   isSaving,
 }: Props) {
@@ -53,7 +53,7 @@ export function TrackerRecordForm({
     defaultValues: {
       id: eventId,
       assigned_id: userId,
-      project_id: projectId,
+      booking_id: bookingId,
       start,
       end,
       description: description ?? undefined,
@@ -72,8 +72,8 @@ export function TrackerRecordForm({
       form.setValue("end", end);
     }
 
-    if (projectId) {
-      form.setValue("project_id", projectId, { shouldValidate: true });
+    if (bookingId) {
+      form.setValue("booking_id", bookingId, { shouldValidate: true });
     }
 
     if (description) {
@@ -90,7 +90,7 @@ export function TrackerRecordForm({
         form.setValue("duration", durationInSeconds, { shouldValidate: true });
       }
     }
-  }, [start, end, projectId, description, eventId]);
+  }, [start, end, bookingId, description, eventId]);
 
   return (
     <Form {...form}>
@@ -108,15 +108,15 @@ export function TrackerRecordForm({
 
         <FormField
           control={form.control}
-          name="project_id"
+          name="booking_id"
           render={({ field }) => (
             <FormItem className="w-full">
               <FormControl>
-                <TrackerSelectProject
-                  onCreate={(project) => {
-                    if (project) {
-                      field.onChange(project.id);
-                      onSelectProject(project);
+                <TravelSelectBooking
+                  onCreate={(booking) => {
+                    if (booking) {
+                      field.onChange(booking.id);
+                      onSelectBooking(booking);
                     }
                   }}
                   teamId={teamId}
@@ -124,7 +124,7 @@ export function TrackerRecordForm({
                   onSelect={(selected) => {
                     if (selected) {
                       field.onChange(selected.id);
-                      onSelectProject(selected);
+                      onSelectBooking(selected);
                     }
                   }}
                 />

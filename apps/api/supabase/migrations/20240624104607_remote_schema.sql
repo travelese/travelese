@@ -101,6 +101,14 @@ CREATE TYPE "public"."trackerStatus" AS ENUM (
 
 ALTER TYPE "public"."trackerStatus" OWNER TO "postgres";
 
+-- Travel Type Definitions
+CREATE TYPE "public"."travelStatus" AS ENUM (
+    'in_progress',
+    'completed'
+);
+
+ALTER TYPE "public"."travelStatus" OWNER TO "postgres";
+
 CREATE TYPE "public"."transactionCategories" AS ENUM (
     'travel',
     'office_supplies',
@@ -836,6 +844,33 @@ COMMENT ON COLUMN "public"."tracker_entries"."stop" IS 'Stop time in UTC, can be
 
 COMMENT ON COLUMN "public"."tracker_entries"."description" IS 'Time Entry description, null if not provided at creation/update';
 
+-- Travel Entities Table
+CREATE TABLE IF NOT EXISTS "public"."travel_entries" (
+    "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
+    "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
+    "duration" bigint,
+    "booking_id" "uuid",
+    "start" timestamp without time zone,
+    "stop" timestamp without time zone,
+    "assigned_id" "uuid",
+    "team_id" "uuid",
+    "description" "text",
+    "rate" numeric,
+    "currency" "text",
+    "billed" boolean DEFAULT false,
+    "date" "date" DEFAULT "now"()
+);
+
+ALTER TABLE "public"."travel_entries" OWNER TO "postgres";
+
+COMMENT ON COLUMN "public"."travel_entries"."duration" IS 'Time entry duration. For running entries should be negative, preferable -1';
+
+COMMENT ON COLUMN "public"."travel_entries"."start" IS 'Start time in UTC';
+
+COMMENT ON COLUMN "public"."travel_entries"."stop" IS 'Stop time in UTC, can be null if it''s still running or created with duration';
+
+COMMENT ON COLUMN "public"."travel_entries"."description" IS 'Time Entry description, null if not provided at creation/update';
+
 CREATE OR REPLACE FUNCTION "public"."project_members"("public"."tracker_entries") RETURNS TABLE("id" "uuid", "avatar_url" "text", "full_name" "text")
     LANGUAGE "sql"
     AS $_$
@@ -846,6 +881,18 @@ CREATE OR REPLACE FUNCTION "public"."project_members"("public"."tracker_entries"
 $_$;
 
 ALTER FUNCTION "public"."project_members"("public"."tracker_entries") OWNER TO "postgres";
+
+-- Booking Members Function (Entries):
+CREATE OR REPLACE FUNCTION "public"."booking_members"("public"."travel_entries") RETURNS TABLE("id" "uuid", "avatar_url" "text", "full_name" "text")
+    LANGUAGE "sql"
+    AS $_$
+  select distinct on (users.id) users.id, users.avatar_url, users.full_name
+  from travel_entries
+  join users on travel_entries.user_id = users.id
+  where travel_entries.booking_id = $1.booking_id;
+$_$;
+
+ALTER FUNCTION "public"."booking_members"("public"."travel_entries") OWNER TO "postgres";
 
 CREATE TABLE IF NOT EXISTS "public"."tracker_projects" (
     "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
@@ -864,6 +911,24 @@ ALTER TABLE "public"."tracker_projects" OWNER TO "postgres";
 
 COMMENT ON COLUMN "public"."tracker_projects"."rate" IS 'Custom rate for project';
 
+-- Travel Bookings Table:
+CREATE TABLE IF NOT EXISTS "public"."travel_bookings" (
+    "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
+    "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
+    "team_id" "uuid",
+    "rate" numeric,
+    "currency" "text",
+    "status" "public"."travelStatus" DEFAULT 'in_progress'::"public"."travelStatus" NOT NULL,
+    "description" "text",
+    "name" "text" NOT NULL,
+    "billable" boolean DEFAULT false,
+    "estimate" bigint
+);
+
+ALTER TABLE "public"."travel_bookings" OWNER TO "postgres";
+
+COMMENT ON COLUMN "public"."travel_bookings"."rate" IS 'Custom rate for booking';
+
 CREATE OR REPLACE FUNCTION "public"."project_members"("public"."tracker_projects") RETURNS TABLE("id" "uuid", "avatar_url" "text", "full_name" "text")
     LANGUAGE "sql"
     AS $$
@@ -874,6 +939,18 @@ CREATE OR REPLACE FUNCTION "public"."project_members"("public"."tracker_projects
 $$;
 
 ALTER FUNCTION "public"."project_members"("public"."tracker_projects") OWNER TO "postgres";
+
+-- Booking Members Function (Bookings):
+CREATE OR REPLACE FUNCTION "public"."booking_members"("public"."travel_bookings") RETURNS TABLE("id" "uuid", "avatar_url" "text", "full_name" "text")
+    LANGUAGE "sql"
+    AS $$
+  select distinct on (users.id) users.id, users.avatar_url, users.full_name
+  from travel_bookings
+  left join travel_entries on travel_bookings.id = travel_entries.booking_id
+  left join users on travel_entries.user_id = users.id;
+$$;
+
+ALTER FUNCTION "public"."booking_members"("public"."travel_bookings") OWNER TO "postgres";
 
 CREATE OR REPLACE FUNCTION "public"."slugify"("value" "text") RETURNS "text"
     LANGUAGE "sql" IMMUTABLE STRICT
@@ -921,6 +998,22 @@ CREATE OR REPLACE FUNCTION "public"."total_duration"("public"."tracker_projects"
 $_$;
 
 ALTER FUNCTION "public"."total_duration"("public"."tracker_projects") OWNER TO "postgres";
+
+-- Total Duration Function (Bookings):
+CREATE OR REPLACE FUNCTION "public"."total_duration"("public"."travel_bookings") RETURNS integer
+    LANGUAGE "sql"
+    AS $_$
+  select sum(travel_entries.duration) as total_duration
+  from
+    travel_bookings
+    join travel_entries on travel_bookings.id = travel_entries.booking_id
+  where
+    travel_bookings.id = $1.id
+  group by
+    travel_bookings.id;
+$_$;
+
+ALTER FUNCTION "public"."total_duration"("public"."travel_bookings") OWNER TO "postgres";
 
 CREATE OR REPLACE FUNCTION "public"."update_enrich_transaction"() RETURNS "trigger"
     LANGUAGE "plpgsql" SECURITY DEFINER
@@ -1110,6 +1203,19 @@ CREATE TABLE IF NOT EXISTS "public"."tracker_reports" (
 
 ALTER TABLE "public"."tracker_reports" OWNER TO "postgres";
 
+-- Travel Reports:
+CREATE TABLE IF NOT EXISTS "public"."travel_reports" (
+    "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
+    "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
+    "link_id" "text",
+    "short_link" "text",
+    "team_id" "uuid" DEFAULT "gen_random_uuid"(),
+    "booking_id" "uuid" DEFAULT "gen_random_uuid"(),
+    "created_by" "uuid"
+);
+
+ALTER TABLE "public"."travel_reports" OWNER TO "postgres";
+
 CREATE TABLE IF NOT EXISTS "public"."transaction_attachments" (
     "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
     "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
@@ -1208,6 +1314,10 @@ ALTER TABLE ONLY "public"."users"
 ALTER TABLE ONLY "public"."tracker_reports"
     ADD CONSTRAINT "project_reports_pkey" PRIMARY KEY ("id");
 
+-- Travel Reports:
+ALTER TABLE ONLY "public"."travel_reports"
+    ADD CONSTRAINT "booking_reports_pkey" PRIMARY KEY ("id");
+
 ALTER TABLE ONLY "public"."reports"
     ADD CONSTRAINT "reports_pkey" PRIMARY KEY ("id");
 
@@ -1222,6 +1332,13 @@ ALTER TABLE ONLY "public"."tracker_projects"
 
 ALTER TABLE ONLY "public"."tracker_entries"
     ADD CONSTRAINT "tracker_records_pkey" PRIMARY KEY ("id");
+
+-- Travel Bookings:
+ALTER TABLE ONLY "public"."travel_bookings"
+    ADD CONSTRAINT "travel_bookings_pkey" PRIMARY KEY ("id");
+
+ALTER TABLE ONLY "public"."travel_entries"
+    ADD CONSTRAINT "travel_records_pkey" PRIMARY KEY ("id");
 
 ALTER TABLE ONLY "public"."transaction_categories"
     ADD CONSTRAINT "transaction_categories_pkey" PRIMARY KEY ("team_id", "slug");
@@ -1323,6 +1440,13 @@ ALTER TABLE ONLY "public"."tracker_reports"
 ALTER TABLE ONLY "public"."tracker_reports"
     ADD CONSTRAINT "public_tracker_reports_project_id_fkey" FOREIGN KEY ("project_id") REFERENCES "public"."tracker_projects"("id") ON UPDATE CASCADE ON DELETE CASCADE;
 
+-- Travel Reports:
+ALTER TABLE ONLY "public"."travel_reports"
+    ADD CONSTRAINT "public_travel_reports_created_by_fkey" FOREIGN KEY ("created_by") REFERENCES "public"."users"("id") ON DELETE CASCADE;
+
+ALTER TABLE ONLY "public"."travel_reports"
+    ADD CONSTRAINT "public_travel_reports_booking_id_fkey" FOREIGN KEY ("booking_id") REFERENCES "public"."travel_bookings"("id") ON UPDATE CASCADE ON DELETE CASCADE;
+
 ALTER TABLE ONLY "public"."transaction_attachments"
     ADD CONSTRAINT "public_transaction_attachments_team_id_fkey" FOREIGN KEY ("team_id") REFERENCES "public"."teams"("id") ON DELETE CASCADE;
 
@@ -1355,6 +1479,22 @@ ALTER TABLE ONLY "public"."tracker_projects"
 
 ALTER TABLE ONLY "public"."tracker_reports"
     ADD CONSTRAINT "tracker_reports_team_id_fkey" FOREIGN KEY ("team_id") REFERENCES "public"."teams"("id") ON UPDATE CASCADE ON DELETE CASCADE;
+
+-- Travel Entries:
+ALTER TABLE ONLY "public"."travel_entries"
+    ADD CONSTRAINT "travel_entries_assigned_id_fkey" FOREIGN KEY ("assigned_id") REFERENCES "public"."users"("id") ON DELETE SET NULL;
+
+ALTER TABLE ONLY "public"."travel_entries"
+    ADD CONSTRAINT "travel_entries_booking_id_fkey" FOREIGN KEY ("booking_id") REFERENCES "public"."travel_bookings"("id") ON DELETE CASCADE;
+
+ALTER TABLE ONLY "public"."travel_entries"
+    ADD CONSTRAINT "travel_entries_team_id_fkey" FOREIGN KEY ("team_id") REFERENCES "public"."teams"("id") ON DELETE CASCADE;
+
+ALTER TABLE ONLY "public"."travel_bookings"
+    ADD CONSTRAINT "travel_bookings_team_id_fkey" FOREIGN KEY ("team_id") REFERENCES "public"."teams"("id") ON DELETE CASCADE;
+
+ALTER TABLE ONLY "public"."travel_reports"
+    ADD CONSTRAINT "travel_reports_team_id_fkey" FOREIGN KEY ("team_id") REFERENCES "public"."teams"("id") ON UPDATE CASCADE ON DELETE CASCADE;
 
 ALTER TABLE ONLY "public"."transaction_categories"
     ADD CONSTRAINT "transaction_categories_team_id_fkey" FOREIGN KEY ("team_id") REFERENCES "public"."teams"("id") ON DELETE CASCADE;
@@ -1424,6 +1564,15 @@ CREATE POLICY "Entries can be selected by a member of the team" ON "public"."tra
 
 CREATE POLICY "Entries can be updated by a member of the team" ON "public"."tracker_entries" FOR UPDATE TO "authenticated" WITH CHECK (("team_id" IN ( SELECT "private"."get_teams_for_authenticated_user"() AS "get_teams_for_authenticated_user")));
 
+-- Travel Entry Policies:
+CREATE POLICY "Entries can be created by a member of the team" ON "public"."travel_entries" FOR INSERT TO "authenticated" WITH CHECK (("team_id" IN ( SELECT "private"."get_teams_for_authenticated_user"() AS "get_teams_for_authenticated_user")));
+
+CREATE POLICY "Entries can be deleted by a member of the team" ON "public"."travel_entries" FOR DELETE TO "authenticated" USING (("team_id" IN ( SELECT "private"."get_teams_for_authenticated_user"() AS "get_teams_for_authenticated_user")));
+
+CREATE POLICY "Entries can be selected by a member of the team" ON "public"."travel_entries" FOR SELECT TO "authenticated" USING (("team_id" IN ( SELECT "private"."get_teams_for_authenticated_user"() AS "get_teams_for_authenticated_user")));
+
+CREATE POLICY "Entries can be updated by a member of the team" ON "public"."travel_entries" FOR UPDATE TO "authenticated" WITH CHECK (("team_id" IN ( SELECT "private"."get_teams_for_authenticated_user"() AS "get_teams_for_authenticated_user")));
+
 CREATE POLICY "Inbox can be deleted by a member of the team" ON "public"."inbox" FOR DELETE USING (("team_id" IN ( SELECT "private"."get_teams_for_authenticated_user"() AS "get_teams_for_authenticated_user")));
 
 CREATE POLICY "Inbox can be selected by a member of the team" ON "public"."inbox" FOR SELECT USING (("team_id" IN ( SELECT "private"."get_teams_for_authenticated_user"() AS "get_teams_for_authenticated_user")));
@@ -1440,11 +1589,23 @@ CREATE POLICY "Projects can be selected by a member of the team" ON "public"."tr
 
 CREATE POLICY "Projects can be updated by a member of the team" ON "public"."tracker_projects" FOR UPDATE TO "authenticated" USING (("team_id" IN ( SELECT "private"."get_teams_for_authenticated_user"() AS "get_teams_for_authenticated_user")));
 
+-- Travel Booking Policies:
+CREATE POLICY "Bookings can be created by a member of the team" ON "public"."travel_bookings" FOR INSERT TO "authenticated" WITH CHECK (("team_id" IN ( SELECT "private"."get_teams_for_authenticated_user"() AS "get_teams_for_authenticated_user")));
+
+CREATE POLICY "Bookings can be deleted by a member of the team" ON "public"."travel_bookings" FOR DELETE TO "authenticated" USING (("team_id" IN ( SELECT "private"."get_teams_for_authenticated_user"() AS "get_teams_for_authenticated_user")));
+
+CREATE POLICY "Bookings can be selected by a member of the team" ON "public"."travel_bookings" FOR SELECT TO "authenticated" USING (("team_id" IN ( SELECT "private"."get_teams_for_authenticated_user"() AS "get_teams_for_authenticated_user")));
+
+CREATE POLICY "Bookings can be updated by a member of the team" ON "public"."travel_bookings" FOR UPDATE TO "authenticated" USING (("team_id" IN ( SELECT "private"."get_teams_for_authenticated_user"() AS "get_teams_for_authenticated_user")));
+
 CREATE POLICY "Reports can be created by a member of the team" ON "public"."reports" FOR INSERT WITH CHECK (("team_id" IN ( SELECT "private"."get_teams_for_authenticated_user"() AS "get_teams_for_authenticated_user")));
 
 CREATE POLICY "Reports can be deleted by a member of the team" ON "public"."reports" FOR DELETE USING (("team_id" IN ( SELECT "private"."get_teams_for_authenticated_user"() AS "get_teams_for_authenticated_user")));
 
 CREATE POLICY "Reports can be handled by a member of the team" ON "public"."tracker_reports" USING (("team_id" IN ( SELECT "private"."get_teams_for_authenticated_user"() AS "get_teams_for_authenticated_user")));
+
+-- Travel Report Policies:
+CREATE POLICY "Reports can be handled by a member of the team" ON "public"."travel_reports" USING (("team_id" IN ( SELECT "private"."get_teams_for_authenticated_user"() AS "get_teams_for_authenticated_user")));
 
 CREATE POLICY "Reports can be selected by a member of the team" ON "public"."reports" FOR SELECT USING (("team_id" IN ( SELECT "private"."get_teams_for_authenticated_user"() AS "get_teams_for_authenticated_user")));
 
@@ -1511,6 +1672,13 @@ ALTER TABLE "public"."tracker_entries" ENABLE ROW LEVEL SECURITY;
 ALTER TABLE "public"."tracker_projects" ENABLE ROW LEVEL SECURITY;
 
 ALTER TABLE "public"."tracker_reports" ENABLE ROW LEVEL SECURITY;
+
+-- Travel RLS Enablement:
+ALTER TABLE "public"."travel_entries" ENABLE ROW LEVEL SECURITY;
+
+ALTER TABLE "public"."travel_bookings" ENABLE ROW LEVEL SECURITY;
+
+ALTER TABLE "public"."travel_reports" ENABLE ROW LEVEL SECURITY;
 
 ALTER TABLE "public"."transaction_attachments" ENABLE ROW LEVEL SECURITY;
 
@@ -1738,6 +1906,26 @@ GRANT ALL ON FUNCTION "public"."project_members"("public"."tracker_projects") TO
 GRANT ALL ON FUNCTION "public"."project_members"("public"."tracker_projects") TO "authenticated";
 GRANT ALL ON FUNCTION "public"."project_members"("public"."tracker_projects") TO "service_role";
 
+-- Travel Entries Table Grants:
+GRANT ALL ON TABLE "public"."travel_entries" TO "anon";
+GRANT ALL ON TABLE "public"."travel_entries" TO "authenticated";
+GRANT ALL ON TABLE "public"."travel_entries" TO "service_role";
+
+-- Travel Entries Function Grants:
+GRANT ALL ON FUNCTION "public"."booking_members"("public"."travel_entries") TO "anon";
+GRANT ALL ON FUNCTION "public"."booking_members"("public"."travel_entries") TO "authenticated";
+GRANT ALL ON FUNCTION "public"."booking_members"("public"."travel_entries") TO "service_role";
+
+-- Travel Bookings Table Grants:
+GRANT ALL ON TABLE "public"."travel_bookings" TO "anon";
+GRANT ALL ON TABLE "public"."travel_bookings" TO "authenticated";
+GRANT ALL ON TABLE "public"."travel_bookings" TO "service_role";
+
+-- Travel Bookings Function Grants:
+GRANT ALL ON FUNCTION "public"."booking_members"("public"."travel_bookings") TO "anon";
+GRANT ALL ON FUNCTION "public"."booking_members"("public"."travel_bookings") TO "authenticated";
+GRANT ALL ON FUNCTION "public"."booking_members"("public"."travel_bookings") TO "service_role";
+
 GRANT ALL ON FUNCTION "public"."set_limit"(real) TO "postgres";
 GRANT ALL ON FUNCTION "public"."set_limit"(real) TO "anon";
 GRANT ALL ON FUNCTION "public"."set_limit"(real) TO "authenticated";
@@ -1800,6 +1988,11 @@ GRANT ALL ON FUNCTION "public"."strict_word_similarity_op"("text", "text") TO "s
 GRANT ALL ON FUNCTION "public"."total_duration"("public"."tracker_projects") TO "anon";
 GRANT ALL ON FUNCTION "public"."total_duration"("public"."tracker_projects") TO "authenticated";
 GRANT ALL ON FUNCTION "public"."total_duration"("public"."tracker_projects") TO "service_role";
+
+-- Travel Booking Function Grants:
+GRANT ALL ON FUNCTION "public"."total_duration"("public"."travel_bookings") TO "anon";
+GRANT ALL ON FUNCTION "public"."total_duration"("public"."travel_bookings") TO "authenticated";
+GRANT ALL ON FUNCTION "public"."total_duration"("public"."travel_bookings") TO "service_role";
 
 GRANT ALL ON FUNCTION "public"."unaccent"("text") TO "postgres";
 GRANT ALL ON FUNCTION "public"."unaccent"("text") TO "anon";
@@ -1881,6 +2074,11 @@ GRANT ALL ON TABLE "public"."teams" TO "service_role";
 GRANT ALL ON TABLE "public"."tracker_reports" TO "anon";
 GRANT ALL ON TABLE "public"."tracker_reports" TO "authenticated";
 GRANT ALL ON TABLE "public"."tracker_reports" TO "service_role";
+
+-- Travel Report Table Grants:
+GRANT ALL ON TABLE "public"."travel_reports" TO "anon";
+GRANT ALL ON TABLE "public"."travel_reports" TO "authenticated";
+GRANT ALL ON TABLE "public"."travel_reports" TO "service_role";
 
 GRANT ALL ON TABLE "public"."transaction_attachments" TO "anon";
 GRANT ALL ON TABLE "public"."transaction_attachments" TO "authenticated";

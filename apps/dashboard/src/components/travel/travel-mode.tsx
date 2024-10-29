@@ -1,6 +1,6 @@
 "use client";
 
-import { changeTravelTypeAction } from "@/actions/travel/change-travel-type-action";
+import { changeTravelTypeAction } from "@/actions/change-travel-type-action";
 import { useI18n } from "@/locales/client";
 import { Button } from "@travelese/ui/button";
 import { Icons } from "@travelese/ui/icons";

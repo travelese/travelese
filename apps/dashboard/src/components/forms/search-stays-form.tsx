@@ -1,14 +1,14 @@
 "use client";
 
-import { createOfferRequestAction } from "@/actions/travel/create-offer-request-action";
-import { createPartialOfferRequestAction } from "@/actions/travel/create-partial-offer-request-action";
-import { createOfferRequestSchema } from "@/actions/travel/schema";
-import { TravelCabin } from "@/components/travel/travel-cabin";
-import { TravelLocation } from "@/components/travel/travel-location";
-import { TravelBaggage } from "@/components/travel/travel-baggage";
-import { TravelPeriod } from "@/components/travel/travel-period";
-import { TravelTraveller } from "@/components/travel/travel-traveller";
-import { TravelType } from "@/components/travel/travel-type";
+import { createOfferRequestAction } from "@/actions/create-offer-request-action";
+import { createPartialOfferRequestAction } from "@/actions/create-partial-offer-request-action";
+import { createOfferRequestSchema } from "@/actions/schema";
+import { TravelBaggage } from "@/components/travel-baggage";
+import { TravelCabin } from "@/components/travel-cabin";
+import { TravelLocation } from "@/components/travel-location";
+import { TravelPeriod } from "@/components/travel-period";
+import { TravelTraveller } from "@/components/travel-traveller";
+import { TravelType } from "@/components/travel-type";
 import type { OfferRequest } from "@duffel/api/types";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@travelese/ui/button";

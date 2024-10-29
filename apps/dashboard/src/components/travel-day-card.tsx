@@ -41,7 +41,7 @@ export function TravelDayCard({
           className="w-[35px] flex items-center justify-center group relative"
           type="button"
           onClick={handleOnClick}
-          // NOTE: If specific project view, i.e time report
+          // NOTE: If specific booking view, i.e time report
           disabled={bookingId}
         >
           <div
@@ -112,7 +112,7 @@ export function TravelDayCard({
                     <button
                       className="flex flex-col"
                       type="button"
-                      // NOTE: If specific project view, i.e time report
+                      // NOTE: If specific booking view, i.e time report
                       disabled={bookingId}
                       onClick={() =>
                         onSelect({ bookingId: record.booking.id, day: date })

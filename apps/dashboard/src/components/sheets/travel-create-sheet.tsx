@@ -3,7 +3,7 @@
 import { createBookingAction } from "@/actions/booking/create-booking-action";
 import { createBookingSchema } from "@/actions/schema";
 import { TravelBookingForm } from "@/components/forms/travel-booking-form";
-import { useTrackerParams } from "@/hooks/use-tracker-params";
+import { useTravelParams } from "@/hooks/use-travel-params";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Drawer, DrawerContent, DrawerHeader } from "@travelese/ui/drawer";
 import { useMediaQuery } from "@travelese/ui/hooks";
@@ -19,10 +19,10 @@ type Props = {
   currencyCode: string;
 };
 
-export function TrackerCreateSheet({ currencyCode }: Props) {
+export function TravelCreateSheet({ currencyCode }: Props) {
   const { toast } = useToast();
   const isDesktop = useMediaQuery("(min-width: 768px)");
-  const { setParams, create } = useTrackerParams();
+  const { setParams, create } = useTravelParams();
 
   const isOpen = create;
 

@@ -1,7 +1,7 @@
 "use server";
 
 import { authActionClient } from "@/actions/safe-action";
-import { createTravelShareSchema } from "@/actions/travel/schema";
+import { createTravelShareSchema } from "@/actions/schema";
 import { dub } from "@/utils/dub";
 import { LogEvents } from "@travelese/events/events";
 

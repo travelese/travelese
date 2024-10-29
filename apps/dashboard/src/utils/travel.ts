@@ -46,7 +46,7 @@ export const getSlotFromDate = (date: Date) => {
 export const createNewEvent = (
   slot: number,
   selectedBookingId: string | null,
-): TravelRecord => {
+): TravelBooking => {
   const startDate = setMinutes(
     setHours(new Date(), Math.floor(slot / 4)),
     (slot % 4) * 15,
@@ -61,10 +61,10 @@ export const createNewEvent = (
 };
 
 export const updateEventTime = (
-  event: TravelRecord,
+  event: TravelBooking,
   start: Date,
   end: Date,
-): TravelRecord => {
+): TravelBooking => {
   return { ...event, start, end };
 };
 
@@ -88,7 +88,7 @@ export const getDates = (
 export const transformTravelData = (
   event: any,
   selectedDate: string | null,
-): TravelRecord => {
+): TravelBooking => {
   const start = event.start
     ? parseISO(event.start)
     : parseISO(`${event.date || selectedDate}T09:00:00`);

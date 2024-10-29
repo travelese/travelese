@@ -1,6 +1,6 @@
 "use client";
 
-import { createTravelShareAction } from "@/actions/travel/create-travel-share-action";
+import { createTravelShareAction } from "@/actions/create-travel-share-action";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@travelese/ui/button";
 import { Calendar } from "@travelese/ui/calendar";
