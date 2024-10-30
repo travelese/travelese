@@ -27,7 +27,7 @@ import { createReport } from "./tools/report";
 import { getRevenueTool } from "./tools/revenue";
 import { getRunwayTool } from "./tools/runway";
 import { getSpendingTool } from "./tools/spending";
-import { searchTravel } from "./tools/travel";
+import { searchTravelTool } from "./tools/travel";
 
 const ratelimit = new Ratelimit({
   limiter: Ratelimit.fixedWindow(10, "10s"),
@@ -181,7 +181,7 @@ export async function submitUserMessage(
         dateFrom: defaultValues.from,
         dateTo: defaultValues.to,
       }),
-      searchTravel: searchTravel({
+      searchTravel: searchTravelTool({
         aiState,
       }),
     },
