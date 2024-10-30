@@ -4,6 +4,7 @@ import { createPartialOfferRequestAction } from "@/actions/create-partial-offer-
 import { listOffersAction } from "@/actions/list-offers-action";
 import { listPlaceSuggestionsAction } from "@/actions/list-place-suggestions-action";
 import { searchAccommodationAction } from "@/actions/search-accommodation-action";
+import { logger } from "@/utils/logger";
 import { nanoid } from "nanoid";
 import { z } from "zod";
 import { TravelUI } from "./ui/travel-ui";
@@ -16,82 +17,43 @@ export function searchTravelTool({ aiState }: Args) {
   return {
     description: "Search for Flights or Stays",
     parameters: z.object({
-      prompt: z.string().describe("Natural language travel search request"),
+      prompt: z.string(),
     }),
     generate: async (args) => {
       const { prompt } = args;
       const { object } = await travelAgent(prompt);
-      const toolCallId = nanoid();
-
-      const results = {
-        type: object.type,
-        data: null,
-      };
 
       if (object.type === "flight" && object.flights) {
-        const slicesWithIATA = await Promise.all(
-          object.flights.slices.map(async (slice) => {
-            const [originPlaces, destPlaces] = await Promise.all([
-              listPlaceSuggestionsAction({ query: slice.origin }),
-              listPlaceSuggestionsAction({ query: slice.destination }),
-            ]);
-            return {
-              ...slice,
-              origin: originPlaces[0]?.iata_code,
-              destination: destPlaces[0]?.iata_code,
-            };
-          }),
-        );
+        const slicePromises = object.flights.slices.map(async (slice) => {
+          const [origin, destination] = await Promise.all([
+            listPlaceSuggestionsAction({ query: slice.origin }),
+            listPlaceSuggestionsAction({ query: slice.destination }),
+          ]);
 
-        const offerRequest = await createPartialOfferRequestAction({
-          ...object.flights,
-          slices: slicesWithIATA,
+          const origin_code =
+            origin?.data?.find((p) => p.type === "airport")?.iata_code ||
+            origin?.data?.find((p) => p.type === "city")?.iata_code;
+
+          const destination_code =
+            destination?.data?.find((p) => p.type === "airport")?.iata_code ||
+            destination?.data?.find((p) => p.type === "city")?.iata_code;
+
+          return {
+            origin: origin_code,
+            destination: destination_code,
+          };
         });
 
-        const { data } = await listOffersAction({
-          offer_request_id: offerRequest.id,
-        });
-
-        results.data = data;
+        return <TravelUI type={object.type} data={data} />;
       }
 
       if (object.type === "stay" && object.stays) {
-        const stayResults = await searchAccommodationAction(object.stays);
-        results.data = stayResults;
+        const data = await searchAccommodationAction({
+          ...object.stays,
+        });
+
+        return <TravelUI type={object.type} data={data} />;
       }
-
-      aiState.done({
-        ...aiState.get(),
-        messages: [
-          ...aiState.get().messages,
-          {
-            id: nanoid(),
-            role: "assistant",
-            content: [
-              {
-                type: "tool-call",
-                toolName: "travelAgent",
-                toolCallId,
-                args,
-              },
-            ],
-          },
-          {
-            id: nanoid(),
-            role: "tool",
-            content: [
-              {
-                type: "tool-result",
-                toolName: "travelAgent",
-                toolCallId,
-                result: results,
-              },
-            ],
-          },
-        ],
-      });
-
-      return <TravelUI {...results} />;
     },
   };
 }

@@ -1,6 +1,5 @@
 "use client";
 
-import { createOfferRequestAction } from "@/actions/create-offer-request-action";
 import { createPartialOfferRequestAction } from "@/actions/create-partial-offer-request-action";
 import { listOffersAction } from "@/actions/list-offers-action";
 import { TravelSearchForm } from "@/components/forms/travel-search-form";
@@ -52,18 +51,6 @@ export function TravelSearchCard({ userId, currency }: Props) {
     },
   });
 
-  const createOfferRequest = useAction(createOfferRequestAction, {
-    onSuccess: ({ data: offerRequest }) => {
-      toast({
-        title: "Offer Request Created",
-        description: `Offer Request ID: ${offerRequest?.id}`,
-        variant: "success",
-      });
-
-      listOffers.execute({ offer_request_id: offerRequest.id });
-    },
-  });
-
   const createPartialOfferRequest = useAction(createPartialOfferRequestAction, {
     onSuccess: ({ data: offerRequest }) => {
       toast({
@@ -77,11 +64,7 @@ export function TravelSearchCard({ userId, currency }: Props) {
   });
 
   const handleSubmit = (data: any) => {
-    if (data.travel_type === "multi_city") {
-      createPartialOfferRequest.execute(data);
-    } else {
-      createOfferRequest.execute(data);
-    }
+    createPartialOfferRequest.execute(data);
   };
 
   return (
@@ -97,10 +80,7 @@ export function TravelSearchCard({ userId, currency }: Props) {
             bags: queryParams.bags,
           }}
           onSubmit={handleSubmit}
-          isSubmitting={
-            createOfferRequest.isExecuting ||
-            createPartialOfferRequest.isExecuting
-          }
+          isSubmitting={createPartialOfferRequest.isExecuting}
           onQueryParamsChange={(updates) =>
             setQueryParams((prev) => ({ ...prev, ...updates }))
           }
