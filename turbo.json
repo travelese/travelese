@@ -32,6 +32,7 @@
         "BASELIME_API_KEY",
         "OPENAI_API_KEY",
         "GROQ_API_KEY",
+        "XAI_API_KEY",
         "OPENPANEL_SECRET_KEY",
         "SENTRY_AUTH_TOKEN",
         "SENTRY_ORG",

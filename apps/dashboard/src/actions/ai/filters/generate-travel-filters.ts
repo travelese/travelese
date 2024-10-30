@@ -1,13 +1,13 @@
 "use server";
 
-import { filterVaultSchema } from "@/actions/schema";
+import { filterTravelSchema } from "@/actions/schema";
 import { xai } from "@/utils/xai";
 import { streamObject } from "ai";
 import { createStreamableValue } from "ai/rsc";
 
-const VALID_FILTERS = ["name", "start", "end", "owners", "tags"];
+const VALID_FILTERS = ["name", "start", "end", "status"];
 
-export async function generateVaultFilters(prompt: string, context?: string) {
+export async function generateTravelFilters(prompt: string, context?: string) {
   const stream = createStreamableValue();
 
   (async () => {
@@ -17,7 +17,7 @@ export async function generateVaultFilters(prompt: string, context?: string) {
                Current date is: ${new Date().toISOString().split("T")[0]} \n
                ${context}
       `,
-      schema: filterVaultSchema.pick({
+      schema: filterTravelSchema.pick({
         ...(VALID_FILTERS.reduce((acc, filter) => {
           acc[filter] = true;
           return acc;

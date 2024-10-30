@@ -1,3 +1,4 @@
+import { Icons } from "@travelese/ui/icons";
 import Image from "next/image";
 import bg from "public/assistant-bg.png";
 import { Assistant } from "./assistant";
@@ -20,6 +21,9 @@ export function SectionSix() {
         </p>
 
         <div className="mt-6 hidden xl:block">
+          <Icons.xAI />
+
+          {/* 
           <svg
             width="140"
             height="18"
@@ -35,7 +39,7 @@ export function SectionSix() {
             />
           </svg>
 
-          {/*           <svg
+          <svg
             xmlns="http://www.w3.org/2000/svg"
             width={139}
             height={19}

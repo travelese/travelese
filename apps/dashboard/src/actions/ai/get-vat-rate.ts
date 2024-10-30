@@ -1,6 +1,6 @@
 "use server";
 
-import { openai } from "@ai-sdk/openai";
+import { xai } from "@/utils/xai";
 import { getCountry } from "@travelese/location";
 import { generateObject } from "ai";
 import { z } from "zod";
@@ -16,7 +16,7 @@ export const getVatRateAction = authActionClient
     const country = getCountry();
 
     const { object } = await generateObject({
-      model: openai("gpt-4o-mini"),
+      model: xai("grok-beta"),
       schema: z.object({
         vat: z.number().min(5).max(100),
       }),

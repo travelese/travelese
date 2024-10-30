@@ -1,6 +1,6 @@
 "use server";
 
-import { openai } from "@ai-sdk/openai";
+import { xai } from "@/utils/xai";
 import { streamObject } from "ai";
 import { createStreamableValue } from "ai/rsc";
 import { z } from "zod";
@@ -13,7 +13,7 @@ export async function findMatchingCategory(
 
   (async () => {
     const { partialObjectStream } = await streamObject({
-      model: openai("gpt-4o-mini"),
+      model: xai("grok-beta"),
       system: `You are an AI assistant specialized in categorizing financial transactions.
                Your task is to analyze the given transaction description and match it to the most appropriate category from the provided list.
                Only use categories from the list provided. If no category seems to fit, respond with 'Uncategorized'.

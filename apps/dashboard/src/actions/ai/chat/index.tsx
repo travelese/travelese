@@ -2,7 +2,7 @@
 
 import { BotMessage, SpinnerMessage } from "@/components/chat/messages";
 import { logger } from "@/utils/logger";
-import { openai } from "@ai-sdk/openai";
+import { xai } from "@/utils/xai";
 import { client as RedisClient } from "@travelese/kv";
 import { getUser } from "@travelese/supabase/cached-queries";
 import { Ratelimit } from "@upstash/ratelimit";
@@ -26,8 +26,8 @@ import { getProfitTool } from "./tools/profit";
 import { createReport } from "./tools/report";
 import { getRevenueTool } from "./tools/revenue";
 import { getRunwayTool } from "./tools/runway";
-import { searchFlights } from "./tools/search-flights";
 import { getSpendingTool } from "./tools/spending";
+import { searchTravel } from "./tools/travel";
 
 const ratelimit = new Ratelimit({
   limiter: Ratelimit.fixedWindow(10, "10s"),
@@ -94,30 +94,19 @@ export async function submitUserMessage(
   let textNode: undefined | React.ReactNode;
 
   const result = await streamUI({
-    model: openai("gpt-4o-mini"),
+    model: xai("grok-beta"),
     initial: <SpinnerMessage />,
-    system: `\
-      You are a helpful assistant in Travelese who can help travellers explore destinations, find the best flights and stays/hotels, and more.
-      If the user wants to search for flights, call \`searchFlights\` function with the following parameters:
-      - origin: IATA code of the departure airport
-      - destination: IATA code of the arrival airport
-      - departure_date: in YYYY-MM-DD format
-      - return_date: in YYYY-MM-DD format (optional for one-way flights)
-      - adults: number of adult passengers
-      - children: number of child passengers
-      - infants: number of infant passengers
-      - cabin_class: economy, premium_economy, business, or first
-      If the user wants the burn rate, call \`getBurnRate\` function.
-      If the user wants the runway, call \`getRunway\` function.
-      If the user wants the profit, call \`getProfit\` function.
-      If the user wants to find transactions or expenses, call \`getTransactions\` function.
-      If the user wants to see spending based on a category, call \`getSpending\` function.
-      If the user wants to find invoices or receipts, call \`getInvoices\` function.
-      If the user wants to find documents, call \`getDocuments\` function.
+    system: `
+            If the user wants to search for flights, or stays, call \`searchTravel\` function.
+            If the user wants the burn rate, call \`getBurnRate\` function.
+            If the user wants the runway, call \`getRunway\` function.
+            If the user wants the profit, call \`getProfit\` function.
+            If the user wants to find transactions or expenses, call \`getTransactions\` function.
+            If the user wants to see spending based on a category, call \`getSpending\` function.
+            If the user wants to find invoices or receipts, call \`getInvoices\` function.
+            If the user wants to find documents, call \`getDocuments\` function.
 
-      Always try to call the functions with default values, otherwise ask the user to respond with parameters.
-      Current date is: ${new Date().toISOString().split("T")[0]} \n
-      `,
+            Current date: ${new Date().toISOString().split("T")[0]}`,
     messages: [
       ...aiState.get().messages.map((message: any) => ({
         role: message.role,
@@ -192,7 +181,9 @@ export async function submitUserMessage(
         dateFrom: defaultValues.from,
         dateTo: defaultValues.to,
       }),
-      searchFlights: searchFlights({ aiState }),
+      searchTravel: searchTravel({
+        aiState,
+      }),
     },
   });
 

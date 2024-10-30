@@ -1,6 +1,6 @@
 "use server";
 
-import { openai } from "@ai-sdk/openai";
+import { xai } from "@/utils/xai";
 import { streamObject } from "ai";
 import { createStreamableValue } from "ai/rsc";
 import { z } from "zod";
@@ -13,7 +13,7 @@ export async function generateCsvMapping(
 
   (async () => {
     const { partialObjectStream } = await streamObject({
-      model: openai("gpt-4o-mini"),
+      model: xai("grok-beta"),
       schema: z.object({
         date: z
           .date()

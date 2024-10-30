@@ -1,5 +1,5 @@
 import type { MutableAIState } from "@/actions/ai/types";
-import { openai } from "@ai-sdk/openai";
+import { xai } from "@/utils/xai";
 import { getMetrics } from "@travelese/supabase/cached-queries";
 import { generateText } from "ai";
 import { startOfMonth } from "date-fns";
@@ -46,7 +46,7 @@ export function getForecastTool({ aiState, dateFrom, dateTo }: Args) {
       });
 
       const { text } = await generateText({
-        model: openai("gpt-4o-mini"),
+        model: xai("grok-beta"),
         system:
           "You are a financial forecaster and analyst. Your task is to provide simple, clear, and concise content. Return only the result with a short description only with text. Make sure to mention that this is an indication of the forecast and should be verified.",
         prompt: `forecast next month ${type} based on the last 12 months ${type}:\n${prev}
