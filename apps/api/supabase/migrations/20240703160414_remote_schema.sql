@@ -15,6 +15,13 @@ CREATE INDEX tracker_projects_team_id_idx ON public.tracker_projects USING btree
 
 CREATE INDEX tracker_reports_team_id_idx ON public.tracker_reports USING btree (team_id);
 
+-- Travel Index:
+CREATE INDEX travel_entries_team_id_idx ON public.travel_entries USING btree (team_id);
+
+CREATE INDEX travel_bookings_team_id_idx ON public.travel_bookings USING btree (team_id);
+
+CREATE INDEX travel_reports_team_id_idx ON public.travel_reports USING btree (team_id);
+
 CREATE INDEX transaction_categories_team_id_idx ON public.transaction_categories USING btree (team_id);
 
 CREATE INDEX transaction_enrichments_category_slug_team_id_idx ON public.transaction_enrichments USING btree (category_slug, team_id);
@@ -123,5 +130,4 @@ grant truncate on table "public"."total_amount" to "service_role";
 grant update on table "public"."total_amount" to "service_role";
 
 CREATE TRIGGER enrich_transaction AFTER INSERT ON public.transactions FOR EACH ROW EXECUTE FUNCTION update_enrich_transaction();
-
 

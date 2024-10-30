@@ -1,7 +1,6 @@
 "use client";
 
 import { useTrackerParams } from "@/hooks/use-tracker-params";
-import { logger } from "@/utils/logger";
 import { Drawer, DrawerContent } from "@travelese/ui/drawer";
 import { useMediaQuery } from "@travelese/ui/hooks";
 import { Sheet, SheetContent } from "@travelese/ui/sheet";

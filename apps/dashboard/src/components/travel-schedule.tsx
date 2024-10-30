@@ -1,8 +1,8 @@
 "use client";
 
-import { createTrackerEntriesAction } from "@/actions/create-tracker-entries-action";
-import { deleteTrackerEntryAction } from "@/actions/delete-tracker-entries";
-import { useTrackerParams } from "@/hooks/use-tracker-params";
+import { createTravelEntriesAction } from "@/actions/create-travel-entries-action";
+import { deleteTravelEntryAction } from "@/actions/delete-travel-entries";
+import { useTravelParams } from "@/hooks/use-travel-params";
 import { secondsToHoursAndMinutes } from "@/utils/format";
 import {
   NEW_EVENT_ID,
@@ -11,11 +11,11 @@ import {
   getDates,
   getSlotFromDate,
   getTimeFromDate,
-  transformTrackerData,
+  transformTravelData,
   updateEventTime,
-} from "@/utils/tracker";
+} from "@/utils/travel";
 import { createClient } from "@travelese/supabase/client";
-import { getTrackerRecordsByDateQuery } from "@travelese/supabase/queries";
+import { getTravelRecordsByDateQuery } from "@travelese/supabase/queries";
 import { cn } from "@travelese/ui/cn";
 import {
   ContextMenu,
@@ -39,14 +39,14 @@ import {
 import { useAction } from "next-safe-action/hooks";
 import React, { useEffect, useRef, useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
-import { TrackerRecordForm } from "./forms/tracker-record-form";
-import { TrackerDaySelect } from "./tracker-day-select";
+import { TravelBookingForm } from "./forms/travel-booking-form";
+import { TravelDaySelect } from "./travel-day-select";
 
-interface TrackerRecord {
+interface TravelBooking {
   id: string;
   start: Date;
   end: Date;
-  project: {
+  booking: {
     id: string;
     name: string;
   };
@@ -60,46 +60,46 @@ type Props = {
   teamId: string;
   userId: string;
   timeFormat: number;
-  projectId?: string;
+  bookingId?: string;
 };
 
-export function TrackerSchedule({
+export function TravelSchedule({
   teamId,
   userId,
   timeFormat,
-  projectId,
+  bookingId,
 }: Props) {
   const supabase = createClient();
 
   const scrollRef = useRef<HTMLDivElement>(null);
-  const { selectedDate, range } = useTrackerParams();
-  const [selectedEvent, setSelectedEvent] = useState<TrackerRecord | null>(
+  const { selectedDate, range } = useTravelParams();
+  const [selectedEvent, setSelectedEvent] = useState<TravelBooking | null>(
     null,
   );
   const hours = Array.from({ length: 24 }, (_, i) => i);
-  const [data, setData] = useState<TrackerRecord[]>([]);
+  const [data, setData] = useState<TravelBooking[]>([]);
   const [isDragging, setIsDragging] = useState(false);
   const [dragStartSlot, setDragStartSlot] = useState<number | null>(null);
   const [totalDuration, setTotalDuration] = useState(0);
-  const [resizingEvent, setResizingEvent] = useState<TrackerRecord | null>(
+  const [resizingEvent, setResizingEvent] = useState<TravelBooking | null>(
     null,
   );
   const [resizeStartY, setResizeStartY] = useState(0);
   const [resizeType, setResizeType] = useState<"top" | "bottom" | null>(null);
-  const [movingEvent, setMovingEvent] = useState<TrackerRecord | null>(null);
+  const [movingEvent, setMovingEvent] = useState<TravelBooking | null>(null);
   const [moveStartY, setMoveStartY] = useState(0);
   const [isContextMenuOpen, setIsContextMenuOpen] = useState(false);
-  const [selectedProjectId, setSelectedProjectId] = useState<string | null>(
-    projectId ?? null,
+  const [selectedBookingId, setSelectedBookingId] = useState<string | null>(
+    bookingId ?? null,
   );
 
-  const createTrackerEntries = useAction(createTrackerEntriesAction, {
+  const createTravelEntries = useAction(createTravelEntriesAction, {
     onSuccess: (result) => {
       if (!result.data) return;
 
       setData((prevData) => {
         const processedData = result?.data.map((event) =>
-          transformTrackerData(event, selectedDate),
+          transformTravelData(event, selectedDate),
         );
         return prevData
           .filter((event) => event.id !== NEW_EVENT_ID)
@@ -119,30 +119,30 @@ export function TrackerSchedule({
 
       const lastEvent = result.data.at(-1);
       setSelectedEvent(
-        lastEvent ? transformTrackerData(lastEvent, selectedDate) : null,
+        lastEvent ? transformTravelData(lastEvent, selectedDate) : null,
       );
     },
   });
 
-  const deleteTrackerEntry = useAction(deleteTrackerEntryAction);
+  const deleteTravelEntry = useAction(deleteTravelEntryAction);
 
   const sortedRange = range?.sort((a, b) => a.localeCompare(b));
 
   useEffect(() => {
     const fetchData = async () => {
-      const trackerData = await getTrackerRecordsByDateQuery(supabase, {
+      const travelData = await getTravelRecordsByDateQuery(supabase, {
         teamId,
         userId,
         date: selectedDate,
       });
 
-      if (trackerData?.data) {
-        const processedData = trackerData.data.map((event: any) =>
-          transformTrackerData(event, selectedDate),
+      if (travelData?.data) {
+        const processedData = travelData.data.map((event: any) =>
+          transformTravelData(event, selectedDate),
         );
 
         setData(processedData);
-        setTotalDuration(trackerData.meta?.totalDuration || 0);
+        setTotalDuration(travelData.meta?.totalDuration || 0);
       } else {
         setData([]);
         setTotalDuration(0);
@@ -171,7 +171,7 @@ export function TrackerSchedule({
 
   const handleDeleteEvent = (eventId: string) => {
     if (eventId !== NEW_EVENT_ID) {
-      deleteTrackerEntry.execute({ id: eventId });
+      deleteTravelEntry.execute({ id: eventId });
       setData((prevData) => prevData.filter((event) => event.id !== eventId));
       setSelectedEvent(null);
 
@@ -209,7 +209,7 @@ export function TrackerSchedule({
     setIsDragging(true);
     setDragStartSlot(slot);
 
-    const newEvent = createNewEvent(slot, selectedProjectId);
+    const newEvent = createNewEvent(slot, selectedBookingId);
 
     setData((prevData) => [...prevData, newEvent]);
     setSelectedEvent(newEvent);
@@ -313,7 +313,7 @@ export function TrackerSchedule({
 
   const handleEventResizeStart = (
     e: React.MouseEvent,
-    event: TrackerRecord,
+    event: TravelBooking,
     type: "top" | "bottom",
   ) => {
     if (event.id !== NEW_EVENT_ID) {
@@ -325,7 +325,7 @@ export function TrackerSchedule({
     }
   };
 
-  const handleEventMoveStart = (e: React.MouseEvent, event: TrackerRecord) => {
+  const handleEventMoveStart = (e: React.MouseEvent, event: TravelBooking) => {
     e.stopPropagation();
     // Delete unsaved event if it exists
     setData((prevData) => prevData.filter((e) => e.id !== NEW_EVENT_ID));
@@ -334,7 +334,7 @@ export function TrackerSchedule({
     setSelectedEvent(event);
   };
 
-  const handleEventClick = (event: TrackerRecord) => {
+  const handleEventClick = (event: TravelBooking) => {
     if (selectedEvent && selectedEvent.id === NEW_EVENT_ID) {
       setData((prevData) => prevData.filter((e) => e.id !== selectedEvent.id));
     }
@@ -346,7 +346,7 @@ export function TrackerSchedule({
     start: string;
     end: string;
     assigned_id: string;
-    project_id: string;
+    booking_id: string;
     description?: string;
   }) => {
     const dates = getDates(selectedDate, sortedRange);
@@ -363,12 +363,12 @@ export function TrackerSchedule({
       dates,
       team_id: teamId,
       assigned_id: values.assigned_id,
-      project_id: values.project_id,
+      booking_id: values.booking_id,
       description: values.description || "",
       duration: Math.max(0, differenceInSeconds(endDate, startDate)),
     };
 
-    createTrackerEntries.execute(newEvent);
+    createTravelEntries.execute(newEvent);
   };
 
   return (
@@ -379,7 +379,7 @@ export function TrackerSchedule({
         </h2>
       </div>
 
-      <TrackerDaySelect />
+      <TravelDaySelect />
 
       <ScrollArea ref={scrollRef} className="h-[calc(100vh-470px)] mt-8">
         <div className="flex text-[#878787] text-xs">
@@ -452,7 +452,7 @@ export function TrackerSchedule({
                     >
                       <div className="text-xs p-4 flex justify-between flex-col select-none pointer-events-none">
                         <span>
-                          {event.project.name} (
+                          {event.booking.name} (
                           {secondsToHoursAndMinutes(
                             differenceInSeconds(event.end, event.start),
                           )}
@@ -495,13 +495,13 @@ export function TrackerSchedule({
         </div>
       </ScrollArea>
 
-      <TrackerRecordForm
+      <TravelBookingForm
         eventId={currentOrNewEvent?.id}
         onCreate={handleCreateEvent}
-        isSaving={createTrackerEntries.isExecuting}
+        isSaving={createTravelEntries.isExecuting}
         userId={userId}
         teamId={teamId}
-        projectId={selectedProjectId}
+        bookingId={selectedBookingId}
         description={currentOrNewEvent?.description}
         start={
           currentOrNewEvent
@@ -511,8 +511,8 @@ export function TrackerSchedule({
         end={
           currentOrNewEvent ? getTimeFromDate(currentOrNewEvent.end) : undefined
         }
-        onSelectProject={(project) => {
-          setSelectedProjectId(project.id);
+        onSelectBooking={(booking) => {
+          setSelectedBookingId(booking.id);
 
           if (selectedEvent) {
             setData((prevData) =>
@@ -520,7 +520,7 @@ export function TrackerSchedule({
                 event.id === selectedEvent.id
                   ? {
                       ...event,
-                      project: { id: project.id, name: project.name },
+                      booking: { id: booking.id, name: booking.name },
                     }
                   : event,
               ),

@@ -1,6 +1,6 @@
 "use client";
 
-import { SearchFlightsForm } from "@/components/forms/search-flights-form";
+import { TravelSearchCard } from "@/components/travel-search-card";
 import { Drawer, DrawerContent } from "@travelese/ui/drawer";
 import { useMediaQuery } from "@travelese/ui/hooks";
 import { ScrollArea } from "@travelese/ui/scroll-area";
@@ -15,7 +15,6 @@ import { useQueryState } from "nuqs";
 export function TravelSearchSheet({
   userId,
   currency,
-  onCreate,
 }: {
   categories: any;
   userId: string;
@@ -36,15 +35,11 @@ export function TravelSearchSheet({
       <Sheet open={isOpen} onOpenChange={handleOpenChange}>
         <SheetContent>
           <SheetHeader className="mb-8">
-            <SheetTitle>Search Flights</SheetTitle>
+            <SheetTitle>Explore</SheetTitle>
           </SheetHeader>
 
           <ScrollArea className="h-full p-0 pb-[100px]" hideScrollbar>
-            <SearchFlightsForm
-              userId={userId}
-              currency={currency}
-              onCreate={() => setOpen(null)}
-            />
+            <TravelSearchCard userId={userId} currency={currency} />
           </ScrollArea>
         </SheetContent>
       </Sheet>
@@ -54,11 +49,7 @@ export function TravelSearchSheet({
   return (
     <Drawer open={isOpen} onOpenChange={handleOpenChange}>
       <DrawerContent className="p-6">
-        <SearchFlightsForm
-          userId={userId}
-          currency={currency}
-          onCreate={() => setOpen(null)}
-        />
+        <TravelSearchCard userId={userId} currency={currency} />
       </DrawerContent>
     </Drawer>
   );

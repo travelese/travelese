@@ -30,7 +30,8 @@ import {
   SelectValue,
 } from "@travelese/ui/select";
 import { useToast } from "@travelese/ui/use-toast";
-import { Loader2, MoreHorizontal } from "lucide-react";
+import { MoreHorizontal } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
 import { useRouter } from "next/navigation";
 

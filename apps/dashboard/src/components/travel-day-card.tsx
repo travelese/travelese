@@ -15,9 +15,9 @@ export function TravelDayCard({
   onSelect,
   disableHover,
   isActive,
-  isTracking,
-  selectProject,
-  projectId,
+  isTraveling,
+  selectBooking,
+  bookingId,
 }) {
   const totalDuration = data?.reduce(
     (duration, item) => item.duration + duration,
@@ -27,8 +27,8 @@ export function TravelDayCard({
   const hoverEnabled = !disableHover && data;
 
   const handleOnClick = () => {
-    if (selectProject) {
-      onSelect({ day: date, projectId: "new" });
+    if (selectBooking) {
+      onSelect({ day: date, bookingId: "new" });
     } else {
       onSelect({ day: date });
     }
@@ -41,8 +41,8 @@ export function TravelDayCard({
           className="w-[35px] flex items-center justify-center group relative"
           type="button"
           onClick={handleOnClick}
-          // NOTE: If specific project view, i.e time report
-          disabled={projectId}
+          // NOTE: If specific booking view, i.e time report
+          disabled={bookingId}
         >
           <div
             className={cn(
@@ -63,7 +63,7 @@ export function TravelDayCard({
                   "w-[20px] h-[20px] rounded-full bg-[#121212]/30 dark:bg-[#878787]/30 group-hover:bg-[#121212] dark:group-hover:bg-white relative",
                   outOfRange && "bg-[#121212]/10 dark:bg-[#878787]/10",
                   isActive && "bg-[#121212] dark:bg-white",
-                  isTracking && "!bg-[#00C969]",
+                  isTraveling && "!bg-[#00C969]",
                   isSameDay(new Date(), date) &&
                     "bg-[#121212]/30 dark:bg-[#878787]/30",
                   data && "bg-[#121212] dark:bg-white",
@@ -112,18 +112,18 @@ export function TravelDayCard({
                     <button
                       className="flex flex-col"
                       type="button"
-                      // NOTE: If specific project view, i.e time report
-                      disabled={projectId}
+                      // NOTE: If specific booking view, i.e time report
+                      disabled={bookingId}
                       onClick={() =>
-                        onSelect({ projectId: record.project.id, day: date })
+                        onSelect({ bookingId: record.booking.id, day: date })
                       }
                     >
-                      {projectId ? (
+                      {bookingId ? (
                         <span className="text-xs">
                           {record.assigned?.full_name}
                         </span>
                       ) : (
-                        <span className="text-xs">{record.project?.name}</span>
+                        <span className="text-xs">{record.booking?.name}</span>
                       )}
                       <span className="text-xs text-[#878787]">
                         {record?.description}

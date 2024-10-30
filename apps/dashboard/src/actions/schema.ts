@@ -334,6 +334,31 @@ export const deleteProjectSchema = z.object({
   id: z.string().uuid(),
 });
 
+export const createBookingSchema = z.object({
+  name: z.string().min(1),
+  description: z.string().optional(),
+  estimate: z.number().optional(),
+  billable: z.boolean().optional().default(false),
+  rate: z.number().min(1).optional(),
+  currency: z.string().optional(),
+  status: z.enum(["in_progress", "completed"]).optional(),
+});
+
+export const updateBookingSchema = z.object({
+  id: z.string().uuid(),
+  name: z.string().min(1).optional(),
+  description: z.string().optional(),
+  estimate: z.number().optional(),
+  billable: z.boolean().optional().default(false),
+  rate: z.number().min(1).optional(),
+  currency: z.string().optional(),
+  status: z.enum(["in_progress", "completed"]).optional(),
+});
+
+export const deleteBookingSchema = z.object({
+  id: z.string().uuid(),
+});
+
 export const deleteEntriesSchema = z.object({
   id: z.string().uuid(),
 });
@@ -349,6 +374,11 @@ export const createReportSchema = z.object({
 export const createProjectReportSchema = z.object({
   baseUrl: z.string().url(),
   projectId: z.string().uuid(),
+});
+
+export const createBookingReportSchema = z.object({
+  baseUrl: z.string().url(),
+  bookingId: z.string().uuid(),
 });
 
 export const updateEntriesSchema = z.object({
@@ -492,6 +522,22 @@ export const filterTrackerSchema = z.object({
     .describe("The status to filter by"),
 });
 
+export const filterTravelSchema = z.object({
+  name: z.string().optional().describe("The name to search for"),
+  start: parseDateSchema
+    .optional()
+    .describe("The start date when to retrieve from. Return ISO-8601 format."),
+  end: parseDateSchema
+    .optional()
+    .describe(
+      "The end date when to retrieve data from. If not provided, defaults to the current date. Return ISO-8601 format.",
+    ),
+  status: z
+    .enum(["in_progress", "completed"])
+    .optional()
+    .describe("The status to filter by"),
+});
+
 export const createTransactionSchema = z.object({
   name: z.string(),
   amount: z.number(),
@@ -560,6 +606,14 @@ export const changeTravelPeriodSchema = z.object({
   to: z.string().optional(),
 });
 
+export const createTravelShareSchema = z.object({
+  baseUrl: z.string().url(),
+  from: z.string(),
+  to: z.string(),
+  type: travelTypeSchema,
+  expiresAt: z.string().datetime().optional(),
+});
+
 export const listPlaceSuggestionsSchema = z.object({
   query: z.string(),
   rad: z.string().optional(),
@@ -567,31 +621,12 @@ export const listPlaceSuggestionsSchema = z.object({
   lng: z.string().optional(),
 });
 
-export const createPartialOfferRequestSchema = z.object({
-  supplier_timeout: z.number().default(30000),
+export const createOfferRequestSchema = z.object({
   slices: z.array(
     z.object({
       origin: z.string(),
       destination: z.string(),
       departure_date: z.string(),
-      departure_time: z
-        .object({
-          from: z.string().datetime(),
-          to: z.string().datetime(),
-        })
-        .optional(),
-      arrival_time: z
-        .object({
-          from: z.string().datetime(),
-          to: z.string().datetime(),
-        })
-        .optional(),
-      cabin_class: z
-        .enum(["business", "economy", "first", "premium_economy"])
-        .optional(),
-      max_connections: z
-        .union([z.literal(0), z.literal(1), z.literal(2)])
-        .optional(),
     }),
   ),
   passengers: z.array(
@@ -607,9 +642,13 @@ export const createPartialOfferRequestSchema = z.object({
           }),
         )
         .optional(),
-      fare_type: z.string().optional(),
     }),
   ),
+  cabin_class: z
+    .enum(["first", "business", "premium_economy", "economy"])
+    .optional(),
+  return_offers: z.boolean().optional(),
+  max_connections: z.number().int().min(0).max(2).optional(),
   private_fares: z
     .record(
       z.string(),
@@ -622,8 +661,60 @@ export const createPartialOfferRequestSchema = z.object({
       ),
     )
     .optional(),
-  return_offers: z.boolean().optional(),
-  sort: z.enum(["total_amount", "total_duration"]).optional(),
+});
+
+export const createPartialOfferRequestSchema = z.object({
+  supplier_timeout: z.number().optional(),
+  slices: z.array(
+    z.object({
+      origin: z.string(),
+      destination: z.string(),
+      departure_time: z
+        .object({
+          from: z.string().datetime(),
+          to: z.string().datetime(),
+        })
+        .optional(),
+      departure_date: z.string(),
+      arrival_time: z
+        .object({
+          from: z.string().datetime(),
+          to: z.string().datetime(),
+        })
+        .optional(),
+    }),
+  ),
+  private_fares: z.record(
+    z.string(),
+    z.array(
+      z.object({
+        corporate_code: z.string().optional(),
+        tracking_reference: z.string().optional(),
+        tour_code: z.string().optional(),
+      }),
+    ),
+  ),
+  passengers: z.array(
+    z.object({
+      type: z.enum(["adult", "child", "infant_without_seat"]),
+      given_name: z.string().optional(),
+      family_name: z.string().optional(),
+      loyalty_programme_accounts: z
+        .array(
+          z.object({
+            airline_iata_code: z.string(),
+            account_number: z.string(),
+          }),
+        )
+        .optional(),
+    }),
+  ),
+  cabin_class: z
+    .enum(["business", "economy", "first", "premium_economy"])
+    .optional(),
+  max_connections: z
+    .union([z.literal(0), z.literal(1), z.literal(2)])
+    .optional(),
 });
 
 export const listOffersSchema = z.object({

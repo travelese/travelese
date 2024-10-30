@@ -1,6 +1,6 @@
 import type { MutableAIState } from "@/actions/ai/types";
-import { createOfferRequestAction } from "@/actions/travel/create-offer-request-action";
-import { listPlaceSuggestionsAction } from "@/actions/travel/list-place-suggestions-action";
+import { createOfferRequestAction } from "@/actions/create-offer-request-action";
+import { listPlaceSuggestionsAction } from "@/actions/list-place-suggestions-action";
 import type { Offer } from "@duffel/api/types";
 import { addWeeks, formatISO } from "date-fns";
 import { nanoid } from "nanoid";

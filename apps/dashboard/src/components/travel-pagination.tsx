@@ -10,7 +10,7 @@ import {
   subMonths,
 } from "date-fns";
 
-export function TrackerPagination({ numberOfMonths, onChange, startDate }) {
+export function TravelPagination({ numberOfMonths, onChange, startDate }) {
   const selectPrevPeriod = () => {
     onChange(
       formatISO(startOfMonth(subMonths(startDate, numberOfMonths)), {

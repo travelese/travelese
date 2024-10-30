@@ -35,4 +35,3 @@ using ((EXISTS ( SELECT 1
   WHERE ((cut.user_id = ( SELECT auth.uid() AS uid)) AND (cut.team_id = users_on_team.team_id)))));
 
 
-

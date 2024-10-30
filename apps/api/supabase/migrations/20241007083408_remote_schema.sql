@@ -1,5 +1,8 @@
 drop policy "Entries can be updated by a member of the team" on "public"."tracker_entries";
 
+-- Travel Drop and Recreate Entry Update Policy:
+drop policy "Entries can be updated by a member of the team" on "public"."travel_entries";
+
 create table "public"."apps" (
     "id" uuid not null default gen_random_uuid(),
     "team_id" uuid default gen_random_uuid(),
@@ -16,6 +19,11 @@ alter table "public"."apps" enable row level security;
 alter table "public"."tracker_entries" alter column "start" set data type timestamp with time zone using "start"::timestamp with time zone;
 
 alter table "public"."tracker_entries" alter column "stop" set data type timestamp with time zone using "stop"::timestamp with time zone;
+
+-- Travel Timestamp Column Updates:
+alter table "public"."travel_entries" alter column "start" set data type timestamp with time zone using "start"::timestamp with time zone;
+
+alter table "public"."travel_entries" alter column "stop" set data type timestamp with time zone using "stop"::timestamp with time zone;
 
 alter table "public"."users" add column "time_format" numeric default '24'::numeric;
 
@@ -59,6 +67,29 @@ AS $function$
 $function$
 ;
 
+-- Travel Get Assigned Users Function:
+CREATE OR REPLACE FUNCTION public.get_assigned_users_for_booking(travel_bookings)
+ RETURNS json
+ LANGUAGE sql
+AS $function$
+  SELECT COALESCE(
+    (SELECT json_agg(
+      json_build_object(
+        'user_id', u.id,
+        'full_name', u.full_name,
+        'avatar_url', u.avatar_url
+      )
+    )
+    FROM (
+      SELECT DISTINCT u.id, u.full_name, u.avatar_url
+      FROM public.users u
+      JOIN public.travel_entries te ON u.id = te.assigned_id
+      WHERE te.booking_id = $1.id
+    ) u
+  ), '[]'::json);
+$function$
+;
+
 CREATE OR REPLACE FUNCTION public.get_project_total_amount(tracker_projects)
  RETURNS numeric
  LANGUAGE sql
@@ -73,6 +104,26 @@ AS $function$
       END
     FROM public.tracker_entries te
     WHERE te.project_id = $1.id
+    ), 0
+  );
+$function$
+;
+
+-- Travel Get Booking Total Amount Function:
+CREATE OR REPLACE FUNCTION public.get_booking_total_amount(travel_bookings)
+ RETURNS numeric
+ LANGUAGE sql
+AS $function$
+  SELECT COALESCE(
+    (SELECT 
+      CASE 
+        WHEN $1.rate IS NOT NULL THEN 
+          ROUND(SUM(te.duration) * $1.rate / 3600, 2)
+        ELSE 
+          0
+      END
+    FROM public.travel_entries te
+    WHERE te.booking_id = $1.id
     ), 0
   );
 $function$
@@ -497,4 +548,12 @@ to authenticated
 using ((team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user)))
 with check ((team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user)));
 
+-- Travel Entries Update Policy:
+create policy "Entries can be updated by a member of the team"
+on "public"."travel_entries"
+as permissive
+for update
+to authenticated
+using ((team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user)))
+with check ((team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user)));
 

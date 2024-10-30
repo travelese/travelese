@@ -1,5 +1,5 @@
 import {
-  getTrackerRecordsByRange,
+  getTravelRecordsByRange,
   getUser,
 } from "@travelese/supabase/cached-queries";
 import { endOfMonth, formatISO, startOfMonth } from "date-fns";
@@ -19,7 +19,7 @@ export async function TravelWidgetServer({ date }: Props) {
 
   const [{ data: userData }, travelData] = await Promise.all([
     getUser(),
-    getTrackerRecordsByRange({
+    getTravelRecordsByRange({
       from: formatISO(startOfMonth(new Date(currentDate)), {
         representation: "date",
       }),

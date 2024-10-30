@@ -1,6 +1,6 @@
-import { useTrackerParams } from "@/hooks/use-tracker-params";
+import { useTravelParams } from "@/hooks/use-travel-params";
 import { formatDateRange } from "@/utils/format";
-import { getTrackerDates } from "@/utils/tracker";
+import { getTravelDates } from "@/utils/travel";
 import { TZDate } from "@date-fns/tz";
 import { Button } from "@travelese/ui/button";
 import { cn } from "@travelese/ui/cn";
@@ -12,9 +12,9 @@ type Props = {
   className?: string;
 };
 
-export function TrackerDaySelect({ className }: Props) {
-  const { setParams, range, selectedDate } = useTrackerParams();
-  const currentDate = getTrackerDates(range, selectedDate);
+export function TravelDaySelect({ className }: Props) {
+  const { setParams, range, selectedDate } = useTravelParams();
+  const currentDate = getTravelDates(range, selectedDate);
 
   const selectPrevDay = () => {
     if (currentDate[0]) {

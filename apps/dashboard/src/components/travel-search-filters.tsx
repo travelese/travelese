@@ -1,6 +1,6 @@
 "use client";
 
-import { generateTrackerFilters } from "@/actions/ai/filters/generate-tracker-filters";
+import { generateTravelFilters } from "@/actions/ai/filters/generate-travel-filters";
 import { Calendar } from "@travelese/ui/calendar";
 import { cn } from "@travelese/ui/cn";
 import {
@@ -48,7 +48,7 @@ const statusFilters = [
   { id: "completed", name: "Completed" },
 ];
 
-export function TrackerSearchFilter({ members }: Props) {
+export function TravelSearchFilter({ members }: Props) {
   const [prompt, setPrompt] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
   const [streaming, setStreaming] = useState(false);
@@ -106,7 +106,7 @@ export function TrackerSearchFilter({ members }: Props) {
     if (prompt.split(" ").length > 1) {
       setStreaming(true);
 
-      const { object } = await generateTrackerFilters(prompt);
+      const { object } = await generateTravelFilters(prompt);
 
       let finalObject = {};
 

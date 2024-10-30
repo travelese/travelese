@@ -1,44 +1,40 @@
 "use server";
 
 import { authActionClient } from "@/actions/safe-action";
-import { createTravelShareSchema } from "@/actions/travel/schema";
+import { createReportSchema } from "@/actions/schema";
 import { dub } from "@/utils/dub";
 import { LogEvents } from "@travelese/events/events";
 
-export const createTravelShareAction = authActionClient
-  .schema(createTravelShareSchema)
+export const createBookingReport = authActionClient
+  .schema(createReportSchema)
   .metadata({
-    name: "create-travel-share",
+    name: "create-booking-report",
     track: {
-      event: LogEvents.TravelShare.name,
-      channel: LogEvents.TravelShare.channel,
+      event: LogEvents.ProjectReport.name,
+      channel: LogEvents.ProjectReport.channel,
     },
   })
   .action(async ({ parsedInput: params, ctx: { user, supabase } }) => {
     const { data } = await supabase
-      .from("travel_shares")
+      .from("tracker_reports")
       .insert({
-        user_id: user.id,
-        from: params.from,
-        to: params.to,
-        type: params.type,
-        expire_at: params.expiresAt,
+        team_id: user.team_id,
+        booking_id: params.bookingId,
         created_by: user.id,
       })
       .select("*")
       .single();
 
     if (!data) {
-      return null;
+      return;
     }
 
     const link = await dub.links.create({
-      url: `${params.baseUrl}/travel/${data.id}`,
-      expiresAt: params.expiresAt,
+      url: `${params.baseUrl}/report/project/${data?.id}`,
     });
 
     const { data: linkData } = await supabase
-      .from("travel_shares")
+      .from("tracker_reports")
       .update({
         link_id: link.id,
         short_link: link.shortLink,
