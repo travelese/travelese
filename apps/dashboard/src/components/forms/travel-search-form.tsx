@@ -1,6 +1,6 @@
 "use client";
 
-import { createOfferRequestSchema } from "@/actions/schema";
+import { createPartialOfferRequestSchema } from "@/actions/schema";
 import { TravelBaggage } from "@/components/travel/travel-baggage";
 import { TravelCabin } from "@/components/travel/travel-cabin";
 import { TravelLocation } from "@/components/travel/travel-location";
@@ -44,7 +44,7 @@ export function TravelSearchForm({
   onQueryParamsChange,
 }: Props) {
   const form = useForm({
-    resolver: zodResolver(createOfferRequestSchema),
+    resolver: zodResolver(createPartialOfferRequestSchema),
     defaultValues,
   });
 

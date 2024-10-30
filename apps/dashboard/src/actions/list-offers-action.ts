@@ -29,14 +29,10 @@ export const listOffersAction = authActionClient
         });
         const listOffersId = nanoid();
 
-        logger("nanoid", listOffersId);
-
         await RedisClient.sadd(
           `list-offers:${listOffersId}`,
           JSON.stringify(response.data),
         );
-
-        logger(`Saved to key: list-offers:${listOffersId}`);
 
         return {
           ...response.data,

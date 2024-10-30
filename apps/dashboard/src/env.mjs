@@ -17,6 +17,7 @@ export const env = createEnv({
     PLAIN_API_KEY: z.string(),
     OPENAI_API_KEY: z.string(),
     GROQ_API_KEY: z.string(),
+    XAI_API_KEY: z.string(),
     SUPABASE_SERVICE_ROLE_KEY: z.string(),
     UPSTASH_REDIS_REST_TOKEN: z.string(),
     UPSTASH_REDIS_REST_URL: z.string(),
@@ -77,6 +78,7 @@ export const env = createEnv({
     SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY,
     OPENAI_API_KEY: process.env.OPENAI_API_KEY,
     GROQ_API_KEY: process.env.GROQ_API_KEY,
+    XAI_API_KEY: process.env.XAI_API_KEY,
     PLAIN_API_KEY: process.env.PLAIN_API_KEY,
     NEXT_PUBLIC_OPENPANEL_CLIENT_ID:
       process.env.NEXT_PUBLIC_OPENPANEL_CLIENT_ID,

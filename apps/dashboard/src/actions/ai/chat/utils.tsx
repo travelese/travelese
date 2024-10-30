@@ -2,13 +2,13 @@ import { BotMessage, UserMessage } from "@/components/chat/messages";
 import type { Chat } from "../types";
 import { BurnRateUI } from "./tools/ui/burn-rate-ui";
 import { DocumentsUI } from "./tools/ui/documents-ui";
-import { FlightsUI } from "./tools/ui/flights-ui";
 import { ProfitUI } from "./tools/ui/profit-ui";
 import { ReportUI } from "./tools/ui/report-ui";
 import { RevenueUI } from "./tools/ui/revenue-ui";
 import { RunwayUI } from "./tools/ui/runway-ui";
 import { SpendingUI } from "./tools/ui/spending-ui";
 import { TransactionsUI } from "./tools/ui/transactions-ui";
+import { TravelUI } from "./tools/ui/travel-ui";
 
 export const sleep = (ms: number) =>
   new Promise((resolve) => setTimeout(resolve, ms));
@@ -57,8 +57,8 @@ function getUIComponentFromMessage(message) {
           return <RevenueUI {...tool.result} />;
         }
 
-        case "searchFlights": {
-          return <FlightsUI offerRequest={tool.result} />;
+        case "searchTravel": {
+          return <TravelUI {...tool.result} />;
         }
 
         default:

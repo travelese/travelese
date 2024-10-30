@@ -1,4 +1,4 @@
-import { openai } from "@ai-sdk/openai";
+import { xai } from "@/utils/xai";
 import { generateObject } from "ai";
 import { z } from "zod";
 
@@ -27,7 +27,7 @@ export class LlmProcessor {
   public async getStructuredData(content: string) {
     try {
       const { object } = await generateObject({
-        model: openai("gpt-4o-mini"),
+        model: xai("grok-beta"),
         mode: "json",
         schema,
         prompt: content,

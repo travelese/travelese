@@ -1,7 +1,7 @@
 "use server";
 
 import { filterTransactionsSchema } from "@/actions/schema";
-import { openai } from "@ai-sdk/openai";
+import { xai } from "@/utils/xai";
 import { streamObject } from "ai";
 import { createStreamableValue } from "ai/rsc";
 
@@ -24,7 +24,7 @@ export async function generateTransactionsFilters(
 
   (async () => {
     const { partialObjectStream } = await streamObject({
-      model: openai("gpt-4o-mini"),
+      model: xai("grok-beta"),
       system: `You are a helpful assistant that generates filters for a given prompt. \n
                Current date is: ${new Date().toISOString().split("T")[0]} \n
                ${context}
