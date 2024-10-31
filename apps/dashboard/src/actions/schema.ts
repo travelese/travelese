@@ -561,40 +561,27 @@ export const createTransactionSchema = z.object({
 
 export type CreateTransactionSchema = z.infer<typeof createTransactionSchema>;
 
-export const changeTravelModeSchema = z.enum(["flights", "stays"]);
-
-const travelTypeSchema = z.enum([
-  "one_way",
-  "return",
-  "multi_city",
-  "digital_nomad",
-]);
-
-export const changeTravelTypeSchema = z.enum([
-  "return",
-  "one_way",
-  "multi_city",
-  "digital_nomad",
-]);
-
-export const changeTravelCabinSchema = z.enum([
+// Travel
+const travelModeSchema = z.enum(["flights", "stays"]);
+const travelTypeSchema = z.enum(["one_way", "return", "multi_city"]);
+const travelCabinSchema = z.enum([
   "economy",
   "premium_economy",
   "business",
   "first_class",
 ]);
+const travelTravellerSchema = z.enum(["adult", "child", "infant_without_seat"]);
+const travelBaggageSchema = z.enum(["carry_on", "cabin", "checked"]);
 
+export const changeTravelModeSchema = travelModeSchema;
+export const changeTravelTypeSchema = travelTypeSchema;
+export const changeTravelCabinSchema = travelCabinSchema;
 export const changeTravelTravellerSchema = z.array(
   z.object({
-    type: z.enum(["adult", "child", "infant_without_seat"]),
+    type: travelTravellerSchema,
   }),
 );
-
-export const changeTravelBaggageSchema = z.enum([
-  "carry_on",
-  "cabin",
-  "checked",
-]);
+export const changeTravelBaggageSchema = travelBaggageSchema;
 
 export const changeTravelLocationSchema = z.object({
   type: z.enum(["origin", "destination"]),
@@ -604,63 +591,6 @@ export const changeTravelLocationSchema = z.object({
 export const changeTravelPeriodSchema = z.object({
   from: z.string(),
   to: z.string().optional(),
-});
-
-export const createTravelShareSchema = z.object({
-  baseUrl: z.string().url(),
-  from: z.string(),
-  to: z.string(),
-  type: travelTypeSchema,
-  expiresAt: z.string().datetime().optional(),
-});
-
-export const listPlaceSuggestionsSchema = z.object({
-  query: z.string(),
-  rad: z.string().optional(),
-  lat: z.string().optional(),
-  lng: z.string().optional(),
-});
-
-export const createOfferRequestSchema = z.object({
-  slices: z.array(
-    z.object({
-      origin: z.string(),
-      destination: z.string(),
-      departure_date: z.string(),
-    }),
-  ),
-  passengers: z.array(
-    z.object({
-      type: z.enum(["adult", "child", "infant_without_seat"]),
-      given_name: z.string().optional(),
-      family_name: z.string().optional(),
-      loyalty_programme_accounts: z
-        .array(
-          z.object({
-            airline_iata_code: z.string(),
-            account_number: z.string(),
-          }),
-        )
-        .optional(),
-    }),
-  ),
-  cabin_class: z
-    .enum(["first", "business", "premium_economy", "economy"])
-    .optional(),
-  return_offers: z.boolean().optional(),
-  max_connections: z.number().int().min(0).max(2).optional(),
-  private_fares: z
-    .record(
-      z.string(),
-      z.array(
-        z.object({
-          corporate_code: z.string().optional(),
-          tracking_reference: z.string().optional(),
-          tour_code: z.string().optional(),
-        }),
-      ),
-    )
-    .optional(),
 });
 
 export const createPartialOfferRequestSchema = z.object({
@@ -696,7 +626,7 @@ export const createPartialOfferRequestSchema = z.object({
   ),
   passengers: z.array(
     z.object({
-      type: z.enum(["adult", "child", "infant_without_seat"]),
+      type: travelTravellerSchema,
       given_name: z.string().optional(),
       family_name: z.string().optional(),
       loyalty_programme_accounts: z
@@ -707,15 +637,230 @@ export const createPartialOfferRequestSchema = z.object({
           }),
         )
         .optional(),
+      age: z.number().optional(),
+      fare_type: z.string().optional(),
     }),
   ),
-  cabin_class: z
-    .enum(["business", "economy", "first", "premium_economy"])
-    .optional(),
+  cabin_class: travelCabinSchema.optional(),
   max_connections: z
     .union([z.literal(0), z.literal(1), z.literal(2)])
     .optional(),
 });
+
+const citySchema = z.object({
+  name: z.string(),
+  id: z.string(),
+  iata_country_code: z.string(),
+  iata_code: z.string(),
+});
+
+const airportSchema = z.object({
+  time_zone: z.string(),
+  name: z.string(),
+  longitude: z.number(),
+  latitude: z.number(),
+  id: z.string(),
+  icao_code: z.string(),
+  iata_country_code: z.string(),
+  iata_code: z.string(),
+  iata_city_code: z.string(),
+  city_name: z.string(),
+  city: citySchema,
+});
+
+const createPartialOfferLocationSchema = z.object({
+  type: z.literal("airport"),
+  time_zone: z.string(),
+  name: z.string(),
+  longitude: z.number(),
+  latitude: z.number(),
+  id: z.string(),
+  icao_code: z.string(),
+  iata_country_code: z.string(),
+  iata_code: z.string(),
+  iata_city_code: z.string(),
+  city_name: z.string(),
+  city: citySchema,
+  airports: z.array(airportSchema),
+});
+
+const carrierSchema = z.object({
+  name: z.string(),
+  logo_symbol_url: z.string(),
+  logo_lockup_url: z.string(),
+  id: z.string(),
+  iata_code: z.string(),
+  conditions_of_carriage_url: z.string(),
+});
+
+const createPartialOfferResponseSchema = z.object({
+  data: z.object({
+    slices: z.array(
+      z.object({
+        origin_type: z.literal("airport"),
+        origin: createPartialOfferLocationSchema,
+        destination_type: z.literal("airport"),
+        destination: createPartialOfferLocationSchema,
+        departure_date: z.string(),
+      }),
+    ),
+    offers: z.array(
+      z.object({
+        total_emissions_kg: z.string(),
+        total_currency: z.string(),
+        total_amount: z.string(),
+        tax_currency: z.string(),
+        tax_amount: z.string(),
+        supported_passenger_identity_document_types: z.array(z.string()),
+        slices: z.array(
+          z.object({
+            segments: z.array(
+              z.object({
+                stops: z.array(
+                  z.object({
+                    id: z.string(),
+                    duration: z.string(),
+                    departing_at: z.string(),
+                    arriving_at: z.string(),
+                    airport: createPartialOfferLocationSchema,
+                  }),
+                ),
+                passengers: z.array(
+                  z.object({
+                    passenger_id: z.string(),
+                    fare_basis_code: z.string(),
+                    cabin_class_marketing_name: z.string(),
+                    cabin_class: z.string(),
+                    cabin: z.object({
+                      name: z.string(),
+                      marketing_name: z.string(),
+                      amenities: z.object({
+                        wifi: z.object({
+                          cost: z.string(),
+                          available: z.string(),
+                        }),
+                        seat: z.object({
+                          type: z.string(),
+                          pitch: z.string(),
+                          legroom: z.string(),
+                        }),
+                        power: z.object({
+                          available: z.string(),
+                        }),
+                      }),
+                    }),
+                    baggages: z.array(
+                      z.object({
+                        type: z.string(),
+                        quantity: z.number(),
+                      }),
+                    ),
+                  }),
+                ),
+                origin_terminal: z.string(),
+                origin: airportSchema,
+                operating_carrier_flight_number: z.string(),
+                operating_carrier: carrierSchema,
+                marketing_carrier_flight_number: z.string(),
+                marketing_carrier: carrierSchema,
+                id: z.string(),
+                duration: z.string(),
+                distance: z.string(),
+                destination_terminal: z.string(),
+                destination: airportSchema,
+                departing_at: z.string(),
+                arriving_at: z.string(),
+                aircraft: z.object({
+                  name: z.string(),
+                  id: z.string(),
+                  iata_code: z.string(),
+                }),
+              }),
+            ),
+            origin_type: z.literal("airport"),
+            origin: createPartialOfferLocationSchema,
+            ngs_shelf: z.number(),
+            id: z.string(),
+            fare_brand_name: z.string(),
+            duration: z.string(),
+            destination_type: z.literal("airport"),
+            destination: createPartialOfferLocationSchema,
+            conditions: z.object({
+              priority_check_in: z.string(),
+              priority_boarding: z.string(),
+              change_before_departure: z.object({
+                penalty_currency: z.string(),
+                penalty_amount: z.string(),
+                allowed: z.boolean(),
+              }),
+              advance_seat_selection: z.string(),
+            }),
+            comparison_key: z.string(),
+          }),
+        ),
+        private_fares: z.array(
+          z.object({
+            type: z.string(),
+            tracking_reference: z.string(),
+            tour_code: z.string(),
+            corporate_code: z.string(),
+          }),
+        ),
+        payment_requirements: z.object({
+          requires_instant_payment: z.boolean(),
+          price_guarantee_expires_at: z.string(),
+          payment_required_by: z.string(),
+        }),
+        passengers: z.array(
+          z.object({
+            type: z.string(),
+            loyalty_programme_accounts: z.array(
+              z.object({
+                airline_iata_code: z.string(),
+                account_number: z.string(),
+              }),
+            ),
+            id: z.string(),
+            given_name: z.string(),
+            fare_type: z.string(),
+            family_name: z.string(),
+            age: z.number(),
+          }),
+        ),
+        passenger_identity_documents_required: z.boolean(),
+        partial: z.boolean(),
+        owner: carrierSchema,
+        live_mode: z.boolean(),
+        id: z.string(),
+        expires_at: z.string(),
+        created_at: z.string(),
+        conditions: z.object({
+          refund_before_departure: z.object({
+            penalty_currency: z.string(),
+            penalty_amount: z.string(),
+            allowed: z.boolean(),
+          }),
+          change_before_departure: z.object({
+            penalty_currency: z.string(),
+            penalty_amount: z.string(),
+            allowed: z.boolean(),
+          }),
+        }),
+        base_currency: z.string(),
+        base_amount: z.string(),
+      }),
+    ),
+    live_mode: z.boolean(),
+    id: z.string(),
+    created_at: z.string(),
+    client_key: z.string(),
+    cabin_class: z.string(),
+  }),
+});
+
+export type CreatePartialOfferResponse = z.infer<
+  typeof createPartialOfferResponseSchema
+>;
 
 export const listOffersSchema = z.object({
   offer_request_id: z.string(),
@@ -724,7 +869,162 @@ export const listOffersSchema = z.object({
   before: z.string().optional(),
 });
 
-export const searchAccommodationSchema = z.object({
+const offerSchema = z.object({
+  total_emissions_kg: z.string(),
+  total_currency: z.string(),
+  total_amount: z.string(),
+  tax_currency: z.string(),
+  tax_amount: z.string(),
+  supported_passenger_identity_document_types: z.array(z.string()),
+  slices: z.array(
+    z.object({
+      segments: z.array(
+        z.object({
+          stops: z.array(
+            z.object({
+              id: z.string(),
+              duration: z.string(),
+              departing_at: z.string(),
+              arriving_at: z.string(),
+              airport: createPartialOfferLocationSchema,
+            }),
+          ),
+          passengers: z.array(
+            z.object({
+              passenger_id: z.string(),
+              fare_basis_code: z.string(),
+              cabin_class_marketing_name: z.string(),
+              cabin_class: z.string(),
+              cabin: z.object({
+                name: z.string(),
+                marketing_name: z.string(),
+                amenities: z.object({
+                  wifi: z.object({
+                    cost: z.string(),
+                    available: z.string(),
+                  }),
+                  seat: z.object({
+                    type: z.string(),
+                    pitch: z.string(),
+                    legroom: z.string(),
+                  }),
+                  power: z.object({
+                    available: z.string(),
+                  }),
+                }),
+              }),
+              baggages: z.array(
+                z.object({
+                  type: z.string(),
+                  quantity: z.number(),
+                }),
+              ),
+            }),
+          ),
+          origin_terminal: z.string(),
+          origin: airportSchema,
+          operating_carrier_flight_number: z.string(),
+          operating_carrier: carrierSchema,
+          marketing_carrier_flight_number: z.string(),
+          marketing_carrier: carrierSchema,
+          id: z.string(),
+          duration: z.string(),
+          distance: z.string(),
+          destination_terminal: z.string(),
+          destination: airportSchema,
+          departing_at: z.string(),
+          arriving_at: z.string(),
+          aircraft: z.object({
+            name: z.string(),
+            id: z.string(),
+            iata_code: z.string(),
+          }),
+        }),
+      ),
+      origin_type: z.literal("airport"),
+      origin: createPartialOfferLocationSchema,
+      ngs_shelf: z.number(),
+      id: z.string(),
+      fare_brand_name: z.string(),
+      duration: z.string(),
+      destination_type: z.literal("airport"),
+      destination: createPartialOfferLocationSchema,
+      conditions: z.object({
+        priority_check_in: z.string(),
+        priority_boarding: z.string(),
+        change_before_departure: z.object({
+          penalty_currency: z.string(),
+          penalty_amount: z.string(),
+          allowed: z.boolean(),
+        }),
+        advance_seat_selection: z.string(),
+      }),
+      comparison_key: z.string(),
+    }),
+  ),
+  private_fares: z.array(
+    z.object({
+      type: z.string(),
+      tracking_reference: z.string(),
+      tour_code: z.string(),
+      corporate_code: z.string(),
+    }),
+  ),
+  payment_requirements: z.object({
+    requires_instant_payment: z.boolean(),
+    price_guarantee_expires_at: z.string(),
+    payment_required_by: z.string(),
+  }),
+  passengers: z.array(
+    z.object({
+      type: z.string(),
+      loyalty_programme_accounts: z.array(
+        z.object({
+          airline_iata_code: z.string(),
+          account_number: z.string(),
+        }),
+      ),
+      id: z.string(),
+      given_name: z.string(),
+      fare_type: z.string(),
+      family_name: z.string(),
+      age: z.number(),
+    }),
+  ),
+  passenger_identity_documents_required: z.boolean(),
+  partial: z.boolean(),
+  owner: carrierSchema,
+  live_mode: z.boolean(),
+  id: z.string(),
+  expires_at: z.string(),
+  created_at: z.string(),
+  conditions: z.object({
+    refund_before_departure: z.object({
+      penalty_currency: z.string(),
+      penalty_amount: z.string(),
+      allowed: z.boolean(),
+    }),
+    change_before_departure: z.object({
+      penalty_currency: z.string(),
+      penalty_amount: z.string(),
+      allowed: z.boolean(),
+    }),
+  }),
+  base_currency: z.string(),
+  base_amount: z.string(),
+});
+
+const listOffersResponseSchema = z.object({
+  meta: z.object({
+    limit: z.number(),
+    after: z.string(),
+  }),
+  data: z.array(offerSchema),
+});
+
+export type ListOffersResponse = z.infer<typeof listOffersResponseSchema>;
+
+export const searchAccommodationRequestSchema = z.object({
   check_in_date: z.string(),
   check_out_date: z.string(),
   rooms: z.number(),
@@ -742,3 +1042,169 @@ export const searchAccommodationSchema = z.object({
     }),
   }),
 });
+
+// ... existing schemas ...
+
+const rateSchema = z.object({
+  total_currency: z.string(),
+  total_amount: z.string(),
+  tax_currency: z.string(),
+  tax_amount: z.string(),
+  supported_loyalty_programme: z.string(),
+  quantity_available: z.number(),
+  payment_type: z.string(),
+  id: z.string(),
+  fee_currency: z.string(),
+  fee_amount: z.string(),
+  due_at_accommodation_currency: z.string(),
+  due_at_accommodation_amount: z.string(),
+  conditions: z.array(
+    z.object({
+      title: z.string(),
+      description: z.string(),
+    }),
+  ),
+  cancellation_timeline: z.array(
+    z.object({
+      refund_amount: z.string(),
+      currency: z.string(),
+      before: z.string(),
+    }),
+  ),
+  board_type: z.string(),
+  base_currency: z.string(),
+  base_amount: z.string(),
+  available_payment_methods: z.array(z.array(z.string())),
+});
+
+const photoSchema = z.object({
+  url: z.string(),
+});
+
+const bedSchema = z.object({
+  type: z.string(),
+  count: z.number(),
+});
+
+const roomSchema = z.object({
+  rates: z.array(rateSchema),
+  photos: z.array(photoSchema),
+  name: z.string(),
+  beds: z.array(bedSchema),
+});
+
+const addressSchema = z.object({
+  region: z.string(),
+  postal_code: z.string(),
+  line_one: z.string(),
+  country_code: z.string(),
+  city_name: z.string(),
+});
+
+const searchAccommodationLocationSchema = z.object({
+  geographic_coordinates: z.object({
+    longitude: z.number(),
+    latitude: z.number(),
+  }),
+  address: addressSchema,
+});
+
+const checkInInformationSchema = z.object({
+  check_out_before_time: z.string(),
+  check_in_after_time: z.string(),
+});
+
+const chainSchema = z.object({
+  name: z.string(),
+});
+
+const brandSchema = z.object({
+  name: z.string(),
+  id: z.string(),
+});
+
+const amenitySchema = z.object({
+  type: z.string(),
+  description: z.string(),
+});
+
+const accommodationSchema = z.object({
+  supported_loyalty_programme: z.string(),
+  rooms: z.array(roomSchema),
+  review_score: z.number(),
+  rating: z.number(),
+  photos: z.array(photoSchema),
+  phone_number: z.string(),
+  name: z.string(),
+  location: searchAccommodationLocationSchema,
+  key_collection: z.object({
+    instructions: z.string(),
+  }),
+  id: z.string(),
+  email: z.string(),
+  description: z.string(),
+  check_in_information: checkInInformationSchema,
+  chain: chainSchema,
+  brand: brandSchema,
+  amenities: z.array(amenitySchema),
+});
+
+const searchAccommodationResultSchema = z.object({
+  rooms: z.number(),
+  id: z.string(),
+  check_out_date: z.string(),
+  check_in_date: z.string(),
+  cheapest_rate_total_amount: z.string(),
+  cheapest_rate_currency: z.string(),
+  accommodation: accommodationSchema,
+});
+
+const searchAccommodationResponseSchema = z.object({
+  data: z.object({
+    results: z.array(searchAccommodationResultSchema),
+    created_at: z.string(),
+  }),
+});
+
+export type SearchAccommodationResponse = z.infer<
+  typeof searchAccommodationResponseSchema
+>;
+
+export const listPlaceSuggestionsSchema = z.object({
+  query: z.string(),
+  rad: z.string().optional(),
+  lat: z.string().optional(),
+  lng: z.string().optional(),
+});
+
+const placeSchema = z.object({
+  type: z.literal("airport"),
+  time_zone: z.string(),
+  name: z.string(),
+  longitude: z.number(),
+  latitude: z.number(),
+  id: z.string(),
+  icao_code: z.string(),
+  iata_country_code: z.string(),
+  iata_code: z.string(),
+  iata_city_code: z.string(),
+  city_name: z.string(),
+  city: citySchema,
+  airports: z.array(airportSchema),
+});
+
+const listPlacesSuggestionsResponseSchema = z.object({
+  warnings: z.array(
+    z.object({
+      type: z.string(),
+      title: z.string(),
+      message: z.string(),
+      code: z.string(),
+    }),
+  ),
+  data: z.array(placeSchema),
+});
+
+export type ListPlacesSuggestionsResponse = z.infer<
+  typeof listPlacesSuggestionsResponseSchema
+>;

@@ -1,8 +1,7 @@
+-- Drop Policy "Entries can be updated by a member of the team"
 drop policy "Entries can be updated by a member of the team" on "public"."tracker_entries";
 
--- Travel Drop and Recreate Entry Update Policy:
-drop policy "Entries can be updated by a member of the team" on "public"."travel_entries";
-
+-- Create Table "public"."apps"
 create table "public"."apps" (
     "id" uuid not null default gen_random_uuid(),
     "team_id" uuid default gen_random_uuid(),
@@ -13,38 +12,46 @@ create table "public"."apps" (
     "settings" jsonb
 );
 
-
+-- Enable row level security for table "public"."apps"
 alter table "public"."apps" enable row level security;
 
+-- Alter Column "start" to timestamp with time zone for table "public"."tracker_entries"
 alter table "public"."tracker_entries" alter column "start" set data type timestamp with time zone using "start"::timestamp with time zone;
 
+-- Alter Column "stop" to timestamp with time zone for table "public"."tracker_entries"
 alter table "public"."tracker_entries" alter column "stop" set data type timestamp with time zone using "stop"::timestamp with time zone;
 
--- Travel Timestamp Column Updates:
-alter table "public"."travel_entries" alter column "start" set data type timestamp with time zone using "start"::timestamp with time zone;
-
-alter table "public"."travel_entries" alter column "stop" set data type timestamp with time zone using "stop"::timestamp with time zone;
-
+-- Add Column "time_format" numeric default '24'::numeric for table "public"."users"
 alter table "public"."users" add column "time_format" numeric default '24'::numeric;
 
+-- Create Unique Index integrations_pkey on table "public"."apps"
 CREATE UNIQUE INDEX integrations_pkey ON public.apps USING btree (id);
 
+-- Create Unique Index unique_app_id_team_id on table "public"."apps"
 CREATE UNIQUE INDEX unique_app_id_team_id ON public.apps USING btree (app_id, team_id);
 
+-- Add Constraint "integrations_pkey" PRIMARY KEY using index "integrations_pkey"
 alter table "public"."apps" add constraint "integrations_pkey" PRIMARY KEY using index "integrations_pkey";
 
+-- Add Constraint "apps_created_by_fkey" FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE CASCADE not valid
 alter table "public"."apps" add constraint "apps_created_by_fkey" FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE CASCADE not valid;
 
+-- Add Constraint "apps_created_by_fkey" FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE CASCADE not valid
 alter table "public"."apps" validate constraint "apps_created_by_fkey";
 
+-- Add Constraint "integrations_team_id_fkey" FOREIGN KEY (team_id) REFERENCES teams(id) ON DELETE CASCADE not valid
 alter table "public"."apps" add constraint "integrations_team_id_fkey" FOREIGN KEY (team_id) REFERENCES teams(id) ON DELETE CASCADE not valid;
 
+-- Add Constraint "integrations_team_id_fkey" FOREIGN KEY (team_id) REFERENCES teams(id) ON DELETE CASCADE not valid
 alter table "public"."apps" validate constraint "integrations_team_id_fkey";
 
+-- Add Constraint "unique_app_id_team_id" UNIQUE using index "unique_app_id_team_id"
 alter table "public"."apps" add constraint "unique_app_id_team_id" UNIQUE using index "unique_app_id_team_id";
 
+-- Set check_function_bodies to off
 set check_function_bodies = off;
 
+-- Create Function get_assigned_users_for_project
 CREATE OR REPLACE FUNCTION public.get_assigned_users_for_project(tracker_projects)
  RETURNS json
  LANGUAGE sql
@@ -67,29 +74,7 @@ AS $function$
 $function$
 ;
 
--- Travel Get Assigned Users Function:
-CREATE OR REPLACE FUNCTION public.get_assigned_users_for_booking(travel_bookings)
- RETURNS json
- LANGUAGE sql
-AS $function$
-  SELECT COALESCE(
-    (SELECT json_agg(
-      json_build_object(
-        'user_id', u.id,
-        'full_name', u.full_name,
-        'avatar_url', u.avatar_url
-      )
-    )
-    FROM (
-      SELECT DISTINCT u.id, u.full_name, u.avatar_url
-      FROM public.users u
-      JOIN public.travel_entries te ON u.id = te.assigned_id
-      WHERE te.booking_id = $1.id
-    ) u
-  ), '[]'::json);
-$function$
-;
-
+-- Create Function get_project_total_amount
 CREATE OR REPLACE FUNCTION public.get_project_total_amount(tracker_projects)
  RETURNS numeric
  LANGUAGE sql
@@ -109,26 +94,7 @@ AS $function$
 $function$
 ;
 
--- Travel Get Booking Total Amount Function:
-CREATE OR REPLACE FUNCTION public.get_booking_total_amount(travel_bookings)
- RETURNS numeric
- LANGUAGE sql
-AS $function$
-  SELECT COALESCE(
-    (SELECT 
-      CASE 
-        WHEN $1.rate IS NOT NULL THEN 
-          ROUND(SUM(te.duration) * $1.rate / 3600, 2)
-        ELSE 
-          0
-      END
-    FROM public.travel_entries te
-    WHERE te.booking_id = $1.id
-    ), 0
-  );
-$function$
-;
-
+-- Create Function get_runway_v4
 CREATE OR REPLACE FUNCTION public.get_runway_v4(team_id text, date_from date, date_to date, base_currency text DEFAULT NULL::text)
  RETURNS numeric
  LANGUAGE plpgsql
@@ -167,6 +133,7 @@ end;
 $function$
 ;
 
+-- Create Function calculate_bank_account_base_balance
 CREATE OR REPLACE FUNCTION public.calculate_bank_account_base_balance()
  RETURNS trigger
  LANGUAGE plpgsql
@@ -211,6 +178,7 @@ begin
 end;$function$
 ;
 
+-- Create Function calculate_inbox_base_amount
 CREATE OR REPLACE FUNCTION public.calculate_inbox_base_amount()
  RETURNS trigger
  LANGUAGE plpgsql
@@ -261,6 +229,7 @@ begin
 end;$function$
 ;
 
+-- Create Function calculate_transaction_base_amount
 CREATE OR REPLACE FUNCTION public.calculate_transaction_base_amount()
  RETURNS trigger
  LANGUAGE plpgsql
@@ -303,6 +272,7 @@ begin
 end;$function$
 ;
 
+-- Create Function detect_recurring_transactions
 CREATE OR REPLACE FUNCTION public.detect_recurring_transactions()
  RETURNS trigger
  LANGUAGE plpgsql
@@ -404,6 +374,7 @@ begin
 END;$function$
 ;
 
+-- Create Function update_enrich_transaction
 CREATE OR REPLACE FUNCTION public.update_enrich_transaction()
  RETURNS trigger
  LANGUAGE plpgsql
@@ -431,6 +402,7 @@ AS $function$begin
 end;$function$
 ;
 
+-- Create Function upsert_transaction_enrichment
 CREATE OR REPLACE FUNCTION public.upsert_transaction_enrichment()
  RETURNS trigger
  LANGUAGE plpgsql
@@ -466,48 +438,70 @@ begin
 end;$function$
 ;
 
+-- Grant permissions for "public"."apps"
 grant delete on table "public"."apps" to "anon";
 
+-- Grant insert on table "public"."apps" to "anon"
 grant insert on table "public"."apps" to "anon";
 
+-- Grant references on table "public"."apps" to "anon"
 grant references on table "public"."apps" to "anon";
 
+-- Grant select on table "public"."apps" to "anon"
 grant select on table "public"."apps" to "anon";
 
+-- Grant trigger on table "public"."apps" to "anon"
 grant trigger on table "public"."apps" to "anon";
 
+-- Grant truncate on table "public"."apps" to "anon"
 grant truncate on table "public"."apps" to "anon";
 
+-- Grant update on table "public"."apps" to "anon"
 grant update on table "public"."apps" to "anon";
 
+-- Grant delete on table "public"."apps" to "authenticated"
 grant delete on table "public"."apps" to "authenticated";
 
+-- Grant insert on table "public"."apps" to "authenticated"
 grant insert on table "public"."apps" to "authenticated";
 
+-- Grant references on table "public"."apps" to "authenticated"
 grant references on table "public"."apps" to "authenticated";
 
+-- Grant select on table "public"."apps" to "authenticated"
 grant select on table "public"."apps" to "authenticated";
 
+-- Grant trigger on table "public"."apps" to "authenticated"
 grant trigger on table "public"."apps" to "authenticated";
 
+-- Grant truncate on table "public"."apps" to "authenticated"
 grant truncate on table "public"."apps" to "authenticated";
 
+-- Grant update on table "public"."apps" to "authenticated"
 grant update on table "public"."apps" to "authenticated";
 
+-- Grant delete on table "public"."apps" to "service_role"
 grant delete on table "public"."apps" to "service_role";
 
+-- Grant insert on table "public"."apps" to "service_role"
 grant insert on table "public"."apps" to "service_role";
 
+-- Grant references on table "public"."apps" to "service_role"
 grant references on table "public"."apps" to "service_role";
 
+-- Grant select on table "public"."apps" to "service_role"
 grant select on table "public"."apps" to "service_role";
 
+-- Grant trigger on table "public"."apps" to "service_role"
 grant trigger on table "public"."apps" to "service_role";
 
+-- Grant truncate on table "public"."apps" to "service_role"
 grant truncate on table "public"."apps" to "service_role";
 
+-- Grant update on table "public"."apps" to "service_role"
 grant update on table "public"."apps" to "service_role";
 
+-- Create Policy "Apps can be deleted by a member of the team"
 create policy "Apps can be deleted by a member of the team"
 on "public"."apps"
 as permissive
@@ -515,7 +509,7 @@ for delete
 to public
 using ((team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user)));
 
-
+-- Create Policy "Apps can be inserted by a member of the team"
 create policy "Apps can be inserted by a member of the team"
 on "public"."apps"
 as permissive
@@ -524,6 +518,7 @@ to public
 with check ((team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user)));
 
 
+-- Create Policy "Apps can be selected by a member of the team"
 create policy "Apps can be selected by a member of the team"
 on "public"."apps"
 as permissive
@@ -532,6 +527,7 @@ to public
 using ((team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user)));
 
 
+-- Create Policy "Apps can be updated by a member of the team"
 create policy "Apps can be updated by a member of the team"
 on "public"."apps"
 as permissive
@@ -540,6 +536,7 @@ to public
 using ((team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user)));
 
 
+-- Create Policy "Entries can be updated by a member of the team"
 create policy "Entries can be updated by a member of the team"
 on "public"."tracker_entries"
 as permissive
@@ -547,13 +544,3 @@ for update
 to authenticated
 using ((team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user)))
 with check ((team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user)));
-
--- Travel Entries Update Policy:
-create policy "Entries can be updated by a member of the team"
-on "public"."travel_entries"
-as permissive
-for update
-to authenticated
-using ((team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user)))
-with check ((team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user)));
-

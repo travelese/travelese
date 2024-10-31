@@ -3,7 +3,7 @@
 import { logger } from "@/utils/logger";
 import { xai } from "@/utils/xai";
 import { getUser } from "@travelese/supabase/cached-queries";
-import { generateObject, streamObject } from "ai";
+import { generateObject } from "ai";
 import { createStreamableValue } from "ai/rsc";
 import { z } from "zod";
 

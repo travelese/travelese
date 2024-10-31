@@ -1,61 +1,91 @@
+-- Create Type connection_status
 create type "public"."connection_status" as enum ('disconnected', 'connected', 'unknown');
 
+-- Create Type inbox_type
 create type "public"."inbox_type" as enum ('invoice', 'expense');
 
+-- Create Type transaction_frequency
 create type "public"."transaction_frequency" as enum ('weekly', 'biweekly', 'monthly', 'semi_monthly', 'annually', 'irregular', 'unknown');
 
+-- Drop Trigger match_transaction
 drop trigger if exists "match_transaction" on "public"."transactions";
 
+-- Drop Trigger enrich_transaction
 drop trigger if exists "enrich_transaction" on "public"."transactions";
 
+-- Revoke delete on table "public"."total_amount" from "anon";
 revoke delete on table "public"."total_amount" from "anon";
 
+-- Revoke insert on table "public"."total_amount" from "anon";
 revoke insert on table "public"."total_amount" from "anon";
 
+-- Revoke references on table "public"."total_amount" from "anon";
 revoke references on table "public"."total_amount" from "anon";
 
+-- Revoke select on table "public"."total_amount" from "anon";
 revoke select on table "public"."total_amount" from "anon";
 
+-- Revoke trigger on table "public"."total_amount" from "anon";
 revoke trigger on table "public"."total_amount" from "anon";
 
+-- Revoke truncate on table "public"."total_amount" from "anon";
 revoke truncate on table "public"."total_amount" from "anon";
 
+-- Revoke update on table "public"."total_amount" from "anon";
 revoke update on table "public"."total_amount" from "anon";
 
+-- Revoke delete on table "public"."total_amount" from "authenticated";
 revoke delete on table "public"."total_amount" from "authenticated";
 
+-- Revoke insert on table "public"."total_amount" from "authenticated";
 revoke insert on table "public"."total_amount" from "authenticated";
 
+-- Revoke references on table "public"."total_amount" from "authenticated";
 revoke references on table "public"."total_amount" from "authenticated";
 
+-- Revoke select on table "public"."total_amount" from "authenticated";
 revoke select on table "public"."total_amount" from "authenticated";
 
+-- Revoke trigger on table "public"."total_amount" from "authenticated";
 revoke trigger on table "public"."total_amount" from "authenticated";
 
+-- Revoke truncate on table "public"."total_amount" from "authenticated";
 revoke truncate on table "public"."total_amount" from "authenticated";
 
+-- Revoke update on table "public"."total_amount" from "authenticated";
 revoke update on table "public"."total_amount" from "authenticated";
 
+-- Revoke delete on table "public"."total_amount" from "service_role";
 revoke delete on table "public"."total_amount" from "service_role";
 
+-- Revoke insert on table "public"."total_amount" from "service_role";
 revoke insert on table "public"."total_amount" from "service_role";
 
+-- Revoke references on table "public"."total_amount" from "service_role";
 revoke references on table "public"."total_amount" from "service_role";
 
+-- Revoke select on table "public"."total_amount" from "service_role";
 revoke select on table "public"."total_amount" from "service_role";
 
+-- Revoke trigger on table "public"."total_amount" from "service_role";
 revoke trigger on table "public"."total_amount" from "service_role";
 
+-- Revoke truncate on table "public"."total_amount" from "service_role";
 revoke truncate on table "public"."total_amount" from "service_role";
 
+-- Revoke update on table "public"."total_amount" from "service_role";
 revoke update on table "public"."total_amount" from "service_role";
 
+-- Drop Table total_amount
 drop table "public"."total_amount";
 
+-- Rename Type reportTypes
 alter type "public"."reportTypes" rename to "reportTypes__old_version_to_be_dropped";
 
+-- Create Type reportTypes
 create type "public"."reportTypes" as enum ('profit', 'revenue', 'burn_rate', 'expense');
 
+-- Create Table documents
 create table "public"."documents" (
     "id" uuid not null default gen_random_uuid(),
     "name" text,
@@ -72,9 +102,10 @@ create table "public"."documents" (
     "fts" tsvector generated always as (to_tsvector('english'::regconfig, ((title || ' '::text) || body))) stored
 );
 
-
+-- Enable row level security for documents
 alter table "public"."documents" enable row level security;
 
+-- Create Table exchange_rates
 create table "public"."exchange_rates" (
     "id" uuid not null default gen_random_uuid(),
     "base" text,
@@ -83,109 +114,160 @@ create table "public"."exchange_rates" (
     "updated_at" timestamp with time zone
 );
 
-
+-- Enable row level security for exchange_rates
 alter table "public"."exchange_rates" enable row level security;
 
+-- Alter column type reports
 alter table "public"."reports" alter column type type "public"."reportTypes" using type::text::"public"."reportTypes";
 
+-- Drop Type reportTypes__old_version_to_be_dropped
 drop type "public"."reportTypes__old_version_to_be_dropped";
 
+-- Drop column last_accessed from bank_accounts
 alter table "public"."bank_accounts" drop column "last_accessed";
 
+-- Add column base_balance to bank_accounts
 alter table "public"."bank_accounts" add column "base_balance" numeric;
 
+-- Add column base_currency to bank_accounts
 alter table "public"."bank_accounts" add column "base_currency" text;
 
+-- Add column error_details to bank_connections
 alter table "public"."bank_connections" add column "error_details" text;
 
+-- Add column last_accessed to bank_connections
 alter table "public"."bank_connections" add column "last_accessed" timestamp with time zone;
 
+-- Add column reference_id to bank_connections
 alter table "public"."bank_connections" add column "reference_id" text;
 
+-- Add column status to bank_connections
 alter table "public"."bank_connections" add column "status" connection_status default 'connected'::connection_status;
 
+-- Drop column due_date from inbox
 alter table "public"."inbox" drop column "due_date";
 
+-- Add column base_amount to inbox
 alter table "public"."inbox" add column "base_amount" numeric;
 
+-- Add column base_currency to inbox
 alter table "public"."inbox" add column "base_currency" text;
 
+-- Add column date to inbox
 alter table "public"."inbox" add column "date" date;
 
+-- Add column description to inbox
 alter table "public"."inbox" add column "description" text;
 
+-- Add column type to inbox
 alter table "public"."inbox" add column "type" inbox_type;
 
+-- Add column base_currency to teams
 alter table "public"."teams" add column "base_currency" text;
 
+-- Add column document_classification to teams
 alter table "public"."teams" add column "document_classification" boolean default false;
 
+-- Alter column type system in transaction_enrichments
 alter table "public"."transaction_enrichments" alter column "system" set default false;
 
+-- Drop column currency_rate from transactions
 alter table "public"."transactions" drop column "currency_rate";
 
+-- Drop column currency_source from transactions
 alter table "public"."transactions" drop column "currency_source";
 
+-- Add column base_amount to transactions
 alter table "public"."transactions" add column "base_amount" numeric;
 
+-- Add column base_currency to transactions
 alter table "public"."transactions" add column "base_currency" text;
 
+-- Add column frequency to transactions
 alter table "public"."transactions" add column "frequency" transaction_frequency;
 
+-- Add column fts_vector to transactions
 alter table "public"."transactions" add column "fts_vector" tsvector generated always as (to_tsvector('english'::regconfig, ((COALESCE(name, ''::text) || ' '::text) || COALESCE(description, ''::text)))) stored;
 
+-- Add column recurring to transactions
 alter table "public"."transactions" add column "recurring" boolean;
 
+-- Add column updated_at to transactions
 alter table "public"."transactions" add column "updated_at" timestamp with time zone;
 
+-- Add column timezone to users
 alter table "public"."users" add column "timezone" text;
 
+-- Create Unique Index currencies_pkey
 CREATE UNIQUE INDEX currencies_pkey ON public.exchange_rates USING btree (id);
 
+-- Create Unique Index documents_pkey
 CREATE UNIQUE INDEX documents_pkey ON public.documents USING btree (id);
 
+-- Create Index documents_team_id_idx
 CREATE INDEX documents_team_id_idx ON public.documents USING btree (team_id);
 
+-- Create Index documents_team_id_parent_id_idx
 CREATE INDEX documents_team_id_parent_id_idx ON public.documents USING btree (team_id, parent_id);
 
+-- Create Index exchange_rates_base_target_idx
 CREATE INDEX exchange_rates_base_target_idx ON public.exchange_rates USING btree (base, target);
 
+-- Create Index idx_transactions_date
 CREATE INDEX idx_transactions_date ON public.transactions USING btree (date);
 
+-- Create Index idx_transactions_fts
 CREATE INDEX idx_transactions_fts ON public.transactions USING gin (fts_vector);
 
+-- Create Index idx_transactions_fts_vector
 CREATE INDEX idx_transactions_fts_vector ON public.transactions USING gin (fts_vector);
 
+-- Create Index idx_transactions_id
 CREATE INDEX idx_transactions_id ON public.transactions USING btree (id);
 
+-- Create Index idx_transactions_name
 CREATE INDEX idx_transactions_name ON public.transactions USING btree (name);
 
+-- Create Index idx_transactions_name_trigram
 CREATE INDEX idx_transactions_name_trigram ON public.transactions USING gin (name gin_trgm_ops);
 
+-- Create Index idx_transactions_team_id_date_name
 CREATE INDEX idx_transactions_team_id_date_name ON public.transactions USING btree (team_id, date, name);
 
+-- Create Index idx_transactions_team_id_name
 CREATE INDEX idx_transactions_team_id_name ON public.transactions USING btree (team_id, name);
 
+-- Create Index idx_trgm_name
 CREATE INDEX idx_trgm_name ON public.transactions USING gist (name gist_trgm_ops);
 
+-- Create Unique Index unique_rate
 CREATE UNIQUE INDEX unique_rate ON public.exchange_rates USING btree (base, target);
 
+-- Add constraint documents_pkey
 alter table "public"."documents" add constraint "documents_pkey" PRIMARY KEY using index "documents_pkey";
 
+-- Add constraint currencies_pkey
 alter table "public"."exchange_rates" add constraint "currencies_pkey" PRIMARY KEY using index "currencies_pkey";
 
+-- Add constraint documents_created_by_fkey
 alter table "public"."documents" add constraint "documents_created_by_fkey" FOREIGN KEY (owner_id) REFERENCES users(id) ON DELETE SET NULL not valid;
 
+-- Add constraint documents_created_by_fkey
 alter table "public"."documents" validate constraint "documents_created_by_fkey";
 
+-- Add constraint storage_team_id_fkey
 alter table "public"."documents" add constraint "storage_team_id_fkey" FOREIGN KEY (team_id) REFERENCES teams(id) ON DELETE CASCADE not valid;
 
+-- Add constraint storage_team_id_fkey
 alter table "public"."documents" validate constraint "storage_team_id_fkey";
 
+-- Add constraint unique_rate
 alter table "public"."exchange_rates" add constraint "unique_rate" UNIQUE using index "unique_rate";
 
+-- Set check_function_bodies to off
 set check_function_bodies = off;
 
+-- Create Function calculate_amount_similarity
 CREATE OR REPLACE FUNCTION public.calculate_amount_similarity(transaction_currency text, inbox_currency text, transaction_amount numeric, inbox_amount numeric)
  RETURNS numeric
  LANGUAGE plpgsql
@@ -222,6 +304,7 @@ end;
 $function$
 ;
 
+-- Create Function calculate_bank_account_base_balance
 CREATE OR REPLACE FUNCTION public.calculate_bank_account_base_balance()
  RETURNS trigger
  LANGUAGE plpgsql
@@ -254,6 +337,7 @@ end;
 $function$
 ;
 
+-- Create Function calculate_base_amount_score
 CREATE OR REPLACE FUNCTION public.calculate_base_amount_score(transaction_base_currency text, inbox_base_currency text, transaction_base_amount numeric, inbox_base_amount numeric)
  RETURNS numeric
  LANGUAGE plpgsql
@@ -290,6 +374,7 @@ end;
 $function$
 ;
 
+-- Create Function calculate_date_proximity_score
 CREATE OR REPLACE FUNCTION public.calculate_date_proximity_score(t_date date, i_date date)
  RETURNS numeric
  LANGUAGE plpgsql
@@ -321,6 +406,7 @@ end;
 $function$
 ;
 
+-- Create Function calculate_date_similarity
 CREATE OR REPLACE FUNCTION public.calculate_date_similarity(transaction_date date, inbox_date date)
  RETURNS numeric
  LANGUAGE plpgsql
@@ -342,6 +428,7 @@ end;
 $function$
 ;
 
+-- Create Function calculate_inbox_base_amount
 CREATE OR REPLACE FUNCTION public.calculate_inbox_base_amount()
  RETURNS trigger
  LANGUAGE plpgsql
@@ -374,6 +461,7 @@ end;
 $function$
 ;
 
+-- Create Function calculate_match_score
 CREATE OR REPLACE FUNCTION public.calculate_match_score(t_record record, i_record record)
  RETURNS numeric
  LANGUAGE plpgsql
@@ -414,6 +502,7 @@ end;
 $function$
 ;
 
+-- Create Function calculate_name_similarity_score
 CREATE OR REPLACE FUNCTION public.calculate_name_similarity_score(transaction_name text, inbox_name text)
  RETURNS numeric
  LANGUAGE plpgsql
@@ -438,6 +527,7 @@ end;
 $function$
 ;
 
+-- Create Function calculate_overall_similarity
 CREATE OR REPLACE FUNCTION public.calculate_overall_similarity(transaction_record record, inbox_record record)
  RETURNS numeric
  LANGUAGE plpgsql
@@ -476,6 +566,7 @@ end;
 $function$
 ;
 
+-- Create Function calculate_total_sum
 CREATE OR REPLACE FUNCTION public.calculate_total_sum(target_currency text)
  RETURNS numeric
  LANGUAGE plpgsql
@@ -509,6 +600,7 @@ end;
 $function$
 ;
 
+-- Create Function calculate_transaction_base_amount
 CREATE OR REPLACE FUNCTION public.calculate_transaction_base_amount()
  RETURNS trigger
  LANGUAGE plpgsql
@@ -541,6 +633,7 @@ end;
 $function$
 ;
 
+-- Create Function calculate_transaction_differences_v2
 CREATE OR REPLACE FUNCTION public.calculate_transaction_differences_v2(p_team_id uuid)
  RETURNS TABLE(transaction_group text, date date, team_id uuid, recurring boolean, frequency transaction_frequency, days_diff double precision)
  LANGUAGE plpgsql
@@ -561,6 +654,7 @@ end;
 $function$
 ;
 
+-- Create Function calculate_transaction_frequency
 CREATE OR REPLACE FUNCTION public.calculate_transaction_frequency(p_transaction_group text, p_team_id uuid, p_new_date date)
  RETURNS TABLE(avg_days_between double precision, transaction_count integer, is_recurring boolean, latest_frequency text)
  LANGUAGE plpgsql
@@ -588,6 +682,7 @@ end;
 $function$
 ;
 
+-- Create Function classify_frequency_v2
 CREATE OR REPLACE FUNCTION public.classify_frequency_v2(p_team_id uuid)
  RETURNS TABLE(transaction_group text, team_id uuid, transaction_count bigint, avg_days_between double precision, stddev_days_between double precision, frequency transaction_frequency)
  LANGUAGE plpgsql
@@ -616,6 +711,7 @@ end;
 $function$
 ;
 
+-- Create Function delete_from_documents
 CREATE OR REPLACE FUNCTION public.delete_from_documents()
  RETURNS trigger
  LANGUAGE plpgsql
@@ -628,6 +724,7 @@ END;
 $function$
 ;
 
+-- Create Function detect_recurring_transactions
 CREATE OR REPLACE FUNCTION public.detect_recurring_transactions()
  RETURNS trigger
  LANGUAGE plpgsql
@@ -720,6 +817,7 @@ END;
 $function$
 ;
 
+-- Create Function determine_transaction_frequency
 CREATE OR REPLACE FUNCTION public.determine_transaction_frequency(p_avg_days_between double precision, p_transaction_count integer)
  RETURNS text
  LANGUAGE plpgsql
@@ -738,6 +836,7 @@ END;
 $function$
 ;
 
+-- Create Function determine_transaction_frequency
 CREATE OR REPLACE FUNCTION public.determine_transaction_frequency(p_avg_days_between double precision, p_transaction_count integer, p_is_recurring boolean, p_latest_frequency text)
  RETURNS text
  LANGUAGE plpgsql
@@ -760,6 +859,7 @@ end;
 $function$
 ;
 
+-- Create Function find_matching_inbox_item
 CREATE OR REPLACE FUNCTION public.find_matching_inbox_item(input_transaction_id uuid, specific_inbox_id uuid DEFAULT NULL::uuid)
  RETURNS TABLE(inbox_id uuid, transaction_id uuid, transaction_name text, similarity_score numeric, file_name text)
  LANGUAGE plpgsql
@@ -815,6 +915,7 @@ end;
 $function$
 ;
 
+-- Create Function get_all_transactions_by_account
 CREATE OR REPLACE FUNCTION public.get_all_transactions_by_account(account_id uuid)
  RETURNS SETOF transactions
  LANGUAGE sql
@@ -823,6 +924,7 @@ AS $function$
 $function$
 ;
 
+-- Create Function get_burn_rate_v2
 CREATE OR REPLACE FUNCTION public.get_burn_rate_v2(team_id uuid, date_from date, date_to date, base_currency text DEFAULT NULL::text)
  RETURNS TABLE(date timestamp with time zone, value numeric, currency text)
  LANGUAGE plpgsql
@@ -864,6 +966,7 @@ end;
 $function$
 ;
 
+-- Create Function get_burn_rate_v3
 CREATE OR REPLACE FUNCTION public.get_burn_rate_v3(team_id uuid, date_from date, date_to date, base_currency text DEFAULT NULL::text)
  RETURNS TABLE(date timestamp with time zone, value numeric, currency text)
  LANGUAGE plpgsql
@@ -918,6 +1021,7 @@ end;
 $function$
 ;
 
+-- Create Function get_current_burn_rate_v2
 CREATE OR REPLACE FUNCTION public.get_current_burn_rate_v2(team_id uuid, base_currency text DEFAULT NULL::text)
  RETURNS TABLE(currency text, value numeric)
  LANGUAGE plpgsql
@@ -954,6 +1058,7 @@ end;
 $function$
 ;
 
+-- Create Function get_current_burn_rate_v3
 CREATE OR REPLACE FUNCTION public.get_current_burn_rate_v3(team_id uuid, base_currency text DEFAULT NULL::text)
  RETURNS TABLE(currency text, value numeric)
  LANGUAGE plpgsql
@@ -1003,6 +1108,7 @@ end;
 $function$
 ;
 
+-- Create Function get_expenses
 CREATE OR REPLACE FUNCTION public.get_expenses(team_id uuid, date_from date, date_to date, base_currency text DEFAULT NULL::text)
  RETURNS TABLE(date timestamp without time zone, value numeric, recurring_value numeric, currency text)
  LANGUAGE plpgsql
@@ -1058,6 +1164,7 @@ END;
 $function$
 ;
 
+-- Create Function get_profit_v2
 CREATE OR REPLACE FUNCTION public.get_profit_v2(team_id uuid, date_from date, date_to date, base_currency text DEFAULT NULL::text)
  RETURNS TABLE(date timestamp with time zone, value numeric, currency text)
  LANGUAGE plpgsql
@@ -1097,6 +1204,7 @@ end;
 $function$
 ;
 
+-- Create Function get_profit_v3
 CREATE OR REPLACE FUNCTION public.get_profit_v3(team_id uuid, date_from date, date_to date, base_currency text DEFAULT NULL::text)
  RETURNS TABLE(date timestamp with time zone, value numeric, currency text)
  LANGUAGE plpgsql
@@ -1144,6 +1252,7 @@ end;
 $function$
 ;
 
+-- Create Function get_revenue_v2
 CREATE OR REPLACE FUNCTION public.get_revenue_v2(team_id uuid, date_from date, date_to date, base_currency text DEFAULT NULL::text)
  RETURNS TABLE(date timestamp with time zone, value numeric, currency text)
  LANGUAGE plpgsql
@@ -1183,6 +1292,7 @@ end;
 $function$
 ;
 
+-- Create Function get_revenue_v3
 CREATE OR REPLACE FUNCTION public.get_revenue_v3(team_id uuid, date_from date, date_to date, base_currency text DEFAULT NULL::text)
  RETURNS TABLE(date timestamp with time zone, value numeric, currency text)
  LANGUAGE plpgsql
@@ -1230,6 +1340,7 @@ end;
 $function$
 ;
 
+-- Create Function get_runway_v2
 CREATE OR REPLACE FUNCTION public.get_runway_v2(team_id uuid, date_from date, date_to date, base_currency text DEFAULT NULL::text)
  RETURNS numeric
  LANGUAGE plpgsql
@@ -1263,6 +1374,7 @@ end;
 $function$
 ;
 
+-- Create Function get_runway_v3
 CREATE OR REPLACE FUNCTION public.get_runway_v3(team_id uuid, date_from date, date_to date, base_currency text DEFAULT NULL::text)
  RETURNS numeric
  LANGUAGE plpgsql
@@ -1296,6 +1408,7 @@ end;
 $function$
 ;
 
+-- Create Function get_spending_v2
 CREATE OR REPLACE FUNCTION public.get_spending_v2(team_id uuid, date_from date, date_to date, base_currency text DEFAULT NULL::text)
  RETURNS TABLE(name text, slug text, amount numeric, currency text, color text, percentage numeric)
  LANGUAGE plpgsql
@@ -1356,6 +1469,7 @@ end;
 $function$
 ;
 
+-- Create Function get_spending_v3
 CREATE OR REPLACE FUNCTION public.get_spending_v3(team_id uuid, date_from date, date_to date, base_currency text DEFAULT NULL::text)
  RETURNS TABLE(name text, slug text, amount numeric, currency text, color text, percentage numeric)
  LANGUAGE plpgsql
@@ -1434,6 +1548,7 @@ end;
 $function$
 ;
 
+-- Create Function get_total_balance_v2
 CREATE OR REPLACE FUNCTION public.get_total_balance_v2(team_id uuid, currency text)
  RETURNS numeric
  LANGUAGE plpgsql
@@ -1452,6 +1567,7 @@ end;
 $function$
 ;
 
+-- Create Function get_total_balance_v3
 CREATE OR REPLACE FUNCTION public.get_total_balance_v3(team_id uuid, currency text)
  RETURNS numeric
  LANGUAGE plpgsql
@@ -1470,6 +1586,7 @@ end;
 $function$
 ;
 
+-- Create Function group_transactions_v2
 CREATE OR REPLACE FUNCTION public.group_transactions_v2(p_team_id uuid)
  RETURNS TABLE(transaction_group text, date date, team_id uuid, recurring boolean, frequency transaction_frequency)
  LANGUAGE plpgsql
@@ -1490,6 +1607,7 @@ end;
 $function$
 ;
 
+-- Create Function handle_empty_folder_placeholder
 CREATE OR REPLACE FUNCTION public.handle_empty_folder_placeholder()
  RETURNS trigger
  LANGUAGE plpgsql
@@ -1540,6 +1658,7 @@ END;
 $function$
 ;
 
+-- Create Function identify_similar_transactions_v2
 CREATE OR REPLACE FUNCTION public.identify_similar_transactions_v2(p_team_id uuid)
  RETURNS TABLE(original_transaction_name text, similar_transaction_name text, team_id uuid)
  LANGUAGE plpgsql
@@ -1560,6 +1679,7 @@ end;
 $function$
 ;
 
+-- Create Function identify_transaction_group
 CREATE OR REPLACE FUNCTION public.identify_transaction_group(p_name text, p_team_id uuid)
  RETURNS text
  LANGUAGE plpgsql
@@ -1587,6 +1707,7 @@ end;
 $function$
 ;
 
+-- Create Function insert_into_documents
 CREATE OR REPLACE FUNCTION public.insert_into_documents()
  RETURNS trigger
  LANGUAGE plpgsql
@@ -1672,6 +1793,7 @@ BEGIN
 END;$function$
 ;
 
+-- Create Function match_transaction_with_inbox
 CREATE OR REPLACE FUNCTION public.match_transaction_with_inbox(p_transaction_id uuid, p_inbox_id uuid DEFAULT NULL::uuid)
  RETURNS TABLE(inbox_id uuid, transaction_id uuid, transaction_name text, score numeric, file_name text)
  LANGUAGE plpgsql
@@ -1729,6 +1851,7 @@ end;
 $function$
 ;
 
+-- Create Function set_updated_at
 CREATE OR REPLACE FUNCTION public.set_updated_at()
  RETURNS trigger
  LANGUAGE plpgsql
@@ -1740,6 +1863,7 @@ end;
 $function$
 ;
 
+-- Create Function update_transaction_frequency
 CREATE OR REPLACE FUNCTION public.update_transaction_frequency()
  RETURNS trigger
  LANGUAGE plpgsql
@@ -1794,6 +1918,7 @@ end;
 $function$
 ;
 
+-- Create Function update_transaction_frequency_v2
 CREATE OR REPLACE FUNCTION public.update_transaction_frequency_v2()
  RETURNS trigger
  LANGUAGE plpgsql
@@ -1826,6 +1951,7 @@ end;
 $function$
 ;
 
+-- Create Function update_transaction_frequency_v3
 CREATE OR REPLACE FUNCTION public.update_transaction_frequency_v3()
  RETURNS trigger
  LANGUAGE plpgsql
@@ -1888,6 +2014,7 @@ end;
 $function$
 ;
 
+-- Create Function handle_new_user
 CREATE OR REPLACE FUNCTION public.handle_new_user()
  RETURNS trigger
  LANGUAGE plpgsql
@@ -1911,6 +2038,7 @@ AS $function$begin
 end;$function$
 ;
 
+-- Create Function update_enrich_transaction
 CREATE OR REPLACE FUNCTION public.update_enrich_transaction()
  RETURNS trigger
  LANGUAGE plpgsql
@@ -1932,6 +2060,7 @@ AS $function$begin
 end;$function$
 ;
 
+-- Create Function upsert_transaction_enrichment
 CREATE OR REPLACE FUNCTION public.upsert_transaction_enrichment()
  RETURNS trigger
  LANGUAGE plpgsql
@@ -1959,90 +2088,121 @@ begin
 end;$function$
 ;
 
+-- Grant permissions for documents table
 grant delete on table "public"."documents" to "anon";
 
+-- Grant insert on table "public"."documents" to "anon";
 grant insert on table "public"."documents" to "anon";
 
+-- Grant references on table "public"."documents" to "anon";
 grant references on table "public"."documents" to "anon";
 
+-- Grant select on table "public"."documents" to "anon";
 grant select on table "public"."documents" to "anon";
 
+-- Grant trigger on table "public"."documents" to "anon";
 grant trigger on table "public"."documents" to "anon";
 
+-- Grant truncate on table "public"."documents" to "anon";
 grant truncate on table "public"."documents" to "anon";
 
+-- Grant update on table "public"."documents" to "anon";
 grant update on table "public"."documents" to "anon";
 
-grant delete on table "public"."documents" to "authenticated";
-
+-- Grant delete on table "public"."documents" to "authenticated";
 grant insert on table "public"."documents" to "authenticated";
 
+-- Grant references on table "public"."documents" to "authenticated";
 grant references on table "public"."documents" to "authenticated";
 
+-- Grant select on table "public"."documents" to "authenticated";
 grant select on table "public"."documents" to "authenticated";
 
+-- Grant trigger on table "public"."documents" to "authenticated";
 grant trigger on table "public"."documents" to "authenticated";
 
+-- Grant truncate on table "public"."documents" to "authenticated";
 grant truncate on table "public"."documents" to "authenticated";
 
+-- Grant update on table "public"."documents" to "authenticated";
 grant update on table "public"."documents" to "authenticated";
 
-grant delete on table "public"."documents" to "service_role";
-
+-- Grant delete on table "public"."documents" to "service_role";
 grant insert on table "public"."documents" to "service_role";
 
+-- Grant references on table "public"."documents" to "service_role";
 grant references on table "public"."documents" to "service_role";
 
+-- Grant select on table "public"."documents" to "service_role";
 grant select on table "public"."documents" to "service_role";
 
-grant trigger on table "public"."documents" to "service_role";
-
+-- Grant trigger on table "public"."documents" to "service_role";
 grant truncate on table "public"."documents" to "service_role";
 
+-- Grant update on table "public"."documents" to "service_role";
 grant update on table "public"."documents" to "service_role";
 
+-- Grant delete on table "public"."exchange_rates" to "anon";
 grant delete on table "public"."exchange_rates" to "anon";
 
+-- Grant insert on table "public"."exchange_rates" to "anon";
 grant insert on table "public"."exchange_rates" to "anon";
 
+-- Grant references on table "public"."exchange_rates" to "anon";
 grant references on table "public"."exchange_rates" to "anon";
 
+-- Grant select on table "public"."exchange_rates" to "anon";
 grant select on table "public"."exchange_rates" to "anon";
 
+-- Grant trigger on table "public"."exchange_rates" to "anon";
 grant trigger on table "public"."exchange_rates" to "anon";
 
+-- Grant truncate on table "public"."exchange_rates" to "anon";
 grant truncate on table "public"."exchange_rates" to "anon";
 
+-- Grant update on table "public"."exchange_rates" to "anon";
 grant update on table "public"."exchange_rates" to "anon";
 
+-- Grant delete on table "public"."exchange_rates" to "authenticated";
 grant delete on table "public"."exchange_rates" to "authenticated";
 
+-- Grant insert on table "public"."exchange_rates" to "authenticated";
 grant insert on table "public"."exchange_rates" to "authenticated";
 
+-- Grant references on table "public"."exchange_rates" to "authenticated";
 grant references on table "public"."exchange_rates" to "authenticated";
 
+-- Grant select on table "public"."exchange_rates" to "authenticated";
 grant select on table "public"."exchange_rates" to "authenticated";
 
+-- Grant trigger on table "public"."exchange_rates" to "authenticated";
 grant trigger on table "public"."exchange_rates" to "authenticated";
 
+-- Grant truncate on table "public"."exchange_rates" to "authenticated";
 grant truncate on table "public"."exchange_rates" to "authenticated";
 
+-- Grant update on table "public"."exchange_rates" to "authenticated";
 grant update on table "public"."exchange_rates" to "authenticated";
 
-grant delete on table "public"."exchange_rates" to "service_role";
-
+-- Grant delete on table "public"."exchange_rates" to "service_role";
 grant insert on table "public"."exchange_rates" to "service_role";
 
+-- Grant references on table "public"."exchange_rates" to "service_role";
 grant references on table "public"."exchange_rates" to "service_role";
 
+-- Grant select on table "public"."exchange_rates" to "service_role";
 grant select on table "public"."exchange_rates" to "service_role";
 
+-- Grant trigger on table "public"."exchange_rates" to "service_role";
 grant trigger on table "public"."exchange_rates" to "service_role";
 
+-- Grant truncate on table "public"."exchange_rates" to "service_role";
 grant truncate on table "public"."exchange_rates" to "service_role";
 
+-- Grant update on table "public"."exchange_rates" to "service_role";
 grant update on table "public"."exchange_rates" to "service_role";
 
+-- Create Policy "Documents can be deleted by a member of the team"
 create policy "Documents can be deleted by a member of the team"
 on "public"."documents"
 as permissive
@@ -2051,6 +2211,7 @@ to public
 using ((team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user)));
 
 
+-- Create Policy "Documents can be selected by a member of the team"
 create policy "Documents can be selected by a member of the team"
 on "public"."documents"
 as permissive
@@ -2059,6 +2220,7 @@ to public
 using ((team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user)));
 
 
+-- Create Policy "Documents can be updated by a member of the team"
 create policy "Documents can be updated by a member of the team"
 on "public"."documents"
 as permissive
@@ -2067,6 +2229,7 @@ to public
 using ((team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user)));
 
 
+-- Create Policy "Enable insert for authenticated users only"
 create policy "Enable insert for authenticated users only"
 on "public"."documents"
 as permissive
@@ -2075,7 +2238,8 @@ to authenticated
 with check (true);
 
 
-create policy "Enable read access for authenticated users"
+-- Create Policy "Enable read access for all users"
+create policy "Enable read access for all users"
 on "public"."exchange_rates"
 as permissive
 for select
@@ -2083,19 +2247,26 @@ to public
 using (true);
 
 
+-- Create Trigger trigger_calculate_bank_account_base_balance_before_insert
 CREATE TRIGGER trigger_calculate_bank_account_base_balance_before_insert BEFORE INSERT ON public.bank_accounts FOR EACH ROW EXECUTE FUNCTION calculate_bank_account_base_balance();
 
+-- Create Trigger trigger_calculate_bank_account_base_balance_before_update
 CREATE TRIGGER trigger_calculate_bank_account_base_balance_before_update BEFORE UPDATE OF balance ON public.bank_accounts FOR EACH ROW WHEN ((old.balance IS DISTINCT FROM new.balance)) EXECUTE FUNCTION calculate_bank_account_base_balance();
 
+-- Create Trigger embed_document
 CREATE TRIGGER embed_document AFTER INSERT ON public.documents FOR EACH ROW EXECUTE FUNCTION supabase_functions.http_request('https://pytddvqiozwrhfbwqazp.supabase.co/functions/v1/generate-document-embedding', 'POST', '{"Content-type":"application/json"}', '{}', '5000');
 
+-- Create Trigger trigger_calculate_inbox_base_amount_before_update
 CREATE TRIGGER trigger_calculate_inbox_base_amount_before_update BEFORE UPDATE ON public.inbox FOR EACH ROW WHEN ((old.amount IS DISTINCT FROM new.amount)) EXECUTE FUNCTION calculate_inbox_base_amount();
 
+-- Create Trigger check_recurring_transactions
 CREATE TRIGGER check_recurring_transactions AFTER INSERT ON public.transactions FOR EACH ROW EXECUTE FUNCTION detect_recurring_transactions();
 
+-- Create Trigger on_update_set_set_updated_at
 CREATE TRIGGER on_update_set_set_updated_at BEFORE UPDATE ON public.transactions FOR EACH ROW EXECUTE FUNCTION set_updated_at();
 
+-- Create Trigger trigger_calculate_transaction_base_amount_before_insert
 CREATE TRIGGER trigger_calculate_transaction_base_amount_before_insert BEFORE INSERT ON public.transactions FOR EACH ROW EXECUTE FUNCTION calculate_transaction_base_amount();
 
+-- Create Trigger enrich_transaction
 CREATE TRIGGER enrich_transaction BEFORE INSERT ON public.transactions FOR EACH ROW EXECUTE FUNCTION update_enrich_transaction();
-

@@ -7,12 +7,7 @@ import { Icons } from "@travelese/ui/icons";
 import { Popover, PopoverContent, PopoverTrigger } from "@travelese/ui/popover";
 import { useOptimisticAction } from "next-safe-action/hooks";
 
-const travelTypes = [
-  "return",
-  "one_way",
-  "multi_city",
-  "digital_nomad",
-] as const;
+const travelTypes = ["return", "one_way", "multi_city"] as const;
 type TravelType = (typeof travelTypes)[number];
 
 type Props = {

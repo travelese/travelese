@@ -19,7 +19,7 @@ export async function GlobalSheets({ defaultCurrency }: Props) {
 
   return (
     <>
-      {/* <TrackerUpdateSheet teamId={userData?.team_id} userId={userData?.id} />
+      <TrackerUpdateSheet teamId={userData?.team_id} userId={userData?.id} />
       <TrackerCreateSheet
         currencyCode={defaultCurrency}
         teamId={userData?.team_id}
@@ -29,7 +29,7 @@ export async function GlobalSheets({ defaultCurrency }: Props) {
         userId={userData?.id}
         timeFormat={userData?.time_format}
         lastProjectId={projectId}
-      />  */}
+      />
       <TravelUpdateSheet teamId={userData?.team_id} userId={userData?.id} />
       <TravelCreateSheet
         currencyCode={defaultCurrency}

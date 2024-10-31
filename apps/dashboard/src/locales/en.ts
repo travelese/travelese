@@ -72,6 +72,10 @@ export default {
     in_progress: "In progress",
     completed: "Completed",
   },
+  travel_status: {
+    in_progress: "In progress",
+    completed: "Completed",
+  },
   notifications: {
     inbox: "Receive notifications about new items in your inbox.",
     match: "Receive notifications about matches.",
@@ -106,7 +110,6 @@ export default {
     return: "Return",
     one_way: "One way",
     multi_city: "Multi city",
-    digital_nomad: "Digital Nomad",
   },
   cabin_class: {
     economy: "Economy",
