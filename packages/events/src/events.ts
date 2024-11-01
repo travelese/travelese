@@ -191,188 +191,32 @@ export const LogEvents = {
     name: "Update Currency",
     channel: "transaction",
   },
-  CreateOfferRequest: {
-    name: "Create Offer Request",
+  SearchTravel: {
+    name: "Search Travel",
+    channel: "travel",
+  },
+  ChangeTravel: {
+    name: "Change Travel",
+    channel: "travel",
+  },
+  BookTravel: {
+    name: "Book Travel",
     channel: "travel",
   },
   CreatePartialOfferRequest: {
     name: "Create Partial Offer Request",
     channel: "travel",
   },
-  GetPartialOfferRequest: {
-    name: "Get Partial Offer Request",
-    channel: "travel",
-  },
-  GetFullOfferFares: {
-    name: "Get Full Offer Fares",
-    channel: "travel",
-  },
   ListOffers: {
     name: "List Offers",
     channel: "travel",
   },
-  GetOffer: {
-    name: "Get Offer",
-    channel: "travel",
-  },
-  GetOfferRequest: {
-    name: "Get Offer Request",
-    channel: "travel",
-  },
-  UpdateOfferPassenger: {
-    name: "Update Offer Passenger",
-    channel: "travel",
-  },
-  CreateOrder: {
-    name: "Create Order",
-    channel: "travel",
-  },
-  ListOrderServices: {
-    name: "List Order Services",
-    channel: "travel",
-  },
-  AddOrderService: {
-    name: "Add Order Service",
-    channel: "travel",
-  },
-  GetOrder: {
-    name: "Get Order",
-    channel: "travel",
-  },
-  UpdateOrder: {
-    name: "Update Order",
-    channel: "travel",
-  },
-  ListOrders: {
-    name: "List Orders",
-    channel: "travel",
-  },
-  CreatePayment: {
-    name: "Create Payment",
-    channel: "travel",
-  },
-  GetSeatMaps: {
-    name: "Get Seat Maps",
-    channel: "travel",
-  },
-  ListOrderCancellations: {
-    name: "List Order Cancellations",
-    channel: "travel",
-  },
-  GetOrderCancellation: {
-    name: "Get Order Cancellation",
-    channel: "travel",
-  },
-  CreateOrderCancellation: {
-    name: "Create Order Cancellation",
-    channel: "travel",
-  },
-  ConfirmOrderCancellation: {
-    name: "Confirm Order Cancellation",
-    channel: "travel",
-  },
-  CreateOrderChangeRequest: {
-    name: "Create Order Change Request",
-    channel: "travel",
-  },
-  GetOrderChangeRequest: {
-    name: "Get Order Change Request",
-    channel: "travel",
-  },
-  ListOrderChangeOffers: {
-    name: "List Order Change Offers",
-    channel: "travel",
-  },
-  CreateBatchOfferRequest: {
-    name: "Create Batch Offer Request",
-    channel: "travel",
-  },
-  GetBatchOfferRequest: {
-    name: "Get Batch Offer Request",
-    channel: "travel",
-  },
-  ListAirlineInitiatedChanges: {
-    name: "List Airline Initiated Changes",
-    channel: "travel",
-  },
-  AcceptAirlineInitiatedChange: {
-    name: "Accept Airline Initiated Change",
-    channel: "travel",
-  },
-  UpdateAirlineInitiatedChange: {
-    name: "Update Airline Initiated Change",
-    channel: "travel",
-  },
-  SearchAccommodationSuggestions: {
-    name: "Search Accommodation Suggestions",
+  SearchAccommodation: {
+    name: "Search Accommodation",
     channel: "travel",
   },
   FetchAllRates: {
     name: "Fetch All Rates",
-    channel: "travel",
-  },
-  CreateQuoteForRate: {
-    name: "Create Quote For Rate",
-    channel: "travel",
-  },
-  CreateBooking: {
-    name: "Create Booking",
-    channel: "travel",
-  },
-  GetBooking: {
-    name: "Get Booking",
-    channel: "travel",
-  },
-  CancelBooking: {
-    name: "Cancel Booking",
-    channel: "travel",
-  },
-  GetAccommodation: {
-    name: "Get Accommodation",
-    channel: "travel",
-  },
-  ListLoyaltyProgrammes: {
-    name: "List Loyalty Programmes",
-    channel: "travel",
-  },
-  GetBrand: {
-    name: "Get Brand",
-    channel: "travel",
-  },
-  ListBrands: {
-    name: "List Brands",
-    channel: "travel",
-  },
-  GetAirline: {
-    name: "Get Airline",
-    channel: "travel",
-  },
-  ListAirlines: {
-    name: "List Airlines",
-    channel: "travel",
-  },
-  GetAircraft: {
-    name: "Get Aircraft",
-    channel: "travel",
-  },
-  ListAircraft: {
-    name: "List Aircraft",
-    channel: "travel",
-  },
-  ListAirports: {
-    name: "List Airports",
-    channel: "travel",
-  },
-  GetAirport: {
-    name: "Get Airport",
-    channel: "travel",
-  },
-  ListCities: {
-    name: "List Cities",
-    channel: "travel",
-  },
-  GetCity: {
-    name: "Get City",
     channel: "travel",
   },
   ListPlaceSuggestions: {
@@ -381,10 +225,6 @@ export const LogEvents = {
   },
   GetLoyaltyProgramme: {
     name: "Get Loyalty Programme",
-    channel: "travel",
-  },
-  SearchAccommodation: {
-    name: "Search Accommodation",
     channel: "travel",
   },
 };

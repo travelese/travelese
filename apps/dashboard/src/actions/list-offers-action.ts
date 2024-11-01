@@ -35,8 +35,7 @@ export const listOffersAction = authActionClient
         );
 
         return {
-          ...response.data,
-          listOffersId,
+          key: `list-offers:${listOffersId}`,
         };
       } catch (error) {
         if (error instanceof DuffelError) {

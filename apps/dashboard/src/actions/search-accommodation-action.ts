@@ -5,10 +5,10 @@ import { DuffelError } from "@duffel/api";
 import { LogEvents } from "@travelese/events/events";
 import { duffel } from "../utils/duffel";
 import { authActionClient } from "./safe-action";
-import { searchAccommodationSchema } from "./schema";
+import { searchAccommodationRequestSchema } from "./schema";
 
 export const searchAccommodationAction = authActionClient
-  .schema(searchAccommodationSchema)
+  .schema(searchAccommodationRequestSchema)
   .metadata({
     name: "search-accommodation",
     track: {
@@ -24,7 +24,10 @@ export const searchAccommodationAction = authActionClient
         const response = await duffel.stays.search({
           check_in_date,
           check_out_date,
-          guests,
+          guests: guests.map((guest) => ({
+            type: guest.type as "adult" | "child" | "infant",
+            age: guest.age,
+          })),
           location,
           rooms,
         });

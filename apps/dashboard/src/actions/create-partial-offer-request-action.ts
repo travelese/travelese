@@ -5,7 +5,6 @@ import { createPartialOfferRequestSchema } from "@/actions/schema";
 import { duffel } from "@/utils/duffel";
 import { logger } from "@/utils/logger";
 import { DuffelError } from "@duffel/api";
-import type { OfferRequest } from "@duffel/api/types";
 import { LogEvents } from "@travelese/events/events";
 
 export const createPartialOfferRequestAction = authActionClient
@@ -20,16 +19,16 @@ export const createPartialOfferRequestAction = authActionClient
   .action(
     async ({
       parsedInput: {
+        supplier_timeout,
         slices,
         passengers,
-        supplier_timeout,
         private_fares,
-        return_offers,
-        sort,
+        cabin_class,
+        max_connections,
       },
     }) => {
       try {
-        const offerRequest = {
+        const response = await duffel.offerRequests.create({
           supplier_timeout,
           slices: slices.map((slice) => ({
             origin: slice.origin,
@@ -40,12 +39,6 @@ export const createPartialOfferRequestAction = authActionClient
             }),
             ...(slice.arrival_time && {
               arrival_time: slice.arrival_time,
-            }),
-            ...(slice.cabin_class && {
-              cabin_class: slice.cabin_class,
-            }),
-            ...(slice.max_connections !== undefined && {
-              max_connections: slice.max_connections,
             }),
           })),
           passengers: passengers.map((passenger) => ({
@@ -59,23 +52,19 @@ export const createPartialOfferRequestAction = authActionClient
             ...(passenger.loyalty_programme_accounts && {
               loyalty_programme_accounts: passenger.loyalty_programme_accounts,
             }),
+            ...(passenger.age && {
+              age: passenger.age,
+            }),
             ...(passenger.fare_type && {
               fare_type: passenger.fare_type,
             }),
           })),
-          ...(private_fares && {
-            private_fares,
-          }),
-          ...(return_offers !== undefined && {
-            return_offers,
-          }),
-          ...(sort && {
-            sort,
-          }),
-        };
+          ...(private_fares && { private_fares }),
+          ...(cabin_class && { cabin_class }),
+          ...(max_connections && { max_connections }),
+        });
 
-        const response = await duffel.offerRequests.create(offerRequest);
-        return response.data as OfferRequest;
+        return response.data;
       } catch (error) {
         if (error instanceof DuffelError) {
           logger("Duffel API Error", {

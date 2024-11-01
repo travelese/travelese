@@ -4,9 +4,9 @@ import { cookies } from "next/headers";
 import { TrackerCreateSheet } from "./tracker-create-sheet";
 import { TrackerScheduleSheet } from "./tracker-schedule-sheet";
 import { TrackerUpdateSheet } from "./tracker-update-sheet";
-import { TravelCreateSheet } from "./travel-create-sheet";
-import { TravelScheduleSheet } from "./travel-schedule-sheet";
-import { TravelUpdateSheet } from "./travel-update-sheet";
+import { BookTravelSheet } from "./travel-book-sheet";
+import { ChangeTravelSheet } from "./travel-change-sheet";
+import { SearchTravelSheet } from "./travel-search-sheet";
 
 type Props = {
   defaultCurrency: string;
@@ -19,7 +19,7 @@ export async function GlobalSheets({ defaultCurrency }: Props) {
 
   return (
     <>
-      {/* <TrackerUpdateSheet teamId={userData?.team_id} userId={userData?.id} />
+      <TrackerUpdateSheet teamId={userData?.team_id} userId={userData?.id} />
       <TrackerCreateSheet
         currencyCode={defaultCurrency}
         teamId={userData?.team_id}
@@ -29,18 +29,10 @@ export async function GlobalSheets({ defaultCurrency }: Props) {
         userId={userData?.id}
         timeFormat={userData?.time_format}
         lastProjectId={projectId}
-      />  */}
-      <TravelUpdateSheet teamId={userData?.team_id} userId={userData?.id} />
-      <TravelCreateSheet
-        currencyCode={defaultCurrency}
-        teamId={userData?.team_id}
       />
-      <TravelScheduleSheet
-        teamId={userData?.team_id}
-        userId={userData?.id}
-        timeFormat={userData?.time_format}
-        lastBookingId={bookingId}
-      />
+      <SearchTravelSheet userId={userData?.id} currency={defaultCurrency} />
+      <BookTravelSheet userId={userData?.id} currency={defaultCurrency} />
+      <ChangeTravelSheet userId={userData?.id} currency={defaultCurrency} />
     </>
   );
 }

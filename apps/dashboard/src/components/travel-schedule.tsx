@@ -39,7 +39,7 @@ import {
 import { useAction } from "next-safe-action/hooks";
 import React, { useEffect, useRef, useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
-import { TravelBookingForm } from "./forms/travel-booking-form";
+import { TravelBookingForm } from "./forms/travel-book-form";
 import { TravelDaySelect } from "./travel-day-select";
 
 interface TravelBooking {

@@ -3,7 +3,7 @@
 import { deleteBookingAction } from "@/actions/booking/delete-booking-action";
 import { updateBookingAction } from "@/actions/booking/update-booking-action";
 import { updateBookingSchema } from "@/actions/schema";
-import { TravelBookingForm } from "@/components/forms/travel-booking-form";
+import { TravelBookingForm } from "@/components/forms/travel-book-form";
 import { useTravelParams } from "@/hooks/use-travel-params";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { createClient } from "@travelese/supabase/client";

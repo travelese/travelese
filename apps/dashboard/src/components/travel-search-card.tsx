@@ -16,28 +16,25 @@ interface Props {
 export function TravelSearchCard({ userId, currency }: Props) {
   const { toast } = useToast();
 
-  const [queryParams, setQueryParams] = useQueryStates(
-    {
-      travel_type: parseAsString.withDefault("return"),
-      cabin_class: parseAsString.withDefault("economy"),
-      passengers: parseAsJson<Array<{ type: string }>>().withDefault([
-        { type: "adult" },
-      ]),
-      slices: parseAsJson<
-        Array<{ origin: string; destination: string; departure_date: string }>
-      >().withDefault([
-        { origin: "", destination: "", departure_date: "" },
-        { origin: "", destination: "", departure_date: "" },
-      ]),
-      bags: parseAsJson<{
-        carry_on: number;
-        cabin: number;
-        checked: number;
-      }>().withDefault({ carry_on: 0, cabin: 0, checked: 0 }),
-      listOffersId: parseAsString.withDefault(""),
-    },
-    { history: "push" },
-  );
+  const [queryParams, setQueryParams] = useQueryStates({
+    travel_type: parseAsString.withDefault("return"),
+    cabin_class: parseAsString.withDefault("economy"),
+    passengers: parseAsJson<Array<{ type: string }>>().withDefault([
+      { type: "adult" },
+    ]),
+    slices: parseAsJson<
+      Array<{ origin: string; destination: string; departure_date: string }>
+    >().withDefault([
+      { origin: "", destination: "", departure_date: "" },
+      { origin: "", destination: "", departure_date: "" },
+    ]),
+    bags: parseAsJson<{
+      carry_on: number;
+      cabin: number;
+      checked: number;
+    }>().withDefault({ carry_on: 0, cabin: 0, checked: 0 }),
+    listOffersId: parseAsString.withDefault(""),
+  });
 
   const listOffers = useAction(listOffersAction, {
     onSuccess: ({ data: { offers, listOffersId } }) => {
@@ -59,7 +56,7 @@ export function TravelSearchCard({ userId, currency }: Props) {
         variant: "success",
       });
 
-      listOffers.execute({ offer_request_id: offerRequest.id });
+      listOffers.execute({ offer_request_id: offerRequest?.id });
     },
   });
 
