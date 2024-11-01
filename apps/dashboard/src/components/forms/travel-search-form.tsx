@@ -1,6 +1,6 @@
 "use client";
 
-import { createPartialOfferRequestSchema } from "@/actions/schema";
+import type { searchTravelSchema } from "@/actions/schema";
 import { TravelBaggage } from "@/components/travel/travel-baggage";
 import { TravelCabin } from "@/components/travel/travel-cabin";
 import { TravelLocation } from "@/components/travel/travel-location";
@@ -18,36 +18,26 @@ import {
 } from "@travelese/ui/form";
 import { Icons } from "@travelese/ui/icons";
 import { SubmitButton } from "@travelese/ui/submit-button";
-import { useForm } from "react-hook-form";
+import { type UseFormReturn, useForm } from "react-hook-form";
+import type { z } from "zod";
 
 interface Props {
-  defaultValues: {
-    slices: Array<{
-      origin: string;
-      destination: string;
-      departure_date: string;
-    }>;
-    passengers: Array<{ type: string }>;
-    cabin_class: string;
-    travel_type: string;
-    bags: { carry_on: number; cabin: number; checked: number };
-  };
-  onSubmit: (data: any) => void;
+  form: UseFormReturn<z.infer<typeof searchTravelSchema>>;
+  onSubmit: (data: z.infer<typeof searchTravelSchema>) => void;
   isSubmitting: boolean;
-  onQueryParamsChange: (updates: any) => void;
+  onQueryParamsChange: (
+    updates: Partial<z.infer<typeof searchTravelSchema>>,
+  ) => void;
 }
 
-export function TravelSearchForm({
-  defaultValues,
+type TravelSearchFormValues = z.infer<typeof searchTravelSchema>;
+
+export function SearchTravelForm({
+  form,
   onSubmit,
   isSubmitting,
   onQueryParamsChange,
 }: Props) {
-  const form = useForm({
-    resolver: zodResolver(createPartialOfferRequestSchema),
-    defaultValues,
-  });
-
   const addFlightSegment = () => {
     const currentSlices = form.getValues("slices");
     if (currentSlices.length < 3) {
@@ -85,7 +75,11 @@ export function TravelSearchForm({
                       onQueryParamsChange({ travel_type: value });
 
                       const currentSlices = form.getValues("slices");
-                      let newSlices;
+                      let newSlices: Array<{
+                        origin: string;
+                        destination: string;
+                        departure_date: string;
+                      }> = [];
 
                       if (value === "return") {
                         newSlices = [
@@ -140,7 +134,13 @@ export function TravelSearchForm({
               <FormItem>
                 <FormControl>
                   <TravelCabin
-                    value={field.value}
+                    value={
+                      field.value as
+                        | "economy"
+                        | "premium_economy"
+                        | "business"
+                        | "first_class"
+                    }
                     onChange={(value) => {
                       field.onChange(value);
                       onQueryParamsChange({ cabin_class: value });
@@ -160,7 +160,13 @@ export function TravelSearchForm({
               <FormItem>
                 <FormControl>
                   <TravelTraveller
-                    value={field.value}
+                    value={
+                      field.value as Array<{
+                        type: "adult" | "child" | "infant_without_seat";
+                        given_name: string;
+                        family_name: string;
+                      }>
+                    }
                     onChange={(value) => {
                       field.onChange(value);
                       onQueryParamsChange({ passengers: value });
@@ -180,7 +186,13 @@ export function TravelSearchForm({
               <FormItem>
                 <FormControl>
                   <TravelBaggage
-                    value={field.value}
+                    value={
+                      field.value as {
+                        carry_on: number;
+                        cabin: number;
+                        checked: number;
+                      }
+                    }
                     onChange={(value) => {
                       field.onChange(value);
                       onQueryParamsChange({ bags: value });
@@ -350,8 +362,8 @@ export function TravelSearchForm({
                         </Button>
                         <SubmitButton
                           isSubmitting={isSubmitting}
-                          className="w-full"
                           size="icon"
+                          className="w-10 h-10 flex-1"
                         >
                           <Icons.Travel className="h-4 w-4" />
                         </SubmitButton>

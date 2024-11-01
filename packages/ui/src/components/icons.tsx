@@ -143,6 +143,8 @@ import {
   MdTravelExplore,
   MdTrendingDown,
   MdTrendingUp,
+  MdOutlineAirplaneTicket,
+  MdOutlineEditNote,
 } from "react-icons/md";
 import { PiDiscordLogo } from "react-icons/pi";
 
@@ -711,4 +713,6 @@ export const Icons = {
   Checked: BaggageChecked10Light,
   Cabin: BaggageCabinLight,
   Time: MdOutlineMoreTime,
+  Ticket: MdOutlineAirplaneTicket,
+  Edit: MdOutlineEditNote,
 };

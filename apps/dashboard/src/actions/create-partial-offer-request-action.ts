@@ -42,7 +42,7 @@ export const createPartialOfferRequestAction = authActionClient
             }),
           })),
           passengers: passengers.map((passenger) => ({
-            type: passenger.type as "adult" | "child" | "infant_without_seat",
+            type: passenger.type,
             ...(passenger.given_name && {
               given_name: passenger.given_name,
             }),
@@ -59,20 +59,12 @@ export const createPartialOfferRequestAction = authActionClient
               fare_type: passenger.fare_type,
             }),
           })),
-          ...(private_fares && {
-            private_fares,
-          }),
-          ...(cabin_class && {
-            cabin_class,
-          }),
-          ...(max_connections && {
-            max_connections,
-          }),
+          ...(private_fares && { private_fares }),
+          ...(cabin_class && { cabin_class }),
+          ...(max_connections && { max_connections }),
         });
 
-        return {
-          ...response.data,
-        };
+        return response.data;
       } catch (error) {
         if (error instanceof DuffelError) {
           logger("Duffel API Error", {

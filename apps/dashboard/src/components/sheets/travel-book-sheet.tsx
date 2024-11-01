@@ -1,8 +1,8 @@
 "use client";
 
-import { createBookingAction } from "@/actions/booking/create-booking-action";
-import { createBookingSchema } from "@/actions/schema";
-import { TravelBookingForm } from "@/components/forms/travel-booking-form";
+import { bookTravelAction } from "@/actions/book-travel-action";
+import { bookTravelSchema } from "@/actions/schema";
+import { BookTravelForm } from "@/components/forms/travel-book-form";
 import { useTravelParams } from "@/hooks/use-travel-params";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Drawer, DrawerContent, DrawerHeader } from "@travelese/ui/drawer";
@@ -16,27 +16,31 @@ import { useForm } from "react-hook-form";
 import type { z } from "zod";
 
 type Props = {
-  currencyCode: string;
+  userId: string;
+  currency: string;
 };
 
-export function TravelCreateSheet({ currencyCode }: Props) {
+export function BookTravelSheet({ userId, currency }: Props) {
   const { toast } = useToast();
   const isDesktop = useMediaQuery("(min-width: 768px)");
-  const { setParams, create } = useTravelParams();
+  const { book, setParams } = useTravelParams();
 
-  const isOpen = create;
-
-  const form = useForm<z.infer<typeof createBookingSchema>>({
-    resolver: zodResolver(createBookingSchema),
+  const form = useForm<z.infer<typeof bookTravelSchema>>({
+    resolver: zodResolver(bookTravelSchema),
     defaultValues: {
-      currency: currencyCode,
-      status: "in_progress",
+      user_id: userId,
+      currency,
     },
   });
 
-  const action = useAction(createBookingAction, {
-    onSuccess: () => {
-      setParams({ create: null });
+  const action = useAction(bookTravelAction, {
+    onSuccess: (data) => {
+      toast({
+        title: `${data.data?.type === "flights" ? "Flights" : "Stays"} Booked`,
+        description: "Your booking has been created.",
+        variant: "success",
+      });
+      setParams({ book: false });
       form.reset();
     },
     onError: () => {
@@ -50,14 +54,14 @@ export function TravelCreateSheet({ currencyCode }: Props) {
 
   if (isDesktop) {
     return (
-      <Sheet open={isOpen} onOpenChange={() => setParams({ create: null })}>
+      <Sheet open={book} onOpenChange={(open) => setParams({ book: open })}>
         <SheetContent>
           <SheetHeader className="mb-8 flex justify-between items-center flex-row">
             <h2 className="text-xl">Create Booking</h2>
           </SheetHeader>
 
           <ScrollArea className="h-full p-0 pb-28" hideScrollbar>
-            <TravelBookingForm
+            <BookTravelForm
               isSaving={action.status === "executing"}
               onSubmit={action.execute}
               form={form}
@@ -70,10 +74,10 @@ export function TravelCreateSheet({ currencyCode }: Props) {
 
   return (
     <Drawer
-      open={isOpen}
+      open={book}
       onOpenChange={(open: boolean) => {
         if (!open) {
-          setParams({ create: null });
+          setParams({ book: false });
         }
       }}
     >
@@ -82,7 +86,7 @@ export function TravelCreateSheet({ currencyCode }: Props) {
           <h2 className="text-xl">Create Booking</h2>
         </DrawerHeader>
 
-        <TravelBookingForm
+        <BookTravelForm
           isSaving={action.status === "executing"}
           onSubmit={action.execute}
           form={form}

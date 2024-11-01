@@ -1,6 +1,6 @@
 import { secondsToHoursAndMinutes } from "@/utils/format";
 import { format } from "date-fns";
-import { TravelBookingForm } from "./forms/travel-booking-form";
+import { TravelBookingForm } from "./forms/travel-book-form";
 import { RecordSkeleton, UpdateRecordForm } from "./forms/update-record-form";
 
 export function TravelEntriesList({

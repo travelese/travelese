@@ -334,31 +334,6 @@ export const deleteProjectSchema = z.object({
   id: z.string().uuid(),
 });
 
-export const createBookingSchema = z.object({
-  name: z.string().min(1),
-  description: z.string().optional(),
-  estimate: z.number().optional(),
-  billable: z.boolean().optional().default(false),
-  rate: z.number().min(1).optional(),
-  currency: z.string().optional(),
-  status: z.enum(["in_progress", "completed"]).optional(),
-});
-
-export const updateBookingSchema = z.object({
-  id: z.string().uuid(),
-  name: z.string().min(1).optional(),
-  description: z.string().optional(),
-  estimate: z.number().optional(),
-  billable: z.boolean().optional().default(false),
-  rate: z.number().min(1).optional(),
-  currency: z.string().optional(),
-  status: z.enum(["in_progress", "completed"]).optional(),
-});
-
-export const deleteBookingSchema = z.object({
-  id: z.string().uuid(),
-});
-
 export const deleteEntriesSchema = z.object({
   id: z.string().uuid(),
 });
@@ -374,11 +349,6 @@ export const createReportSchema = z.object({
 export const createProjectReportSchema = z.object({
   baseUrl: z.string().url(),
   projectId: z.string().uuid(),
-});
-
-export const createBookingReportSchema = z.object({
-  baseUrl: z.string().url(),
-  bookingId: z.string().uuid(),
 });
 
 export const updateEntriesSchema = z.object({
@@ -593,58 +563,228 @@ export const changeTravelPeriodSchema = z.object({
   to: z.string().optional(),
 });
 
-export const createPartialOfferRequestSchema = z.object({
-  supplier_timeout: z.number().optional(),
-  slices: z.array(
-    z.object({
-      origin: z.string(),
-      destination: z.string(),
-      departure_time: z
-        .object({
-          from: z.string().datetime(),
-          to: z.string().datetime(),
-        })
-        .optional(),
-      departure_date: z.string(),
-      arrival_time: z
-        .object({
-          from: z.string().datetime(),
-          to: z.string().datetime(),
-        })
-        .optional(),
-    }),
-  ),
-  private_fares: z.record(
-    z.string(),
-    z.array(
-      z.object({
-        corporate_code: z.string().optional(),
-        tracking_reference: z.string().optional(),
-        tour_code: z.string().optional(),
-      }),
-    ),
-  ),
-  passengers: z.array(
-    z.object({
-      type: travelTravellerSchema,
-      given_name: z.string().optional(),
-      family_name: z.string().optional(),
-      loyalty_programme_accounts: z
-        .array(
-          z.object({
-            airline_iata_code: z.string(),
-            account_number: z.string(),
-          }),
-        )
-        .optional(),
-      age: z.number().optional(),
-      fare_type: z.string().optional(),
-    }),
-  ),
+export const searchTravelSchema = z.object({
+  search_type: z.enum(["flights", "stays"]),
+
+  // Common fields
+  user_id: z.string(),
+  currency: z.string(),
+
+  // Flights search params
+  travel_type: travelTypeSchema.optional(),
   cabin_class: travelCabinSchema.optional(),
-  max_connections: z
-    .union([z.literal(0), z.literal(1), z.literal(2)])
+  passengers: z
+    .array(
+      z.object({
+        type: travelTravellerSchema,
+        given_name: z.string().min(1, "First name is required").optional(),
+        family_name: z.string().min(1, "Last name is required").optional(),
+        age: z.number().optional(),
+      }),
+    )
+    .default([]),
+  bags: z
+    .object({
+      carry_on: z.number().min(0),
+      cabin: z.number().min(0),
+      checked: z.number().min(0),
+    })
     .optional(),
+  slices: z
+    .array(
+      z.object({
+        origin: z.string().min(3),
+        destination: z.string().min(3),
+        departure_date: z.string(),
+      }),
+    )
+    .min(1)
+    .optional(),
+
+  // Stays search params
+  check_in_date: z.string().optional(),
+  check_out_date: z.string().optional(),
+  rooms: z.number().optional(),
+  location: z
+    .object({
+      radius: z.number(),
+      geographic_coordinates: z.object({
+        longitude: z.number(),
+        latitude: z.number(),
+      }),
+    })
+    .optional(),
+  guests: z
+    .array(
+      z.object({
+        type: z.enum(["adult", "child", "infant"]),
+        age: z.number().optional(),
+      }),
+    )
+    .optional(),
+});
+
+export const bookTravelSchema = z.object({
+  booking_type: z.enum(["flights", "stays"]),
+
+  // Common fields
+  user_id: z.string(),
+  currency: z.string(),
+
+  // Flights booking params
+  offer_id: z.string().optional(),
+  passengers: z
+    .array(
+      z.object({
+        type: z.enum(["adult", "child", "infant_without_seat"]),
+        title: z.string(),
+        given_name: z.string(),
+        family_name: z.string(),
+        born_on: z.string(),
+        email: z.string().email(),
+        phone_number: z.string(),
+      }),
+    )
+    .optional(),
+
+  // Stays booking params
+  accommodation_id: z.string().optional(),
+  rate_id: z.string().optional(),
+  guest_info: z
+    .object({
+      email: z.string().email(),
+      phone_number: z.string(),
+      guests: z.array(
+        z.object({
+          type: z.enum(["adult", "child"]),
+          given_name: z.string(),
+          family_name: z.string(),
+        }),
+      ),
+    })
+    .optional(),
+});
+
+export const changeTravelSchema = z.object({
+  change_type: z.enum(["flights", "stays"]),
+
+  // Common fields
+  user_id: z.string(),
+  currency: z.string(),
+
+  // Flights change params
+  order_change: z
+    .object({
+      order_id: z.string(),
+      slices: z.array(
+        z.object({
+          departure_date: z.string(),
+          destination: z.string(),
+          origin: z.string(),
+          cabin_class: z.enum([
+            "economy",
+            "premium_economy",
+            "first",
+            "business",
+          ]),
+        }),
+      ),
+    })
+    .optional(),
+
+  // Stays cancellation params
+  booking_cancellation: z
+    .object({
+      booking_id: z.string(),
+      cancellation_reason: z.string().optional(),
+    })
+    .optional(),
+});
+
+export const createBookingSchema = z.object({
+  name: z.string().min(1),
+  description: z.string().optional(),
+  estimate: z.number().optional(),
+  billable: z.boolean().optional().default(false),
+  rate: z.number().min(1).optional(),
+  currency: z.string().optional(),
+  status: z.enum(["in_progress", "completed"]).optional(),
+});
+
+export const updateBookingSchema = z.object({
+  id: z.string().uuid(),
+  name: z.string().min(1).optional(),
+  description: z.string().optional(),
+  estimate: z.number().optional(),
+  billable: z.boolean().optional().default(false),
+  rate: z.number().min(1).optional(),
+  currency: z.string().optional(),
+  status: z.enum(["in_progress", "completed"]).optional(),
+});
+
+export const deleteBookingSchema = z.object({
+  id: z.string().uuid(),
+});
+
+export const createBookingReportSchema = z.object({
+  baseUrl: z.string().url(),
+  bookingId: z.string().uuid(),
+});
+
+const passengerSchema = z.object({
+  type: z.enum(["adult", "child", "infant_without_seat"]).optional(),
+  age: z.number().optional(),
+  given_name: z.string().optional(),
+  family_name: z.string().optional(),
+  loyalty_programme_accounts: z
+    .array(
+      z.object({
+        airline_iata_code: z.string(),
+        account_number: z.string(),
+      }),
+    )
+    .optional(),
+  fare_type: z.string().optional(),
+});
+
+const sliceSchema = z.object({
+  origin: z.string(),
+  destination: z.string(),
+  departure_date: z.string(),
+  departure_time: z
+    .object({
+      from: z.string().optional(),
+      to: z.string().optional(),
+    })
+    .optional(),
+  arrival_time: z
+    .object({
+      from: z.string().optional(),
+      to: z.string().optional(),
+    })
+    .optional(),
+});
+
+export const createPartialOfferRequestSchema = z.object({
+  cabin_class: z
+    .enum(["first", "business", "premium_economy", "economy"])
+    .optional(),
+  max_connections: z.number().optional(),
+  passengers: z.array(passengerSchema),
+  private_fares: z
+    .record(
+      z.string(),
+      z.array(
+        z.object({
+          corporate_code: z.string().optional(),
+          tracking_reference: z.string().optional(),
+          tour_code: z.string().optional(),
+        }),
+      ),
+    )
+    .optional(),
+  slices: z.array(sliceSchema),
+  supplier_timeout: z.number().optional(),
 });
 
 const citySchema = z.object({
@@ -1042,8 +1182,6 @@ export const searchAccommodationRequestSchema = z.object({
     }),
   }),
 });
-
-// ... existing schemas ...
 
 const rateSchema = z.object({
   total_currency: z.string(),

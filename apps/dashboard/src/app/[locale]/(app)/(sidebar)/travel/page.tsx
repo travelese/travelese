@@ -1,8 +1,11 @@
-import { OpenTravelSheet } from "@/components/open-travel-sheet";
+import {
+  OpenTravelBookSheet,
+  OpenTravelChangeSheet,
+  OpenTravelSearchSheet,
+} from "@/components/open-travel-sheet";
 import { Table } from "@/components/tables/travel";
 import { Loading } from "@/components/tables/travel/loading";
 import { TravelCalendar } from "@/components/travel-calendar";
-import { TravelSearchCard } from "@/components/travel-search-card";
 import { TravelSearchFilter } from "@/components/travel-search-filters";
 import {
   getTravelRecordsByRange,
@@ -47,10 +50,6 @@ export default async function Travel({ searchParams }: Props) {
 
   return (
     <div>
-      <div className="mt-8 relative">
-        <TravelSearchCard userId={userData?.id} currency={userData?.currency} />
-      </div>
-
       <TravelCalendar
         weekStartsOnMonday={userData?.week_starts_on_monday}
         timeFormat={userData?.time_format}
@@ -63,7 +62,9 @@ export default async function Travel({ searchParams }: Props) {
 
         <div className="flex space-x-2">
           <TravelSearchFilter />
-          <OpenTravelSheet />
+          <OpenTravelSearchSheet />
+          <OpenTravelChangeSheet />
+          <OpenTravelBookSheet />
         </div>
       </div>
 

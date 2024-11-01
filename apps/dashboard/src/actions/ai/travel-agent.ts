@@ -8,15 +8,8 @@ import { createStreamableValue } from "ai/rsc";
 import { z } from "zod";
 
 export async function travelAgent(prompt: string) {
-  logger("travelAgent started", { prompt });
-
   const user = await getUser();
-  logger("travelAgent user data", { user });
-
   const stream = createStreamableValue();
-  logger("travelAgent stream created", { stream });
-
-  logger("travelAgent generateObject started");
   const { object } = await generateObject({
     model: xai("grok-beta"),
     system: `
