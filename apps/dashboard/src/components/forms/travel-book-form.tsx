@@ -25,10 +25,11 @@ import {
 import { SubmitButton } from "@travelese/ui/submit-button";
 import { format } from "date-fns";
 import { CalendarIcon } from "lucide-react";
-import { useForm } from "react-hook-form";
+import { type UseFormReturn, useForm } from "react-hook-form";
 import type { z } from "zod";
 
 interface Props {
+  form: UseFormReturn<z.infer<typeof bookTravelSchema>>;
   onSubmit: (data: z.infer<typeof bookTravelSchema>) => void;
   isSaving: boolean;
   bookingType: "flights" | "stays";
@@ -36,27 +37,29 @@ interface Props {
 }
 
 export function BookTravelForm({
+  form,
   onSubmit,
   isSaving,
   bookingType,
   defaultValues,
 }: Props) {
-  const form = useForm<z.infer<typeof bookTravelSchema>>({
-    defaultValues: {
-      booking_type: bookingType,
-      passengers: bookingType === "flights" ? [{ type: "adult" }] : undefined,
-      guest_info:
-        bookingType === "stays" ? { guests: [{ type: "adult" }] } : undefined,
-      ...defaultValues,
-    },
-  });
-
   const isFlights = bookingType === "flights";
 
   const addPassenger = () => {
     const currentPassengers = form.getValues("passengers") || [];
     if (currentPassengers.length < 9) {
-      form.setValue("passengers", [...currentPassengers, { type: "adult" }]);
+      form.setValue("passengers", [
+        ...currentPassengers,
+        {
+          type: "adult",
+          title: "Mr",
+          given_name: "",
+          family_name: "",
+          email: "",
+          born_on: "",
+          phone_number: "",
+        },
+      ]);
     }
   };
 
