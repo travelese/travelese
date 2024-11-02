@@ -25,36 +25,22 @@ interface Props {
   form: UseFormReturn<z.infer<typeof changeTravelSchema>>;
   onSubmit: (data: z.infer<typeof changeTravelSchema>) => void;
   isSaving: boolean;
+  changeType: "flights" | "stays";
+  defaultValues?: Partial<z.infer<typeof changeTravelSchema>>;
 }
 
-export function ChangeTravelForm({ form, onSubmit, isSaving }: Props) {
-  const isFlights = form.watch("change_type") === "flights";
+export function ChangeTravelForm({
+  form,
+  onSubmit,
+  isSaving,
+  changeType,
+  defaultValues,
+}: Props) {
+  const isFlights = changeType === "flights";
 
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        <FormField
-          control={form.control}
-          name="change_type"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Change Type</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select type" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  <SelectItem value="flights">Change Flight</SelectItem>
-                  <SelectItem value="stays">Cancel Stay</SelectItem>
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
         {isFlights ? (
           <>
             <FormField

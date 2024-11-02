@@ -145,6 +145,7 @@ export function SearchTravelSheet({ userId, currency }: Props) {
                 setQueryParams((prev) => ({ ...prev, ...updates }))
               }
               searchType={searchType}
+              defaultValues={form.getValues()}
             />
           </ScrollArea>
         </SheetContent>
@@ -191,6 +192,7 @@ export function SearchTravelSheet({ userId, currency }: Props) {
             setQueryParams((prev) => ({ ...prev, ...updates }))
           }
           searchType={searchType}
+          defaultValues={form.getValues()}
         />
       </DrawerContent>
     </Drawer>

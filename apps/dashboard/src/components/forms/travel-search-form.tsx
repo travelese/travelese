@@ -25,22 +25,26 @@ interface Props {
   form: UseFormReturn<z.infer<typeof searchTravelSchema>>;
   onSubmit: (data: z.infer<typeof searchTravelSchema>) => void;
   isSubmitting: boolean;
+  defaultValues?: Partial<z.infer<typeof searchTravelSchema>>;
+  searchType: "flights" | "stays";
   onQueryParamsChange: (
     updates: Partial<z.infer<typeof searchTravelSchema>>,
   ) => void;
 }
 
-type TravelSearchFormValues = z.infer<typeof searchTravelSchema>;
-
 export function SearchTravelForm({
   form,
   onSubmit,
   isSubmitting,
+  defaultValues,
+  searchType,
   onQueryParamsChange,
 }: Props) {
+  const isFlights = searchType === "flights";
+
   const addFlightSegment = () => {
     const currentSlices = form.getValues("slices");
-    if (currentSlices.length < 3) {
+    if (currentSlices && currentSlices.length < 3) {
       const newSlice = { origin: "", destination: "", departure_date: "" };
       form.setValue("slices", [...currentSlices, newSlice]);
       onQueryParamsChange({ slices: [...currentSlices, newSlice] });
@@ -49,7 +53,7 @@ export function SearchTravelForm({
 
   const removeFlightSegment = (indexToRemove: number) => {
     const currentSlices = form.getValues("slices");
-    if (currentSlices.length > 1) {
+    if (currentSlices && currentSlices.length > 1) {
       const newSlices = currentSlices.filter(
         (_, index) => index !== indexToRemove,
       );
@@ -61,7 +65,7 @@ export function SearchTravelForm({
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)}>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-3 mx-auto max-w-4xl">
+        <div className="grid grid-cols-2 gap-2 mb-3 mx-auto max-w-4xl">
           <FormField
             control={form.control}
             name="travel_type"
@@ -69,7 +73,7 @@ export function SearchTravelForm({
               <FormItem>
                 <FormControl>
                   <TravelType
-                    value={field.value}
+                    value={field.value as "one_way" | "return" | "multi_city"}
                     onChange={(value) => {
                       field.onChange(value);
                       onQueryParamsChange({ travel_type: value });
@@ -83,20 +87,20 @@ export function SearchTravelForm({
 
                       if (value === "return") {
                         newSlices = [
-                          currentSlices[0] || {
+                          currentSlices?.[0] || {
                             origin: "",
                             destination: "",
                             departure_date: "",
                           },
                           {
-                            origin: currentSlices[0]?.destination || "",
-                            destination: currentSlices[0]?.origin || "",
+                            origin: currentSlices?.[0]?.destination || "",
+                            destination: currentSlices?.[0]?.origin || "",
                             departure_date: "",
                           },
                         ];
                       } else if (value === "one_way") {
                         newSlices = [
-                          currentSlices[0] || {
+                          currentSlices?.[0] || {
                             origin: "",
                             destination: "",
                             departure_date: "",
@@ -104,7 +108,7 @@ export function SearchTravelForm({
                         ];
                       } else if (value === "multi_city") {
                         newSlices =
-                          currentSlices.length < 2
+                          currentSlices && currentSlices.length < 2
                             ? [
                                 ...currentSlices,
                                 {
@@ -206,12 +210,9 @@ export function SearchTravelForm({
           />
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-2 mb-3 mx-auto max-w-4xl">
-          {form.watch("slices").map((slice, index) => (
-            <div
-              key={index}
-              className="col-span-full grid grid-cols-1 md:grid-cols-4 gap-2"
-            >
+        <div className="grid grid-cols-1 gap-2 mb-3 mx-auto max-w-4xl">
+          {form.watch("slices")?.map((slice, index) => (
+            <div key={index} className="col-span-full grid grid-cols-1 gap-2">
               {(form.watch("travel_type") === "multi_city" || index === 0) && (
                 <>
                   <FormField
@@ -229,7 +230,7 @@ export function SearchTravelForm({
                               onQueryParamsChange({
                                 slices: form
                                   .getValues("slices")
-                                  .map((s, i) =>
+                                  ?.map((s, i) =>
                                     i === index
                                       ? { ...s, origin: iataCode }
                                       : s,
@@ -258,7 +259,7 @@ export function SearchTravelForm({
                               onQueryParamsChange({
                                 slices: form
                                   .getValues("slices")
-                                  .map((s, i) =>
+                                  ?.map((s, i) =>
                                     i === index
                                       ? { ...s, destination: iataCode }
                                       : s,
@@ -289,7 +290,12 @@ export function SearchTravelForm({
                                     )
                                   : undefined,
                             }}
-                            travelType={form.watch("travel_type")}
+                            travelType={
+                              form.watch("travel_type") as
+                                | "one_way"
+                                | "return"
+                                | "multi_city"
+                            }
                             index={index}
                             onChange={(value) => {
                               field.onChange(value.from);
@@ -336,51 +342,58 @@ export function SearchTravelForm({
                       </FormItem>
                     )}
                   />
+                  <div className="fixed bottom-8 w-full sm:max-w-[455px] right-8">
+                    {form.watch("travel_type") === "multi_city" &&
+                      index === (form.watch("slices")?.length || 0) - 1 && (
+                        <div className="flex space-x-1">
+                          <Button
+                            type="button"
+                            size="icon"
+                            variant="outline"
+                            onClick={() => removeFlightSegment(index)}
+                            disabled={
+                              form.watch("slices") &&
+                              (form.watch("slices")?.length || 0) <= 1
+                            }
+                            className="w-10 h-10 flex-1"
+                          >
+                            <Icons.Close className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            type="button"
+                            size="icon"
+                            variant="outline"
+                            onClick={addFlightSegment}
+                            disabled={
+                              form.watch("slices") &&
+                              (form.watch("slices")?.length || 0) >= 3
+                            }
+                            className="w-10 h-10 flex-1"
+                          >
+                            <Icons.Plus className="h-4 w-4" />
+                          </Button>
+                          <SubmitButton
+                            isSubmitting={isSubmitting}
+                            size="icon"
+                            className="w-10 h-10 flex-1"
+                          >
+                            <Icons.Travel className="h-4 w-4" />
+                          </SubmitButton>
+                        </div>
+                      )}
 
-                  {form.watch("travel_type") === "multi_city" &&
-                    index === form.watch("slices").length - 1 && (
-                      <div className="flex space-x-1">
-                        <Button
-                          type="button"
-                          size="icon"
-                          variant="outline"
-                          onClick={() => removeFlightSegment(index)}
-                          disabled={form.watch("slices").length <= 1}
-                          className="w-10 h-10 flex-1"
-                        >
-                          <Icons.Close className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          type="button"
-                          size="icon"
-                          variant="outline"
-                          onClick={addFlightSegment}
-                          disabled={form.watch("slices").length >= 3}
-                          className="w-10 h-10 flex-1"
-                        >
-                          <Icons.Plus className="h-4 w-4" />
-                        </Button>
-                        <SubmitButton
-                          isSubmitting={isSubmitting}
-                          size="icon"
-                          className="w-10 h-10 flex-1"
-                        >
-                          <Icons.Travel className="h-4 w-4" />
-                        </SubmitButton>
-                      </div>
+                    {((form.watch("travel_type") !== "multi_city" &&
+                      index === (form.watch("slices")?.length || 0) - 1) ||
+                      (form.watch("travel_type") === "return" &&
+                        index === 0)) && (
+                      <SubmitButton
+                        className="w-full"
+                        isSubmitting={isSubmitting}
+                      >
+                        {isFlights ? "Search Flights" : "Search Stays"}
+                      </SubmitButton>
                     )}
-
-                  {((form.watch("travel_type") !== "multi_city" &&
-                    index === form.watch("slices").length - 1) ||
-                    (form.watch("travel_type") === "return" &&
-                      index === 0)) && (
-                    <SubmitButton
-                      isSubmitting={isSubmitting}
-                      className="w-full"
-                    >
-                      Search
-                    </SubmitButton>
-                  )}
+                  </div>
                 </>
               )}
             </div>

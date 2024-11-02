@@ -25,10 +25,11 @@ import {
 import { SubmitButton } from "@travelese/ui/submit-button";
 import { format } from "date-fns";
 import { CalendarIcon } from "lucide-react";
-import { useForm } from "react-hook-form";
+import { type UseFormReturn, useForm } from "react-hook-form";
 import type { z } from "zod";
 
 interface Props {
+  form: UseFormReturn<z.infer<typeof bookTravelSchema>>;
   onSubmit: (data: z.infer<typeof bookTravelSchema>) => void;
   isSaving: boolean;
   bookingType: "flights" | "stays";
@@ -36,27 +37,29 @@ interface Props {
 }
 
 export function BookTravelForm({
+  form,
   onSubmit,
   isSaving,
   bookingType,
   defaultValues,
 }: Props) {
-  const form = useForm<z.infer<typeof bookTravelSchema>>({
-    defaultValues: {
-      booking_type: bookingType,
-      passengers: bookingType === "flights" ? [{ type: "adult" }] : undefined,
-      guest_info:
-        bookingType === "stays" ? { guests: [{ type: "adult" }] } : undefined,
-      ...defaultValues,
-    },
-  });
-
   const isFlights = bookingType === "flights";
 
   const addPassenger = () => {
     const currentPassengers = form.getValues("passengers") || [];
     if (currentPassengers.length < 9) {
-      form.setValue("passengers", [...currentPassengers, { type: "adult" }]);
+      form.setValue("passengers", [
+        ...currentPassengers,
+        {
+          type: "adult",
+          title: "Mr",
+          given_name: "",
+          family_name: "",
+          email: "",
+          born_on: "",
+          phone_number: "",
+        },
+      ]);
     }
   };
 
@@ -77,7 +80,7 @@ export function BookTravelForm({
           // Flights booking form
           <>
             {form.watch("passengers")?.map((passenger, index) => (
-              <div key={index} className="space-y-4 p-4 border rounded-lg">
+              <div key={index} className="space-y-4 p-4 border">
                 <div className="flex justify-between items-center">
                   <h3 className="font-medium">Passenger {index + 1}</h3>
                   {index > 0 && (
@@ -91,60 +94,61 @@ export function BookTravelForm({
                     </Button>
                   )}
                 </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <FormField
+                    control={form.control}
+                    name={`passengers.${index}.type`}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Passenger Type</FormLabel>
+                        <Select
+                          onValueChange={field.onChange}
+                          defaultValue={field.value}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select type" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="adult">Adult</SelectItem>
+                            <SelectItem value="child">Child</SelectItem>
+                            <SelectItem value="infant_without_seat">
+                              Infant (No Seat)
+                            </SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-                <FormField
-                  control={form.control}
-                  name={`passengers.${index}.type`}
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Passenger Type</FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        defaultValue={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select type" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="adult">Adult</SelectItem>
-                          <SelectItem value="child">Child</SelectItem>
-                          <SelectItem value="infant_without_seat">
-                            Infant (No Seat)
-                          </SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name={`passengers.${index}.title`}
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Title</FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        defaultValue={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select title" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="mr">Mr</SelectItem>
-                          <SelectItem value="ms">Ms</SelectItem>
-                          <SelectItem value="mrs">Mrs</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                  <FormField
+                    control={form.control}
+                    name={`passengers.${index}.title`}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Title</FormLabel>
+                        <Select
+                          onValueChange={field.onChange}
+                          defaultValue={field.value}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select title" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="mr">Mr</SelectItem>
+                            <SelectItem value="ms">Ms</SelectItem>
+                            <SelectItem value="mrs">Mrs</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
 
                 <FormField
                   control={form.control}
@@ -364,7 +368,7 @@ export function BookTravelForm({
 
         <div className="fixed bottom-8 w-full sm:max-w-[455px] right-8">
           <SubmitButton className="w-full" isSubmitting={isSaving}>
-            Complete Booking
+            {isFlights ? "Book Flight" : "Book Stay"}
           </SubmitButton>
         </div>
       </form>
