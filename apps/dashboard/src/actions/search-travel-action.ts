@@ -34,6 +34,9 @@ export const searchTravelAction = authActionClient
           cabin_class: parsedInput.cabin_class,
         });
 
+        // Log the response from Duffel
+        logger("Response from Duffel API:", offerRequest.data);
+
         // List offers
         const offers = await duffel.offers.list({
           offer_request_id: offerRequest.data.id,
@@ -45,28 +48,33 @@ export const searchTravelAction = authActionClient
           JSON.stringify(offers.data),
         );
 
+        // Log the response from Duffel
+        logger("Response from Duffel API:", offers.data);
+
         return {
           type: "flight",
-          listOffersId,
-          offerRequestId: offerRequest.data.id,
+          listOffersId: `list-offers:${listOffersId}`,
         };
       }
 
-      if (parsedInput.search_ype === "stays") {
-        const response = await duffel.stays.search({
+      if (parsedInput.search_type === "stays") {
+        const accommodations = await duffel.stays.search({
           check_in_date: parsedInput.check_in_date,
           check_out_date: parsedInput.check_out_date,
           guests: parsedInput.guests.map((guest) => ({
-            type: guest.type as "adult" | "child" | "infant",
+            type: guest.type,
             age: guest.age,
           })),
           location: parsedInput.location,
           rooms: parsedInput.rooms,
         });
 
+        // Log the response from Duffel
+        logger("Response from Duffel API:", accommodations.data);
+
         return {
           type: "stays",
-          data: response.data,
+          data: accommodations.data,
         };
       }
     } catch (error) {

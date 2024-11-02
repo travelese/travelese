@@ -7,7 +7,6 @@ import { TravelLocation } from "@/components/travel/travel-location";
 import { TravelPeriod } from "@/components/travel/travel-period";
 import { TravelTraveller } from "@/components/travel/travel-traveller";
 import { TravelType } from "@/components/travel/travel-type";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@travelese/ui/button";
 import {
   Form,
@@ -18,7 +17,7 @@ import {
 } from "@travelese/ui/form";
 import { Icons } from "@travelese/ui/icons";
 import { SubmitButton } from "@travelese/ui/submit-button";
-import { type UseFormReturn, useForm } from "react-hook-form";
+import type { UseFormReturn } from "react-hook-form";
 import type { z } from "zod";
 
 interface Props {

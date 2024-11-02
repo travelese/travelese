@@ -998,10 +998,6 @@ const createPartialOfferResponseSchema = z.object({
   }),
 });
 
-export type CreatePartialOfferResponse = z.infer<
-  typeof createPartialOfferResponseSchema
->;
-
 export const listOffersSchema = z.object({
   offer_request_id: z.string(),
   limit: z.number().optional(),
@@ -1162,8 +1158,6 @@ const listOffersResponseSchema = z.object({
   data: z.array(offerSchema),
 });
 
-export type ListOffersResponse = z.infer<typeof listOffersResponseSchema>;
-
 export const searchAccommodationRequestSchema = z.object({
   check_in_date: z.string(),
   check_out_date: z.string(),
@@ -1304,10 +1298,6 @@ const searchAccommodationResponseSchema = z.object({
   }),
 });
 
-export type SearchAccommodationResponse = z.infer<
-  typeof searchAccommodationResponseSchema
->;
-
 export const listPlaceSuggestionsSchema = z.object({
   query: z.string(),
   rad: z.string().optional(),
@@ -1315,8 +1305,8 @@ export const listPlaceSuggestionsSchema = z.object({
   lng: z.string().optional(),
 });
 
-const placeSchema = z.object({
-  type: z.literal("airport"),
+export const placeSchema = z.object({
+  type: z.string(),
   time_zone: z.string(),
   name: z.string(),
   longitude: z.number(),
@@ -1331,18 +1321,6 @@ const placeSchema = z.object({
   airports: z.array(airportSchema),
 });
 
-const listPlacesSuggestionsResponseSchema = z.object({
-  warnings: z.array(
-    z.object({
-      type: z.string(),
-      title: z.string(),
-      message: z.string(),
-      code: z.string(),
-    }),
-  ),
+export const listPlacesSuggestionsResponseSchema = z.object({
   data: z.array(placeSchema),
 });
-
-export type ListPlacesSuggestionsResponse = z.infer<
-  typeof listPlacesSuggestionsResponseSchema
->;
