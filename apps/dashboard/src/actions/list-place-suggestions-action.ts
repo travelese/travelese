@@ -27,7 +27,7 @@ export const listPlaceSuggestionsAction = authActionClient
       });
 
       // Log the response from Duffel
-      logger("Response from Duffel API:", response.data);
+      // logger("Response from Duffel API:", response.data);
 
       return response.data as Places[];
     } catch (error) {

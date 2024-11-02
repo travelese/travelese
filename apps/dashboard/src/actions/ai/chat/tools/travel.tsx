@@ -1,10 +1,9 @@
 import { travelAgent } from "@/actions/ai/travel-agent";
 import type { MutableAIState } from "@/actions/ai/types";
-import { createPartialOfferRequestAction } from "@/actions/create-partial-offer-request-action";
-import { listOffersAction } from "@/actions/list-offers-action";
 import { listPlaceSuggestionsAction } from "@/actions/list-place-suggestions-action";
-import { searchAccommodationAction } from "@/actions/search-accommodation-action";
+import { searchTravelAction } from "@/actions/search-travel-action";
 import { logger } from "@/utils/logger";
+import { client as RedisClient } from "@travelese/kv";
 import { nanoid } from "nanoid";
 import { z } from "zod";
 import { TravelUI } from "./ui/travel-ui";
@@ -17,43 +16,63 @@ export function searchTravelTool({ aiState }: Args) {
   return {
     description: "Search for Flights or Stays",
     parameters: z.object({
-      prompt: z.string(),
+      query: z.string().describe("The user's travel request"),
     }),
-    generate: async (args) => {
-      const { prompt } = args;
-      const { object } = await travelAgent(prompt);
+    generate: async ({ query }) => {
+      const { travel, places, type } = await travelAgent(query);
 
-      if (object.type === "flight" && object.flights) {
-        const slicePromises = object.flights.slices.map(async (slice) => {
-          const [origin, destination] = await Promise.all([
-            listPlaceSuggestionsAction({ query: slice.origin }),
-            listPlaceSuggestionsAction({ query: slice.destination }),
-          ]);
+      const placeSuggestions = await Promise.all(
+        places.map(async (place) => {
+          const suggestions = await listPlaceSuggestionsAction(place);
+          return suggestions?.data ?? [];
+        }),
+      );
 
-          const origin_code =
-            origin?.data?.find((p) => p.type === "airport")?.iata_code ||
-            origin?.data?.find((p) => p.type === "city")?.iata_code;
+      const searchResults = await searchTravelAction(travel);
 
-          const destination_code =
-            destination?.data?.find((p) => p.type === "airport")?.iata_code ||
-            destination?.data?.find((p) => p.type === "city")?.iata_code;
+      logger("searchResults", searchResults);
 
-          return {
-            origin: origin_code,
-            destination: destination_code,
-          };
-        });
+      const props = {
+        travel,
+        type,
+        placeSuggestions,
+        searchResults,
+      };
 
-        return <TravelUI type={object.type} data={data} />;
-      }
+      const toolCallId = nanoid();
 
-      if (object.type === "stay" && object.stays) {
-        const data = await searchAccommodationAction({
-          ...object.stays,
-        });
+      aiState.done({
+        ...aiState.get(),
+        messages: [
+          ...aiState.get().messages,
+          {
+            id: nanoid(),
+            role: "assistant",
+            content: [
+              {
+                type: "tool-call",
+                toolName: "searchTravel",
+                toolCallId,
+                args: { query },
+              },
+            ],
+          },
+          {
+            id: nanoid(),
+            role: "tool",
+            content: [
+              {
+                type: "tool-result",
+                toolName: "searchTravel",
+                toolCallId,
+                result: props,
+              },
+            ],
+          },
+        ],
+      });
 
-        return <TravelUI type={object.type} data={data} />;
-      }
+      return <TravelUI {...props} />;
     },
   };
 }

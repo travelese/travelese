@@ -1,129 +1,80 @@
+import type { searchTravelSchema } from "@/actions/schema";
 import { BotCard } from "@/components/chat/messages";
-import type { Offer } from "@duffel/api/types";
-import type { Stay } from "@duffel/api/types";
-import { format } from "date-fns";
+import { logger } from "@/utils/logger";
+import type { Places } from "@duffel/api/Places/Suggestions/SuggestionsType";
+import { Icons } from "@travelese/ui/icons";
+import type { z } from "zod";
 
-interface FlightOptionProps {
-  offer: Offer;
+interface Props {
+  type: "flights" | "stays";
+  travel: z.infer<typeof searchTravelSchema>;
+  placeSuggestions: Array<Array<Places>>;
+  searchResults?:
+    | {
+        type: "flight";
+        listOffersId: string;
+      }
+    | {
+        type: "stays";
+        accommodations: any;
+      }
+    | null;
 }
 
-function FlightOption({ offer }: FlightOptionProps) {
+export function TravelUI({
+  type,
+  travel,
+  placeSuggestions,
+  searchResults,
+}: Props) {
   return (
-    <div className="p-4 border rounded-lg space-y-2">
-      <div className="flex justify-between items-center">
-        <span className="font-semibold">
-          {offer.total_amount} {offer.total_currency}
-        </span>
-        <span className="text-sm text-muted-foreground">
-          {offer.owner.name}
-        </span>
-      </div>
+    <BotCard className="font-sans space-y-4">
+      <div className="flex flex-col gap-4">
+        <div className="text-sm text-muted-foreground">
+          Looking for {type} - {travel.search_type}
+        </div>
 
-      <div className="space-y-4">
-        {offer.slices.map((slice, index) => (
-          <div key={slice.id} className="space-y-2">
-            <div className="flex justify-between text-sm">
-              <span>Flight {index + 1}</span>
-              <span>{slice.duration.replace("PT", "")} duration</span>
-            </div>
-
-            <div className="flex justify-between items-center">
-              <div className="text-left">
-                <div className="font-medium">{slice.origin.iata_code}</div>
-                <div className="text-sm text-muted-foreground">
-                  {format(
-                    new Date(slice.segments[0].departing_at),
-                    "HH:mm, MMM d",
+        <div className="space-y-2">
+          <div className="font-medium">Suggested locations:</div>
+          {placeSuggestions?.map((suggestions, index) => (
+            <div key={index} className="flex flex-wrap gap-2">
+              {suggestions?.slice(0, 5).map((place) => (
+                <div
+                  key={place.id}
+                  className="text-xs px-2 py-1 rounded-md bg-muted flex items-center gap-2"
+                >
+                  {place.type === "city" ? (
+                    <>
+                      {place.name} ({place.iata_code})
+                      <Icons.City className="h-3 w-3" />
+                    </>
+                  ) : (
+                    <>
+                      {place.city_name} ({place.iata_code})
+                      <Icons.Airport className="h-3 w-3" />
+                    </>
                   )}
                 </div>
-              </div>
-
-              <div className="text-right">
-                <div className="font-medium">{slice.destination.iata_code}</div>
-                <div className="text-sm text-muted-foreground">
-                  {format(
-                    new Date(
-                      slice.segments[slice.segments.length - 1].arriving_at,
-                    ),
-                    "HH:mm, MMM d",
-                  )}
-                </div>
-              </div>
+              ))}
             </div>
+          ))}
+        </div>
 
-            {slice.segments.length > 1 && (
-              <div className="text-sm text-muted-foreground">
-                {slice.segments.length - 1} stop(s)
+        {searchResults && (
+          <div className="space-y-2">
+            <div className="font-medium">Search Results:</div>
+            {searchResults.type === "flight" ? (
+              <div className="text-sm">
+                Flight offers found! Offer ID: {searchResults.listOffersId}
+              </div>
+            ) : (
+              <div className="text-sm">
+                Stay options found!{" "}
+                {JSON.stringify(searchResults.accommodations)}
               </div>
             )}
           </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-interface StayOptionProps {
-  stay: Stay;
-}
-
-function StayOption({ stay }: StayOptionProps) {
-  return (
-    <div className="p-4 border rounded-lg space-y-2">
-      <div className="flex justify-between items-center">
-        <span className="font-semibold">
-          {stay.price.amount} {stay.price.currency}
-        </span>
-        <span className="text-sm text-muted-foreground">
-          {stay.property.name}
-        </span>
-      </div>
-
-      <div className="space-y-2">
-        <div className="text-sm text-muted-foreground">
-          {stay.property.address.line1}, {stay.property.address.city}
-        </div>
-        <div className="text-sm">
-          {format(new Date(stay.check_in), "MMM d")} -{" "}
-          {format(new Date(stay.check_out), "MMM d")}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-interface Props {
-  type: "flight" | "stay";
-  data: Offer[] | Stay[];
-}
-
-export function TravelUI({ type, data }: Props) {
-  if (!data?.length) {
-    return (
-      <BotCard>
-        <div className="text-sm text-muted-foreground">
-          No {type} options found
-        </div>
-      </BotCard>
-    );
-  }
-
-  return (
-    <BotCard>
-      <div className="space-y-4">
-        <h3 className="text-lg font-semibold">
-          Available {type === "flight" ? "Flight" : "Stay"} Options
-        </h3>
-
-        {type === "flight" &&
-          (data as Offer[]).map((offer) => (
-            <FlightOption key={offer.id} offer={offer} />
-          ))}
-
-        {type === "stay" &&
-          (data as Stay[]).map((stay) => (
-            <StayOption key={stay.id} stay={stay} />
-          ))}
+        )}
       </div>
     </BotCard>
   );
