@@ -28,15 +28,55 @@ export function searchTravelTool({ aiState }: Args) {
         }),
       );
 
-      const searchResults = await searchTravelAction(travel);
+      const searchResults = await searchTravelAction({
+        ...travel,
+        slices: travel.slices?.map((slice, index) => {
+          const originCity = placeSuggestions[index]?.find(
+            (p) => p.type === "city",
+          );
+          const destinationCity = placeSuggestions[index + 1]?.find(
+            (p) => p.type === "city",
+          );
 
-      logger("searchResults", searchResults);
+          return {
+            ...slice,
+            origin: originCity?.iata_code ?? slice.origin,
+            destination: destinationCity?.iata_code ?? slice.destination,
+          };
+        }),
+      });
+
+      const offersId = searchResults?.data?.offersId;
+      //logger("Raw offersId from searchResults", offersId);
+
+      let searchResultsData = {};
+      if (offersId) {
+        try {
+          const redisKey = `offers:${offersId}`;
+          // logger("Redis key", redisKey);
+          const redisResult = await RedisClient.hgetall(redisKey);
+          // logger("Redis raw result", redisResult);
+
+          // Check if redisResult.offers is already an object
+          searchResultsData =
+            typeof redisResult?.offers === "string"
+              ? JSON.parse(redisResult.offers)
+              : (redisResult?.offers ?? {});
+
+          // logger("Parsed searchResultsData", searchResultsData);
+        } catch (error) {
+          // logger("Redis error", error);
+          searchResultsData = {};
+        }
+      }
+
+      // logger("Final searchResultsData", searchResultsData);
 
       const props = {
         travel,
         type,
         placeSuggestions,
-        searchResults,
+        searchResultsData,
       };
 
       const toolCallId = nanoid();

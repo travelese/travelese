@@ -5,6 +5,8 @@ import { searchTravelSchema } from "@/actions/schema";
 import { duffel } from "@/utils/duffel";
 import { logger } from "@/utils/logger";
 import { DuffelError } from "@duffel/api";
+import type { PassengerType } from "@duffel/api/types";
+
 import { LogEvents } from "@travelese/events/events";
 import { client as RedisClient } from "@travelese/kv";
 import { nanoid } from "nanoid";
@@ -23,15 +25,19 @@ export const searchTravelAction = authActionClient
       if (parsedInput.search_type === "flights") {
         // Create partial offer request
         const offerRequest = await duffel.offerRequests.create({
-          slices: parsedInput.slices.map((slice) => ({
+          slices: parsedInput.slices!.map((slice) => ({
             origin: slice.origin,
             destination: slice.destination,
-            departure_date: slice.departure_date,
+            departure_date: slice.departure_date!,
           })),
-          passengers: parsedInput.passengers.map((passenger) => ({
-            type: passenger.type,
+          passengers: parsedInput.passengers!.map((passenger) => ({
+            type: passenger.type as PassengerType,
           })),
-          cabin_class: parsedInput.cabin_class,
+          cabin_class: parsedInput.cabin_class as
+            | "economy"
+            | "premium_economy"
+            | "business"
+            | "first",
         });
 
         // Log the response from Duffel
@@ -43,30 +49,36 @@ export const searchTravelAction = authActionClient
         });
 
         const listOffersId = nanoid();
-        await RedisClient.sadd(
-          `list-offers:${listOffersId}`,
-          JSON.stringify(offers.data),
-        );
+        await RedisClient.hset(`offers:${listOffersId}`, {
+          offers: JSON.stringify(offers.data),
+          timestamp: Date.now(),
+        });
 
         // Log the response from Duffel
         logger("Response from Duffel API:", offers.data);
 
         return {
           type: "flight",
-          listOffersId: `list-offers:${listOffersId}`,
+          offersId: listOffersId,
         };
       }
 
       if (parsedInput.search_type === "stays") {
         const accommodations = await duffel.stays.search({
-          check_in_date: parsedInput.check_in_date,
-          check_out_date: parsedInput.check_out_date,
-          guests: parsedInput.guests.map((guest) => ({
+          check_in_date: parsedInput.check_in_date!,
+          check_out_date: parsedInput.check_out_date!,
+          guests: parsedInput.guests!.map((guest) => ({
             type: guest.type,
             age: guest.age,
           })),
-          location: parsedInput.location,
-          rooms: parsedInput.rooms,
+          location: parsedInput.location!,
+          rooms: parsedInput.rooms!,
+        });
+
+        const listAccommodationsId = nanoid();
+        await RedisClient.hset(`accommodations:${listAccommodationsId}`, {
+          accommodations: JSON.stringify(accommodations.data),
+          timestamp: Date.now(),
         });
 
         // Log the response from Duffel
@@ -74,7 +86,7 @@ export const searchTravelAction = authActionClient
 
         return {
           type: "stays",
-          data: accommodations.data,
+          accommodationsId: `accommodations:${listAccommodationsId}`,
         };
       }
     } catch (error) {
