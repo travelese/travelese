@@ -1,13 +1,20 @@
 import {
+  AirportSecurity as AirportIcon,
   BaggageCabinLight,
   BaggageChecked10Light,
   BaggagePersonalLight,
   Child,
+  City as CityIcon,
+  CalendarDuration as DurationIcon,
   Infant,
+  AirplaneLanding as LandingIcon,
   Passenger,
   Passengers,
+  AirplaneTakeoff as TakeoffIcon,
+  Terminal as TerminalIcon,
 } from "@kiwicom/orbit-components/icons";
 import { ArchiveIcon } from "@radix-ui/react-icons";
+import { CloudFogIcon } from "lucide-react";
 import { FaXTwitter } from "react-icons/fa6";
 import { FiGithub, FiLoader } from "react-icons/fi";
 import {
@@ -57,6 +64,7 @@ import {
   MdOutlineAccountCircle,
   MdOutlineAdd,
   MdOutlineAirlineSeatLegroomReduced,
+  MdOutlineAirplaneTicket,
   MdOutlineApps,
   MdOutlineArrowDownward,
   MdOutlineArrowForward,
@@ -80,6 +88,7 @@ import {
   MdOutlineDashboardCustomize,
   MdOutlineDelete,
   MdOutlineDescription,
+  MdOutlineEditNote,
   MdOutlineEmail,
   MdOutlineExitToApp,
   MdOutlineExpandMore,
@@ -143,8 +152,6 @@ import {
   MdTravelExplore,
   MdTrendingDown,
   MdTrendingUp,
-  MdOutlineAirplaneTicket,
-  MdOutlineEditNote,
 } from "react-icons/md";
 import { PiDiscordLogo } from "react-icons/pi";
 
@@ -681,8 +688,8 @@ export const Icons = {
   FlightsDeparture: MdFlightTakeoff,
   FlightsArrival: MdFlightLand,
   Flights: MdFlight,
-  City: MdLocationCity,
-  Airport: MdOutlineLocalAirport,
+  City: CityIcon,
+  Airport: AirportIcon,
   Airports: MdOutlineConnectingAirports,
   CabinClass: MdOutlineFlightClass,
   Explore: MdOutlineExplore,
@@ -715,4 +722,9 @@ export const Icons = {
   Time: MdOutlineMoreTime,
   Ticket: MdOutlineAirplaneTicket,
   Edit: MdOutlineEditNote,
+  Terminal: TerminalIcon,
+  Duration: DurationIcon,
+  Landing: LandingIcon,
+  Takeoff: TakeoffIcon,
+  Cloud: CloudFogIcon,
 };

@@ -31,10 +31,11 @@ export function searchTravelTool({ aiState }: Args) {
       const searchResults = await searchTravelAction({
         ...travel,
         slices: travel.slices?.map((slice, index) => {
-          const originCity = placeSuggestions[index]?.find(
+          const isReturn = index === 1;
+          const originCity = placeSuggestions[isReturn ? 1 : 0]?.find(
             (p) => p.type === "city",
           );
-          const destinationCity = placeSuggestions[index + 1]?.find(
+          const destinationCity = placeSuggestions[isReturn ? 0 : 1]?.find(
             (p) => p.type === "city",
           );
 
