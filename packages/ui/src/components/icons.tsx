@@ -1,4 +1,5 @@
 import {
+  AirConditioning,
   AirportSecurity as AirportIcon,
   BaggageCabinLight,
   BaggageChecked10Light,
@@ -15,8 +16,15 @@ import {
 } from "@kiwicom/orbit-components/icons";
 import { ArchiveIcon } from "@radix-ui/react-icons";
 import { CloudFogIcon } from "lucide-react";
+import { CiDumbbell } from "react-icons/ci";
 import { FaXTwitter } from "react-icons/fa6";
 import { FiGithub, FiLoader } from "react-icons/fi";
+import { GrLounge } from "react-icons/gr";
+import {
+  LuBedDouble,
+  LuConciergeBell,
+  LuUtensilsCrossed,
+} from "react-icons/lu";
 import {
   MdAdd,
   MdAirlineSeatReclineNormal,
@@ -82,12 +90,14 @@ import {
   MdOutlineChatBubbleOutline,
   MdOutlineClear,
   MdOutlineClose,
+  MdOutlineCoffee,
   MdOutlineConnectingAirports,
   MdOutlineContentCopy,
   MdOutlineCreateNewFolder,
   MdOutlineDashboardCustomize,
   MdOutlineDelete,
   MdOutlineDescription,
+  MdOutlineDirectionsCar,
   MdOutlineEditNote,
   MdOutlineEmail,
   MdOutlineExitToApp,
@@ -106,6 +116,7 @@ import {
   MdOutlineInventory2,
   MdOutlineListAlt,
   MdOutlineLocalAirport,
+  MdOutlineLocalLaundryService,
   MdOutlineLocationOn,
   MdOutlineLuggage,
   MdOutlineMoreTime,
@@ -116,21 +127,25 @@ import {
   MdOutlinePalette,
   MdOutlinePause,
   MdOutlinePerson,
+  MdOutlinePinDrop,
   MdOutlinePlayArrow,
   MdOutlinePower,
   MdOutlineQuestionAnswer,
   MdOutlineRemove,
   MdOutlineRepeat,
   MdOutlineSettings,
+  MdOutlineStarBorder,
   MdOutlineStyle,
   MdOutlineSubject,
   MdOutlineTask,
   MdOutlineTimer,
   MdOutlineTune,
+  MdOutlineTv,
   MdOutlineUploadFile,
   MdOutlineVisibility,
   MdOutlineVolumeOff,
   MdOutlineVolumeUp,
+  MdOutlineWaves,
   MdOutlineWifi,
   MdPause,
   MdPauseCircle,
@@ -727,4 +742,17 @@ export const Icons = {
   Landing: LandingIcon,
   Takeoff: TakeoffIcon,
   Cloud: CloudFogIcon,
+  Star: MdOutlineStarBorder,
+  AirConditioning,
+  BedDouble: LuBedDouble,
+  ConciergeBell: LuConciergeBell,
+  Lounge: GrLounge,
+  WashingMachine: MdOutlineLocalLaundryService,
+  Tv: MdOutlineTv,
+  Coffee: MdOutlineCoffee,
+  Utensils: LuUtensilsCrossed,
+  Car: MdOutlineDirectionsCar,
+  Waves: MdOutlineWaves,
+  Dumbbell: CiDumbbell,
+  MapPin: MdOutlinePinDrop,
 };

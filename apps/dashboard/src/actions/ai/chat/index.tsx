@@ -30,8 +30,9 @@ import { getSpendingTool } from "./tools/spending";
 import { searchTravelTool } from "./tools/travel";
 
 const ratelimit = new Ratelimit({
-  limiter: Ratelimit.fixedWindow(10, "10s"),
+  limiter: Ratelimit.fixedWindow(20, "60s"),
   redis: RedisClient,
+  analytics: true,
 });
 
 export async function submitUserMessage(
@@ -39,7 +40,7 @@ export async function submitUserMessage(
 ): Promise<ClientMessage> {
   "use server";
   const ip = headers().get("x-forwarded-for");
-  const { success } = await ratelimit.limit(ip);
+  const { success } = await ratelimit.limit(ip ?? "");
 
   logger("Submitting user message", { content, ip });
 

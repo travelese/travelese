@@ -48,30 +48,66 @@ export function searchTravelTool({ aiState }: Args) {
       });
 
       const offersId = searchResults?.data?.offersId;
-      //logger("Raw offersId from searchResults", offersId);
 
+      // When retrieving the data
       let searchResultsData = {};
-      if (offersId) {
+      if (type === "flights" && searchResults?.data?.offersId) {
         try {
-          const redisKey = `offers:${offersId}`;
-          // logger("Redis key", redisKey);
+          const redisKey = `offers:${searchResults.data.offersId}`;
           const redisResult = await RedisClient.hgetall(redisKey);
-          // logger("Redis raw result", redisResult);
 
-          // Check if redisResult.offers is already an object
-          searchResultsData =
-            typeof redisResult?.offers === "string"
-              ? JSON.parse(redisResult.offers)
-              : (redisResult?.offers ?? {});
+          if (!redisResult?.offers) {
+            throw new Error("Flight offers data not found or expired");
+          }
 
-          // logger("Parsed searchResultsData", searchResultsData);
+          // Add safety checks for parsing
+          try {
+            searchResultsData =
+              typeof redisResult.offers === "string"
+                ? JSON.parse(redisResult.offers)
+                : redisResult.offers;
+          } catch (parseError) {
+            logger("Failed to parse flight results", {
+              error: parseError,
+              data: redisResult.offers,
+            });
+            throw new Error("Invalid flight data format");
+          }
         } catch (error) {
-          // logger("Redis error", error);
-          searchResultsData = {};
+          logger("Failed to retrieve flight results", error);
+          throw new Error(
+            "Failed to retrieve flight results. Please try again.",
+          );
+        }
+      } else if (type === "stays" && searchResults?.data?.accommodationsId) {
+        // Same pattern for accommodations
+        try {
+          const redisKey = `accommodations:${searchResults.data.accommodationsId}`;
+          const redisResult = await RedisClient.hgetall(redisKey);
+
+          if (!redisResult?.accommodations) {
+            throw new Error("Accommodation data not found or expired");
+          }
+
+          try {
+            searchResultsData =
+              typeof redisResult.accommodations === "string"
+                ? JSON.parse(redisResult.accommodations)
+                : redisResult.accommodations;
+          } catch (parseError) {
+            logger("Failed to parse accommodation results", {
+              error: parseError,
+              data: redisResult.accommodations,
+            });
+            throw new Error("Invalid accommodation data format");
+          }
+        } catch (error) {
+          logger("Failed to retrieve accommodation results", error);
+          throw new Error(
+            "Failed to retrieve accommodation results. Please try again.",
+          );
         }
       }
-
-      // logger("Final searchResultsData", searchResultsData);
 
       const props = {
         travel,

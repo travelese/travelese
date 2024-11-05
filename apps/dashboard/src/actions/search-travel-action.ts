@@ -49,13 +49,15 @@ export const searchTravelAction = authActionClient
         });
 
         const listOffersId = nanoid();
-        await RedisClient.hset(`offers:${listOffersId}`, {
-          offers: JSON.stringify(offers.data),
-          timestamp: Date.now(),
-        });
+        const redisKey = `offers:${listOffersId}`;
 
-        // Log the response from Duffel
-        logger("Response from Duffel API:", offers.data);
+        await RedisClient.pipeline()
+          .hset(redisKey, {
+            offers: JSON.stringify(offers.data),
+            timestamp: Date.now().toString(),
+          })
+          .expire(redisKey, 3600) // Expire after 1 hour
+          .exec();
 
         return {
           type: "flight",
@@ -76,17 +78,19 @@ export const searchTravelAction = authActionClient
         });
 
         const listAccommodationsId = nanoid();
-        await RedisClient.hset(`accommodations:${listAccommodationsId}`, {
-          accommodations: JSON.stringify(accommodations.data),
-          timestamp: Date.now(),
-        });
+        const redisKey = `accommodations:${listAccommodationsId}`;
 
-        // Log the response from Duffel
-        logger("Response from Duffel API:", accommodations.data);
+        await RedisClient.pipeline()
+          .hset(redisKey, {
+            accommodations: JSON.stringify(accommodations.data),
+            timestamp: Date.now().toString(),
+          })
+          .expire(redisKey, 3600) // Expire after 1 hour
+          .exec();
 
         return {
           type: "stays",
-          accommodationsId: `accommodations:${listAccommodationsId}`,
+          accommodationsId: listAccommodationsId,
         };
       }
     } catch (error) {
