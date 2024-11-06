@@ -24,6 +24,7 @@ const config = {
     "@travelese/ui",
     "@travelese/jobs",
     "@travelese/tailwind",
+    "@travelese/invoice",
   ],
   compiler: {
     styledComponents: true,

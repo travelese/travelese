@@ -61,6 +61,15 @@ export function FileIcon({
     );
   }
 
+  if (name === "invoices") {
+    return (
+      <Icons.SnippetFolder
+        size={size}
+        className={cn("text-[#878787]", className)}
+      />
+    );
+  }
+
   if (isFolder) {
     return (
       <Icons.Folder size={size} className={cn("text-[#878787]", className)} />

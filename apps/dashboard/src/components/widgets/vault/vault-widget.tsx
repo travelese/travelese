@@ -1,6 +1,7 @@
 import { getUser } from "@travelese/supabase/cached-queries";
 import { getVaultActivityQuery } from "@travelese/supabase/queries";
 import { createClient } from "@travelese/supabase/server";
+import Link from "next/link";
 import { Vault } from "./vault";
 
 export function VaultWidgetSkeleton() {
@@ -10,7 +11,9 @@ export function VaultWidgetSkeleton() {
 export function VaultWidgetHeader() {
   return (
     <div>
-      <h2 className="text-lg">Recent files</h2>
+      <Link href="/vault" prefetch>
+        <h2 className="text-lg">Recent files</h2>
+      </Link>
 
       <div className="flex py-3 border-b-[1px] justify-between mt-4">
         <span className="font-medium text-sm">Name</span>

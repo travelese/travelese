@@ -48,7 +48,7 @@ export function TravelCard({
             <div className="flex flex-col items-center">
               {emission ? (
                 <>
-                  <Icons.Cloud className="h-4 w-4 mb-1" />
+                  <Icons.Cloud className="size-4 mb-1" />
                   <AlertTitle>Emission</AlertTitle>
                   <AlertDescription>
                     {emission} kg CO<sub>2</sub>
@@ -61,7 +61,7 @@ export function TravelCard({
                       {[...Array(rating)].map((_, i) => (
                         <Icons.Star
                           key={i}
-                          className="h-4 w-4 text-muted-foreground"
+                          className="size-4 text-muted-foreground"
                         />
                       ))}
                     </div>

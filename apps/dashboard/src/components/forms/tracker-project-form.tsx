@@ -219,7 +219,7 @@ export function TrackerProjectForm({ onSubmit, isSaving, form }: Props) {
 
         <div className="fixed bottom-8 w-full sm:max-w-[455px] right-8">
           <Button className="w-full" disabled={isSaving}>
-            {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : "Save"}
+            {isSaving ? <Loader2 className="size-4 animate-spin" /> : "Save"}
           </Button>
         </div>
       </form>

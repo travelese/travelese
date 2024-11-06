@@ -3,6 +3,10 @@ import type { Config } from "tailwindcss";
 
 export default {
   presets: [baseConfig],
-  content: ["./src/**/*.{ts,tsx}", "../../packages/ui/src/**/*.{ts,tsx}"],
+  content: [
+    "./src/**/*.{ts,tsx}",
+    "../../packages/ui/src/**/*.{ts,tsx}",
+    "../../packages/invoice/src/**/*.{ts,tsx}",
+  ],
   plugins: [require("@todesktop/tailwind-variants")],
 } satisfies Config;

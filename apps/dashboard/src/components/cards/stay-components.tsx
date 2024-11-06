@@ -121,16 +121,16 @@ function LocationInfo({
         <TooltipContent>
           <div className="space-y-2 font-mono">
             <div className="text-sm">
-              <Icons.MapPin className="h-4 w-4 inline-block mr-1" />
+              <Icons.MapPin className="size-4 inline-block mr-1" />
               {location.address.line_one}
             </div>
             <div className="text-xs text-muted-foreground">
-              <Icons.City className="h-4 w-4 inline-block mr-1" />
+              <Icons.City className="size-4 inline-block mr-1" />
               {location.address.city_name}, {location.address.country_code}
             </div>
             {location.coordinates && (
               <div className="text-xs text-muted-foreground">
-                <Icons.Navigation className="h-4 w-4 inline-block mr-1" />
+                <Icons.Navigation className="size-4 inline-block mr-1" />
                 {location.coordinates.latitude},{" "}
                 {location.coordinates.longitude}
               </div>
@@ -195,7 +195,7 @@ export function Amenities({
             <Tooltip>
               <TooltipTrigger asChild>
                 <div className="flex items-center gap-1">
-                  <Icon className="h-4 w-4" />
+                  <Icon className="size-4" />
                   <span>{amenity.type}</span>
                 </div>
               </TooltipTrigger>

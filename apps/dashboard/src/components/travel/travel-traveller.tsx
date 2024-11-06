@@ -20,19 +20,19 @@ export function TravelTraveller({ value, disabled, onChange }: Props) {
       id: "adult",
       label: t("travel_passenger.adult"),
       subLabel: "12+",
-      icon: <Icons.User className="h-4 w-4" />,
+      icon: <Icons.User className="size-4" />,
     },
     {
       id: "child",
       label: t("travel_passenger.child"),
       subLabel: "2-11",
-      icon: <Icons.Child className="h-4 w-4" />,
+      icon: <Icons.Child className="size-4" />,
     },
     {
       id: "infant_without_seat",
       label: t("travel_passenger.infant_without_seat"),
       subLabel: "Under 2",
-      icon: <Icons.Infant className="h-4 w-4" />,
+      icon: <Icons.Infant className="size-4" />,
     },
   ];
 

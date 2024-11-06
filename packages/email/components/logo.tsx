@@ -1,10 +1,9 @@
 import { Img, Section } from "@react-email/components";
+import { getEmailUrl } from "@travelese/utils/envs";
 
-type Props = {
-  baseUrl: string;
-};
+const baseUrl = getEmailUrl();
 
-export function Logo({ baseUrl }: Props) {
+export function Logo() {
   return (
     <Section className="mt-[32px]">
       <Img

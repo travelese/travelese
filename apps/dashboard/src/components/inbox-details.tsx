@@ -2,11 +2,10 @@ import { Avatar, AvatarFallback } from "@travelese/ui/avatar";
 import { Button } from "@travelese/ui/button";
 import { cn } from "@travelese/ui/cn";
 import {
-  DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuTrigger,
 } from "@travelese/ui/dropdown-menu";
+import { DropdownMenu, DropdownMenuTrigger } from "@travelese/ui/dropdown-menu";
 import { Icons } from "@travelese/ui/icons";
 import { Separator } from "@travelese/ui/separator";
 import { Skeleton } from "@travelese/ui/skeleton";
@@ -64,7 +63,7 @@ export function InboxDetails({
     setShowFallback(false);
   }, [item]);
 
-  const handleCopyUrl = async () => {
+  const handleCopyLink = async () => {
     try {
       await navigator.clipboard.writeText(
         `${window.location.origin}/inbox?id=${item.id}`,
@@ -72,7 +71,7 @@ export function InboxDetails({
 
       toast({
         duration: 4000,
-        title: "Copied URL to clipboard.",
+        title: "Copied link to clipboard.",
         variant: "success",
       });
     } catch {}
@@ -96,7 +95,7 @@ export function InboxDetails({
                 disabled={!item}
                 onClick={onDelete}
               >
-                <Trash2 className="h-4 w-4" />
+                <Trash2 className="size-4" />
               </Button>
             </TooltipTrigger>
             <TooltipContent className="px-3 py-1.5 text-xs">
@@ -109,7 +108,7 @@ export function InboxDetails({
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon" disabled={!item}>
-                <MoreVertical className="h-4 w-4" />
+                <MoreVertical className="size-4" />
                 <span className="sr-only">More</span>
               </Button>
             </DropdownMenuTrigger>
@@ -127,8 +126,8 @@ export function InboxDetails({
                   Download
                 </a>
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={handleCopyUrl}>
-                Copy URL
+              <DropdownMenuItem onClick={handleCopyLink}>
+                Copy Link
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

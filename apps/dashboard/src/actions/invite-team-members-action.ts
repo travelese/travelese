@@ -1,18 +1,16 @@
 "use server";
 
-import { env } from "@/env.mjs";
+import { resend } from "@/utils/resend";
 import { render } from "@react-email/render";
 import InviteEmail from "@travelese/email/emails/invite";
 import { getI18n } from "@travelese/email/locales";
 import { LogEvents } from "@travelese/events/events";
+import { nanoid } from "nanoid";
 import { revalidatePath as revalidatePathFunc } from "next/cache";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
-import { Resend } from "resend";
 import { authActionClient } from "./safe-action";
 import { inviteTeamMembersSchema } from "./schema";
-
-const resend = new Resend(env.RESEND_API_KEY);
 
 export const inviteTeamMembersAction = authActionClient
   .schema(inviteTeamMembersSchema)
@@ -48,12 +46,15 @@ export const inviteTeamMembersAction = authActionClient
         .select("email, code, user:invited_by(*), team:team_id(*)");
 
       const emails = invtesData?.map(async (invites) => ({
-        from: "Travelese <bot@travelese.ai>",
+        from: "Midday <middaybot@midday.ai>",
         to: [invites.email],
         subject: t("invite.subject", {
           invitedByName: invites.user.full_name,
           teamName: invites.team.name,
         }),
+        headers: {
+          "X-Entity-Ref-ID": nanoid(),
+        },
         html: await render(
           InviteEmail({
             invitedByEmail: invites.user.email,

@@ -120,7 +120,7 @@ export function ShareReport({ defaultValue, type, setOpen }: Props) {
                         ) : (
                           <span>Expire at</span>
                         )}
-                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                        <CalendarIcon className="ml-auto size-4 opacity-50" />
                       </Button>
                     </FormControl>
                   </PopoverTrigger>
@@ -149,7 +149,7 @@ export function ShareReport({ defaultValue, type, setOpen }: Props) {
               className="w-full"
             >
               {createReport.status === "executing" ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
+                <Loader2 className="size-4 animate-spin" />
               ) : (
                 "Publish"
               )}

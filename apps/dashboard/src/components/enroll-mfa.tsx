@@ -114,7 +114,7 @@ export function EnrollMFA() {
         <CollapsibleTrigger className="p-0 text-sm w-full">
           <div className="flex items-center justify-between">
             <span className="font-medium">Use setup key</span>
-            <CaretSortIcon className="h-4 w-4" />
+            <CaretSortIcon className="size-4" />
           </div>
         </CollapsibleTrigger>
         <CollapsibleContent>

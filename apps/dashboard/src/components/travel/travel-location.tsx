@@ -92,7 +92,7 @@ export function TravelLocation({
             className="h-8 w-8"
             onClick={() => selectLocation(place)}
           >
-            <Icons.Plus className="h-4 w-4" />
+            <Icons.Plus className="size-4" />
           </Button>
         </div>
       ))}
@@ -126,19 +126,19 @@ export function TravelLocation({
           className="w-full justify-start text-left font-normal"
           onClick={() => setIsOpen(!isOpen)}
         >
-          <TypeIcon className="mr-2 h-4 w-4 shrink-0" />
+          <TypeIcon className="mr-2 size-4 shrink-0" />
           <span className="flex-grow truncate">{displayValue}</span>
           {value && (
             <Button
               variant="ghost"
               size="sm"
-              className="h-4 w-4 p-0 ml-2"
+              className="size-4 p-0 ml-2"
               onClick={(e) => {
                 e.stopPropagation();
                 clearSelection();
               }}
             >
-              <Icons.Clear className="h-4 w-4" />
+              <Icons.Clear className="size-4" />
             </Button>
           )}
         </Button>
@@ -152,7 +152,7 @@ export function TravelLocation({
               onChange={updateSearchQuery}
               className="pl-8 border-border"
             />
-            <Icons.Search className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4" />
+            <Icons.Search className="absolute left-2 top-1/2 -translate-y-1/2 size-4" />
           </div>
         </div>
         <div className="w-[350px] overflow-auto">

@@ -107,7 +107,7 @@ export function ComboboxDropdown<T extends ComboboxItem>({
                   <>
                     <Check
                       className={cn(
-                        "mr-2 h-4 w-4",
+                        "mr-2 size-4",
                         isChecked ? "opacity-100" : "opacity-0",
                       )}
                     />
@@ -156,12 +156,12 @@ export function ComboboxDropdown<T extends ComboboxItem>({
           className="w-full justify-between relative"
         >
           {selectedItem
-            ? (
+            ? ((
                 <div className="flex items-center">
                   {renderSelectedItem?.(selectedItem)}
                 </div>
-              ) ?? selectedItem.label
-            : placeholder ?? "Select item..."}
+              ) ?? selectedItem.label)
+            : (placeholder ?? "Select item...")}
           <ChevronsUpDown className="size-4 opacity-50 absolute right-2" />
         </Button>
       </PopoverTrigger>

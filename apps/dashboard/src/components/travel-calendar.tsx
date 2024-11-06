@@ -3,6 +3,7 @@
 import { useTravelParams } from "@/hooks/use-travel-params";
 import { formatAmount, secondsToHoursAndMinutes } from "@/utils/format";
 import { TZDate } from "@date-fns/tz";
+import NumberFlow from "@number-flow/react";
 import { cn } from "@travelese/ui/cn";
 import { Icons } from "@travelese/ui/icons";
 import {
@@ -24,7 +25,6 @@ import {
   startOfWeek,
   subMonths,
 } from "date-fns";
-import MotionNumber from "motion-number";
 import { useCallback, useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 import { TravelEvents } from "./travel-events";
@@ -244,7 +244,7 @@ function CalendarHeader({
     <div className="flex items-center justify-between mb-6">
       <div className="space-y-2 select-text">
         <h1 className="text-4xl font-mono">
-          <MotionNumber
+          <NumberFlow
             value={
               meta?.totalDuration ? Math.round(meta.totalDuration / 3600) : 0
             }
@@ -266,7 +266,7 @@ function CalendarHeader({
           <TooltipProvider delayDuration={100}>
             <Tooltip>
               <TooltipTrigger>
-                <Icons.Info className="h-4 w-4 mt-1" />
+                <Icons.Info className="size-4 mt-1" />
               </TooltipTrigger>
               <TooltipContent
                 className="text-xs text-[#878787] w-[250px] p-0 dark:bg-background"

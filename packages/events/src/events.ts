@@ -191,6 +191,14 @@ export const LogEvents = {
     name: "Update Currency",
     channel: "transaction",
   },
+  CreateCustomer: {
+    name: "Create Customer",
+    channel: "customer",
+  },
+  DeleteCustomer: {
+    name: "Delete Customer",
+    channel: "customer",
+  },
   SearchTravel: {
     name: "Search Travel",
     channel: "travel",

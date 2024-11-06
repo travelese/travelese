@@ -33,11 +33,11 @@ export function TravelMode({ initialValue, disabled }: Props) {
           className="w-full justify-between"
           disabled={disabled}
         >
-          <Icons.ModeOfTravel className="h-4 w-4 mr-2" />
+          <Icons.ModeOfTravel className="size-4 mr-2" />
           <span className="flex-grow line-clamp-1 text-ellipsis text-left">
             {t(`travel_mode.${optimisticState}`)}
           </span>
-          <ChevronDown className="ml-2 h-4 w-4" />
+          <ChevronDown className="ml-2 size-4" />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-[225px]" sideOffset={10}>

@@ -44,13 +44,13 @@ export function FlightCard({ offer }: { offer: Offer }) {
                           </div>
                         </TooltipTrigger>
                         <TooltipContent className="font-mono text-muted-foreground">
-                          <Icons.City className="h-4 w-4" />{" "}
+                          <Icons.City className="size-4" />{" "}
                           {segment.origin.city_name}
                           <br />
-                          <Icons.Airport className="h-4 w-4" />{" "}
+                          <Icons.Airport className="size-4" />{" "}
                           {segment.origin.name}
                           <br />
-                          <Icons.Terminal className="h-4 w-4" />{" "}
+                          <Icons.Terminal className="size-4" />{" "}
                           {segment.origin_terminal}
                         </TooltipContent>
                       </Tooltip>
@@ -71,13 +71,13 @@ export function FlightCard({ offer }: { offer: Offer }) {
                         </div>
                       </TooltipTrigger>
                       <TooltipContent className="font-mono text-muted-foreground">
-                        <Icons.City className="h-4 w-4" />{" "}
+                        <Icons.City className="size-4" />{" "}
                         {segment.destination.city_name}
                         <br />
-                        <Icons.Airport className="h-4 w-4" />{" "}
+                        <Icons.Airport className="size-4" />{" "}
                         {segment.destination.name}
                         <br />
-                        <Icons.Terminal className="h-4 w-4" />{" "}
+                        <Icons.Terminal className="size-4" />{" "}
                         {segment.destination_terminal}
                       </TooltipContent>
                     </Tooltip>
