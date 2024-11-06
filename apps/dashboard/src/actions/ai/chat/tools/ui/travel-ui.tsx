@@ -53,11 +53,15 @@ export function TravelUI({ type, travel, searchResultsData }: Props) {
           <div className="font-medium">
             Found {results.length} {type}
           </div>
-          {type === "flights" ? (
-            <FlightCard offer={results[0] as Offer} />
-          ) : (
-            <StayCard stay={results[0] as StaysSearchResult} />
-          )}
+          <div className="grid gap-4">
+            {type === "flights"
+              ? results.map((offer: Offer) => (
+                  <FlightCard key={offer.id} offer={offer} />
+                ))
+              : results.map((stay: StaysSearchResult) => (
+                  <StayCard key={stay.id} stay={stay} />
+                ))}
+          </div>
         </div>
       </div>
     </BotCard>

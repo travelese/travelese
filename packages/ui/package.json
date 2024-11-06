@@ -13,13 +13,13 @@
     "build": "storybook build"
   },
   "devDependencies": {
-    "@storybook/addon-essentials": "^8.3.6",
-    "@storybook/addon-links": "^8.3.6",
-    "@storybook/react-vite": "^8.3.6",
+    "@storybook/addon-essentials": "^8.4.2",
+    "@storybook/addon-links": "^8.4.2",
+    "@storybook/react-vite": "^8.4.2",
     "autoprefixer": "^10.4.20",
     "react": "18.3.1",
     "react-dom": "18.3.1",
-    "storybook": "^8.3.6",
+    "storybook": "^8.4.2",
     "typescript": "^5.6.3"
   },
   "exports": {
