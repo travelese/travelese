@@ -180,15 +180,15 @@ export const StopsInfo = ({ slice }: { slice: OfferSlice }) => {
                   {segment.destination.iata_code})
                 </div>
                 <div className="text-xs text-muted-foreground">
-                  <Icons.Duration className="h-4 w-4" />{" "}
+                  <Icons.Duration className="size-4" />{" "}
                   {formatDuration(segment.duration)}
                 </div>
                 <div className="text-xs text-muted-foreground">
-                  <Icons.Landing className="h-4 w-4" />{" "}
+                  <Icons.Landing className="size-4" />{" "}
                   {formatDateTime(segment.arriving_at)}
                 </div>
                 <div className="text-xs text-muted-foreground">
-                  <Icons.Takeoff className="h-4 w-4" />{" "}
+                  <Icons.Takeoff className="size-4" />{" "}
                   {formatDateTime(segment.departing_at)}
                 </div>
                 {index < stopCount - 1 && (
@@ -278,7 +278,7 @@ export function BaggageInfo({ segments }: { segments: OfferSliceSegment[] }) {
         <Tooltip>
           <TooltipTrigger asChild>
             <div className="flex items-center gap-1">
-              <Icons.Backpack className="h-4 w-4" />
+              <Icons.Backpack className="size-4" />
               <span>{countBagType("carry_on", segments)}</span>
             </div>
           </TooltipTrigger>
@@ -291,7 +291,7 @@ export function BaggageInfo({ segments }: { segments: OfferSliceSegment[] }) {
         <Tooltip>
           <TooltipTrigger asChild>
             <div className="flex items-center gap-1">
-              <Icons.Briefcase className="h-4 w-4" />
+              <Icons.Briefcase className="size-4" />
               <span>{countBagType("checked", segments)}</span>
             </div>
           </TooltipTrigger>

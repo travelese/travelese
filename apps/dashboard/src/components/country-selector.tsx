@@ -15,18 +15,25 @@ import {
   PopoverTrigger,
 } from "@travelese/ui/popover";
 import * as React from "react";
+import { useEffect } from "react";
 
 type Props = {
   defaultValue: string;
-  onSelect: (countryCode: string) => void;
+  onSelect: (countryCode: string, countryName: string) => void;
 };
 
 export function CountrySelector({ defaultValue, onSelect }: Props) {
   const [open, setOpen] = React.useState(false);
   const [value, setValue] = React.useState(defaultValue);
 
+  useEffect(() => {
+    if (value !== defaultValue) {
+      setValue(defaultValue);
+    }
+  }, [defaultValue, value]);
+
   const selected = Object.values(countries).find(
-    (country) => country.code === value,
+    (country) => country.code === value || country.name === value,
   );
 
   return (
@@ -34,12 +41,11 @@ export function CountrySelector({ defaultValue, onSelect }: Props) {
       <PopoverTrigger asChild>
         <Button
           variant="outline"
-          role="combobox"
           aria-expanded={open}
           className="w-full justify-between font-normal truncate bg-accent"
         >
           {value ? selected?.name : "Select country"}
-          <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+          <CaretSortIcon className="ml-2 size-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
       <PopoverContentWithoutPortal className="w-[225px] p-0">
@@ -53,14 +59,14 @@ export function CountrySelector({ defaultValue, onSelect }: Props) {
                 value={country.name}
                 onSelect={() => {
                   setValue(country.code);
-                  onSelect?.(country.code);
+                  onSelect?.(country.code, country.name);
                   setOpen(false);
                 }}
               >
                 {country.name}
                 <CheckIcon
                   className={cn(
-                    "ml-auto h-4 w-4",
+                    "ml-auto size-4",
                     value === country.code ? "opacity-100" : "opacity-0",
                   )}
                 />

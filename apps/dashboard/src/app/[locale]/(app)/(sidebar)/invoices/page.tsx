@@ -12,8 +12,8 @@ import { InvoicesPaid } from "@/components/invoices-paid";
 import { InvoicesTable } from "@/components/tables/invoices";
 import { InvoiceSkeleton } from "@/components/tables/invoices/skeleton";
 import { Cookies } from "@/utils/constants";
-import { getDefaultSettings } from "@midday/invoice/default";
-import { getUser } from "@midday/supabase/cached-queries";
+import { getDefaultSettings } from "@travelese/invoice/default";
+import { getUser } from "@travelese/supabase/cached-queries";
 import type { Metadata } from "next";
 import { ErrorBoundary } from "next/dist/client/components/error-boundary";
 import { cookies } from "next/headers";
@@ -61,7 +61,7 @@ export default async function Page({
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 pt-6">
+      <div className="grid grid-cols-4 gap-6 pt-6">
         <Suspense fallback={<InvoiceSummarySkeleton />}>
           <InvoicesOpen defaultCurrency={defaultSettings.currency} />
         </Suspense>

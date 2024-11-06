@@ -44,10 +44,10 @@ export function Toaster() {
                             <Icons.Error className="text-[#FF3638]" />
                           )}
                           {props?.variant === "progress" && (
-                            <Loader2 className="h-4 w-4 animate-spin" />
+                            <Loader2 className="size-4 animate-spin" />
                           )}
                           {props?.variant === "spinner" && (
-                            <Loader2 className="h-4 w-4 animate-spin" />
+                            <Loader2 className="size-4 animate-spin" />
                           )}
                         </div>
                       )}

@@ -52,7 +52,7 @@ export function ItemCounter({
             ))}
           </div>
           <div className="flex-grow" />
-          <Icons.ChevronDown className="h-4 w-4" />
+          <Icons.ChevronDown className="size-4" />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-[225px]" sideOffset={10}>
@@ -78,7 +78,7 @@ export function ItemCounter({
                   aria-label={`Decrease ${item.label} count`}
                   className="h-8 w-8"
                 >
-                  <Icons.Minus className="h-4 w-4" />
+                  <Icons.Minus className="size-4" />
                 </Button>
                 <div className="w-8 text-center">{value[item.id] || 0}</div>
                 <Button
@@ -88,7 +88,7 @@ export function ItemCounter({
                   aria-label={`Increase ${item.label} count`}
                   className="h-8 w-8"
                 >
-                  <Icons.Plus className="h-4 w-4" />
+                  <Icons.Plus className="size-4" />
                 </Button>
               </div>
             </div>

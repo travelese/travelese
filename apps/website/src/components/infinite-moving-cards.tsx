@@ -115,7 +115,7 @@ export const InfiniteMovingCards = ({
                       <svg
                         width={2500}
                         height={2500}
-                        className="h-4 w-4"
+                        className="size-4"
                         viewBox="0 0 512 512"
                       >
                         <path

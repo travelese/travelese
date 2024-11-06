@@ -46,11 +46,11 @@ export function TravelCabin({ value, disabled, onChange }: Props) {
           className="w-full justify-between"
           disabled={disabled}
         >
-          <Icons.CabinClass className="h-4 w-4 mr-2" />
+          <Icons.CabinClass className="size-4 mr-2" />
           <span className="flex-grow line-clamp-1 text-ellipsis text-left">
             {t(`cabin_class.${optimisticState}`)}
           </span>
-          <Icons.ChevronDown className="ml-2 h-4 w-4" />
+          <Icons.ChevronDown className="ml-2 size-4" />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-[225px]" sideOffset={10}>

@@ -7,13 +7,12 @@ import {
   Section,
   Text,
 } from "@react-email/components";
+import { getEmailUrl } from "@travelese/utils/envs";
 import { TripleColumn } from "responsive-react-email";
 
-type Props = {
-  baseUrl?: string;
-};
+const baseUrl = getEmailUrl();
 
-export function Footer({ baseUrl }: Props) {
+export function Footer() {
   return (
     <Section className="w-full">
       <Hr />

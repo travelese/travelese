@@ -161,7 +161,7 @@ export const columns: ColumnDef<Payment>[] = [
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="h-8 w-8 p-0">
-                  <MoreHorizontal className="h-4 w-4" />
+                  <MoreHorizontal className="size-4" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
@@ -197,7 +197,7 @@ export const columns: ColumnDef<Payment>[] = [
                         }
                       >
                         {leaveTeam.status === "executing" ? (
-                          <Loader2 className="h-4 w-4 animate-spin" />
+                          <Loader2 className="size-4 animate-spin" />
                         ) : (
                           "Confirm"
                         )}

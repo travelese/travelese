@@ -196,7 +196,7 @@ export function TravelSearchFilter({ members }: Props) {
         <DropdownMenuGroup>
           <DropdownMenuSub>
             <DropdownMenuSubTrigger>
-              <Icons.CalendarMonth className="mr-2 h-4 w-4" />
+              <Icons.CalendarMonth className="mr-2 size-4" />
               <span>Date</span>
             </DropdownMenuSubTrigger>
             <DropdownMenuPortal>
@@ -237,7 +237,7 @@ export function TravelSearchFilter({ members }: Props) {
         <DropdownMenuGroup>
           <DropdownMenuSub>
             <DropdownMenuSubTrigger>
-              <Icons.ProjectStatus className="mr-2 h-4 w-4 rotate-180" />
+              <Icons.ProjectStatus className="mr-2 size-4 rotate-180" />
               <span>Status</span>
             </DropdownMenuSubTrigger>
             <DropdownMenuPortal>

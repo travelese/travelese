@@ -50,7 +50,7 @@ export function ChartFilters({ currencies }: Props) {
       <DropdownMenuContent sideOffset={10} align="end" className="w-[200px]">
         <DropdownMenuSub>
           <DropdownMenuSubTrigger>
-            <Icons.Currency className="mr-2 h-4 w-4" />
+            <Icons.Currency className="mr-2 size-4" />
             <span>Currency</span>
           </DropdownMenuSubTrigger>
           <DropdownMenuPortal>

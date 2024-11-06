@@ -1,12 +1,12 @@
 {
-  "extends": "@travelese/tsconfig/react-library.json",
+  "extends": "@travelese/tsconfig/base.json",
+  "include": ["emails", "components"],
+  "exclude": ["node_modules"],
   "compilerOptions": {
     "baseUrl": ".",
-    "paths": {
-      "@/*": ["./src/*"],
-      "@travelese/ui/*": ["../ui/src/*"]
-    }
-  },
-  "include": ["."],
-  "exclude": ["node_modules"]
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "jsx": "react-jsx",
+    "jsxImportSource": "react"
+  }
 }

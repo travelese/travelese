@@ -10,18 +10,16 @@ import {
   Tailwind,
   Text,
 } from "@react-email/components";
+import { getEmailUrl } from "@travelese/utils/envs";
 import { Footer } from "../components/footer";
 import { GetStarted } from "../components/get-started";
 import { Logo } from "../components/logo";
 
+const baseUrl = getEmailUrl();
+
 interface WelcomeProps {
   fullName: string;
 }
-
-const baseUrl =
-  process.env.VERCEL_ENV === "production"
-    ? "https://travelese.ai/email"
-    : "http://localhost:3000/email";
 
 export const WelcomeEmail = ({ fullName = "Armin Babaei" }: WelcomeProps) => {
   const firstName = fullName.split(" ").at(0);
@@ -60,7 +58,7 @@ export const WelcomeEmail = ({ fullName = "Armin Babaei" }: WelcomeProps) => {
             className="border-transparent md:border-[#E8E7E1] my-[40px] mx-auto p-[20px] max-w-[600px]"
             style={{ borderStyle: "solid", borderWidth: 1 }}
           >
-            <Logo baseUrl={baseUrl} />
+            <Logo />
             <Heading className="text-[#121212] text-[21px] font-normal text-center p-0 my-[30px] mx-0">
               Welcome to Travelese
             </Heading>
@@ -127,7 +125,7 @@ export const WelcomeEmail = ({ fullName = "Armin Babaei" }: WelcomeProps) => {
 
             <br />
 
-            <Footer baseUrl={baseUrl} />
+            <Footer />
           </Container>
         </Body>
       </Tailwind>

@@ -196,7 +196,7 @@ export function VaultSearchFilter({ members }: { members: any[] }) {
         <DropdownMenuGroup>
           <DropdownMenuSub>
             <DropdownMenuSubTrigger>
-              <Icons.CalendarMonth className="mr-2 h-4 w-4" />
+              <Icons.CalendarMonth className="mr-2 size-4" />
               <span>Date</span>
             </DropdownMenuSubTrigger>
             <DropdownMenuPortal>
@@ -233,7 +233,7 @@ export function VaultSearchFilter({ members }: { members: any[] }) {
         <DropdownMenuGroup>
           <DropdownMenuSub>
             <DropdownMenuSubTrigger>
-              <Icons.Face className="mr-2 h-4 w-4" />
+              <Icons.Face className="mr-2 size-4" />
               <span>Members</span>
             </DropdownMenuSubTrigger>
             <DropdownMenuPortal>
@@ -267,7 +267,7 @@ export function VaultSearchFilter({ members }: { members: any[] }) {
         <DropdownMenuGroup>
           <DropdownMenuSub>
             <DropdownMenuSubTrigger>
-              <Icons.Status className="mr-2 h-4 w-4" />
+              <Icons.Status className="mr-2 size-4" />
               <span>Tags</span>
             </DropdownMenuSubTrigger>
             <DropdownMenuPortal>

@@ -356,7 +356,7 @@ export function SearchTravelForm({
                             }
                             className="w-10 h-10 flex-1"
                           >
-                            <Icons.Close className="h-4 w-4" />
+                            <Icons.Close className="size-4" />
                           </Button>
                           <Button
                             type="button"
@@ -369,14 +369,14 @@ export function SearchTravelForm({
                             }
                             className="w-10 h-10 flex-1"
                           >
-                            <Icons.Plus className="h-4 w-4" />
+                            <Icons.Plus className="size-4" />
                           </Button>
                           <SubmitButton
                             isSubmitting={isSubmitting}
                             size="icon"
                             className="w-10 h-10 flex-1"
                           >
-                            <Icons.Travel className="h-4 w-4" />
+                            <Icons.Travel className="size-4" />
                           </SubmitButton>
                         </div>
                       )}

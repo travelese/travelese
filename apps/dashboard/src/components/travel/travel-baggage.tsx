@@ -20,19 +20,19 @@ export function TravelBaggage({ value, disabled, onChange }: Props) {
       id: "carry_on",
       label: t("travel_baggage.carry_on"),
       subLabel: "Baggage",
-      icon: <Icons.CarryOn className="h-4 w-4" />,
+      icon: <Icons.CarryOn className="size-4" />,
     },
     {
       id: "cabin",
       label: t("travel_baggage.cabin"),
       subLabel: "Baggage",
-      icon: <Icons.Cabin className="h-4 w-4" />,
+      icon: <Icons.Cabin className="size-4" />,
     },
     {
       id: "checked",
       label: t("travel_baggage.checked"),
       subLabel: "Baggage",
-      icon: <Icons.Checked className="h-4 w-4" />,
+      icon: <Icons.Checked className="size-4" />,
     },
   ];
 

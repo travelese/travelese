@@ -61,7 +61,7 @@ export async function BurnRateChart({
           <TooltipProvider delayDuration={100}>
             <Tooltip>
               <TooltipTrigger asChild>
-                <Icons.Info className="h-4 w-4 mt-1" />
+                <Icons.Info className="size-4 mt-1" />
               </TooltipTrigger>
               <TooltipContent
                 className="text-xs text-[#878787] max-w-[240px] p-4 space-y-2"

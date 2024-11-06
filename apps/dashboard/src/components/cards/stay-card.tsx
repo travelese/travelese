@@ -40,12 +40,12 @@ export function StayCard({ stay }: { stay: StaysSearchResult }) {
                     </div>
                   </TooltipTrigger>
                   <TooltipContent className="font-mono text-muted-foreground">
-                    <Icons.City className="h-4 w-4" /> {stay.accommodation.name}
+                    <Icons.City className="size-4" /> {stay.accommodation.name}
                     <br />
-                    <Icons.MapPin className="h-4 w-4" />{" "}
+                    <Icons.MapPin className="size-4" />{" "}
                     {stay.accommodation.location.address.line_one}
                     <br />
-                    <Icons.City className="h-4 w-4" />{" "}
+                    <Icons.City className="size-4" />{" "}
                     {stay.accommodation.location.address.city_name}
                   </TooltipContent>
                 </Tooltip>
@@ -64,7 +64,7 @@ export function StayCard({ stay }: { stay: StaysSearchResult }) {
                     </div>
                   </TooltipTrigger>
                   <TooltipContent className="font-mono text-muted-foreground">
-                    <Icons.Calendar className="h-4 w-4" /> {stay.nights} night
+                    <Icons.Calendar className="size-4" /> {stay.nights} night
                     {stay.nights !== 1 ? "s" : ""}
                   </TooltipContent>
                 </Tooltip>
