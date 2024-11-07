@@ -29,12 +29,10 @@ export function PaymentDetails() {
         render={({ field }) => (
           <Editor
             initialContent={field.value}
-            onChange={(content) => {
-              field.onChange(content);
-            }}
+            onChange={field.onChange}
             onBlur={(content) => {
               updateInvoiceTemplate.execute({
-                payment_details: content,
+                payment_details: content ? JSON.stringify(content) : null,
               });
             }}
             className="h-[78px]"

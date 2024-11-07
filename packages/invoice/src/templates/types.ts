@@ -16,6 +16,9 @@ export type Template = {
   vat_label: string;
   locale: string;
   timezone: string;
+  include_decimals: boolean;
+  include_qr: boolean;
+  include_vat: boolean;
 };
 
 export type LineItem = {
@@ -29,6 +32,7 @@ export type LineItem = {
 
 export type TemplateProps = {
   invoice_number: string;
+  discount?: number;
   issue_date: string;
   due_date: string;
   template: Template;

@@ -1,5 +1,5 @@
 import { Document, Font, Image, Page, Text, View } from "@react-pdf/renderer";
-import { getCdnUrl } from "@travelese/utils/envs";
+import { getCdnUrl } from "@travelese/utils/src/envs";
 import QRCodeUtil from "qrcode";
 import type { TemplateProps } from "../types";
 import { EditorContent } from "./components/editor-content";

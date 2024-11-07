@@ -19,6 +19,12 @@ export function LineItems() {
   const { control } = useFormContext<InvoiceFormValues>();
   const currency = useWatch({ control, name: "template.currency" });
   const includeVAT = useWatch({ control, name: "template.include_vat" });
+  const includeDecimals = useWatch({
+    control,
+    name: "template.include_decimals",
+  });
+
+  const maximumFractionDigits = includeDecimals ? 2 : 0;
 
   const { fields, append, remove, swap } = useFieldArray({
     control,
@@ -52,7 +58,7 @@ export function LineItems() {
   return (
     <div className="space-y-4">
       <div
-        className={`grid ${includeVAT ? "grid-cols-[1.5fr_15%_15%_6%_15%]" : "grid-cols-[1.5fr_15%_15%_15%]"} gap-4 items-end mb-2`}
+        className={`grid ${includeVAT ? "grid-cols-[1.5fr_15%_15%_10%_15%]" : "grid-cols-[1.5fr_15%_15%_15%]"} gap-4 items-end mb-2`}
       >
         <LabelInput
           name="template.description_label"
@@ -118,6 +124,7 @@ export function LineItems() {
             isReorderable={fields.length > 1}
             currency={currency}
             includeVAT={includeVAT}
+            maximumFractionDigits={maximumFractionDigits}
           />
         ))}
       </Reorder.Group>
@@ -148,6 +155,7 @@ function LineItemRow({
   item,
   currency,
   includeVAT,
+  maximumFractionDigits,
 }: {
   index: number;
   handleRemove: (index: number) => void;
@@ -155,9 +163,10 @@ function LineItemRow({
   item: InvoiceFormValues["line_items"][number];
   currency: string;
   includeVAT: boolean;
+  maximumFractionDigits: number;
 }) {
   const controls = useDragControls();
-  const { control, setValue } = useFormContext<InvoiceFormValues>();
+  const { control } = useFormContext<InvoiceFormValues>();
 
   const price = useWatch({
     control,
@@ -176,7 +185,7 @@ function LineItemRow({
 
   return (
     <Reorder.Item
-      className={`grid ${includeVAT ? "grid-cols-[1.5fr_15%_15%_6%_15%]" : "grid-cols-[1.5fr_15%_15%_15%]"} gap-4 items-end relative group mb-2 w-full`}
+      className={`grid ${includeVAT ? "grid-cols-[1.5fr_15%_15%_10%_15%]" : "grid-cols-[1.5fr_15%_15%_15%]"} gap-4 items-end relative group mb-2 w-full`}
       value={item}
       dragListener={false}
       dragControls={controls}
@@ -188,13 +197,13 @@ function LineItemRow({
           onPointerDown={(e) => controls.start(e)}
           variant="ghost"
         >
-          <Icons.DragIndicator className="size-4 text-[#878787]" />
+          <Icons.DragIndicator className="h-4 w-4 text-[#878787]" />
         </Button>
       )}
 
       <Input name={`line_items.${index}.name`} autoFocus={index > 0} />
 
-      <AmountInput name={`line_items.${index}.price`} min="0" />
+      <AmountInput name={`line_items.${index}.price`} />
 
       <QuantityInput name={`line_items.${index}.quantity`} />
 
@@ -210,6 +219,7 @@ function LineItemRow({
               includeVAT,
             }),
             currency,
+            maximumFractionDigits,
           })}
         </span>
       </div>

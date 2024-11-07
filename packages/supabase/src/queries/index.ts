@@ -1,4 +1,3 @@
-import { UTCDate } from "@date-fns/utc";
 import { generateInvoiceNumber } from "@travelese/invoice/number";
 import {
   addDays,
@@ -1146,7 +1145,7 @@ export async function getInvoicesQuery(
   const query = supabase
     .from("invoices")
     .select(
-      "id, invoice_number, internal_note, token, due_date, invoice_date, paid_at, updated_at, viewed_at, amount, template, currency, status, vat, tax, customer:customer_id(id, name, website), customer_name",
+      "id, invoice_number, internal_note, token, due_date, issue_date, paid_at, updated_at, viewed_at, amount, template, currency, status, vat, tax, customer:customer_id(id, name, website), customer_name",
       { count: "exact" },
     )
     .eq("team_id", teamId);
@@ -1293,7 +1292,7 @@ export async function getDraftInvoiceQuery(supabase: Client, id: string) {
   return supabase
     .from("invoices")
     .select(
-      "id, due_date, invoice_number, template, amount, currency, line_items, payment_details, note_details, customer_details, vat, tax, from_details, issue_date, customer_id, customer_name, token",
+      "id, due_date, invoice_number, template, status, discount, amount, currency, line_items, payment_details, note_details, customer_details, vat, tax, from_details, issue_date, customer_id, customer_name, token",
     )
     .eq("id", id)
     .single();
@@ -1313,212 +1312,4 @@ export async function searchInvoiceNumberQuery(
     .select("invoice_number")
     .eq("team_id", params.teamId)
     .ilike("invoice_number", `%${params.query}`);
-}
-
-type GetTravelBookingQueryParams = {
-  teamId: string;
-  bookingId: string;
-};
-
-export async function getTravelBookingQuery(
-  supabase: Client,
-  params: GetTravelBookingQueryParams,
-) {
-  return supabase
-    .from("travel_bookings")
-    .select("*")
-    .eq("id", params.bookingId)
-    .eq("team_id", params.teamId)
-    .single();
-}
-
-export type GetTravelBookingsQueryParams = {
-  teamId: string;
-  to?: number;
-  from?: number;
-  start?: string;
-  end?: string;
-  sort?: [string, "asc" | "desc"];
-  search?: {
-    query?: string;
-    fuzzy?: boolean;
-  };
-  filter?: {
-    status?: "in_progress" | "completed";
-  };
-};
-
-export async function getTravelBookingsQuery(
-  supabase: Client,
-  params: GetTravelBookingsQueryParams,
-) {
-  const {
-    from = 0,
-    to = 10,
-    filter,
-    sort,
-    teamId,
-    search,
-    start,
-    end,
-  } = params;
-  const { status } = filter || {};
-
-  const query = supabase
-    .from("travel_bookings")
-    .select(
-      "*, total_duration, users:get_assigned_users_for_booking, total_amount:get_booking_total_amount",
-      {
-        count: "exact",
-      },
-    )
-    .eq("team_id", teamId);
-
-  if (status) {
-    query.eq("status", status);
-  }
-
-  if (start && end) {
-    query.gte("created_at", start);
-    query.lte("created_at", end);
-  }
-
-  if (search?.query && search?.fuzzy) {
-    query.ilike("name", `%${search.query}%`);
-  }
-
-  if (sort) {
-    const [column, value] = sort;
-    if (column === "time") {
-      query.order("total_duration", { ascending: value === "asc" });
-    } else if (column === "amount") {
-      // query.order("total_amount", { ascending: value === "asc" });
-    } else if (column === "assigned") {
-      // query.order("assigned_id", { ascending: value === "asc" });
-    } else {
-      query.order(column, { ascending: value === "asc" });
-    }
-  } else {
-    query.order("created_at", { ascending: false });
-  }
-
-  const { data, count } = await query.range(from, to);
-
-  return {
-    meta: {
-      count,
-    },
-    data,
-  };
-}
-
-type GetTravelRecordsByDateParams = {
-  teamId: string;
-  date: string;
-  bookingId?: string;
-  userId?: string;
-};
-
-export async function getTravelRecordsByDateQuery(
-  supabase: Client,
-  params: GetTravelRecordsByDateParams,
-) {
-  const { teamId, bookingId, date, userId } = params;
-
-  const query = supabase
-    .from("travel_entries")
-    .select(
-      "*, assigned:assigned_id(id, full_name, avatar_url), booking:booking_id(id, name, rate, currency)",
-    )
-    .eq("team_id", teamId)
-    .eq("date", formatISO(new UTCDate(date), { representation: "date" }));
-
-  if (bookingId) {
-    query.eq("booking_id", bookingId);
-  }
-
-  if (userId) {
-    query.eq("assigned_id", userId);
-  }
-
-  const { data } = await query;
-
-  const totalDuration = data?.reduce(
-    (duration, item) => (item?.duration ?? 0) + duration,
-    0,
-  );
-
-  return {
-    meta: {
-      totalDuration,
-    },
-    data,
-  };
-}
-
-export type GetTravelRecordsByRangeParams = {
-  teamId: string;
-  from: string;
-  to: string;
-  bookingId?: string;
-  userId?: string;
-};
-
-export async function getTravelRecordsByRangeQuery(
-  supabase: Client,
-  params: GetTravelRecordsByRangeParams,
-) {
-  if (!params.teamId) {
-    return null;
-  }
-
-  const query = supabase
-    .from("travel_entries")
-    .select(
-      "*, assigned:assigned_id(id, full_name, avatar_url), booking:booking_id(id, name, rate, currency)",
-    )
-    .eq("team_id", params.teamId)
-    .gte("date", new UTCDate(params.from).toISOString())
-    .lte("date", new UTCDate(params.to).toISOString())
-    .order("created_at");
-
-  if (params.userId) {
-    query.eq("assigned_id", params.userId);
-  }
-
-  if (params.bookingId) {
-    query.eq("booking_id", params.bookingId);
-  }
-
-  const { data } = await query;
-  const result = data?.reduce((acc, item) => {
-    const key = item.date;
-
-    if (!acc[key]) {
-      acc[key] = [];
-    }
-    acc[key].push(item);
-    return acc;
-  }, {});
-
-  const totalDuration = data?.reduce(
-    (duration, item) => (item?.duration ?? 0) + duration,
-    0,
-  );
-
-  const totalAmount = data?.reduce(
-    (amount, { booking, duration = 0 }) =>
-      amount + (booking?.rate ?? 0) * (duration / 3600),
-    0,
-  );
-
-  return {
-    meta: {
-      totalDuration,
-      totalAmount,
-      from: params.from,
-      to: params.to,
-    },
-    data: result,
-  };
 }

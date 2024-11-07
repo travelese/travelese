@@ -192,7 +192,7 @@ export function InvoiceSearchFilter({ customers: customersData }: Props) {
         <DropdownMenuGroup>
           <DropdownMenuSub>
             <DropdownMenuSubTrigger>
-              <Icons.CalendarMonth className="mr-2 size-4" />
+              <Icons.CalendarMonth className="mr-2 h-4 w-4" />
               <span>Due Date</span>
             </DropdownMenuSubTrigger>
             <DropdownMenuPortal>
@@ -204,7 +204,6 @@ export function InvoiceSearchFilter({ customers: customersData }: Props) {
                 <Calendar
                   mode="range"
                   initialFocus
-                  today={start ? new Date(start) : new Date()}
                   toDate={new Date()}
                   selected={{
                     from: start ? new Date(start) : undefined,
@@ -229,7 +228,7 @@ export function InvoiceSearchFilter({ customers: customersData }: Props) {
         <DropdownMenuGroup>
           <DropdownMenuSub>
             <DropdownMenuSubTrigger>
-              <Icons.Face className="mr-2 size-4" />
+              <Icons.Face className="mr-2 h-4 w-4" />
               <span>Customer</span>
             </DropdownMenuSubTrigger>
             <DropdownMenuPortal>
@@ -260,7 +259,7 @@ export function InvoiceSearchFilter({ customers: customersData }: Props) {
         <DropdownMenuGroup>
           <DropdownMenuSub>
             <DropdownMenuSubTrigger>
-              <Icons.Status className="mr-2 size-4" />
+              <Icons.Status className="mr-2 h-4 w-4" />
               <span>Status</span>
             </DropdownMenuSubTrigger>
             <DropdownMenuPortal>
