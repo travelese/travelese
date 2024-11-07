@@ -196,7 +196,7 @@ export function TrackerSearchFilter({ members }: Props) {
         <DropdownMenuGroup>
           <DropdownMenuSub>
             <DropdownMenuSubTrigger>
-              <Icons.CalendarMonth className="mr-2 size-4" />
+              <Icons.CalendarMonth className="mr-2 h-4 w-4" />
               <span>Date</span>
             </DropdownMenuSubTrigger>
             <DropdownMenuPortal>
@@ -208,7 +208,6 @@ export function TrackerSearchFilter({ members }: Props) {
                 <Calendar
                   mode="range"
                   initialFocus
-                  today={filters.start ? new Date(filters.start) : new Date()}
                   toDate={new Date()}
                   selected={{
                     from: filters.start && new Date(filters.start),
@@ -237,7 +236,7 @@ export function TrackerSearchFilter({ members }: Props) {
         <DropdownMenuGroup>
           <DropdownMenuSub>
             <DropdownMenuSubTrigger>
-              <Icons.ProjectStatus className="mr-2 size-4 rotate-180" />
+              <Icons.ProjectStatus className="mr-2 h-4 w-4 rotate-180" />
               <span>Status</span>
             </DropdownMenuSubTrigger>
             <DropdownMenuPortal>

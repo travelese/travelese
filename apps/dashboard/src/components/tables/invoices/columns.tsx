@@ -28,7 +28,7 @@ import * as React from "react";
 export type Invoice = {
   id: string;
   due_date: string;
-  invoice_date?: string;
+  issue_date?: string;
   paid_at?: string;
   status: string;
   currency: string;
@@ -88,7 +88,8 @@ export const columns: ColumnDef<Invoice>[] = [
       const customer = row.original.customer;
       const name = customer?.name || row.original.customer_name;
       const viewAt = row.original.viewed_at;
-      const hasNewMessages = false;
+
+      if (!name) return "-";
 
       return (
         <div className="flex items-center space-x-2">
@@ -147,10 +148,10 @@ export const columns: ColumnDef<Invoice>[] = [
     cell: ({ row }) => row.getValue("invoice_number"),
   },
   {
-    header: "Invoice date",
-    accessorKey: "invoice_date",
+    header: "Issue date",
+    accessorKey: "issue_date",
     cell: ({ row }) => {
-      const date = row.getValue("invoice_date");
+      const date = row.getValue("issue_date");
       return <span>{date ? formatDate(date) : "-"}</span>;
     },
   },
@@ -195,7 +196,7 @@ export const columns: ColumnDef<Invoice>[] = [
                     <div className="absolute inset-0 rounded-full bg-[#FFD02B] animate-[pulse_1s_ease-in-out_5] opacity-50" />
                   </div>
                 )}
-                <DotsHorizontalIcon className="size-4" />
+                <DotsHorizontalIcon className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">

@@ -13,13 +13,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@travelese/ui/select";
-import {
-  formatISO,
-  startOfMonth,
-  startOfYear,
-  subMonths,
-  subWeeks,
-} from "date-fns";
+import { formatISO } from "date-fns";
+import { startOfMonth, startOfYear, subMonths, subWeeks } from "date-fns";
 import { formatDateRange } from "little-date";
 import { useAction } from "next-safe-action/hooks";
 import { parseAsString, useQueryStates } from "nuqs";
@@ -166,7 +161,6 @@ export function ChartPeriod({ defaultValue, disabled }: Props) {
           <Calendar
             mode="range"
             numberOfMonths={2}
-            today={params.from ? new Date(params.from) : new Date()}
             selected={{
               from: params.from && new Date(params.from),
               to: params.to && new Date(params.to),
@@ -176,7 +170,7 @@ export function ChartPeriod({ defaultValue, disabled }: Props) {
             }
             initialFocus
             toDate={new Date()}
-            onSelect={handleChangePeriod}
+            onSelect={(date) => handleChangePeriod(date)}
           />
         </PopoverContent>
       </Popover>

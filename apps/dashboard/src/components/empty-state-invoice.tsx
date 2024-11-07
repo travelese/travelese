@@ -1,6 +1,6 @@
 "use client";
 
-import { requestAccessAction } from "@/actions/request-access-action";
+import { requestAccessAction } from "@/actions/invoice/request-access-action";
 import { Button } from "@travelese/ui/button";
 import { cn } from "@travelese/ui/cn";
 import { Icons } from "@travelese/ui/icons";
@@ -98,7 +98,7 @@ export function EmptyStateInvoice({ hasRequested }: { hasRequested: boolean }) {
           )}
 
           {requestAccess.status === "executing" && (
-            <Loader2 className="size-4 animate-spin" />
+            <Loader2 className="h-4 w-4 animate-spin" />
           )}
           {requested && <Icons.Check />}
         </Button>

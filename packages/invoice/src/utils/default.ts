@@ -7,6 +7,9 @@ export type Settings = {
   size: string;
   include_tax: boolean;
   include_vat: boolean;
+  include_discount: boolean;
+  include_decimals: boolean;
+  include_qr: boolean;
 };
 
 export function getDefaultSettings(): Settings {
@@ -29,5 +32,8 @@ export function getDefaultSettings(): Settings {
     include_tax,
     timezone,
     include_vat: !include_tax,
+    include_discount: false,
+    include_decimals: false,
+    include_qr: true,
   };
 }
