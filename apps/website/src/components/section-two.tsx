@@ -20,9 +20,7 @@ export function SectionTwo() {
           </h3>
 
           <p className="text-[#878787] mb-4 text-sm">
-            Connect with locals and experience destinations as they do. Our
-            platform helps you find and engage with local guides, hosts, and
-            experiences that go beyond the typical tourist offerings.
+            Connect with locals and experience destinations as they do.
           </p>
 
           <div className="flex space-x-2 items-center mt-8">

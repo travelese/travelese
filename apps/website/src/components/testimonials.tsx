@@ -9,30 +9,6 @@ const testimonials = [
     verified: true,
     quote: "Hey 👋🏽 I'm Armin.",
   },
-  {
-    name: "Armin Babaei",
-    avatarUrl:
-      "https://pbs.twimg.com/profile_images/1831477610414518272/s_7NZWub_400x400.jpg",
-    handle: "@itsarminbabaei",
-    verified: true,
-    quote: "Hey 👋🏽 I'm Armin.",
-  },
-  {
-    name: "Armin Babaei",
-    avatarUrl:
-      "https://pbs.twimg.com/profile_images/1831477610414518272/s_7NZWub_400x400.jpg",
-    handle: "@itsarminbabaei",
-    verified: true,
-    quote: "Hey 👋🏽 I'm Armin.",
-  },
-  {
-    name: "Armin Babaei",
-    avatarUrl:
-      "https://pbs.twimg.com/profile_images/1831477610414518272/s_7NZWub_400x400.jpg",
-    handle: "@itsarminbabaei",
-    verified: true,
-    quote: "Hey 👋🏽 I'm Armin.",
-  },
 ];
 
 export function Testimonials() {

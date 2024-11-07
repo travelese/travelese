@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Clients from "public/product-clients.png";
-import Invoice from "public/product-invoice.jpg";
+import Invoice from "public/product-invoice.png";
 import Pdf from "public/product-pdf.png";
 
 export const metadata: Metadata = {
@@ -15,10 +15,6 @@ export default function Page() {
     <div className="container mb-52">
       <div className="mb-40">
         <div className="mt-24 text-center">
-          <span className="text-[#F5F5F3] border border-border rounded-full font-medium font-mono px-3 text-xs py-1.5 mb-4 bg-[#1D1D1D]">
-            Coming soon
-          </span>
-
           <h1 className="mt-24 font-medium text-center text-[75px] md:text-[170px] mb-2 leading-none text-stroke">
             Seamless
           </h1>
@@ -43,12 +39,7 @@ export default function Page() {
           <h4 className="font-medium text-xl md:text-2xl mb-4">
             Fast and easy
           </h4>
-          <p className="text-[#878787] text-sm">
-            Create web-based invoices quickly, save client information, and make
-            it even faster the next time. Create tailored invoices with payment
-            terms, tax rules, and discounts. Simply paste in how you want to be
-            paid and send it.
-          </p>
+          <p className="text-[#878787] text-sm">Create web-based invoices.</p>
         </div>
 
         <Image

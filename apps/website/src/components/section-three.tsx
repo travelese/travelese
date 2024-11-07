@@ -12,15 +12,9 @@ export function SectionThree() {
             </h3>
 
             <p className="text-[#878787] mb-4 text-sm">
-              Gain a deeper understanding of your own travel patterns and
-              preferences. Our platform analyzes your past trips, current
-              bookings, and future plans to provide you with personalized data
-              and actionable insights. <br />
-              Visualize your travel history, track your carbon footprint,
-              identify spending trends, and discover new destinations that align
-              with your interests. These data-driven insights help you make more
-              informed decisions, optimize your travel experiences, and
-              continually evolve as a traveler.
+              Visualize your travel history
+              <br />
+              Track your carbon footprint
             </p>
 
             <div className="flex space-x-2 items-center mt-8 text-sm">

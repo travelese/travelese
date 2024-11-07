@@ -1,7 +1,7 @@
 import { CopyInput } from "@/components/copy-input";
 import type { Metadata } from "next";
 import Image from "next/image";
-import Inbox from "public/product-inbox.jpg";
+import Inbox from "public/product-inbox.png";
 import Match from "public/product-match.png";
 import Receipt from "public/product-receipt.png";
 

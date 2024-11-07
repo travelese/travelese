@@ -29,24 +29,18 @@ export function Footer() {
                   <Link href="/overview">Overview</Link>
                 </li>
                 <li className="transition-colors text-[#878787]">
-                  <Link href="/inbox">Flights</Link>
-                </li>
-                <li className="transition-colors text-[#878787]">
-                  <Link href="/vault">Stays</Link>
-                </li>
-                {/* <li className="transition-colors text-[#878787]">
-                  <Link href="/tracker">Tracker</Link>
+                  <Link href="/travel">Travel</Link>
                 </li>
                 <li className="transition-colors text-[#878787]">
                   <Link href="/invoice">Invoice</Link>
-                </li> */}
+                </li>
                 <li className="transition-colors text-[#878787]">
                   <Link href="/pricing">Pricing</Link>
                 </li>
                 {/* <li className="transition-colors text-[#878787]">
                   <Link href="/engine">Engine</Link>
-                </li> */}
-                {/* <li className="transition-colors text-[#878787]">
+                </li>
+                <li className="transition-colors text-[#878787]">
                   <Link href="/download">Download</Link>
                 </li> */}
               </ul>
@@ -83,14 +77,11 @@ export function Footer() {
                   <Link href="/story">Story</Link>
                 </li>
                 <li className="transition-colors text-[#878787]">
-                  <Link href="/updates">Updates</Link>
+                  <Link href="/blog">Blog</Link>
                 </li>
                 <li className="transition-colors text-[#878787]">
                   <Link href="/open-startup">Open startup</Link>
                 </li>
-                {/* <li className="transition-colors text-[#878787]">
-                  <Link href="/oss-friends">OSS friends</Link>
-                </li> */}
               </ul>
             </div>
           </div>

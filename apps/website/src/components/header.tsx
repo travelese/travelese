@@ -99,20 +99,25 @@ export function Header() {
           icon: <Icons.Overview size={20} />,
         },
         {
-          path: "/flights",
-          title: "Flights",
-          icon: <Icons.Flights size={20} />,
+          path: "/travel",
+          title: "Travel",
+          icon: <Icons.Explore size={20} />,
         },
         {
-          path: "/stays",
-          title: "Stays",
-          icon: <Icons.Stays size={20} />,
-        } /* ,
+          path: "/inbox",
+          title: "Inbox",
+          icon: <Icons.Inbox2 size={20} />,
+        },
         {
           path: "/invoice",
           title: "Invoice",
           icon: <Icons.Invoice size={20} />,
-        }, */,
+        },
+        {
+          path: "/vault",
+          title: "Vault",
+          icon: <Icons.Files size={20} />,
+        },
       ],
     },
     {
@@ -120,8 +125,8 @@ export function Header() {
       path: "/pricing",
     },
     {
-      title: "Updates",
-      path: "/updates",
+      title: "Blog",
+      path: "/blog",
     },
     {
       title: "Story",
@@ -130,7 +135,7 @@ export function Header() {
     /* {
       title: "Download",
       path: "/download",
-    }, */
+    }, 
     {
       title: "Community",
       cover: (
@@ -149,7 +154,6 @@ export function Header() {
           path: "https://go.travelese.ai/XTxOfuy",
           icon: <FaDiscord size={19} />,
         },
-        /*
         {
           path: "https://docs.travelese.ai",
           title: "Documentation",
@@ -164,9 +168,9 @@ export function Header() {
           title: "Apps & Integrations",
           path: "https://docs.travelese.ai",
           icon: <MdOutlineIntegrationInstructions size={20} />,
-        }, */
+        },
       ],
-    },
+    }, */
   ];
 
   if (pathname.includes("pitch")) {

@@ -56,7 +56,9 @@ const popupCenter = ({ url, title, w, h }) => {
   return newWindow;
 };
 
-export function UpdatesToolbar({ posts }) {
+export function BlogToolbar({
+  posts,
+}: { posts: { slug: string; title: string }[] }) {
   const pathname = usePathname();
   const currentIndex = posts.findIndex((a) => pathname.endsWith(a.slug)) ?? 0;
 
@@ -90,7 +92,7 @@ export function UpdatesToolbar({ posts }) {
 
   const handleOnShare = () => {
     const popup = popupCenter({
-      url: `https://twitter.com/intent/tweet?text=${currentPost.title} https://travelese.ai/updates/${currentPost.slug}`,
+      url: `https://twitter.com/intent/tweet?text=${currentPost.title} https://travelese.ai/blog/${currentPost.slug}`,
       title: currentPost.title,
       w: 800,
       h: 400,

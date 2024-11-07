@@ -46,10 +46,10 @@ export async function fetchStats() {
     { count: users },
     { count: transactions },
     { count: bankAccounts },
-    { count: trackerEntries },
+    { count: travelEntries },
     { count: inboxItems },
     { count: bankConnections },
-    { count: trackerProjects },
+    { count: travelBookings },
     { count: reports },
     { count: vaultObjects },
     { count: transactionEnrichments },
@@ -67,7 +67,7 @@ export async function fetchStats() {
       .select("id", { count: "exact", head: true })
       .limit(1),
     supabase
-      .from("tracker_entries")
+      .from("travel_entries")
       .select("id", { count: "exact", head: true })
       .limit(1),
     supabase
@@ -79,7 +79,7 @@ export async function fetchStats() {
       .select("id", { count: "exact", head: true })
       .limit(1),
     supabase
-      .from("tracker_projects")
+      .from("travel_bookings")
       .select("id", { count: "exact", head: true })
       .limit(1),
     supabase
@@ -100,10 +100,10 @@ export async function fetchStats() {
     users,
     transactions,
     bankAccounts,
-    trackerEntries,
+    travelEntries,
     inboxItems,
     bankConnections,
-    trackerProjects,
+    travelBookings,
     reports,
     vaultObjects,
     transactionEnrichments,
