@@ -1,11 +1,11 @@
 import { Article } from "@/components/article";
-import { UpdatesToolbar } from "@/components/updates-toolbar";
+import { BlogToolbar } from "@/components/blog-toolbar";
 import { getBlogPosts } from "@/lib/blog";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Updates",
-  description: "Keep up to date with product updates and announcments.",
+  title: "Blog",
+  description: "Travelese Blog.",
 };
 
 export default async function Page() {
@@ -18,7 +18,9 @@ export default async function Page() {
       }
       return 1;
     })
-    .map((post, index) => <Article data={post} firstPost={index === 0} />);
+    .map((post, index) => (
+      <Article key={post.slug} data={post} firstPost={index === 0} />
+    ));
 
   return (
     <div className="container flex justify-center scroll-smooth">
@@ -26,7 +28,7 @@ export default async function Page() {
         {posts}
       </div>
 
-      <UpdatesToolbar
+      <BlogToolbar
         posts={data.map((post) => ({
           slug: post.slug,
           title: post.metadata.title,

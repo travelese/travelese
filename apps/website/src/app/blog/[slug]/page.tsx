@@ -16,6 +16,8 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({
   params,
+}: {
+  params: { slug: string };
 }): Promise<Metadata | undefined> {
   const post = getBlogPosts().find((post) => post.slug === params.slug);
   if (!post) {
@@ -78,7 +80,7 @@ export default async function Page({
             dateModified: post.metadata.publishedAt,
             description: post.metadata.summary,
             image: `${baseUrl}${post.metadata.image}`,
-            url: `${baseUrl}/updates/${post.slug}`,
+            url: `${baseUrl}/blog/${post.slug}`,
           }),
         }}
       />
@@ -88,7 +90,7 @@ export default async function Page({
 
         <h2 className="font-medium text-2xl mb-6">{post.metadata.title}</h2>
 
-        <div className="updates">
+        <div className="blog">
           {post.metadata.image && (
             <Image
               src={post.metadata.image}

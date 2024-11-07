@@ -15,7 +15,7 @@ export default function Page() {
         Travelese.
       </h1>
 
-      <h3 className="font-medium text-xl mb-2">Problem</h3>
+      {/* <h3 className="font-medium text-xl mb-2">Problem</h3>
       <p className="text-[#878787] mb-8">After years of ...</p>
 
       <h3 className="font-medium text-xl mb-2">Solution</h3>
@@ -34,12 +34,12 @@ export default function Page() {
 
       <div className="mt-6 mb-8">
         <p className="text-sm text-[#878787] mb-2">Best regards, Armin</p>
-        {/* <Image
+         <Image
           src={signature}
           alt="Signature"
           className="block w-[143px] h-[20px]"
-        /> */}
-      </div>
+        /> 
+      </div> */}
     </div>
   );
 }

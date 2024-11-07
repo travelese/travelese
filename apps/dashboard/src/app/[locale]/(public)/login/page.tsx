@@ -4,7 +4,6 @@ import { DesktopCommandMenuSignIn } from "@/components/desktop-command-menu-sign
 import { GithubSignIn } from "@/components/github-sign-in";
 import { GoogleSignIn } from "@/components/google-sign-in";
 import { OTPSignIn } from "@/components/otp-sign-in";
-import { SlackSignIn } from "@/components/slack-sign-in";
 import { Cookies } from "@/utils/constants";
 import { isEU } from "@travelese/location";
 import {
@@ -52,18 +51,6 @@ export default async function Page(params) {
         <>
           <GoogleSignIn />
           <SlackSignIn />
-          <GithubSignIn />
-          <OTPSignIn className="border-t-[1px] border-border pt-8" />
-        </>
-      );
-      break;
-
-    case "slack":
-      preferredSignInOption = <SlackSignIn />;
-      moreSignInOptions = (
-        <>
-          <GoogleSignIn />
-          <AppleSignIn />
           <GithubSignIn />
           <OTPSignIn className="border-t-[1px] border-border pt-8" />
         </>
