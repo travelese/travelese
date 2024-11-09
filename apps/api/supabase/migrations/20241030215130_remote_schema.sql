@@ -163,9 +163,6 @@ CREATE POLICY "Bookings can be selected by a member of the team" ON "public"."tr
 
 CREATE POLICY "Bookings can be updated by a member of the team" ON "public"."travel_bookings" FOR UPDATE TO "authenticated" USING (("team_id" IN ( SELECT "private"."get_teams_for_authenticated_user"() AS "get_teams_for_authenticated_user")));
 
--- Tracker Report Policies:
-CREATE POLICY "Reports can be handled by a member of the team" ON "public"."tracker_reports" USING (("team_id" IN ( SELECT "private"."get_teams_for_authenticated_user"() AS "get_teams_for_authenticated_user")));
-
 -- Travel Report Policies:
 CREATE POLICY "Reports can be handled by a member of the team" ON "public"."travel_reports" USING (("team_id" IN ( SELECT "private"."get_teams_for_authenticated_user"() AS "get_teams_for_authenticated_user")));
 

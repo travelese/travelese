@@ -12,7 +12,7 @@ export function TravelHeader({ totalDuration }: Props) {
   return (
     <div className="flex justify-between">
       <div>
-        <Link href="/tracker" prefetch>
+        <Link href="/travel" prefetch>
           <h2 className="text-lg">Travel</h2>
         </Link>
         <span className="text-[#878787] text-sm">

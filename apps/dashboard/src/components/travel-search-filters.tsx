@@ -237,7 +237,7 @@ export function TravelSearchFilter({ members }: Props) {
         <DropdownMenuGroup>
           <DropdownMenuSub>
             <DropdownMenuSubTrigger>
-              <Icons.ProjectStatus className="mr-2 size-4 rotate-180" />
+              <Icons.BookingStatus className="mr-2 size-4 rotate-180" />
               <span>Status</span>
             </DropdownMenuSubTrigger>
             <DropdownMenuPortal>

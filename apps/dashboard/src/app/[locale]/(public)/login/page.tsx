@@ -50,7 +50,6 @@ export default async function Page(params) {
       moreSignInOptions = (
         <>
           <GoogleSignIn />
-          <SlackSignIn />
           <GithubSignIn />
           <OTPSignIn className="border-t-[1px] border-border pt-8" />
         </>
@@ -63,7 +62,6 @@ export default async function Page(params) {
         <>
           <GoogleSignIn />
           <AppleSignIn />
-          <SlackSignIn />
           <OTPSignIn className="border-t-[1px] border-border pt-8" />
         </>
       );
@@ -75,7 +73,6 @@ export default async function Page(params) {
         <>
           <AppleSignIn />
           <GithubSignIn />
-          <SlackSignIn />
           <OTPSignIn className="border-t-[1px] border-border pt-8" />
         </>
       );
@@ -88,7 +85,6 @@ export default async function Page(params) {
           <GoogleSignIn />
           <AppleSignIn />
           <GithubSignIn />
-          <SlackSignIn />
         </>
       );
       break;
@@ -97,7 +93,6 @@ export default async function Page(params) {
       if (device?.vendor === "Apple") {
         moreSignInOptions = (
           <>
-            <SlackSignIn />
             <GithubSignIn />
             <OTPSignIn className="border-t-[1px] border-border pt-8" />
           </>
@@ -106,7 +101,6 @@ export default async function Page(params) {
         moreSignInOptions = (
           <>
             <AppleSignIn />
-            <SlackSignIn />
             <GithubSignIn />
             <OTPSignIn className="border-t-[1px] border-border pt-8" />
           </>
@@ -131,12 +125,9 @@ export default async function Page(params) {
               <h1 className="font-medium pb-1 text-3xl">Login to Travelese.</h1>
             </div>
 
-            {/* <p className="font-medium pb-1 text-2xl text-[#878787]">
-              Automate travel management <br /> tasks, stay organized, and make
-              <br />
-              informed decisions
-              <br /> effortlessly.
-            </p> */}
+            <p className="font-medium pb-1 text-2xl text-[#878787]">
+              Traveller Experience Management
+            </p>
 
             <div className="pointer-events-auto mt-6 flex flex-col mb-6">
               {preferredSignInOption}

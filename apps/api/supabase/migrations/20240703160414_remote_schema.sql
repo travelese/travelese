@@ -12,15 +12,6 @@ create table "public"."total_amount" (
 -- Create Index reports_team_id
 CREATE INDEX reports_team_id_idx ON public.reports USING btree (team_id);
 
--- Create Index tracker_entries
-CREATE INDEX tracker_entries_team_id_idx ON public.tracker_entries USING btree (team_id);
-
--- Create Index tracker_projects
-CREATE INDEX tracker_projects_team_id_idx ON public.tracker_projects USING btree (team_id);
-
--- Create Index tracker_reports
-CREATE INDEX tracker_reports_team_id_idx ON public.tracker_reports USING btree (team_id);
-
 -- Create Index transaction_categories_team_id
 CREATE INDEX transaction_categories_team_id_idx ON public.transaction_categories USING btree (team_id);
 

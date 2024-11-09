@@ -13,8 +13,6 @@ import {
   type GetRunwayQueryParams,
   type GetSpendingParams,
   type GetTeamBankAccountsParams,
-  type GetTrackerProjectsQueryParams,
-  type GetTrackerRecordsByRangeParams,
   type GetTransactionsParams,
   type GetTravelBookingsQueryParams,
   type GetTravelRecordsByRangeParams,
@@ -38,8 +36,6 @@ import {
   getTeamSettingsQuery,
   getTeamUserQuery,
   getTeamsByUserIdQuery,
-  getTrackerProjectsQuery,
-  getTrackerRecordsByRangeQuery,
   getTransactionsQuery,
   getTravelBookingsQuery,
   getTravelRecordsByRangeQuery,
@@ -336,48 +332,6 @@ export const getUserInvites = async () => {
       revalidate: 180,
     },
   )();
-};
-
-export const getTrackerProjects = async (
-  params: Omit<GetTrackerProjectsQueryParams, "teamId">,
-) => {
-  const supabase = createClient();
-  const user = await getUser();
-  const teamId = user?.data?.team_id;
-
-  return unstable_cache(
-    async () => {
-      return getTrackerProjectsQuery(supabase, { ...params, teamId });
-    },
-    ["tracker_projects", teamId],
-    {
-      tags: [`tracker_projects_${teamId}`],
-      revalidate: 180,
-    },
-  )(params);
-};
-
-export const getTrackerRecordsByRange = async (
-  params: Omit<GetTrackerRecordsByRangeParams, "teamId">,
-) => {
-  const supabase = createClient();
-  const user = await getUser();
-  const teamId = user?.data?.team_id;
-
-  return unstable_cache(
-    async () => {
-      return getTrackerRecordsByRangeQuery(supabase, {
-        ...params,
-        teamId,
-        userId: user?.data?.id,
-      });
-    },
-    ["tracker_entries", teamId],
-    {
-      tags: [`tracker_entries_${teamId}`],
-      revalidate: 180,
-    },
-  )(params);
 };
 
 export const getTravelBookings = async (

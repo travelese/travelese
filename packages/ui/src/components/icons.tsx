@@ -762,7 +762,7 @@ export const Icons = {
   Clock: MdAlarm,
   Location: MdOutlineLocationOn,
   Loader: FiLoader,
-  ProjectStatus: MdDownloading,
+  BookingStatus: MdDownloading,
   ModeOfTravel: MdModeOfTravel,
   Passenger: Passenger,
   Passengers: Passengers,

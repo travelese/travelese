@@ -2,7 +2,6 @@
 
 import type { InvoiceFormValues } from "@/actions/invoice/schema";
 import { updateInvoiceTemplateAction } from "@/actions/invoice/update-invoice-template-action";
-import { useInvoiceParams } from "@/hooks/use-invoice-params";
 import { Button } from "@travelese/ui/button";
 import {
   DropdownMenu,
@@ -29,13 +28,14 @@ const options = [
 
 type Props = {
   isSubmitting: boolean;
+  disabled?: boolean;
 };
 
-export function SubmitButton({ isSubmitting }: Props) {
-  const { type } = useInvoiceParams();
+export function SubmitButton({ isSubmitting, disabled }: Props) {
   const { watch, setValue, formState } = useFormContext<InvoiceFormValues>();
 
   const selectedOption = watch("template.delivery_type");
+  const canUpdate = watch("status") !== "draft";
 
   const updateInvoiceTemplate = useAction(updateInvoiceTemplateAction);
 
@@ -55,33 +55,38 @@ export function SubmitButton({ isSubmitting }: Props) {
 
   return (
     <div className="flex divide-x">
-      <BaseSubmitButton isSubmitting={isSubmitting} disabled={!isValid}>
-        {type === "update"
+      <BaseSubmitButton
+        isSubmitting={isSubmitting}
+        disabled={!isValid || disabled}
+      >
+        {canUpdate
           ? "Update"
           : options.find((o) => o.value === selectedOption)?.label}
       </BaseSubmitButton>
 
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button
-            disabled={!isValid || isSubmitting}
-            className="size-9 p-0 [&[data-state=open]>svg]:rotate-180"
-          >
-            <Icons.ChevronDown className="size-4 transition-transform duration-200" />
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" sideOffset={10}>
-          {options.map((option) => (
-            <DropdownMenuCheckboxItem
-              key={option.value}
-              checked={selectedOption === option.value}
-              onCheckedChange={() => handleOptionChange(option.value)}
+      {!canUpdate && (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              disabled={!isValid || isSubmitting || disabled}
+              className="size-9 p-0 [&[data-state=open]>svg]:rotate-180"
             >
-              {option.label}
-            </DropdownMenuCheckboxItem>
-          ))}
-        </DropdownMenuContent>
-      </DropdownMenu>
+              <Icons.ChevronDown className="size-4 transition-transform duration-200" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" sideOffset={10}>
+            {options.map((option) => (
+              <DropdownMenuCheckboxItem
+                key={option.value}
+                checked={selectedOption === option.value}
+                onCheckedChange={() => handleOptionChange(option.value)}
+              >
+                {option.label}
+              </DropdownMenuCheckboxItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
+      )}
     </div>
   );
 }

@@ -506,31 +506,6 @@ export async function updateInboxById(
   return inbox;
 }
 
-type CreateProjectParams = {
-  name: string;
-  description?: string;
-  estimate?: number;
-  billable?: boolean;
-  rate?: number;
-  currency?: string;
-};
-
-export async function createProject(
-  supabase: Client,
-  params: CreateProjectParams,
-) {
-  const { data: userData } = await getCurrentUserTeamQuery(supabase);
-
-  return supabase
-    .from("tracker_projects")
-    .insert({
-      ...params,
-      team_id: userData?.team_id,
-    })
-    .select()
-    .single();
-}
-
 type CreateBookingParams = {
   name: string;
   description?: string;

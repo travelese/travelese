@@ -131,13 +131,6 @@ CREATE TYPE "public"."teamRoles" AS ENUM (
 
 ALTER TYPE "public"."teamRoles" OWNER TO "postgres";
 
--- Tracker Status Definition:
-CREATE TYPE "public"."trackerStatus" AS ENUM (
-    'in_progress',
-    'completed'
-);
-
-ALTER TYPE "public"."trackerStatus" OWNER TO "postgres";
 
 -- Transaction Categories Definition:
 CREATE TYPE "public"."transactionCategories" AS ENUM (
@@ -882,75 +875,6 @@ $$;
 
 ALTER FUNCTION "public"."nanoid_optimized"("size" integer, "alphabet" "text", "mask" integer, "step" integer) OWNER TO "postgres";
 
-CREATE TABLE IF NOT EXISTS "public"."tracker_entries" (
-    "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
-    "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
-    "duration" bigint,
-    "project_id" "uuid",
-    "start" timestamp without time zone,
-    "stop" timestamp without time zone,
-    "assigned_id" "uuid",
-    "team_id" "uuid",
-    "description" "text",
-    "rate" numeric,
-    "currency" "text",
-    "billed" boolean DEFAULT false,
-    "date" "date" DEFAULT "now"()
-);
-
-ALTER TABLE "public"."tracker_entries" OWNER TO "postgres";
-
--- Tracker Entries Duration Comment:
-COMMENT ON COLUMN "public"."tracker_entries"."duration" IS 'Time entry duration. For running entries should be negative, preferable -1';
--- Tracker Entries Start Comment:
-COMMENT ON COLUMN "public"."tracker_entries"."start" IS 'Start time in UTC';
--- Tracker Entries Stop Comment:
-COMMENT ON COLUMN "public"."tracker_entries"."stop" IS 'Stop time in UTC, can be null if it''s still running or created with duration';
--- Tracker Entries Description Comment:
-COMMENT ON COLUMN "public"."tracker_entries"."description" IS 'Time Entry description, null if not provided at creation/update';
-
--- Project Members Function
-CREATE OR REPLACE FUNCTION "public"."project_members"("public"."tracker_entries") RETURNS TABLE("id" "uuid", "avatar_url" "text", "full_name" "text")
-    LANGUAGE "sql"
-    AS $_$
-  select distinct on (users.id) users.id, users.avatar_url, users.full_name
-  from tracker_entries
-  join users on tracker_entries.user_id = users.id
-  where tracker_entries.project_id = $1.project_id;
-$_$;
-
-ALTER FUNCTION "public"."project_members"("public"."tracker_entries") OWNER TO "postgres";
-
--- Tracker Projects Table
-CREATE TABLE IF NOT EXISTS "public"."tracker_projects" (
-    "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
-    "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
-    "team_id" "uuid",
-    "rate" numeric,
-    "currency" "text",
-    "status" "public"."trackerStatus" DEFAULT 'in_progress'::"public"."trackerStatus" NOT NULL,
-    "description" "text",
-    "name" "text" NOT NULL,
-    "billable" boolean DEFAULT false,
-    "estimate" bigint
-);
-
-ALTER TABLE "public"."tracker_projects" OWNER TO "postgres";
-
-COMMENT ON COLUMN "public"."tracker_projects"."rate" IS 'Custom rate for project';
-
--- Project Members Function
-CREATE OR REPLACE FUNCTION "public"."project_members"("public"."tracker_projects") RETURNS TABLE("id" "uuid", "avatar_url" "text", "full_name" "text")
-    LANGUAGE "sql"
-    AS $$
-  select distinct on (users.id) users.id, users.avatar_url, users.full_name
-  from tracker_projects
-  left join tracker_entries on tracker_projects.id = tracker_entries.project_id
-  left join users on tracker_entries.user_id = users.id;
-$$;
-
-ALTER FUNCTION "public"."project_members"("public"."tracker_projects") OWNER TO "postgres";
-
 -- Slugify Function
 CREATE OR REPLACE FUNCTION "public"."slugify"("value" "text") RETURNS "text"
     LANGUAGE "sql" IMMUTABLE STRICT
@@ -984,21 +908,6 @@ $_$;
 
 ALTER FUNCTION "public"."slugify"("value" "text") OWNER TO "postgres";
 
--- Total Duration Function
-CREATE OR REPLACE FUNCTION "public"."total_duration"("public"."tracker_projects") RETURNS integer
-    LANGUAGE "sql"
-    AS $_$
-  select sum(tracker_entries.duration) as total_duration
-  from
-    tracker_projects
-    join tracker_entries on tracker_projects.id = tracker_entries.project_id
-  where
-    tracker_projects.id = $1.id
-  group by
-    tracker_projects.id;
-$_$;
-
-ALTER FUNCTION "public"."total_duration"("public"."tracker_projects") OWNER TO "postgres";
 
 -- Update Enrich Transaction Function
 CREATE OR REPLACE FUNCTION "public"."update_enrich_transaction"() RETURNS "trigger"
@@ -1184,19 +1093,6 @@ CREATE TABLE IF NOT EXISTS "public"."teams" (
 
 ALTER TABLE "public"."teams" OWNER TO "postgres";
 
--- Tracker Reports Table
-CREATE TABLE IF NOT EXISTS "public"."tracker_reports" (
-    "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
-    "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
-    "link_id" "text",
-    "short_link" "text",
-    "team_id" "uuid" DEFAULT "gen_random_uuid"(),
-    "project_id" "uuid" DEFAULT "gen_random_uuid"(),
-    "created_by" "uuid"
-);
-
-ALTER TABLE "public"."tracker_reports" OWNER TO "postgres";
-
 -- Transaction Attachments Table
 CREATE TABLE IF NOT EXISTS "public"."transaction_attachments" (
     "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
@@ -1305,10 +1201,6 @@ ALTER TABLE ONLY "public"."users_on_team"
 ALTER TABLE ONLY "public"."users"
     ADD CONSTRAINT "profiles_pkey" PRIMARY KEY ("id");
 
--- Tracker Reports Primary Key
-ALTER TABLE ONLY "public"."tracker_reports"
-    ADD CONSTRAINT "project_reports_pkey" PRIMARY KEY ("id");
-
 -- Reports Primary Key
 ALTER TABLE ONLY "public"."reports"
     ADD CONSTRAINT "reports_pkey" PRIMARY KEY ("id");
@@ -1320,14 +1212,6 @@ ALTER TABLE ONLY "public"."teams"
 -- Teams Primary Key
 ALTER TABLE ONLY "public"."teams"
     ADD CONSTRAINT "teams_pkey" PRIMARY KEY ("id");
-
--- Tracker Projects Primary Key
-ALTER TABLE ONLY "public"."tracker_projects"
-    ADD CONSTRAINT "tracker_projects_pkey" PRIMARY KEY ("id");
-
--- Tracker Entries Primary Key
-ALTER TABLE ONLY "public"."tracker_entries"
-    ADD CONSTRAINT "tracker_records_pkey" PRIMARY KEY ("id");
 
 -- Transaction Categories Primary Key
 ALTER TABLE ONLY "public"."transaction_categories"
@@ -1461,14 +1345,6 @@ ALTER TABLE ONLY "public"."inbox"
 ALTER TABLE ONLY "public"."reports"
     ADD CONSTRAINT "public_reports_created_by_fkey" FOREIGN KEY ("created_by") REFERENCES "public"."users"("id") ON DELETE CASCADE;
 
--- Tracker Reports Created By Foreign Key
-ALTER TABLE ONLY "public"."tracker_reports"
-    ADD CONSTRAINT "public_tracker_reports_created_by_fkey" FOREIGN KEY ("created_by") REFERENCES "public"."users"("id") ON DELETE CASCADE;
-
--- Tracker Reports Project ID Foreign Key
-ALTER TABLE ONLY "public"."tracker_reports"
-    ADD CONSTRAINT "public_tracker_reports_project_id_fkey" FOREIGN KEY ("project_id") REFERENCES "public"."tracker_projects"("id") ON UPDATE CASCADE ON DELETE CASCADE;
-
 -- Transaction Attachments Team ID Foreign Key
 ALTER TABLE ONLY "public"."transaction_attachments"
     ADD CONSTRAINT "public_transaction_attachments_team_id_fkey" FOREIGN KEY ("team_id") REFERENCES "public"."teams"("id") ON DELETE CASCADE;
@@ -1492,26 +1368,6 @@ ALTER TABLE ONLY "public"."user_invites"
 -- Reports Team ID Foreign Key
 ALTER TABLE ONLY "public"."reports"
     ADD CONSTRAINT "reports_team_id_fkey" FOREIGN KEY ("team_id") REFERENCES "public"."teams"("id") ON UPDATE CASCADE;
-
--- Tracker Entries Assigned ID Foreign Key
-ALTER TABLE ONLY "public"."tracker_entries"
-    ADD CONSTRAINT "tracker_entries_assigned_id_fkey" FOREIGN KEY ("assigned_id") REFERENCES "public"."users"("id") ON DELETE SET NULL;
-
--- Tracker Entries Project ID Foreign Key
-ALTER TABLE ONLY "public"."tracker_entries"
-    ADD CONSTRAINT "tracker_entries_project_id_fkey" FOREIGN KEY ("project_id") REFERENCES "public"."tracker_projects"("id") ON DELETE CASCADE;
-
--- Tracker Entries Team ID Foreign Key
-ALTER TABLE ONLY "public"."tracker_entries"
-    ADD CONSTRAINT "tracker_entries_team_id_fkey" FOREIGN KEY ("team_id") REFERENCES "public"."teams"("id") ON DELETE CASCADE;
-
--- Tracker Projects Team ID Foreign Key
-ALTER TABLE ONLY "public"."tracker_projects"
-    ADD CONSTRAINT "tracker_projects_team_id_fkey" FOREIGN KEY ("team_id") REFERENCES "public"."teams"("id") ON DELETE CASCADE;
-
--- Tracker Reports Team ID Foreign Key
-ALTER TABLE ONLY "public"."tracker_reports"
-    ADD CONSTRAINT "tracker_reports_team_id_fkey" FOREIGN KEY ("team_id") REFERENCES "public"."teams"("id") ON UPDATE CASCADE ON DELETE CASCADE;
 
 -- Transaction Categories Team ID Foreign Key
 ALTER TABLE ONLY "public"."transaction_categories"
@@ -1598,18 +1454,6 @@ CREATE POLICY "Enable update for authenticated users only" ON "public"."transact
 -- Enable updates for users on team
 CREATE POLICY "Enable updates for users on team" ON "public"."users_on_team" FOR UPDATE TO "authenticated" USING (("team_id" IN ( SELECT "private"."get_teams_for_authenticated_user"() AS "get_teams_for_authenticated_user"))) WITH CHECK (("team_id" IN ( SELECT "private"."get_teams_for_authenticated_user"() AS "get_teams_for_authenticated_user")));
 
--- Entries can be created by a member of the team
-CREATE POLICY "Entries can be created by a member of the team" ON "public"."tracker_entries" FOR INSERT TO "authenticated" WITH CHECK (("team_id" IN ( SELECT "private"."get_teams_for_authenticated_user"() AS "get_teams_for_authenticated_user")));
-
--- Entries can be deleted by a member of the team
-CREATE POLICY "Entries can be deleted by a member of the team" ON "public"."tracker_entries" FOR DELETE TO "authenticated" USING (("team_id" IN ( SELECT "private"."get_teams_for_authenticated_user"() AS "get_teams_for_authenticated_user")));
-
--- Entries can be selected by a member of the team
-CREATE POLICY "Entries can be selected by a member of the team" ON "public"."tracker_entries" FOR SELECT TO "authenticated" USING (("team_id" IN ( SELECT "private"."get_teams_for_authenticated_user"() AS "get_teams_for_authenticated_user")));
-
--- Entries can be updated by a member of the team
-CREATE POLICY "Entries can be updated by a member of the team" ON "public"."tracker_entries" FOR UPDATE TO "authenticated" WITH CHECK (("team_id" IN ( SELECT "private"."get_teams_for_authenticated_user"() AS "get_teams_for_authenticated_user")));
-
 -- Inbox can be deleted by a member of the team
 CREATE POLICY "Inbox can be deleted by a member of the team" ON "public"."inbox" FOR DELETE USING (("team_id" IN ( SELECT "private"."get_teams_for_authenticated_user"() AS "get_teams_for_authenticated_user")));
 
@@ -1622,26 +1466,11 @@ CREATE POLICY "Inbox can be updated by a member of the team" ON "public"."inbox"
 -- Invited users can select team if they are invited.
 CREATE POLICY "Invited users can select team if they are invited." ON "public"."teams" FOR SELECT USING (("id" IN ( SELECT "private"."get_invites_for_authenticated_user"() AS "get_invites_for_authenticated_user")));
 
--- Projects can be created by a member of the team
-CREATE POLICY "Projects can be created by a member of the team" ON "public"."tracker_projects" FOR INSERT TO "authenticated" WITH CHECK (("team_id" IN ( SELECT "private"."get_teams_for_authenticated_user"() AS "get_teams_for_authenticated_user")));
-
--- Projects can be deleted by a member of the team
-CREATE POLICY "Projects can be deleted by a member of the team" ON "public"."tracker_projects" FOR DELETE TO "authenticated" USING (("team_id" IN ( SELECT "private"."get_teams_for_authenticated_user"() AS "get_teams_for_authenticated_user")));
-
--- Projects can be selected by a member of the team
-CREATE POLICY "Projects can be selected by a member of the team" ON "public"."tracker_projects" FOR SELECT TO "authenticated" USING (("team_id" IN ( SELECT "private"."get_teams_for_authenticated_user"() AS "get_teams_for_authenticated_user")));
-
--- Projects can be updated by a member of the team
-CREATE POLICY "Projects can be updated by a member of the team" ON "public"."tracker_projects" FOR UPDATE TO "authenticated" USING (("team_id" IN ( SELECT "private"."get_teams_for_authenticated_user"() AS "get_teams_for_authenticated_user")));
-
 -- Reports can be created by a member of the team
 CREATE POLICY "Reports can be created by a member of the team" ON "public"."reports" FOR INSERT WITH CHECK (("team_id" IN ( SELECT "private"."get_teams_for_authenticated_user"() AS "get_teams_for_authenticated_user")));
 
 -- Reports can be deleted by a member of the team
 CREATE POLICY "Reports can be deleted by a member of the team" ON "public"."reports" FOR DELETE USING (("team_id" IN ( SELECT "private"."get_teams_for_authenticated_user"() AS "get_teams_for_authenticated_user")));
-
--- Reports can be handled by a member of the team
-CREATE POLICY "Reports can be handled by a member of the team" ON "public"."tracker_reports" USING (("team_id" IN ( SELECT "private"."get_teams_for_authenticated_user"() AS "get_teams_for_authenticated_user")));
 
 -- Reports can be selected by a member of the team
 CREATE POLICY "Reports can be selected by a member of the team" ON "public"."reports" FOR SELECT USING (("team_id" IN ( SELECT "private"."get_teams_for_authenticated_user"() AS "get_teams_for_authenticated_user")));
@@ -1731,15 +1560,6 @@ ALTER TABLE "public"."reports" ENABLE ROW LEVEL SECURITY;
 
 -- Enable row level security for teams
 ALTER TABLE "public"."teams" ENABLE ROW LEVEL SECURITY;
-
--- Enable row level security for tracker entries
-ALTER TABLE "public"."tracker_entries" ENABLE ROW LEVEL SECURITY;
-
--- Enable row level security for tracker projects
-ALTER TABLE "public"."tracker_projects" ENABLE ROW LEVEL SECURITY;
-
--- Enable row level security for tracker reports
-ALTER TABLE "public"."tracker_reports" ENABLE ROW LEVEL SECURITY;
 
 -- Enable row level security for transaction attachments
 ALTER TABLE "public"."transaction_attachments" ENABLE ROW LEVEL SECURITY;
@@ -2004,26 +1824,6 @@ GRANT ALL ON FUNCTION "public"."nanoid_optimized"("size" integer, "alphabet" "te
 GRANT ALL ON FUNCTION "public"."nanoid_optimized"("size" integer, "alphabet" "text", "mask" integer, "step" integer) TO "authenticated";
 GRANT ALL ON FUNCTION "public"."nanoid_optimized"("size" integer, "alphabet" "text", "mask" integer, "step" integer) TO "service_role";
 
--- Grant all on tracker_entries to all roles
-GRANT ALL ON TABLE "public"."tracker_entries" TO "anon";
-GRANT ALL ON TABLE "public"."tracker_entries" TO "authenticated";
-GRANT ALL ON TABLE "public"."tracker_entries" TO "service_role";
-
--- Grant all on project_members to all roles
-GRANT ALL ON FUNCTION "public"."project_members"("public"."tracker_entries") TO "anon";
-GRANT ALL ON FUNCTION "public"."project_members"("public"."tracker_entries") TO "authenticated";
-GRANT ALL ON FUNCTION "public"."project_members"("public"."tracker_entries") TO "service_role";
-
--- Grant all on tracker_projects to all roles
-GRANT ALL ON TABLE "public"."tracker_projects" TO "anon";
-GRANT ALL ON TABLE "public"."tracker_projects" TO "authenticated";
-GRANT ALL ON TABLE "public"."tracker_projects" TO "service_role";
-
--- Grant all on project_members to all roles
-GRANT ALL ON FUNCTION "public"."project_members"("public"."tracker_projects") TO "anon";
-GRANT ALL ON FUNCTION "public"."project_members"("public"."tracker_projects") TO "authenticated";
-GRANT ALL ON FUNCTION "public"."project_members"("public"."tracker_projects") TO "service_role";
-
 -- Grant all on set_limit to all roles
 GRANT ALL ON FUNCTION "public"."set_limit"(real) TO "postgres";
 GRANT ALL ON FUNCTION "public"."set_limit"(real) TO "anon";
@@ -2094,11 +1894,6 @@ GRANT ALL ON FUNCTION "public"."strict_word_similarity_op"("text", "text") TO "p
 GRANT ALL ON FUNCTION "public"."strict_word_similarity_op"("text", "text") TO "anon";
 GRANT ALL ON FUNCTION "public"."strict_word_similarity_op"("text", "text") TO "authenticated";
 GRANT ALL ON FUNCTION "public"."strict_word_similarity_op"("text", "text") TO "service_role";
-
--- Grant all on total_duration to all roles
-GRANT ALL ON FUNCTION "public"."total_duration"("public"."tracker_projects") TO "anon";
-GRANT ALL ON FUNCTION "public"."total_duration"("public"."tracker_projects") TO "authenticated";
-GRANT ALL ON FUNCTION "public"."total_duration"("public"."tracker_projects") TO "service_role";
 
 -- Grant all on unaccent to all roles
 GRANT ALL ON FUNCTION "public"."unaccent"("text") TO "postgres";
@@ -2193,11 +1988,6 @@ GRANT ALL ON TABLE "public"."reports" TO "service_role";
 GRANT ALL ON TABLE "public"."teams" TO "anon";
 GRANT ALL ON TABLE "public"."teams" TO "authenticated";
 GRANT ALL ON TABLE "public"."teams" TO "service_role";
-
--- Grant all on tracker_reports to all roles
-GRANT ALL ON TABLE "public"."tracker_reports" TO "anon";
-GRANT ALL ON TABLE "public"."tracker_reports" TO "authenticated";
-GRANT ALL ON TABLE "public"."tracker_reports" TO "service_role";
 
 -- Grant all on transaction_attachments to all roles
 GRANT ALL ON TABLE "public"."transaction_attachments" TO "anon";

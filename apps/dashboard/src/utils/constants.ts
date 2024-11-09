@@ -20,5 +20,4 @@ export const Cookies = {
   TrackingConsent: "tracking-consent",
   InboxOrder: "inbox-order",
   HideConnectFlow: "hide-connect-flow",
-  LastProject: "last-project",
 };
