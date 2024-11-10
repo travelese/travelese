@@ -8,9 +8,9 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@travelese/ui/tooltip";
-import { Ancillaries, FlightSummary } from "./flight-components";
-import { BaggageInfo, StopsInfo } from "./flight-components";
 import { TravelCard } from "./travel-card";
+import { Ancillaries, FlightSummary } from "./travel-flight-components";
+import { BaggageInfo, StopsInfo } from "./travel-flight-components";
 import { formatDate, formatDuration, formatTime } from "./travel-utils";
 
 export function FlightCard({ offer }: { offer: Offer }) {

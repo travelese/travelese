@@ -7,7 +7,7 @@ import { cookies } from "next/headers";
 import { z } from "zod";
 import { authActionClient } from "./safe-action";
 
-export const createTrackerEntriesAction = authActionClient
+export const createTravelEntriesAction = authActionClient
   .schema(
     z.object({
       id: z.string().optional(),
@@ -15,17 +15,17 @@ export const createTrackerEntriesAction = authActionClient
       stop: z.string(),
       dates: z.array(z.string()),
       assigned_id: z.string(),
-      project_id: z.string(),
+      booking_id: z.string(),
       description: z.string().optional(),
       duration: z.number(),
     }),
   )
   .metadata({
-    name: "create-tracker-entries",
+    name: "create-travel-entries",
   })
   .action(
     async ({ parsedInput: { dates, ...params }, ctx: { supabase, user } }) => {
-      cookies().set(Cookies.LastProject, params.project_id);
+      cookies().set(Cookies.LastBooking, params.booking_id);
 
       const entries = dates.map((date) => ({
         ...params,
@@ -36,19 +36,19 @@ export const createTrackerEntriesAction = authActionClient
       }));
 
       const { data, error } = await supabase
-        .from("tracker_entries")
+        .from("travel_entries")
         .upsert(entries, {
           ignoreDuplicates: false,
         })
         .select(
-          "*, assigned:assigned_id(id, full_name, avatar_url), project:project_id(id, name, rate, currency)",
+          "*, assigned:assigned_id(id, full_name, avatar_url), booking:booking_id(id, name, rate, currency)",
         );
 
       if (error) {
         throw error;
       }
 
-      revalidateTag(`tracker_entries_${user.team_id}`);
+      revalidateTag(`travel_entries_${user.team_id}`);
 
       return data;
     },

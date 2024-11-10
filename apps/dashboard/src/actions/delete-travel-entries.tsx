@@ -15,7 +15,7 @@ export const deleteTravelEntryAction = authActionClient
   })
   .action(async ({ parsedInput: { id }, ctx: { supabase, user } }) => {
     const { data, error } = await supabase
-      .from("tracker_entries")
+      .from("travel_entries")
       .delete()
       .eq("id", id)
       .select();

@@ -1,7 +1,7 @@
 "use client";
 
-import { useTrackerParams } from "@/hooks/use-tracker-params";
-import { sortDates } from "@/utils/tracker";
+import { useTravelParams } from "@/hooks/use-travel-params";
+import { sortDates } from "@/utils/travel";
 import { cn } from "@travelese/ui/cn";
 import { useClickAway } from "@uidotdev/usehooks";
 import {
@@ -46,7 +46,7 @@ export function TravelWidget({
     range,
     setParams,
     selectedDate,
-  } = useTrackerParams(initialDate);
+  } = useTravelParams(initialDate);
 
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState<string | null>(null);

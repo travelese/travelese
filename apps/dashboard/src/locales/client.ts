@@ -13,5 +13,8 @@ export const {
   useI18n,
 } = createI18nClient({
   en: () => import("./en"),
-  // sv: () => import("./sv"),
+  fr: () => import("./fr"),
+  it: () => import("./it"),
+  ja: () => import("./jp"),
+  fa: () => import("./fa"),
 });

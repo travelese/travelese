@@ -1,6 +1,3 @@
--- Drop Policy "Entries can be updated by a member of the team"
-drop policy "Entries can be updated by a member of the team" on "public"."tracker_entries";
-
 -- Create Table "public"."apps"
 create table "public"."apps" (
     "id" uuid not null default gen_random_uuid(),
@@ -14,12 +11,6 @@ create table "public"."apps" (
 
 -- Enable row level security for table "public"."apps"
 alter table "public"."apps" enable row level security;
-
--- Alter Column "start" to timestamp with time zone for table "public"."tracker_entries"
-alter table "public"."tracker_entries" alter column "start" set data type timestamp with time zone using "start"::timestamp with time zone;
-
--- Alter Column "stop" to timestamp with time zone for table "public"."tracker_entries"
-alter table "public"."tracker_entries" alter column "stop" set data type timestamp with time zone using "stop"::timestamp with time zone;
 
 -- Add Column "time_format" numeric default '24'::numeric for table "public"."users"
 alter table "public"."users" add column "time_format" numeric default '24'::numeric;
@@ -50,49 +41,6 @@ alter table "public"."apps" add constraint "unique_app_id_team_id" UNIQUE using 
 
 -- Set check_function_bodies to off
 set check_function_bodies = off;
-
--- Create Function get_assigned_users_for_project
-CREATE OR REPLACE FUNCTION public.get_assigned_users_for_project(tracker_projects)
- RETURNS json
- LANGUAGE sql
-AS $function$
-  SELECT COALESCE(
-    (SELECT json_agg(
-      json_build_object(
-        'user_id', u.id,
-        'full_name', u.full_name,
-        'avatar_url', u.avatar_url
-      )
-    )
-    FROM (
-      SELECT DISTINCT u.id, u.full_name, u.avatar_url
-      FROM public.users u
-      JOIN public.tracker_entries te ON u.id = te.assigned_id
-      WHERE te.project_id = $1.id
-    ) u
-  ), '[]'::json);
-$function$
-;
-
--- Create Function get_project_total_amount
-CREATE OR REPLACE FUNCTION public.get_project_total_amount(tracker_projects)
- RETURNS numeric
- LANGUAGE sql
-AS $function$
-  SELECT COALESCE(
-    (SELECT 
-      CASE 
-        WHEN $1.rate IS NOT NULL THEN 
-          ROUND(SUM(te.duration) * $1.rate / 3600, 2)
-        ELSE 
-          0
-      END
-    FROM public.tracker_entries te
-    WHERE te.project_id = $1.id
-    ), 0
-  );
-$function$
-;
 
 -- Create Function get_runway_v4
 CREATE OR REPLACE FUNCTION public.get_runway_v4(team_id text, date_from date, date_to date, base_currency text DEFAULT NULL::text)
@@ -534,13 +482,3 @@ as permissive
 for update
 to public
 using ((team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user)));
-
-
--- Create Policy "Entries can be updated by a member of the team"
-create policy "Entries can be updated by a member of the team"
-on "public"."tracker_entries"
-as permissive
-for update
-to authenticated
-using ((team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user)))
-with check ((team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user)));

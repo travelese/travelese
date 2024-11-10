@@ -150,7 +150,7 @@ export const CardStack = ({
                     className="w-[35px] h-[20px] z-20 absolute top-[170px] left-[8px]"
                     onClick={() => onChangeCard(cards.find((c) => c.id === 2))}
                   >
-                    <span className="sr-only">Tracker</span>
+                    <span className="sr-only">Travel</span>
                   </button>
                 </TooltipTrigger>
                 <TooltipContent
@@ -158,7 +158,7 @@ export const CardStack = ({
                   className="py-1 px-3 rounded-sm"
                   sideOffset={8}
                 >
-                  <p className="text-xs">Tracker</p>
+                  <p className="text-xs">Travel</p>
                 </TooltipContent>
               </Tooltip>
 

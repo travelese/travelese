@@ -35,7 +35,7 @@ export function Screens() {
             },
             {
               id: 2,
-              name: "Tracker",
+              name: "Travel",
               content: (
                 <Image
                   quality={100}

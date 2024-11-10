@@ -15,30 +15,6 @@ export const LogEvents = {
     name: "User Registered",
     channel: "registered",
   },
-  ProjectCreated: {
-    name: "Project Created",
-    channel: "tracker",
-  },
-  ProjectDeleted: {
-    name: "Project Deleted",
-    channel: "tracker",
-  },
-  ProjectUpdated: {
-    name: "Project Updated",
-    channel: "tracker",
-  },
-  ProjectReport: {
-    name: "Project Report",
-    channel: "report",
-  },
-  TrackerCreateEntry: {
-    name: "Tracker Create Entry",
-    channel: "tracker",
-  },
-  TrackerDeleteEntry: {
-    name: "Tracker Delete Entry",
-    channel: "tracker",
-  },
   ConnectBankCompleted: {
     name: "Connect Bank Completed",
     channel: "bank",

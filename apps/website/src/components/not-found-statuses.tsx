@@ -32,7 +32,7 @@ const data = [
     description: "Next.js",
   },
   {
-    name: "<Project-Name>",
+    name: "<Booking-Name>",
     description: "Travelese",
   },
 ];

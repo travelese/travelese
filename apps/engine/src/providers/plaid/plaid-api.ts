@@ -166,24 +166,32 @@ export class PlaidApi {
     userId,
     language = "en",
     accessToken,
-  }: LinkTokenCreateRequest): Promise<
-    import("axios").AxiosResponse<LinkTokenCreateResponse>
-  > {
-    return this.#client.linkTokenCreate({
-      client_id: this.#clientId,
-      secret: this.#clientSecret,
-      client_name: "Travelese",
-      products: [Products.Transactions],
-      language,
-      access_token: accessToken,
-      country_codes: this.#countryCodes,
-      transactions: {
-        days_requested: 730,
-      },
-      user: {
-        client_user_id: userId,
-      },
-    });
+  }: LinkTokenCreateRequest): Promise<LinkTokenCreateResponse> {
+    try {
+      const response = await this.#client.linkTokenCreate({
+        client_id: this.#clientId,
+        secret: this.#clientSecret,
+        client_name: "Travelese",
+        products: [Products.Transactions],
+        language,
+        access_token: accessToken,
+        country_codes: this.#countryCodes,
+        transactions: {
+          days_requested: 730,
+        },
+        user: {
+          client_user_id: userId,
+        },
+      });
+
+      return response.data;
+    } catch (error) {
+      const parsedError = isError(error);
+      if (parsedError) {
+        throw new ProviderError(parsedError);
+      }
+      throw error;
+    }
   }
 
   async institutionsGetById(institution_id: string) {

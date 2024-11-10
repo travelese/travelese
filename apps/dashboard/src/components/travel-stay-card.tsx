@@ -8,8 +8,8 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@travelese/ui/tooltip";
-import { Amenities, StaySummary } from "./stay-components";
 import { TravelCard } from "./travel-card";
+import { Amenities, StaySummary } from "./travel-stay-components";
 import { formatDate } from "./travel-utils";
 
 export function StayCard({ stay }: { stay: StaysSearchResult }) {

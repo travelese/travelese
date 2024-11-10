@@ -1,7 +1,5 @@
 import { BankAccountsChart } from "@/components/charts/bank-accounts-chart";
 import { BankConnectionsChart } from "@/components/charts/bank-connections-chart";
-import { FlightsChart } from "@/components/charts/flights-chart";
-import { StaysChart } from "@/components/charts/stays-chart";
 import { TransactionEnrichmentsChart } from "@/components/charts/transaction-enrichments-chart";
 import { TransactionsChart } from "@/components/charts/transactions-chart";
 import { TravelBookingsChart } from "@/components/charts/travel-bookings-chart";
@@ -55,16 +53,12 @@ export default async function Page() {
           <div className="grid md:grid-cols-2 gap-6 mt-12">
             <TravellersChart />
             <TransactionsChart />
-            {/* 
             <TransactionEnrichmentsChart />
             <BankAccountsChart />
             <BankConnectionsChart />
             <VaultChart />
-            <TrackerEntriesChart />
-            <TrackerProjectsChart /> 
-            */}
-            <FlightsChart />
-            <StaysChart />
+            <TravelEntriesChart />
+            <TravelBookingsChart />
           </div>
         </TabsContent>
 

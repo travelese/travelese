@@ -17,8 +17,11 @@ export default {
     placeholder: "Select language",
   },
   languages: {
-    en: "English",
-    sv: "Swedish",
+    en: "English", // English
+    fr: "French", // French
+    fa: "Persian", // Persian (Farsi)
+    it: "Italian", // Italian
+    ja: "Japanese", // Japanese
   },
   timezone: {
     title: "Time Zone",
@@ -69,10 +72,7 @@ export default {
     owner: "Owner",
     member: "Member",
   },
-  tracker_status: {
-    in_progress: "In progress",
-    completed: "Completed",
-  },
+
   travel_status: {
     in_progress: "In progress",
     completed: "Completed",
@@ -88,7 +88,7 @@ export default {
     inbox: "Inbox",
     spending: "Spending",
     transactions: "Transactions",
-    tracker: "Tracker",
+    travel: "Travel",
   },
   bottom_bar: {
     "transactions#one": "1 Transaction",
@@ -174,10 +174,10 @@ export default {
     user_manuals: "User Manuals",
     software_licenses: "Software Licenses",
     data_backup_logs: "Data Backup Logs",
-    project_plans: "Project Plans",
+    travel_plans: "Travel Plans",
     task_lists: "Task Lists",
     risk_management_plans: "Risk Management Plans",
-    project_status_reports: "Project Status Reports",
+    booking_status_reports: "Booking Status Reports",
     meeting_agendas: "Meeting Agendas",
     lab_notebooks: "Lab Notebooks",
     experiment_results: "Experiment Results",

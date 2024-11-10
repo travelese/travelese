@@ -41,28 +41,13 @@ export function Footer() {
                 Overview
               </Link>
             </Row>
+
             <Row className="mb-1.5">
               <Link
                 className="text-[#707070] text-[14px]"
                 href="https://go.travelese.ai/JISKG9m"
               >
-                Flights
-              </Link>
-            </Row>
-            <Row className="mb-1.5">
-              <Link
-                className="text-[#707070] text-[14px]"
-                href="https://go.travelese.ai/H4EQQK2"
-              >
-                Stays
-              </Link>
-            </Row>
-            {/* <Row className="mb-1.5">
-              <Link
-                className="text-[#707070] text-[14px]"
-                href="https://go.travelese.ai"
-              >
-                Tracker
+                Travel
               </Link>
             </Row>
 
@@ -73,7 +58,7 @@ export function Footer() {
               >
                 Invoice
               </Link>
-            </Row> */}
+            </Row>
 
             <Row className="mb-1.5">
               <Link
@@ -188,7 +173,7 @@ export function Footer() {
                 className="text-[#707070] text-[14px]"
                 href="https://go.travelese.ai/m5UA5OH"
               >
-                Updates
+                Blog
               </Link>
             </Row>
             <Row className="mb-1.5">
@@ -199,14 +184,6 @@ export function Footer() {
                 Open startup
               </Link>
             </Row>
-            {/* <Row className="mb-1.5">
-              <Link
-                className="text-[#707070] text-[14px]"
-                href="https://go.travelese.ai/rZrELLy"
-              >
-                OSS Friends
-              </Link>
-            </Row> */}
           </Section>
         }
         columnThreeStyles={{ paddingRight: 0, paddingLeft: 0, width: 185 }}
@@ -219,7 +196,7 @@ export function Footer() {
         <Column className="align-middle w-[40px]">
           <Link href="https://go.travelese.ai/0FpSUKo">
             <Img
-              src={`${baseUrl}/x.png`}
+              src={`${baseUrl}/email/x.png`}
               width="22"
               height="22"
               alt="Travelese on X"
@@ -240,7 +217,7 @@ export function Footer() {
         <Column className="align-middle w-[40px]">
           <Link href="https://go.travelese.ai/XTxOfuy">
             <Img
-              src={`${baseUrl}/discord.png`}
+              src={`${baseUrl}/email/discord.png`}
               width="22"
               height="22"
               alt="Travelese on Discord"
@@ -251,7 +228,7 @@ export function Footer() {
         <Column className="align-middle">
           <Link href="https://go.travelese.ai/oP5xRyx">
             <Img
-              src={`${baseUrl}/linkedin.png`}
+              src={`${baseUrl}/email/linkedin.png`}
               width="22"
               height="22"
               alt="Travelese on LinkedIn"
@@ -285,7 +262,7 @@ export function Footer() {
       <Row>
         <Link href="https://go.travelese.ai">
           <Img
-            src={`${baseUrl}/logo-footer.png`}
+            src={`${baseUrl}/email/logo-footer.png`}
             width="100"
             alt="Travelese"
             className="block"

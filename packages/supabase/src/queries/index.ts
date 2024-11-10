@@ -858,24 +858,24 @@ export async function getInboxQuery(
   };
 }
 
-type GetTrackerProjectQueryParams = {
+type GetTravelBookingQueryParams = {
   teamId: string;
-  projectId: string;
+  bookingId: string;
 };
 
-export async function getTrackerProjectQuery(
+export async function getTravelBookingQuery(
   supabase: Client,
-  params: GetTrackerProjectQueryParams,
+  params: GetTravelBookingQueryParams,
 ) {
   return supabase
-    .from("tracker_projects")
+    .from("travel_bookings")
     .select("*")
-    .eq("id", params.projectId)
+    .eq("id", params.bookingId)
     .eq("team_id", params.teamId)
     .single();
 }
 
-export type GetTrackerProjectsQueryParams = {
+export type GetTravelBookingsQueryParams = {
   teamId: string;
   to?: number;
   from?: number;
@@ -891,9 +891,9 @@ export type GetTrackerProjectsQueryParams = {
   };
 };
 
-export async function getTrackerProjectsQuery(
+export async function getTravelBookingsQuery(
   supabase: Client,
-  params: GetTrackerProjectsQueryParams,
+  params: GetTravelBookingsQueryParams,
 ) {
   const {
     from = 0,
@@ -908,9 +908,9 @@ export async function getTrackerProjectsQuery(
   const { status } = filter || {};
 
   const query = supabase
-    .from("tracker_projects")
+    .from("travel_bookings")
     .select(
-      "*, total_duration, users:get_assigned_users_for_project, total_amount:get_project_total_amount",
+      "*, total_duration, users:get_assigned_users_for_booking, total_amount:get_booking_total_amount",
       {
         count: "exact",
       },
@@ -955,29 +955,29 @@ export async function getTrackerProjectsQuery(
   };
 }
 
-type GetTrackerRecordsByDateParams = {
+type GetTravelRecordsByDateParams = {
   teamId: string;
   date: string;
-  projectId?: string;
+  bookingId?: string;
   userId?: string;
 };
 
 export async function getTrackerRecordsByDateQuery(
   supabase: Client,
-  params: GetTrackerRecordsByDateParams,
+  params: GetTravelRecordsByDateParams,
 ) {
-  const { teamId, projectId, date, userId } = params;
+  const { teamId, bookingId, date, userId } = params;
 
   const query = supabase
-    .from("tracker_entries")
+    .from("travel_entries")
     .select(
-      "*, assigned:assigned_id(id, full_name, avatar_url), project:project_id(id, name, rate, currency)",
+      "*, assigned:assigned_id(id, full_name, avatar_url), booking:booking_id(id, name, rate, currency)",
     )
     .eq("team_id", teamId)
     .eq("date", formatISO(new UTCDate(date), { representation: "date" }));
 
-  if (projectId) {
-    query.eq("project_id", projectId);
+  if (bookingId) {
+    query.eq("booking_id", bookingId);
   }
 
   if (userId) {
@@ -999,26 +999,26 @@ export async function getTrackerRecordsByDateQuery(
   };
 }
 
-export type GetTrackerRecordsByRangeParams = {
+export type GetTravelRecordsByRangeParams = {
   teamId: string;
   from: string;
   to: string;
-  projectId?: string;
+  bookingId?: string;
   userId?: string;
 };
 
-export async function getTrackerRecordsByRangeQuery(
+export async function getTravelRecordsByRangeQuery(
   supabase: Client,
-  params: GetTrackerRecordsByRangeParams,
+  params: GetTravelRecordsByRangeParams,
 ) {
   if (!params.teamId) {
     return null;
   }
 
   const query = supabase
-    .from("tracker_entries")
+    .from("travel_entries")
     .select(
-      "*, assigned:assigned_id(id, full_name, avatar_url), project:project_id(id, name, rate, currency)",
+      "*, assigned:assigned_id(id, full_name, avatar_url), booking:booking_id(id, name, rate, currency)",
     )
     .eq("team_id", params.teamId)
     .gte("date", new UTCDate(params.from).toISOString())
@@ -1029,8 +1029,8 @@ export async function getTrackerRecordsByRangeQuery(
     query.eq("assigned_id", params.userId);
   }
 
-  if (params.projectId) {
-    query.eq("project_id", params.projectId);
+  if (params.bookingId) {
+    query.eq("booking_id", params.bookingId);
   }
 
   const { data } = await query;
@@ -1050,8 +1050,8 @@ export async function getTrackerRecordsByRangeQuery(
   );
 
   const totalAmount = data?.reduce(
-    (amount, { project, duration = 0 }) =>
-      amount + (project?.rate ?? 0) * (duration / 3600),
+    (amount, { booking, duration = 0 }) =>
+      amount + (booking?.rate ?? 0) * (duration / 3600),
     0,
   );
 

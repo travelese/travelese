@@ -14,6 +14,7 @@ import { FormatAmount } from "./format-amount";
 import { InvoiceActions } from "./invoice-actions";
 import { InvoiceNote } from "./invoice-note";
 import { InvoiceStatus } from "./invoice-status";
+import { OpenURL } from "./open-url";
 import type { Invoice } from "./tables/invoices/columns";
 
 type Props = Invoice;
@@ -33,6 +34,7 @@ export function InvoiceDetails({
   template,
   token,
   internal_note,
+  updated_at,
 }: Props) {
   return (
     <div>
@@ -55,7 +57,7 @@ export function InvoiceDetails({
         <InvoiceStatus status={status} />
       </div>
 
-      <div className="flex justify-between items-center mt-6 mb-3">
+      <div className="flex justify-between items-center mt-6 mb-3 relative">
         <div className="flex flex-col w-full space-y-1">
           <span
             className={cn("text-4xl font-mono select-text", {
@@ -94,6 +96,17 @@ export function InvoiceDetails({
         </div>
       )}
 
+      {status === "canceled" && (
+        <div className="mt-8 flex flex-col space-y-1">
+          <span className="text-base font-medium">
+            Canceled on {updated_at && format(new Date(updated_at), "MMM dd")}
+          </span>
+          <span className="text-xs">
+            <span className="text-[#606060]">Marked as canceled</span>
+          </span>
+        </div>
+      )}
+
       <div className="mt-6 flex flex-col space-y-4 border-t border-border pt-6">
         <div className="flex justify-between items-center">
           <span className="text-sm text-[#606060]">Due date</span>
@@ -125,8 +138,14 @@ export function InvoiceDetails({
         <div className="mt-6 flex flex-col space-y-2 border-t border-border pt-6">
           <span className="text-sm text-[#606060]">Invoice link</span>
           <div className="flex w-full gap-2">
-            <div className="flex-1 min-w-0">
+            <div className="flex-1 min-w-0 relative">
               <CopyInput value={`${window.location.origin}/i/${token}`} />
+
+              <div className="absolute right-9 top-[11px]">
+                <OpenURL href={`${window.location.origin}/i/${token}`}>
+                  <Icons.OpenInNew />
+                </OpenURL>
+              </div>
             </div>
 
             {status !== "draft" && (

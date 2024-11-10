@@ -309,31 +309,6 @@ export const updateInboxSchema = z.object({
 
 export type UpdateInboxFormValues = z.infer<typeof updateInboxSchema>;
 
-export const createProjectSchema = z.object({
-  name: z.string().min(1),
-  description: z.string().optional(),
-  estimate: z.number().optional(),
-  billable: z.boolean().optional().default(false),
-  rate: z.number().min(1).optional(),
-  currency: z.string().optional(),
-  status: z.enum(["in_progress", "completed"]).optional(),
-});
-
-export const updateProjectSchema = z.object({
-  id: z.string().uuid(),
-  name: z.string().min(1).optional(),
-  description: z.string().optional(),
-  estimate: z.number().optional(),
-  billable: z.boolean().optional().default(false),
-  rate: z.number().min(1).optional(),
-  currency: z.string().optional(),
-  status: z.enum(["in_progress", "completed"]).optional(),
-});
-
-export const deleteProjectSchema = z.object({
-  id: z.string().uuid(),
-});
-
 export const deleteEntriesSchema = z.object({
   id: z.string().uuid(),
 });
@@ -346,18 +321,13 @@ export const createReportSchema = z.object({
   expiresAt: z.string().datetime().optional(),
 });
 
-export const createProjectReportSchema = z.object({
-  baseUrl: z.string().url(),
-  projectId: z.string().uuid(),
-});
-
 export const updateEntriesSchema = z.object({
   id: z.string().uuid().optional(),
   action: z.enum(["update", "create", "delete"]),
   date: z.string().optional(),
   duration: z.number().optional(),
   assigned_id: z.string().optional(),
-  project_id: z.string().optional(),
+  booking_id: z.string().optional(),
   description: z.string().optional(),
   start: z.string().datetime().optional(),
   stop: z.string().datetime().optional(),
@@ -472,22 +442,6 @@ export const filterVaultSchema = z.object({
       "The end date when to retrieve data from. If not provided, defaults to the current date. Return ISO-8601 format.",
     ),
   owners: z.array(z.string()).optional().describe("The owners to filter by"),
-});
-
-export const filterTrackerSchema = z.object({
-  name: z.string().optional().describe("The name to search for"),
-  start: parseDateSchema
-    .optional()
-    .describe("The start date when to retrieve from. Return ISO-8601 format."),
-  end: parseDateSchema
-    .optional()
-    .describe(
-      "The end date when to retrieve data from. If not provided, defaults to the current date. Return ISO-8601 format.",
-    ),
-  status: z
-    .enum(["in_progress", "completed"])
-    .optional()
-    .describe("The status to filter by"),
 });
 
 export const filterTravelSchema = z.object({
@@ -742,6 +696,7 @@ export const createBookingSchema = z.object({
   rate: z.number().min(1).optional(),
   currency: z.string().optional(),
   status: z.enum(["in_progress", "completed"]).optional(),
+  customer_id: z.string().uuid().nullable().optional(),
 });
 
 export const updateBookingSchema = z.object({
@@ -753,6 +708,7 @@ export const updateBookingSchema = z.object({
   rate: z.number().min(1).optional(),
   currency: z.string().optional(),
   status: z.enum(["in_progress", "completed"]).optional(),
+  customer_id: z.string().uuid().nullable().optional(),
 });
 
 export const deleteBookingSchema = z.object({

@@ -88,9 +88,8 @@
     "thumbsRating": true
   },
   "footerSocials": {
-    "twitter": "https://x.com/traveleseai",
+    "x": "https://x.com/traveleseai",
     "github": "https://git.new/travelese",
-    "website": "https://travelese.ai",
-    "linkedin": "https://www.linkedin.com/company/traveleseai"
+    "website": "https://travelese.ai"
   }
 }

@@ -10,13 +10,13 @@ export const createBookingReport = authActionClient
   .metadata({
     name: "create-booking-report",
     track: {
-      event: LogEvents.ProjectReport.name,
-      channel: LogEvents.ProjectReport.channel,
+      event: LogEvents.BookingReport.name,
+      channel: LogEvents.BookingReport.channel,
     },
   })
   .action(async ({ parsedInput: params, ctx: { user, supabase } }) => {
     const { data } = await supabase
-      .from("tracker_reports")
+      .from("travel_reports")
       .insert({
         team_id: user.team_id,
         booking_id: params.bookingId,
@@ -30,11 +30,11 @@ export const createBookingReport = authActionClient
     }
 
     const link = await dub.links.create({
-      url: `${params.baseUrl}/report/project/${data?.id}`,
+      url: `${params.baseUrl}/report/booking/${data?.id}`,
     });
 
     const { data: linkData } = await supabase
-      .from("tracker_reports")
+      .from("travel_reports")
       .update({
         link_id: link.id,
         short_link: link.shortLink,

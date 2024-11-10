@@ -1,5 +1,5 @@
 import Image from "next/image";
-import timetracker from "public/time-tracker.png";
+import travel from "public/travel.png";
 
 export function SectionThree() {
   return (
@@ -48,11 +48,11 @@ export function SectionThree() {
           </div>
 
           <Image
-            src={timetracker}
+            src={travel}
             height={400}
             className="-mb-[32px] md:-mb-[1px] object-contain mt-8 md:mt-0"
             quality={100}
-            alt="Tracker"
+            alt="Travel"
           />
         </div>
       </div>

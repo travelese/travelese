@@ -17,7 +17,7 @@ export function TravelEvents({
           )}
           key={data[0].id}
         >
-          {data[0].project.name} ({secondsToHoursAndMinutes(data[0].duration)})
+          {data[0].booking.name} ({secondsToHoursAndMinutes(data[0].duration)})
         </div>
       )}
       {data && data.length > 1 && (

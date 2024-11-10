@@ -1,12 +1,12 @@
 import { fetchStats } from "@/lib/fetch-stats";
 
-export async function TrackerProjectsChart() {
-  const { trackerProjects } = await fetchStats();
+export async function TravelBookingsChart() {
+  const { travelBookings } = await fetchStats();
   return (
     <div className="flex border flex-col items-center justify-center border-border bg-background px-6 pt-8 pb-6 space-y-4">
-      <h2 className="text-2xl">Time Tracker Projects</h2>
+      <h2 className="text-2xl">Time Travel Bookings</h2>
       <p className="text-[#878787] text-sm text-center">
-        Number of created tracker projects.
+        Number of created travel bookings.
       </p>
 
       <div className="flex items-center space-x-4">
@@ -16,9 +16,9 @@ export async function TrackerProjectsChart() {
         </span>
 
         <span className="mt-auto font-mono text-[80px] md:text-[122px]">
-          {trackerProjects &&
+          {travelBookings &&
             Intl.NumberFormat("en", { notation: "compact" }).format(
-              trackerProjects,
+              travelBookings,
             )}
         </span>
       </div>
