@@ -1,4 +1,3 @@
-import Midday from "@midday-ai/engine";
 import { eventTrigger } from "@trigger.dev/sdk";
 import { revalidateTag } from "next/cache";
 import { z } from "zod";
@@ -85,7 +84,7 @@ client.defineJob({
         await Promise.all(promises);
       }
     } catch (error) {
-      if (error instanceof Midday.APIError) {
+      if (error instanceof engine.APIError) {
         const parsedError = parseAPIError(error);
 
         await io.supabase.client

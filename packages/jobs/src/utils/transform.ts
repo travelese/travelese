@@ -1,8 +1,7 @@
-import type { Transactions } from "@midday-ai/engine/resources/transactions";
 import type { Database } from "@travelese/supabase/types";
 
 type TransformTransactionData = {
-  transaction: Transactions.Data;
+  transaction: engine.Transactions.Data;
   teamId: string;
   bankAccountId: string;
 };

@@ -8,7 +8,6 @@ import { useConnectParams } from "@/hooks/use-connect-params";
 import { useI18n } from "@/locales/client";
 import { getInitials } from "@/utils/format";
 import { zodResolver } from "@hookform/resolvers/zod";
-import type { Accounts } from "@midday-ai/engine/resources/accounts.mjs";
 import { Avatar, AvatarFallback } from "@travelese/ui/avatar";
 import { Button } from "@travelese/ui/button";
 import {
@@ -138,7 +137,7 @@ function SupportForm() {
 
 export function SelectBankAccountsModal() {
   const { toast } = useToast();
-  const [accounts, setAccounts] = useState<Accounts.Data[]>([]);
+  const [accounts, setAccounts] = useState<engine.Accounts.Data[]>([]);
   const [loading, setLoading] = useState(true);
   const [eventId, setEventId] = useState<string>();
   const [activeTab, setActiveTab] = useState<

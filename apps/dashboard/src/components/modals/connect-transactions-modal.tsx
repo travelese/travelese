@@ -4,7 +4,6 @@ import { createPlaidLinkTokenAction } from "@/actions/institutions/create-plaid-
 import { exchangePublicToken } from "@/actions/institutions/exchange-public-token";
 import { getInstitutions } from "@/actions/institutions/get-institutions";
 import { useConnectParams } from "@/hooks/use-connect-params";
-import type { Institutions } from "@midday-ai/engine/resources/institutions/institutions";
 import { track } from "@travelese/events/client";
 import { LogEvents } from "@travelese/events/events";
 import { Button } from "@travelese/ui/button";

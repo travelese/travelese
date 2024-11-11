@@ -24,7 +24,7 @@ const AllDonePage = ({ searchParams }: Props) => {
             src={appIcon}
             width={80}
             height={80}
-            alt="Midday"
+            alt="Travelese"
             quality={100}
             className="mb-10"
           />

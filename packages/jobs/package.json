@@ -12,7 +12,6 @@
   },
   "dependencies": {
     "@fast-csv/format": "5.0.0",
-    "@midday-ai/engine": "^0.1.0-alpha.22",
     "@travelese/documents": "workspace:*",
     "@travelese/import": "workspace:*",
     "@travelese/invoice": "workspace:*",
