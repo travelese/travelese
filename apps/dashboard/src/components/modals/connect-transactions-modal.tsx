@@ -106,11 +106,6 @@ export function ConnectTransactionsModal({
   const isOpen = step === "connect";
   const debouncedSearchTerm = useDebounce(query, 200);
 
-  // NOTE: Load SDKs here so it's not unmonted
-  useScript("https://cdn.teller.io/connect/connect.js", {
-    removeOnUnmount: false,
-  });
-
   const { open: openPlaid } = usePlaidLink({
     token: plaidToken,
     publicKey: "",

@@ -1,5 +1,4 @@
 import { createPlaidLinkTokenAction } from "@/actions/institutions/create-plaid-link";
-import { reconnectGoCardLessLinkAction } from "@/actions/institutions/reconnect-gocardless-link";
 import { isDesktopApp } from "@todesktop/client-core/platform/todesktop";
 import { Button } from "@travelese/ui/button";
 import { Icons } from "@travelese/ui/icons";
@@ -41,28 +40,6 @@ export function ReconnectProvider({
   const [plaidToken, setPlaidToken] = useState<string | undefined>();
   const [isLoading, setIsLoading] = useState(false);
 
-  const reconnectGoCardLessLink = useAction(reconnectGoCardLessLinkAction, {
-    onExecute: () => {
-      setIsLoading(true);
-    },
-    onError: () => {
-      setIsLoading(false);
-
-      toast({
-        duration: 2500,
-        variant: "error",
-        title: "Something went wrong please try again.",
-      });
-    },
-    onSuccess: () => {
-      setIsLoading(false);
-    },
-  });
-
-  useScript("https://cdn.teller.io/connect/connect.js", {
-    removeOnUnmount: false,
-  });
-
   const { open: openPlaid } = usePlaidLink({
     token: plaidToken,
     publicKey: "",
@@ -77,23 +54,6 @@ export function ReconnectProvider({
       setPlaidToken(undefined);
     },
   });
-
-  const openTeller = () => {
-    const teller = window.TellerConnect.setup({
-      applicationId: process.env.NEXT_PUBLIC_TELLER_APPLICATION_ID!,
-      environment: process.env.NEXT_PUBLIC_TELLER_ENVIRONMENT,
-      enrollmentId,
-      appearance: theme,
-      onSuccess: () => {
-        onManualSync();
-      },
-      onFailure: () => {},
-    });
-
-    if (teller) {
-      teller.open();
-    }
-  };
 
   useEffect(() => {
     if (plaidToken) {
@@ -114,17 +74,6 @@ export function ReconnectProvider({
 
         return;
       }
-      case "gocardless": {
-        return reconnectGoCardLessLink.execute({
-          id,
-          institutionId,
-          availableHistory: 60,
-          redirectTo: `${window.location.origin}/api/gocardless/reconnect`,
-          isDesktop: isDesktopApp(),
-        });
-      }
-      case "teller":
-        return openTeller();
       default:
         return;
     }

@@ -2,8 +2,6 @@ import { updateInstitutionUsageAction } from "@/actions/institutions/update-inst
 import { useConnectParams } from "@/hooks/use-connect-params";
 import { useAction } from "next-safe-action/hooks";
 import { BankConnectButton } from "./bank-connect-button";
-import { GoCardLessConnect } from "./gocardless-connect";
-import { TellerConnect } from "./teller-connect";
 
 type Props = {
   id: string;
@@ -26,31 +24,6 @@ export function ConnectBankProvider({
   };
 
   switch (provider) {
-    case "teller":
-      return (
-        <TellerConnect
-          id={id}
-          onSelect={() => {
-            // NOTE: Wait for Teller sdk to be configured
-            setTimeout(() => {
-              setParams({ step: null });
-            }, 950);
-
-            updateUsage();
-          }}
-        />
-      );
-    case "gocardless": {
-      return (
-        <GoCardLessConnect
-          id={id}
-          availableHistory={availableHistory}
-          onSelect={() => {
-            updateUsage();
-          }}
-        />
-      );
-    }
     case "plaid":
       return (
         <BankConnectButton

@@ -1651,8 +1651,8 @@ export type Database = {
         | "other_asset"
         | "loan"
         | "other_liability";
-      bank_providers: "gocardless" | "plaid" | "teller";
-      bankProviders: "gocardless" | "plaid" | "teller";
+      bank_providers: "plaid";
+      bankProviders: "plaid";
       connection_status: "disconnected" | "connected" | "unknown";
       inbox_status: "processing" | "pending" | "archived" | "new" | "deleted";
       inbox_type: "invoice" | "expense";

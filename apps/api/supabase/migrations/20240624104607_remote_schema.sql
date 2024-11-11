@@ -79,18 +79,14 @@ ALTER TYPE "public"."account_type" OWNER TO "postgres";
 
 -- Bank Providers Type Definition:
 CREATE TYPE "public"."bankProviders" AS ENUM (
-    'gocardless',
     'plaid',
-    'teller'
 );
 
 ALTER TYPE "public"."bankProviders" OWNER TO "postgres";
 
 -- Bank Providers Type Definition:
 CREATE TYPE "public"."bank_providers" AS ENUM (
-    'gocardless',
     'plaid',
-    'teller'
 );
 
 ALTER TYPE "public"."bank_providers" OWNER TO "postgres";

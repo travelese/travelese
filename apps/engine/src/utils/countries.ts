@@ -1,4 +1,4 @@
-export const GOCARDLESS_COUNTRIES = [
+export const GO_COUNTRIES = [
   "AT",
   "BE",
   "BG",
@@ -34,14 +34,6 @@ export const GOCARDLESS_COUNTRIES = [
 
 export const PLAID_COUNTRIES = ["US", "CA"];
 
-export const TELLER_COUNTRIES = ["US"];
-
-const combinedCountries = [
-  ...new Set([
-    ...GOCARDLESS_COUNTRIES,
-    ...PLAID_COUNTRIES,
-    ...TELLER_COUNTRIES,
-  ]),
-] as const;
+const combinedCountries = [...new Set([...PLAID_COUNTRIES])] as const;
 
 export const ALL_COUNTRIES: readonly string[] = combinedCountries;
