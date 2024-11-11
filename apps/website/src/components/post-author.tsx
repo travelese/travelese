@@ -3,9 +3,17 @@ import Image from "next/image";
 const getAuthorTagline = (id: string) =>
   ({
     "5c2176bb-e4f0-4026-a77a-3feaf95fc758": "Engineering", // Pontus
-  }[id]);
+  })[id];
 
-export function PostAuthor({ name, src, id }) {
+export function PostAuthor({
+  name,
+  src,
+  id,
+}: {
+  name: string;
+  src: string;
+  id: string;
+}) {
   return (
     <div className="flex space-x-2 items-center">
       <Image

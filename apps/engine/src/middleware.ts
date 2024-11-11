@@ -20,7 +20,8 @@ const authMiddleware = (c: Context, next: Next) => {
 };
 
 const cacheMiddleware = (c: Context, next: Next) => {
-  if (process.env.NODE_ENV === "development") {
+  const environment = c.env.ENVIRONMENT || "development";
+  if (environment === "development") {
     return next();
   }
 

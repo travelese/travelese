@@ -26,5 +26,8 @@
   },
   "[markdown]": {
     "editor.defaultFormatter": "denoland.vscode-deno"
+  },
+  "[toml]": {
+    "editor.defaultFormatter": "tamasfe.even-better-toml"
   }
 }

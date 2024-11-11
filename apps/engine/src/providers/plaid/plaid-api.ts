@@ -167,13 +167,6 @@ export class PlaidApi {
     language = "en",
     accessToken,
   }: LinkTokenCreateRequest): Promise<LinkTokenCreateResponse> {
-    logger(`Creating Plaid link token for ${userId}`, {
-      language,
-      hasAccessToken: !!accessToken,
-      clientId: this.#clientId?.substring(0, 4) + "***",
-      hasSecret: !!this.#clientSecret,
-    });
-
     try {
       const response = await this.#client.linkTokenCreate({
         client_id: this.#clientId,
@@ -193,7 +186,6 @@ export class PlaidApi {
 
       return response.data;
     } catch (error) {
-      logger("Plaid link token creation failed", error);
       const parsedError = isError(error);
       if (parsedError) {
         throw new ProviderError(parsedError);

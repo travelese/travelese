@@ -14,6 +14,7 @@ export const env = createEnv({
    * built with invalid env vars.
    */
   server: {
+    ENGINE_API_KEY: z.string(),
     PLAIN_API_KEY: z.string(),
     XAI_API_KEY: z.string(),
     SUPABASE_SERVICE_ROLE_KEY: z.string(),
@@ -45,6 +46,7 @@ export const env = createEnv({
    * Destructure all variables from `process.env` to make sure they aren't tree-shaken away.
    */
   runtimeEnv: {
+    ENGINE_API_KEY: process.env.ENGINE_API_KEY,
     VERCEL_URL: process.env.VERCEL_URL,
     NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
     NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,

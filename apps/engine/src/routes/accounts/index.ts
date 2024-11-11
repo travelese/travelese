@@ -100,18 +100,16 @@ const balanceRoute = createRoute({
 app.openapi(indexRoute, async (c) => {
   const envs = env(c);
 
-  const { provider, accessToken, institutionId, id } = c.req.valid("query");
+  const { provider, accessToken, institutionId } = c.req.valid("query");
 
   const api = new Provider({
     provider,
     kv: c.env.KV,
-    fetcher: c.env.TELLER_CERT,
     envs,
   });
 
   try {
     const data = await api.getAccounts({
-      id,
       accessToken,
       institutionId,
     });
@@ -135,7 +133,6 @@ app.openapi(balanceRoute, async (c) => {
 
   const api = new Provider({
     provider,
-    fetcher: c.env.TELLER_CERT,
     kv: c.env.KV,
     envs,
   });
@@ -161,11 +158,10 @@ app.openapi(balanceRoute, async (c) => {
 
 app.openapi(deleteRoute, async (c) => {
   const envs = env(c);
-  const { provider, accountId, accessToken } = c.req.valid("query");
+  const { provider, accessToken } = c.req.valid("query");
 
   const api = new Provider({
     provider,
-    fetcher: c.env.TELLER_CERT,
     kv: c.env.KV,
     envs,
   });
@@ -173,7 +169,6 @@ app.openapi(deleteRoute, async (c) => {
   try {
     await api.deleteAccounts({
       accessToken,
-      accountId,
     });
 
     return c.json(

@@ -1,5 +1,4 @@
 import type { Bindings } from "@/common/bindings";
-import { swaggerUI } from "@hono/swagger-ui";
 import { OpenAPIHono } from "@hono/zod-openapi";
 import { requestId } from "hono/request-id";
 import {
@@ -17,7 +16,6 @@ import transactionsRoutes from "./routes/transactions";
 
 const app = new OpenAPIHono<{ Bindings: Bindings }>({
   defaultHook: (result, c) => {
-    console.log(result);
     if (!result.success) {
       return c.json({ success: false, errors: result.error.errors }, 422);
     }
@@ -29,28 +27,22 @@ app.use(authMiddleware);
 app.use(securityMiddleware);
 app.use(loggingMiddleware);
 
-// Enable cache for the following routes
 app.get("/institutions", cacheMiddleware);
 app.get("/rates", cacheMiddleware);
+
+// Register security scheme for OpenAPI docs
+app.openAPIRegistry.registerComponent("securitySchemes", "Bearer", {
+  type: "http",
+  scheme: "bearer",
+});
 
 app
   .route("/transactions", transactionsRoutes)
   .route("/accounts", accountRoutes)
   .route("/institutions", institutionRoutes)
   .route("/rates", ratesRoutes)
-  .route("/auth", authRoutes);
-
-app.openAPIRegistry.registerComponent("securitySchemes", "Bearer", {
-  type: "http",
-  scheme: "bearer",
-});
-
-app.get(
-  "/",
-  swaggerUI({
-    url: "/openapi",
-  }),
-);
+  .route("/auth", authRoutes)
+  .route("/health", healthRoutes);
 
 app.doc("/openapi", {
   openapi: "3.1.0",
@@ -59,7 +51,5 @@ app.doc("/openapi", {
     title: "Travelese Engine API",
   },
 });
-
-app.route("/health", healthRoutes);
 
 export default app;

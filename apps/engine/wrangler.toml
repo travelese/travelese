@@ -6,33 +6,24 @@ logpush = true
 name = "engine"
 route = { pattern = "engine.travelese.ai/*", zone_name = "travelese.ai" }
 
-kv_namespaces = [
-  { binding = "KV", id = "b321b928d84747a4b899b21894a720c2" }
-]
-
-mtls_certificates = [
-  { binding = "TELLER_CERT", certificate_id = "44d6feaf-8445-414a-a096-151a21a16988" }
-]
+kv_namespaces = [{ binding = "KV", id = "b321b928d84747a4b899b21894a720c2" }]
 
 r2_buckets = [
-  { binding = "STORAGE", bucket_name = "engine-assets", preview_bucket_name = ""}
+  { binding = "STORAGE", bucket_name = "engine-assets", preview_bucket_name = "" },
 ]
 
 [env.staging]
 name = "engine-staging"
 route = { pattern = "engine-staging.travelese.ai/*", zone_name = "travelese.ai" }
 
-kv_namespaces = [
-  { binding = "KV", id = "b321b928d84747a4b899b21894a720c2" }
-]
-
-mtls_certificates = [
-  { binding = "TELLER_CERT", certificate_id = "44d6feaf-8445-414a-a096-151a21a16988" }
-]
+kv_namespaces = [{ binding = "KV", id = "b321b928d84747a4b899b21894a720c2" }]
 
 r2_buckets = [
-  { binding = "STORAGE", bucket_name = "engine-assets", preview_bucket_name = "" }
+  { binding = "STORAGE", bucket_name = "engine-assets", preview_bucket_name = "" },
 ]
+
+[env.development]
+name = "engine-dev"
 
 [observability]
 enabled = true
