@@ -1,7 +1,9 @@
-import { GoCardLessProvider } from "@/providers/gocardless/gocardless-provider";
 import { PlaidProvider } from "@/providers/plaid/plaid-provider";
-import { TellerProvider } from "@/providers/teller/teller-provider";
 import type { ProviderParams } from "@/providers/types";
+
+export const excludedInstitutions = [
+  "ins_56", // Chase - Plaid
+];
 
 export async function getInstitutions(
   params: Omit<
@@ -11,15 +13,9 @@ export async function getInstitutions(
 ) {
   const { countryCode } = params;
 
-  const gocardless = new GoCardLessProvider(params);
-  const teller = new TellerProvider(params);
   const plaid = new PlaidProvider(params);
 
-  const result = await Promise.all([
-    teller.getInstitutions(),
-    gocardless.getInstitutions({ countryCode }),
-    plaid.getInstitutions({ countryCode }),
-  ]);
+  const result = await Promise.all([plaid.getInstitutions({ countryCode })]);
 
   return result.flat();
 }

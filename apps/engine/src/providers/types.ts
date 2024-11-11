@@ -1,14 +1,12 @@
 import type { AccountType } from "@/utils/account";
 
-export type Providers = "teller" | "plaid" | "gocardless";
+export type Providers = "plaid";
 
 export type ProviderParams = {
   provider: Providers;
   kv: KVNamespace;
   fetcher?: Fetcher | null; // Teller
   envs: {
-    GOCARDLESS_SECRET_KEY: string;
-    GOCARDLESS_SECRET_ID: string;
     PLAID_CLIENT_ID: string;
     PLAID_SECRET: string;
     PLAID_ENVIRONMENT: string;
@@ -60,7 +58,6 @@ export type GetTransactionsRequest = {
 };
 
 export type GetAccountsRequest = {
-  id?: string; // GoCardLess
   accessToken?: string; // Teller & Plaid
   institutionId?: string; // Plaid
 };
@@ -76,7 +73,6 @@ export type GetAccountBalanceResponse = {
 };
 
 export type DeleteAccountsRequest = {
-  accountId?: string; // GoCardLess
   accessToken?: string; // Teller & Plaid
 };
 
@@ -100,7 +96,5 @@ export type HealthCheckResponse = {
 };
 
 export type GetHealthCheckResponse = {
-  teller: HealthCheckResponse;
-  gocardless: HealthCheckResponse;
   plaid: HealthCheckResponse;
 };

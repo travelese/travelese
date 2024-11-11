@@ -3,25 +3,14 @@ import { z } from "@hono/zod-openapi";
 import { InstitutionSchema } from "../institutions/schema";
 
 export const AccountsParamsSchema = z.object({
-  id: z
-    .string()
-    .optional()
-    .openapi({
-      description: "GoCardLess reference id",
-      param: {
-        name: "id",
-        in: "query",
-      },
-      example: "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-    }),
   provider: Providers.openapi({
-    example: Providers.Enum.teller,
+    example: Providers.Enum.plaid,
   }),
   accessToken: z
     .string()
     .optional()
     .openapi({
-      description: "Teller & Plaid access token",
+      description: "Plaid access token",
       param: {
         name: "accessToken",
         in: "query",
@@ -83,22 +72,14 @@ export const AccountsSchema = z
 
 export const AccountBalanceParamsSchema = z
   .object({
-    id: z.string().openapi({
-      description: "Account id",
-      param: {
-        name: "id",
-        in: "query",
-      },
-      example: "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-    }),
     provider: Providers.openapi({
-      example: Providers.Enum.teller,
+      example: Providers.Enum.plaid,
     }),
     accessToken: z
       .string()
       .optional()
       .openapi({
-        description: "Teller & Plaid access token",
+        description: "Plaid access token",
         param: {
           name: "accessToken",
           in: "query",
@@ -125,22 +106,14 @@ export const AccountBalanceSchema = z
 
 export const DeleteAccountsParamsSchema = z
   .object({
-    accountId: z.string().openapi({
-      description: "Account id (GoCardLess)",
-      param: {
-        name: "accountId",
-        in: "query",
-      },
-      example: "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-    }),
     provider: Providers.openapi({
-      example: Providers.Enum.teller,
+      example: Providers.Enum.plaid,
     }),
     accessToken: z
       .string()
       .optional()
       .openapi({
-        description: "Teller & Plaid access token",
+        description: "Plaid access token",
         param: {
           name: "accessToken",
           in: "query",

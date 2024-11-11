@@ -49,11 +49,6 @@ export async function ConnectionStatus() {
     );
   }
 
-  // NOTE: No connections with expire_at (Only GoCardLess)
-  if (bankConnections?.data?.find((bank) => bank.expires_at === null)) {
-    return null;
-  }
-
   const { warning, error, show } = getConnectionsStatus(bankConnections.data);
 
   if (!show) {

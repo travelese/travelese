@@ -137,10 +137,7 @@ export const shareFileSchema = z.object({
 });
 
 export const connectBankAccountSchema = z.object({
-  referenceId: z.string().nullable().optional(), // GoCardLess
-  accessToken: z.string().nullable().optional(), // Teller
-  enrollmentId: z.string().nullable().optional(), // Teller
-  provider: z.enum(["gocardless", "plaid", "teller"]),
+  provider: z.enum(["plaid"]),
   accounts: z.array(
     z.object({
       account_id: z.string(),
@@ -335,13 +332,6 @@ export const updateEntriesSchema = z.object({
 
 export const manualSyncTransactionsSchema = z.object({
   connectionId: z.string().uuid(),
-});
-
-export const createGoCardLessLinkSchema = z.object({
-  institutionId: z.string(),
-  step: z.string().optional(),
-  availableHistory: z.number(),
-  redirectBase: z.string(),
 });
 
 export const updateInstitutionUsageSchema = z.object({

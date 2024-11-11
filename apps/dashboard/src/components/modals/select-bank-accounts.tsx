@@ -212,7 +212,7 @@ export function SelectBankAccountsModal() {
   useEffect(() => {
     async function fetchData() {
       const { data } = await getAccounts({
-        provider: provider as "teller" | "plaid" | "gocardless",
+        provider: provider as "plaid",
         id: ref ?? undefined,
         accessToken: token ?? undefined,
         institutionId: institution_id ?? undefined,
@@ -223,7 +223,7 @@ export function SelectBankAccountsModal() {
 
       if (!form.formState.isValid) {
         form.reset({
-          provider: provider as "gocardless" | "plaid" | "teller",
+          provider: provider as "plaid",
           accessToken: token ?? undefined,
           enrollmentId: enrollment_id ?? undefined,
           referenceId: ref ?? undefined,

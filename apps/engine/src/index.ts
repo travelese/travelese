@@ -17,6 +17,7 @@ import transactionsRoutes from "./routes/transactions";
 
 const app = new OpenAPIHono<{ Bindings: Bindings }>({
   defaultHook: (result, c) => {
+    console.log(result);
     if (!result.success) {
       return c.json({ success: false, errors: result.error.errors }, 422);
     }
@@ -30,9 +31,6 @@ app.use(loggingMiddleware);
 
 // Enable cache for the following routes
 app.get("/institutions", cacheMiddleware);
-app.get("/accounts", cacheMiddleware);
-app.get("/accounts/balance", cacheMiddleware);
-app.get("/transactions", cacheMiddleware);
 app.get("/rates", cacheMiddleware);
 
 app
@@ -58,7 +56,7 @@ app.doc("/openapi", {
   openapi: "3.1.0",
   info: {
     version: "1.0.0",
-    title: "Travelese Engine API",
+    title: "Midday Engine API",
   },
 });
 

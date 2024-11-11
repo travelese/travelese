@@ -1,8 +1,6 @@
 import { logger } from "@/utils/logger";
 import { withRetry } from "@/utils/retry";
-import { GoCardLessProvider } from "./gocardless/gocardless-provider";
 import { PlaidProvider } from "./plaid/plaid-provider";
-import { TellerProvider } from "./teller/teller-provider";
 import type {
   DeleteAccountsRequest,
   GetAccountBalanceRequest,
@@ -16,18 +14,12 @@ import type {
 export class Provider {
   #name?: string;
 
-  #provider: PlaidProvider | TellerProvider | GoCardLessProvider | null = null;
+  #provider: PlaidProvider | null = null;
 
   constructor(params?: ProviderParams) {
     this.#name = params?.provider;
 
     switch (params?.provider) {
-      case "gocardless":
-        this.#provider = new GoCardLessProvider(params);
-        break;
-      case "teller":
-        this.#provider = new TellerProvider(params);
-        break;
       case "plaid":
         this.#provider = new PlaidProvider(params);
         break;
@@ -38,27 +30,14 @@ export class Provider {
   async getHealthCheck(
     params: Omit<ProviderParams, "provider">,
   ): Promise<GetHealthCheckResponse> {
-    const teller = new TellerProvider(params);
     const plaid = new PlaidProvider(params);
-    const gocardless = new GoCardLessProvider(params);
 
     try {
-      const [isPlaidHealthy, isGocardlessHealthy, isTellerHealthy] =
-        await Promise.all([
-          plaid.getHealthCheck(),
-          gocardless.getHealthCheck(),
-          teller.getHealthCheck(),
-        ]);
+      const [isPlaidHealthy] = await Promise.all([plaid.getHealthCheck()]);
 
       return {
         plaid: {
           healthy: isPlaidHealthy,
-        },
-        gocardless: {
-          healthy: isGocardlessHealthy,
-        },
-        teller: {
-          healthy: isTellerHealthy,
         },
       };
     } catch {

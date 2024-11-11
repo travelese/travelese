@@ -1,4 +1,3 @@
-import { getAccessValidForDays } from "@travelese/engine/src/providers/gocardless/utils";
 import { addDays } from "date-fns";
 import { getCurrentUserTeamQuery, getUserInviteQuery } from "../queries";
 import type { Client } from "../types";
@@ -21,7 +20,7 @@ type CreateBankAccountsPayload = {
   referenceId?: string;
   teamId: string;
   userId: string;
-  provider: "gocardless" | "teller" | "plaid";
+  provider: "plaid";
 };
 
 export async function createBankAccounts(
@@ -42,15 +41,6 @@ export async function createBankAccounts(
   if (!account) {
     return;
   }
-
-  // NOTE: GoCardLess connection expires after 90-180 days
-  const expiresAt =
-    provider === "gocardless"
-      ? addDays(
-          new Date(),
-          getAccessValidForDays({ institutionId: account.institution_id }),
-        ).toDateString()
-      : undefined;
 
   const bankConnection = await supabase
     .from("bank_connections")
@@ -100,27 +90,6 @@ type UpdateBankConnectionData = {
   id: string;
   referenceId?: string;
 };
-
-// NOTE: Only GoCardLess needs to be updated
-export async function updateBankConnection(
-  supabase: Client,
-  data: UpdateBankConnectionData,
-) {
-  const { id, referenceId } = data;
-
-  return await supabase
-    .from("bank_connections")
-    .update({
-      expires_at: addDays(
-        new Date(),
-        getAccessValidForDays({ institutionId: id }),
-      ).toDateString(),
-      reference_id: referenceId,
-    })
-    .eq("id", id)
-    .select()
-    .single();
-}
 
 type CreateTransactionsData = {
   transactions: any[];

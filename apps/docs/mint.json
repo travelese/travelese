@@ -73,8 +73,6 @@
         "api-reference/engine/endpoint/get-accounts",
         "api-reference/engine/endpoint/get-account-balance",
         "api-reference/engine/endpoint/search-institutions",
-        "api-reference/engine/endpoint/auth-link-gocardless",
-        "api-reference/engine/endpoint/exchange-token-gocardless",
         "api-reference/engine/endpoint/auth-link-plaid",
         "api-reference/engine/endpoint/exchange-token-plaid",
         "api-reference/engine/endpoint/health"
