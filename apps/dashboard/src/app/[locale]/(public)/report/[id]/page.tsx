@@ -223,7 +223,7 @@ export default async function Report({ params }) {
               href="https://travelese.ai?utm_source=report"
               className="text-black dark:text-white"
             >
-              Midday
+              Travelese
             </a>
           </p>
         </div>

@@ -126,12 +126,12 @@ export default async function Page({ params }: Props) {
 
       <div className="fixed bottom-4 right-4 hidden md:block">
         <a
-          href="https://midday.ai?utm_source=invoice"
+          href="https://travelese.ai?utm_source=invoice"
           target="_blank"
           rel="noreferrer"
           className="text-[9px] text-[#878787]"
         >
-          Powered by <span className="text-primary">midday</span>
+          Powered by <span className="text-primary">Travelese</span>
         </a>
       </div>
     </div>

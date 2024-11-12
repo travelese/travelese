@@ -50,7 +50,7 @@ export const createInvoiceAction = authActionClient
     if (deliveryType === "create_and_send" && !draft.sent_to) {
       try {
         await resend.emails.send({
-          from: "Midday <middaybot@midday.ai>",
+          from: "Travelese <travelesebot@travelese.ai>",
           to: draft.customer.email,
           reply_to: user.team.email,
           subject: `${user.team.name} sent you an invoice`,

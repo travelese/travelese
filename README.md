@@ -38,7 +38,6 @@ development: https://docs.travelese.ai
 
 ## App Architecture
 
-- [Midday](https://midday.ai/)
 - [Shadcn](https://ui.shadcn.com/)
 - [Turborepo](https://turbo.build/)
 - [Nextjs](https://nextjs.org/)

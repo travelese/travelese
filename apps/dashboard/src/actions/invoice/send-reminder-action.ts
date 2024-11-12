@@ -28,7 +28,7 @@ export const sendReminderAction = authActionClient
     }
 
     await resend.emails.send({
-      from: "Midday <middaybot@midday.ai>",
+      from: "Travelese <travelesebot@travelese.ai>",
       to: invoice.customer.email,
       reply_to: email,
       subject: `Reminder: Payment for ${invoice.invoice_number}`,

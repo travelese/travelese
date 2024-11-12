@@ -7,7 +7,7 @@ import { ImageResponse } from "next/og";
 export const contentType = "image/png";
 export const runtime = "edge";
 
-const CDN_URL = "https://cdn.midday.ai";
+const CDN_URL = "https://cdn.travelese.ai";
 
 export default async function Image({ params }: { params: { token: string } }) {
   const supabase = createClient({ admin: true });
