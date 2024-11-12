@@ -40,7 +40,6 @@ app.openapi(indexRoute, async (c) => {
 
   const providers = await api.getHealthCheck({
     kv: c.env.KV,
-    fetcher: c.env.TELLER_CERT,
     envs,
   });
 

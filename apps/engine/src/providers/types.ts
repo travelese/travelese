@@ -5,7 +5,6 @@ export type Providers = "plaid";
 export type ProviderParams = {
   provider: Providers;
   kv: KVNamespace;
-  fetcher?: Fetcher | null; // Teller
   envs: {
     PLAID_CLIENT_ID: string;
     PLAID_SECRET: string;
@@ -42,7 +41,6 @@ export type Account = {
   type: AccountType;
   institution: Institution;
   balance: Balance;
-  enrollment_id: string | null; // Teller
 };
 
 export type Balance = {
@@ -53,18 +51,18 @@ export type Balance = {
 export type GetTransactionsRequest = {
   accountId: string;
   latest?: boolean;
-  accessToken?: string; // Teller & Plaid
+  accessToken?: string; // Plaid
   accountType: AccountType;
 };
 
 export type GetAccountsRequest = {
-  accessToken?: string; // Teller & Plaid
+  accessToken?: string; // Plaid
   institutionId?: string; // Plaid
 };
 
 export type GetAccountBalanceRequest = {
   accountId: string;
-  accessToken?: string; // Teller & Plaid
+  accessToken?: string; // Plaid
 };
 
 export type GetAccountBalanceResponse = {
@@ -73,7 +71,7 @@ export type GetAccountBalanceResponse = {
 };
 
 export type DeleteAccountsRequest = {
-  accessToken?: string; // Teller & Plaid
+  accessToken?: string; // Plaid
 };
 
 export type GetTransactionsResponse = Transaction[];

@@ -1,15 +1,18 @@
-export type Bindings = {
+export interface Bindings {
   KV: KVNamespace;
   STORAGE: R2Bucket;
   API_SECRET_KEY: string;
+
+  // Plaid
   PLAID_CLIENT_ID: string;
-  PLAID_ENVIRONMENT: string;
   PLAID_SECRET: string;
+  PLAID_ENVIRONMENT: string;
+
+  // Typesense
   TYPESENSE_API_KEY: string;
-  TYPESENSE_ENDPOINT_AU: string;
-  TYPESENSE_ENDPOINT_EU: string;
-  TYPESENSE_ENDPOINT_US: string;
   TYPESENSE_ENDPOINT: string;
-  UPSTASH_REDIS_REST_TOKEN: string;
-  UPSTASH_REDIS_REST_URL: string;
-};
+
+  // Optional Redis caching
+  UPSTASH_REDIS_REST_TOKEN?: string;
+  UPSTASH_REDIS_REST_URL?: string;
+}
