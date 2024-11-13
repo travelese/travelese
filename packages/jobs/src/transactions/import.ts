@@ -1,38 +1,33 @@
 import { transform } from "@travelese/import/src/transform";
-import { eventTrigger } from "@trigger.dev/sdk";
+import { task } from "@trigger.dev/sdk/v3";
 import Papa from "papaparse";
 import { z } from "zod";
-import { client, supabase } from "../client";
+import { supabase } from "../client";
 import { Events, Jobs } from "../constants";
 import { mapTransactions, processTransactions } from "../utils/import";
 
-client.defineJob({
-  id: Jobs.TRANSACTIONS_IMPORT,
-  name: "Transactions - Import",
-  version: "0.0.2",
-  trigger: eventTrigger({
-    name: Events.TRANSACTIONS_IMPORT,
-    schema: z.object({
-      importType: z.enum(["csv", "image"]),
-      inverted: z.boolean(),
-      dateAdjustment: z.number().optional(),
-      filePath: z.array(z.string()).optional(),
-      bankAccountId: z.string(),
-      currency: z.string(),
-      teamId: z.string(),
-      table: z.array(z.record(z.string(), z.string())).optional(),
-      timezone: z.string(),
-      mappings: z.object({
-        amount: z.string(),
-        date: z.string(),
-        description: z.string(),
-      }),
-    }),
-  }),
-  integrations: { supabase },
-  run: async (payload, io) => {
-    const supabase = io.supabase.client;
+type ImportTransactionsPayload = z.infer<typeof schema>;
 
+const schema = z.object({
+  importType: z.enum(["csv", "image"]),
+  inverted: z.boolean(),
+  dateAdjustment: z.number().optional(),
+  filePath: z.array(z.string()).optional(),
+  bankAccountId: z.string(),
+  currency: z.string(),
+  teamId: z.string(),
+  table: z.array(z.record(z.string(), z.string())).optional(),
+  timezone: z.string(),
+  mappings: z.object({
+    amount: z.string(),
+    date: z.string(),
+    description: z.string(),
+  }),
+});
+
+export const importTransactions = task({
+  id: Jobs.TRANSACTIONS_IMPORT,
+  run: async (payload: ImportTransactionsPayload) => {
     const {
       teamId,
       filePath,

@@ -22,7 +22,7 @@ export const inboxDocument = task({
   run: async (payload: InboxDocumentPayload) => {
     const { recordId, teamId } = payload;
 
-    const { data: inboxData } = await supabase.client
+    const { data: inboxData } = await supabase
       .from("inbox")
       .select()
       .eq("id", payload.recordId)
@@ -30,12 +30,12 @@ export const inboxDocument = task({
       .throwOnError();
 
     // Get all users on team
-    const { data: usersData } = await supabase.client
+    const { data: usersData } = await supabase
       .from("users_on_team")
       .select("team_id, user:users(id, full_name, avatar_url, email, locale)")
       .eq("team_id", payload.teamId);
 
-    const { data } = await supabase.client.storage
+    const { data } = await supabase.storage
       .from("vault")
       .download(inboxData.file_path.join("/"));
 
@@ -55,7 +55,7 @@ export const inboxDocument = task({
         content: Buffer.from(buffer).toString("base64"),
       });
 
-      const { data: updatedInbox } = await supabase.client
+      const { data: updatedInbox } = await supabase
         .from("inbox")
         .update({
           amount: result.amount,
@@ -81,7 +81,7 @@ export const inboxDocument = task({
     } catch {
       // If we end up here we could not parse the document
       // But we want to update the status so we show the record with fallback name (Subject/From name)
-      await supabase.client
+      await supabase
         .from("inbox")
         .update({ status: "pending" })
         .eq("id", payload.recordId);

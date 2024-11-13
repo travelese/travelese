@@ -1,21 +1,20 @@
+import { logger, task } from "@trigger.dev/sdk/v3";
 import { revalidateTag } from "next/cache";
-import { client, supabase } from "../client";
+import { supabase } from "../client";
 import { Events, Jobs } from "../constants";
 import { engine } from "../utils/engine";
 import { parseAPIError } from "../utils/error";
 import { getClassification, transformTransaction } from "../utils/transform";
 import { scheduler } from "./scheduler";
 
-client.defineJob({
-  id: Jobs.TRANSACTIONS_SYNC,
-  name: "Transactions - Sync",
-  version: "0.0.1",
-  trigger: scheduler,
-  integrations: { supabase },
-  run: async (_, io, ctx) => {
-    const supabase = io.supabase.client;
+type SyncPayload = {
+  teamId: string;
+};
 
-    const teamId = ctx.source?.id as string;
+export const sync = task({
+  id: Jobs.TRANSACTIONS_SYNC,
+  run: async (payload: SyncPayload) => {
+    const { teamId } = payload;
 
     const { data: accountsData, error: accountsError } = await supabase
       .from("bank_accounts")
@@ -27,7 +26,7 @@ client.defineJob({
       .eq("manual", false);
 
     if (accountsError) {
-      await io.logger.error("Accounts Error", accountsError);
+      await logger.error("Accounts Error", accountsError);
     }
 
     const promises = accountsData?.map(async (account) => {
@@ -40,7 +39,7 @@ client.defineJob({
 
         // Update account balance
         if (balance.data?.amount) {
-          await io.supabase.client
+          await supabase
             .from("bank_accounts")
             .update({ balance: balance.data.amount })
             .eq("id", account.id);
@@ -48,7 +47,7 @@ client.defineJob({
 
         // Update bank connection last accessed
         // TODO: Fix so it only update once per connection
-        await io.supabase.client
+        await supabase
           .from("bank_connections")
           .update({ last_accessed: new Date().toISOString() })
           .eq("id", account.bank_connection.id);
@@ -56,7 +55,7 @@ client.defineJob({
         if (error instanceof engine.APIError) {
           const parsedError = parseAPIError(error);
 
-          await io.supabase.client
+          await supabase
             .from("bank_connections")
             .update({
               status: parsedError.code,
@@ -104,7 +103,7 @@ client.defineJob({
             .select("*");
 
         if (transactionsError) {
-          await io.logger.error("Transactions error", transactionsError);
+          await logger.error("Transactions error", transactionsError);
         }
 
         if (transactionsData && transactionsData?.length > 0) {
@@ -133,9 +132,9 @@ client.defineJob({
         revalidateTag(`bank_accounts_${teamId}`);
       }
     } catch (error) {
-      await io.logger.debug(`Team id: ${teamId}`);
+      await logger.debug(`Team id: ${teamId}`);
 
-      await io.logger.error(
+      await logger.error(
         error instanceof Error ? error.message : String(error),
       );
     }

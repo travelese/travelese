@@ -1,28 +1,23 @@
 import { writeToString } from "@fast-csv/format";
 import { download } from "@travelese/supabase/storage";
-import { eventTrigger } from "@trigger.dev/sdk";
+import { task } from "@trigger.dev/sdk/v3";
 import { BlobReader, BlobWriter, TextReader, ZipWriter } from "@zip.js/zip.js";
 import { revalidateTag } from "next/cache";
 import { z } from "zod";
-import { client, supabase } from "../client";
+import { supabase } from "../client";
 import { Events, Jobs } from "../constants";
 
-client.defineJob({
-  id: Jobs.TRANSACTIONS_EXPORT,
-  name: "Transactions - Export",
-  version: "0.0.1",
-  trigger: eventTrigger({
-    name: Events.TRANSACTIONS_EXPORT,
-    schema: z.object({
-      transactionIds: z.array(z.string()),
-      teamId: z.string(),
-      locale: z.string(),
-    }),
-  }),
-  integrations: { supabase },
-  run: async (payload, io) => {
-    const client = await io.supabase.client;
+type ExportTransactionsPayload = z.infer<typeof schema>;
 
+const schema = z.object({
+  transactionIds: z.array(z.string()),
+  teamId: z.string(),
+  locale: z.string(),
+});
+
+export const exportTransactions = task({
+  id: Jobs.TRANSACTIONS_EXPORT,
+  run: async (payload: ExportTransactionsPayload) => {
     const { transactionIds, teamId, locale } = payload;
 
     const filePath = `export-${new Date().toISOString()}`;
@@ -30,7 +25,7 @@ client.defineJob({
     const path = `${teamId}/exports`;
     const fileName = `${filePath}.zip`;
 
-    const generateExport = await io.createStatus("generate-export-start", {
+    const generateExport = await createStatus("generate-export-start", {
       label: "Generating export",
       state: "loading",
       data: {
@@ -38,7 +33,7 @@ client.defineJob({
       },
     });
 
-    const { data, count } = await client
+    const { data, count } = await supabase
       .from("transactions")
       .select(
         `
@@ -193,7 +188,7 @@ client.defineJob({
       },
     });
 
-    await client.storage
+    await supabase.storage
       .from("vault")
       .upload(`${path}/${fileName}`, await zip.arrayBuffer(), {
         upsert: true,

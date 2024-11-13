@@ -1,30 +1,24 @@
-import { eventTrigger } from "@trigger.dev/sdk";
+import { logger, task } from "@trigger.dev/sdk/v3";
 import { revalidateTag } from "next/cache";
 import { z } from "zod";
-import { client, supabase } from "../client";
+import { supabase } from "../client";
 import { Events, Jobs } from "../constants";
 import { engine } from "../utils/engine";
 import { parseAPIError } from "../utils/error";
 import { processBatch } from "../utils/process";
 import { getClassification, transformTransaction } from "../utils/transform";
 
+type ManualSyncPayload = z.infer<typeof schema>;
+const schema = z.object({
+  connectionId: z.string(),
+  teamId: z.string(),
+});
+
 const BATCH_LIMIT = 500;
 
-client.defineJob({
+export const manualSync = task({
   id: Jobs.TRANSACTIONS_MANUAL_SYNC,
-  name: "Transactions - Manual Sync",
-  version: "0.0.1",
-  trigger: eventTrigger({
-    name: Events.TRANSACTIONS_MANUAL_SYNC,
-    schema: z.object({
-      connectionId: z.string(),
-      teamId: z.string(),
-    }),
-  }),
-  integrations: { supabase },
-  run: async (payload, io) => {
-    const supabase = io.supabase.client;
-
+  run: async (payload: ManualSyncPayload) => {
     const { teamId, connectionId } = payload;
 
     const { data: accountsData } = await supabase
@@ -87,7 +81,7 @@ client.defineJob({
       if (error instanceof engine.APIError) {
         const parsedError = parseAPIError(error);
 
-        await io.supabase.client
+        await supabase
           .from("bank_connections")
           .update({
             status: parsedError.code,
@@ -100,7 +94,7 @@ client.defineJob({
     }
 
     // Update bank connection last accessed and restore connection status
-    await io.supabase.client
+    await supabase
       .from("bank_connections")
       .update({
         last_accessed: new Date().toISOString(),
