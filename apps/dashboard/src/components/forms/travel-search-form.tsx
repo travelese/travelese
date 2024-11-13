@@ -1,12 +1,12 @@
 "use client";
 
 import type { searchTravelSchema } from "@/actions/schema";
-import { TravelBaggage } from "@/components/travel/travel-baggage";
-import { TravelCabin } from "@/components/travel/travel-cabin";
-import { TravelLocation } from "@/components/travel/travel-location";
-import { TravelPeriod } from "@/components/travel/travel-period";
-import { TravelTraveller } from "@/components/travel/travel-traveller";
-import { TravelType } from "@/components/travel/travel-type";
+import { TravelBaggage } from "@/components/travel-baggage";
+import { TravelCabin } from "@/components/travel-cabin";
+import { TravelLocation } from "@/components/travel-location";
+import { TravelPeriod } from "@/components/travel-period";
+import { TravelTraveller } from "@/components/travel-traveller";
+import { TravelType } from "@/components/travel-type";
 import { Button } from "@travelese/ui/button";
 import {
   Form,

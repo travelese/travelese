@@ -7,6 +7,7 @@ export default {
   theme: {
     extend: {
       colors: {
+        blue: "#0057FF",
         fontFamily: {
           sans: "var(--font-geist-sans)",
           mono: "var(--font-geist-mono)",

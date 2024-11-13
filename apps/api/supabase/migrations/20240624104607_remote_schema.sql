@@ -79,14 +79,14 @@ ALTER TYPE "public"."account_type" OWNER TO "postgres";
 
 -- Bank Providers Type Definition:
 CREATE TYPE "public"."bankProviders" AS ENUM (
-    'plaid',
+    'plaid'
 );
 
 ALTER TYPE "public"."bankProviders" OWNER TO "postgres";
 
 -- Bank Providers Type Definition:
 CREATE TYPE "public"."bank_providers" AS ENUM (
-    'plaid',
+    'plaid'
 );
 
 ALTER TYPE "public"."bank_providers" OWNER TO "postgres";
@@ -1289,7 +1289,7 @@ CREATE INDEX "transactions_team_id_idx" ON "public"."transactions" USING "btree"
 CREATE INDEX "users_on_team_team_id_idx" ON "public"."users_on_team" USING "btree" ("team_id");
 
 -- Embed Category Trigger
-CREATE OR REPLACE TRIGGER "embed_category" AFTER INSERT OR UPDATE ON "public"."transaction_categories" FOR EACH ROW EXECUTE FUNCTION "supabase_functions"."http_request"('https://pytddvqiozwrhfbwqazp.supabase.co/functions/v1/generate-category-embedding', 'POST', '{"Content-type":"application/json"}', '{}', '5000');
+CREATE OR REPLACE TRIGGER "embed_category" AFTER INSERT OR UPDATE ON "public"."transaction_categories" FOR EACH ROW EXECUTE FUNCTION "supabase_functions"."http_request"('https://jylavktzapdciiteepdf.supabase.co/functions/v1/generate-category-embedding', 'POST', '{"Content-type":"application/json"}', '{}', '5000');
 
 -- Generate Category Slug Trigger
 CREATE OR REPLACE TRIGGER "generate_category_slug" BEFORE INSERT ON "public"."transaction_categories" FOR EACH ROW EXECUTE FUNCTION "public"."generate_slug_from_name"();
