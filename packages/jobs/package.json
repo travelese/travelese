@@ -16,12 +16,11 @@
     "@travelese/import": "workspace:*",
     "@travelese/invoice": "workspace:*",
     "@travelese/supabase": "workspace:*",
-    "@trigger.dev/react": "3.1.0",
-    "@trigger.dev/resend": "3.1.0",
     "@trigger.dev/sdk": "^3.1.0",
-    "@trigger.dev/supabase": "3.1.0",
     "@zip.js/zip.js": "2.7.52",
-    "nanoid": "^5.0.8"
+    "nanoid": "^5.0.8",
+    "resend": "^2.0.0",
+    "@supabase/supabase-js": "^2.39.0"
   },
   "devDependencies": {
     "@trigger.dev/build": "^3.1.0"

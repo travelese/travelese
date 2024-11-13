@@ -4,42 +4,38 @@ import {
   TriggerEvents,
   triggerBulk,
 } from "@travelese/notification";
-import { eventTrigger } from "@trigger.dev/sdk";
+import { task } from "@trigger.dev/sdk/v3";
 import { z } from "zod";
-import { client, supabase } from "../client";
-import { Events, Jobs } from "../constants";
+import { supabase } from "../client";
+import { Jobs } from "../constants";
+import { inboxMatch } from "./match";
 
-client.defineJob({
+type InboxDocumentPayload = z.infer<typeof schema>;
+
+const schema = z.object({
+  recordId: z.string(),
+  teamId: z.string(),
+});
+
+export const inboxDocument = task({
   id: Jobs.INBOX_DOCUMENT,
-  name: "Inbox - Document",
-  version: "0.0.1",
-  trigger: eventTrigger({
-    name: Events.INBOX_DOCUMENT,
-    schema: z.object({
-      recordId: z.string(),
-      teamId: z.string(),
-    }),
-  }),
-  integrations: {
-    supabase,
-  },
-  run: async (payload, io) => {
+  run: async (payload: InboxDocumentPayload) => {
     const { recordId, teamId } = payload;
 
-    const { data: inboxData } = await io.supabase.client
+    const { data: inboxData } = await supabase.client
       .from("inbox")
       .select()
-      .eq("id", recordId)
+      .eq("id", payload.recordId)
       .single()
       .throwOnError();
 
     // Get all users on team
-    const { data: usersData } = await io.supabase.client
+    const { data: usersData } = await supabase.client
       .from("users_on_team")
       .select("team_id, user:users(id, full_name, avatar_url, email, locale)")
-      .eq("team_id", teamId);
+      .eq("team_id", payload.teamId);
 
-    const { data } = await io.supabase.client.storage
+    const { data } = await supabase.client.storage
       .from("vault")
       .download(inboxData.file_path.join("/"));
 
@@ -59,7 +55,7 @@ client.defineJob({
         content: Buffer.from(buffer).toString("base64"),
       });
 
-      const { data: updatedInbox } = await io.supabase.client
+      const { data: updatedInbox } = await supabase.client
         .from("inbox")
         .update({
           amount: result.amount,
@@ -71,27 +67,24 @@ client.defineJob({
           description: result.description,
           status: "pending",
         })
-        .eq("id", recordId)
+        .eq("id", payload.recordId)
         .select()
         .single();
 
       if (updatedInbox?.amount) {
-        await io.sendEvent("Match Inbox", {
-          name: Events.INBOX_MATCH,
-          payload: {
-            teamId: updatedInbox.team_id,
-            inboxId: updatedInbox.id,
-            amount: updatedInbox.amount,
-          },
+        await inboxMatch.trigger({
+          teamId: updatedInbox.team_id,
+          inboxId: updatedInbox.id,
+          amount: updatedInbox.amount,
         });
       }
     } catch {
       // If we end up here we could not parse the document
       // But we want to update the status so we show the record with fallback name (Subject/From name)
-      await io.supabase.client
+      await supabase.client
         .from("inbox")
         .update({ status: "pending" })
-        .eq("id", recordId);
+        .eq("id", payload.recordId);
 
       if (!inboxData || !usersData?.length) {
         return;

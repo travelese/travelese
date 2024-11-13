@@ -21,3 +21,5 @@ export const Cookies = {
   InboxOrder: "inbox-order",
   HideConnectFlow: "hide-connect-flow",
 };
+
+export const MAP_RADIUS = 20_000;

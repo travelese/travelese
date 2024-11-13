@@ -5,32 +5,24 @@ import {
   triggerBulk,
 } from "@travelese/notification";
 import { updateInboxById } from "@travelese/supabase/mutations";
-import { eventTrigger } from "@trigger.dev/sdk";
+import { task } from "@trigger.dev/sdk/v3";
 import { subDays } from "date-fns";
 import { revalidateTag } from "next/cache";
-import { z } from "zod";
-import { client, supabase } from "../client";
-import { Events, Jobs } from "../constants";
+import { supabase } from "../client";
+import { Jobs } from "../constants";
 
-client.defineJob({
+interface InboxMatchPayload {
+  inboxId: string;
+  amount: number;
+  teamId: string;
+}
+
+export const inboxMatch = task({
   id: Jobs.INBOX_MATCH,
-  name: "Inbox - Match",
-  version: "0.0.1",
-  trigger: eventTrigger({
-    name: Events.INBOX_MATCH,
-    schema: z.object({
-      inboxId: z.string(),
-      amount: z.number(),
-      teamId: z.string(),
-    }),
-  }),
-  integrations: {
-    supabase,
-  },
-  run: async (payload, io) => {
+  run: async (payload: InboxMatchPayload) => {
     // NOTE: All inbox reciepts and invoices amount are
     // saved with positive values while transactions have signed values
-    const { data: transactionData } = await io.supabase.client
+    const { data: transactionData } = await supabase.client
       .from("transactions")
       .select("id, name, team_id, attachments:transaction_attachments(*)")
       .eq("amount", -Math.abs(payload.amount))
@@ -42,14 +34,14 @@ client.defineJob({
     if (transactionData?.length === 1) {
       const transaction = transactionData.at(0);
 
-      const { data: inboxData } = await io.supabase.client
+      const { data: inboxData } = await supabase.client
         .from("inbox")
         .select("*")
         .eq("team_id", payload.teamId)
         .eq("id", payload.inboxId)
         .single();
 
-      const { data: attachmentData } = await io.supabase.client
+      const { data: attachmentData } = await supabase.client
         .from("transaction_attachments")
         .insert({
           type: inboxData.content_type,
@@ -63,7 +55,7 @@ client.defineJob({
         .single();
 
       const { data: updatedInboxData } = await updateInboxById(
-        io.supabase.client,
+        supabase.client,
         {
           id: inboxData.id,
           attachment_id: attachmentData.id,
@@ -78,7 +70,7 @@ client.defineJob({
 
       revalidateTag(`transactions_${inboxData.team_id}`);
 
-      const { data: usersData } = await io.supabase.client
+      const { data: usersData } = await supabase.client
         .from("users_on_team")
         .select(
           "id, team_id, user:users(id, full_name, avatar_url, email, locale, team_id)",
@@ -111,6 +103,8 @@ client.defineJob({
       if (notificationEvents?.length) {
         triggerBulk(notificationEvents?.flat());
       }
+
+      return updatedInboxData;
     }
   },
 });

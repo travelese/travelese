@@ -268,3 +268,151 @@
 .aria-selected\:text-accent-foreground[aria-selected="true"] {
   border-radius: 0px;
 }
+
+/* flights */
+
+.stars-container {
+  animation: stars-animation 50s linear infinite;
+}
+
+@keyframes stars-animation {
+  0% {
+    transform: translateX(0);
+  }
+
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes plane-light-animation {
+  0% {
+    transform: scale(1.5);
+    opacity: 1;
+  }
+
+  50% {
+    transform: scale(1);
+    opacity: 0.5;
+  }
+
+  100% {
+    transform: scale(1.5);
+    opacity: 1;
+  }
+}
+
+.marker-pulse-container {
+  @apply absolute w-24 h-24 left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2;
+}
+
+.marker-pulse {
+  @apply absolute w-full h-full bg-blue/20 rounded-full origin-center border border-blue;
+  animation: marker-pulse-animation 3s ease-out infinite;
+  animation-fill-mode: both;
+}
+
+@keyframes marker-pulse-animation {
+  0% {
+    transform: scale(0);
+    opacity: 1;
+  }
+
+  10% {
+    opacity: 1;
+  }
+
+  50% {
+    transform: scale(1);
+    opacity: 0;
+  }
+
+  100% {
+    opacity: 0;
+  }
+}
+
+@property --animation-progress {
+  syntax: '<number>';
+  initial-value: 0;
+  inherits: true;
+}
+
+.flight-activity-container {
+  --animation-progress: 1;
+  --block-duration: 1200ms;
+  --block-delay: 100ms;
+  animation: flight-activity-progress calc(var(--total) * var(--block-delay) + var(--block-duration)) 1200ms ease-out;
+  animation-fill-mode: both;
+}
+
+@keyframes flight-activity-progress {
+  from {
+    --animation-progress: 0;
+  }
+
+  to {
+    --animation-progress: 1;
+  }
+}
+
+.flight-activity-container:last-child .flight-activity-line {
+  border: none;
+  width: 1px;
+  background: linear-gradient(to top, transparent, white);
+}
+
+.flight-activity-item {
+  animation: slide-up 1200ms cubic-bezier(0.16, 1, 0.3, 1);
+  animation-delay: calc(var(--index) * 100ms);
+  animation-fill-mode: both;
+}
+
+@keyframes slide-up {
+  0% {
+    opacity: 0;
+    transform: translateY(100%);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.flight-activity-dot {
+  animation: dot-animation 500ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  animation-delay: calc(var(--index) * 150ms + 200ms);
+  animation-fill-mode: both;
+  transform-origin: center;
+}
+
+@keyframes dot-animation {
+  0% {
+    transform: scale(0);
+  }
+
+  100% {
+    transform: scale(1);
+  }
+}
+
+.flight-activity-line {
+  animation: line-animation 150ms ease-in-out;
+  animation-delay: calc(var(--index) * 150ms + 150ms);
+  animation-fill-mode: both;
+  transform-origin: top;
+  /* transform: scaleY(var(--animation-progress)); */
+}
+
+@keyframes line-animation {
+  0% {
+    transform: scaleY(0);
+    opacity: 0;
+  }
+
+  100% {
+    transform: scaleY(1);
+    opacity: 0.5;
+  }
+}
