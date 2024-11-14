@@ -5,7 +5,7 @@ import { SelectCurrency as SelectCurrencyBase } from "@/components/select-curren
 import { uniqueCurrencies } from "@travelese/location/src/currencies";
 import { Button } from "@travelese/ui/button";
 import { useToast } from "@travelese/ui/use-toast";
-import { useEventDetails } from "@trigger.dev/react";
+import { useRealtimeRun } from "@trigger.dev/react-hooks";
 import { useAction } from "next-safe-action/hooks";
 import { useEffect, useState } from "react";
 
@@ -13,11 +13,9 @@ export function SelectCurrency({ defaultValue }: { defaultValue: string }) {
   const { toast } = useToast();
   const [eventId, setEventId] = useState<string | undefined>();
   const [isSyncing, setSyncing] = useState(false);
-  const { data } = useEventDetails(eventId);
+  const { run } = useRealtimeRun(eventId ?? "");
 
-  const status = data?.runs.at(-1)?.status;
-
-  const error = status === "FAILURE" || status === "TIMED_OUT";
+  const error = run?.status === "FAILED" || run?.status === "TIMED_OUT";
 
   const updateCurrency = useAction(updateCurrencyAction, {
     onExecute: () => setSyncing(true),
@@ -60,7 +58,7 @@ export function SelectCurrency({ defaultValue }: { defaultValue: string }) {
   }, [eventId]);
 
   useEffect(() => {
-    if (status === "SUCCESS") {
+    if (run?.status === "COMPLETED") {
       setSyncing(false);
       setEventId(undefined);
       toast({
@@ -69,7 +67,7 @@ export function SelectCurrency({ defaultValue }: { defaultValue: string }) {
         title: "Transactions and account balances updated.",
       });
     }
-  }, [status]);
+  }, [run?.status]);
 
   useEffect(() => {
     if (isSyncing) {

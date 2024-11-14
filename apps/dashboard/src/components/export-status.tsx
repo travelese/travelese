@@ -11,7 +11,7 @@ import {
 } from "@travelese/ui/dropdown-menu";
 import { Icons } from "@travelese/ui/icons";
 import { useToast } from "@travelese/ui/use-toast";
-import { useEventRunStatuses } from "@trigger.dev/react";
+import { useRealtimeRun } from "@trigger.dev/react-hooks";
 import ms from "ms";
 import { useAction } from "next-safe-action/hooks";
 import { useEffect, useState } from "react";
@@ -35,8 +35,7 @@ export function ExportStatus() {
   const { toast, dismiss, update } = useToast();
   const [toastId, setToastId] = useState(null);
   const { exportId, setExportId } = useExportStore();
-  const { error, statuses } = useEventRunStatuses(exportId);
-  const status = statuses?.at(0);
+  const { error, run } = useRealtimeRun(exportId ?? "");
 
   const shareFile = useAction(shareFileAction, {
     onError: () => {
@@ -61,7 +60,15 @@ export function ExportStatus() {
     dismiss(id);
   };
 
-  const handleOnShare = ({ id, expireIn, filename }) => {
+  const handleOnShare = ({
+    id,
+    expireIn,
+    filename,
+  }: {
+    id: string;
+    expireIn: number;
+    filename: string;
+  }) => {
     shareFile.execute({ expireIn, filepath: `exports/${filename}` });
     dismiss(id);
   };
@@ -79,14 +86,14 @@ export function ExportStatus() {
       setToastId(id);
     } else {
       update(toastId, {
-        progress: status?.data?.progress,
+        progress: run?.output?.progress,
       });
     }
 
-    if (status?.data?.progress === 100) {
+    if (run?.output?.progress === 100) {
       const { id } = toast({
         title: "Export completed",
-        description: `Your export is ready based on ${status?.data?.totalItems} transactions. It's stored in your Vault.`,
+        description: `Your export is ready based on ${run?.output?.totalItems} transactions. It's stored in your Vault.`,
         duration: Number.POSITIVE_INFINITY,
         footer: (
           <div className="mt-4 flex space-x-4">
@@ -109,7 +116,7 @@ export function ExportStatus() {
                       handleOnShare({
                         id,
                         expireIn: option.expireIn,
-                        filename: status?.data?.fileName,
+                        filename: run?.output?.fileName,
                       })
                     }
                   >
@@ -120,7 +127,7 @@ export function ExportStatus() {
             </DropdownMenu>
 
             <a
-              href={`/api/download/file?path=exports/${status?.data?.fileName}&filename=${status?.data?.fileName}`}
+              href={`/api/download/file?path=exports/${run?.output?.fileName}&filename=${run?.output?.fileName}`}
               download
             >
               <Button size="sm" onClick={() => handleOnDownload(id)}>

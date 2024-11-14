@@ -16,7 +16,7 @@ import {
   TooltipTrigger,
 } from "@travelese/ui/tooltip";
 import { useToast } from "@travelese/ui/use-toast";
-import { useEventDetails } from "@trigger.dev/react";
+import { useRealtimeRun } from "@trigger.dev/react-hooks";
 import { differenceInDays, formatDistanceToNow } from "date-fns";
 import { useAction } from "next-safe-action/hooks";
 import { useRouter } from "next/navigation";
@@ -134,13 +134,13 @@ export function BankConnection({ connection }: BankConnectionProps) {
   const [eventId, setEventId] = useState<string | undefined>();
   const [isSyncing, setSyncing] = useState(false);
   const { toast, dismiss } = useToast();
-  const { data } = useEventDetails(eventId);
+  const { run: runData } = useRealtimeRun(eventId ?? "");
   const router = useRouter();
 
-  const status = data?.runs.at(-1)?.status;
+  const status = runData?.status;
   const { show } = connectionStatus(connection);
 
-  const error = status === "FAILURE" || status === "TIMED_OUT";
+  const error = status === "FAILED" || status === "TIMED_OUT";
 
   const [params] = useQueryStates({
     step: parseAsString,
@@ -166,7 +166,7 @@ export function BankConnection({ connection }: BankConnectionProps) {
   });
 
   useEffect(() => {
-    if (status === "SUCCESS") {
+    if (status === "COMPLETED") {
       dismiss();
       setEventId(undefined);
       setSyncing(false);

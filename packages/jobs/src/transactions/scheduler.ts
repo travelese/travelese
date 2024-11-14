@@ -1,6 +1,9 @@
-import { client } from "../client";
+import { schedules } from "@trigger.dev/sdk/v3";
 import { Jobs } from "../constants";
 
-export const scheduler = client.defineDynamicSchedule({
+export const scheduler = schedules.task({
   id: Jobs.TRANSACTION_SCHEDULER,
+  run: async () => {
+    console.log("Scheduler running");
+  },
 });

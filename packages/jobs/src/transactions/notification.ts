@@ -10,7 +10,7 @@ import {
 import { logger, task } from "@trigger.dev/sdk/v3";
 import { z } from "zod";
 import { supabase } from "../client";
-import { Events, Jobs } from "../constants";
+import { Jobs } from "../constants";
 
 type NotificationPayload = z.infer<typeof schema>;
 
