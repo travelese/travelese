@@ -18,7 +18,7 @@
         "UPSTASH_REDIS_REST_TOKEN",
         "TRIGGER_SECRET_KEY",
         "TRIGGER_PROJECT_ID",
-        "NOVU_API_KEY",
+        "NOVU_SECRET_KEY",
         "DUB_API_KEY",
         "PLAID_CLIENT_ID",
         "PLAID_SECRET",

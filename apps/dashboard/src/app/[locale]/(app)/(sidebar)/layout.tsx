@@ -2,12 +2,10 @@ import { AI } from "@/actions/ai/chat";
 import { Header } from "@/components/header";
 import { GlobalSheets } from "@/components/sheets/global-sheets";
 import { Sidebar } from "@/components/sidebar";
+import { UserProvider } from "@/store/user/provider";
 import { setupAnalytics } from "@travelese/events/server";
-import { getCountryCode } from "@travelese/location";
-import {
-  currencies,
-  uniqueCurrencies,
-} from "@travelese/location/src/currencies";
+import { getCountryCode, getCurrency } from "@travelese/location";
+import { uniqueCurrencies } from "@travelese/location/currencies";
 import { getUser } from "@travelese/supabase/cached-queries";
 import { nanoid } from "nanoid";
 import dynamic from "next/dynamic";
@@ -73,6 +71,7 @@ export default async function Layout({
 }) {
   const user = await getUser();
   const countryCode = getCountryCode();
+  const currency = getCurrency();
 
   if (!user?.data?.team) {
     redirect("/teams");
@@ -83,32 +82,36 @@ export default async function Layout({
   }
 
   return (
-    <div className="relative">
-      <AI initialAIState={{ user: user.data, messages: [], chatId: nanoid() }}>
-        <Sidebar />
+    <UserProvider data={user.data}>
+      <div className="relative">
+        <AI
+          initialAIState={{ user: user.data, messages: [], chatId: nanoid() }}
+        >
+          <Sidebar />
 
-        <div className="mx-4 md:ml-[95px] md:mr-10 pb-8">
-          <Header />
-          {children}
-        </div>
+          <div className="mx-4 md:ml-[95px] md:mr-10 pb-8">
+            <Header />
+            {children}
+          </div>
 
-        {/* This is used to make the header draggable on macOS */}
-        <div className="hidden todesktop:block todesktop:[-webkit-app-region:drag] fixed top-0 w-full h-4 pointer-events-none" />
+          {/* This is used to make the header draggable on macOS */}
+          <div className="hidden todesktop:block todesktop:[-webkit-app-region:drag] fixed top-0 w-full h-4 pointer-events-none" />
 
-        <AssistantModal />
-        <ConnectTransactionsModal countryCode={countryCode} />
-        <SelectBankAccountsModal />
-        <ImportModal
-          currencies={uniqueCurrencies}
-          defaultCurrency={currencies[countryCode]}
-        />
-        <ExportStatus />
-        <HotKeys />
+          <AssistantModal />
+          <ConnectTransactionsModal countryCode={countryCode} />
+          <SelectBankAccountsModal />
+          <ImportModal
+            currencies={uniqueCurrencies}
+            defaultCurrency={currency}
+          />
+          <ExportStatus />
+          <HotKeys />
 
-        <Suspense>
-          <GlobalSheets defaultCurrency={currencies[countryCode]} />
-        </Suspense>
-      </AI>
-    </div>
+          <Suspense>
+            <GlobalSheets defaultCurrency={currency} />
+          </Suspense>
+        </AI>
+      </div>
+    </UserProvider>
   );
 }
