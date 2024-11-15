@@ -3,8 +3,7 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"],
-      "@travelese/ui": ["../../packages/ui/src"]
+      "@/*": ["./src/*"]
     },
     "strict": true
   },

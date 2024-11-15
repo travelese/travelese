@@ -14,5 +14,5 @@ export default defineConfig({
       randomize: true,
     },
   },
-  dirs: ["./jobs", "@travelese/jobs/src"],
+  dirs: ["./jobs"],
 });

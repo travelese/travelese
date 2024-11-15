@@ -2,7 +2,6 @@ import "./src/env.mjs";
 
 import bundleAnalyzer from "@next/bundle-analyzer";
 import { withSentryConfig } from "@sentry/nextjs";
-import withVercelToolbar from "@vercel/toolbar/plugins/next";
 
 const withBundleAnalyzer = bundleAnalyzer({
   enabled: process.env.ANALYZE === "true",
@@ -13,6 +12,8 @@ const config = {
   poweredByHeader: false,
   reactStrictMode: true,
   images: {
+    loader: "custom",
+    loaderFile: "./image-loader.ts",
     remotePatterns: [
       {
         protocol: "https",
@@ -26,8 +27,13 @@ const config = {
     "@travelese/tailwind",
     "@travelese/invoice",
   ],
-  compiler: {
-    styledComponents: true,
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
+  logging: {
+    fetches: {
+      fullUrl: true,
+    },
   },
   typescript: {
     ignoreBuildErrors: true,
@@ -50,15 +56,11 @@ const config = {
   },
 };
 
-const nextConfig = withVercelToolbar()(
-  withSentryConfig(withBundleAnalyzer(config), {
-    silent: !process.env.CI,
-    telemetry: false,
-    widenClientFileUpload: true,
-    hideSourceMaps: true,
-    disableLogger: true,
-    tunnelRoute: "/monitoring",
-  }),
-);
-
-export default nextConfig;
+export default withSentryConfig(withBundleAnalyzer(config), {
+  silent: !process.env.CI,
+  telemetry: false,
+  widenClientFileUpload: true,
+  hideSourceMaps: true,
+  disableLogger: true,
+  tunnelRoute: "/monitoring",
+});

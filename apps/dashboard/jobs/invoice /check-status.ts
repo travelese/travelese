@@ -1,76 +1,61 @@
+import { TZDate } from "@date-fns/tz";
 import { createClient } from "@travelese/supabase/job";
 import { logger, schemaTask } from "@trigger.dev/sdk/v3";
 import { subDays } from "date-fns";
 import { z } from "zod";
-import { invoiceNotification } from "./notification";
+import { updateInvoiceStatus } from "../utils/update-invocie";
 
 export const checkInvoiceStatus = schemaTask({
   id: "check-invoice-status",
   schema: z.object({
     invoiceId: z.string().uuid(),
   }),
+  queue: {
+    concurrencyLimit: 10,
+  },
   run: async ({ invoiceId }) => {
     const supabase = createClient();
 
     const { data: invoice } = await supabase
       .from("invoices")
       .select(
-        "id, status, due_date, currency, amount, team_id, file_path, invoice_number",
+        "id, status, due_date, currency, amount, team_id, file_path, invoice_number, file_size, user:user_id(timezone)",
       )
       .eq("id", invoiceId)
       .single();
 
-    if (!invoice) return;
-
-    const isOverdue =
-      invoice.due_date && new Date(invoice.due_date) < new Date();
-
-    // Check if the invoice is overdue
-    if (invoice.status === "unpaid" && isOverdue) {
-      const { data: updatedInvoice } = await supabase
-        .from("invoices")
-        .update({ status: "overdue" })
-        .eq("id", invoiceId)
-        .select()
-        .single();
-
-      if (updatedInvoice) {
-        logger.info("Invoice status changed to overdue", {
-          invoiceId,
-        });
-
-        await invoiceNotification.trigger({
-          invoiceId,
-          status: updatedInvoice?.status as "overdue" | "paid",
-        });
-      }
+    if (!invoice) {
+      logger.error("Invoice data is missing");
+      return;
     }
 
-    if (!invoice.amount || !invoice.currency || !invoice.team_id) return;
+    if (!invoice.amount || !invoice.currency || !invoice.due_date) {
+      logger.error("Invoice data is missing");
+      return;
+    }
 
-    // Check if invoice is paid
+    const userTimezone = invoice.user?.timezone || "UTC";
+
+    // Find recent transactions matching invoice amount, currency, and team_id
     const { data: transactions } = await supabase
       .from("transactions")
       .select("id")
       .eq("team_id", invoice.team_id)
       .eq("amount", invoice.amount)
-      .eq("currency", invoice.currency)
-      .gte("date", subDays(new Date(), 5).toISOString())
+      .eq("currency", invoice.currency?.toUpperCase())
+      .gte(
+        "date",
+        // Get the transactions from the last 3 days
+        subDays(new TZDate(new Date(), userTimezone), 3).toISOString(),
+      )
       .eq("is_fulfilled", false);
 
-    if (transactions?.length === 1) {
-      // Update invoice status
-      const { data: updatedInvoice } = await supabase
-        .from("invoices")
-        .update({ status: "paid" })
-        .eq("id", invoiceId)
-        .select()
-        .single();
-
+    // We have a match
+    if (transactions && transactions.length === 1) {
       const transactionId = transactions.at(0)?.id;
       const filename = `${invoice.invoice_number}.pdf`;
 
-      // Insert transaction attachment
+      // Attach the invoice file to the transaction and mark as paid
       await supabase
         .from("transaction_attachments")
         .insert({
@@ -79,19 +64,26 @@ export const checkInvoiceStatus = schemaTask({
           transaction_id: transactionId,
           team_id: invoice.team_id,
           name: filename,
-          size: 0, // TODO: Get size
+          size: invoice.file_size,
         })
         .select()
         .single();
 
-      if (updatedInvoice) {
-        logger.info("Invoice status changed to paid", {
-          invoiceId,
-        });
+      await updateInvoiceStatus({
+        invoiceId,
+        status: "paid",
+      });
+    } else {
+      // Check if the invoice is overdue
+      const isOverdue =
+        new TZDate(invoice.due_date, userTimezone) <
+        new TZDate(new Date(), userTimezone);
 
-        await invoiceNotification.trigger({
+      // Update invoice status to overdue if it's past due date and currently unpaid
+      if (isOverdue && invoice.status === "unpaid") {
+        await updateInvoiceStatus({
           invoiceId,
-          status: updatedInvoice?.status as "overdue" | "paid",
+          status: "overdue",
         });
       }
     }
