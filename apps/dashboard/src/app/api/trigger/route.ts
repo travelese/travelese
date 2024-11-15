@@ -1,9 +1,16 @@
-import { client } from "@travelese/jobs";
-import { createAppRoute } from "@trigger.dev/nextjs";
+import { tasks } from "@trigger.dev/sdk/v3";
+import { NextResponse } from "next/server";
 
 export const runtime = "nodejs";
 export const maxDuration = 300; // 5min
 
-import "@travelese/jobs";
+export async function POST(req: Request) {
+  const payload = await req.json();
 
-export const { POST, dynamic } = createAppRoute(client);
+  const { publicAccessToken } = await tasks.trigger(payload.id, payload.data);
+
+  return NextResponse.json({
+    message: "OK",
+    publicAccessToken,
+  });
+}

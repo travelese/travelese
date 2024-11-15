@@ -3,6 +3,7 @@
 import { dub } from "@/utils/dub";
 import { LogEvents } from "@travelese/events/events";
 import { share } from "@travelese/supabase/storage";
+import { auth } from "@trigger.dev/sdk/v3";
 import { authActionClient } from "./safe-action";
 import { shareFileSchema } from "./schema";
 
@@ -33,5 +34,16 @@ export const shareFileAction = authActionClient
       url: response?.data?.signedUrl,
     });
 
-    return link?.shortLink;
+    const publicToken = await auth.createPublicToken({
+      scopes: {
+        read: {
+          runs: true, // For testing - specify exact runs in production
+        },
+      },
+    });
+
+    return {
+      shortLink: link?.shortLink,
+      publicToken,
+    };
   });

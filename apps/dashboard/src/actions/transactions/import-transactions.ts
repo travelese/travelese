@@ -2,8 +2,9 @@
 
 import { LogEvents } from "@travelese/events/events";
 import { formatAmountValue } from "@travelese/import";
-import { Events, client } from "@travelese/jobs";
+import { Jobs } from "@travelese/jobs";
 import { getTimezone } from "@travelese/location";
+import { auth, tasks } from "@trigger.dev/sdk/v3";
 import { z } from "zod";
 import { authActionClient } from "../safe-action";
 
@@ -48,6 +49,17 @@ export const importTransactionsAction = authActionClient
       },
       ctx: { user, supabase },
     }) => {
+      // Generate public token for this specific run
+      const publicToken = await auth.createPublicToken({
+        scopes: {
+          read: {
+            runs: true, // For testing only - in production specify exact runs
+          },
+        },
+      });
+
+      console.log("Public Token:", publicToken); // Log the token
+
       // Update currency for account
       const balance = currentBalance
         ? formatAmountValue({ amount: currentBalance })
@@ -60,22 +72,22 @@ export const importTransactionsAction = authActionClient
 
       const timezone = getTimezone();
 
-      const event = await client.sendEvent({
-        name: Events.TRANSACTIONS_IMPORT,
-        payload: {
-          filePath,
-          bankAccountId,
-          currency,
-          mappings,
-          teamId: user.team_id,
-          inverted,
-          dateAdjustment,
-          importType,
-          table,
-          timezone,
-        },
+      const event = await tasks.trigger(Jobs.TRANSACTIONS_IMPORT, {
+        filePath,
+        bankAccountId,
+        currency,
+        mappings,
+        teamId: user.team_id,
+        inverted,
+        dateAdjustment,
+        importType,
+        table,
+        timezone,
       });
 
-      return event;
+      return {
+        ...event,
+        publicToken, // Return token with event data
+      };
     },
   );

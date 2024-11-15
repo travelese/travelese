@@ -1,19 +1,11 @@
-import { cronTrigger } from "@trigger.dev/sdk";
-import { client, supabase } from "../client";
+import { logger, task } from "@trigger.dev/sdk/v3";
+import { supabase } from "../client";
 import { Jobs } from "../constants";
 import { engine } from "../utils/engine";
 import { processBatch } from "../utils/process";
 
-client.defineJob({
+export const updateExchangeRates = task({
   id: Jobs.EXCHANGE_RATES_UPDATE,
-  name: "Exchange Rates - Update",
-  version: "0.1.2",
-  trigger: cronTrigger({
-    cron: "0 12 * * *",
-  }),
-  integrations: {
-    supabase,
-  },
   run: async (_, io) => {
     const rates = await engine.rates.list();
 
@@ -26,10 +18,10 @@ client.defineJob({
       }));
     });
 
-    await io.logger.info("Updating exchange rates", { data });
+    await logger.info("Updating exchange rates", { data });
 
     await processBatch(data, 500, async (batch) => {
-      await io.supabase.client.from("exchange_rates").upsert(batch, {
+      await supabase.from("exchange_rates").upsert(batch, {
         onConflict: "base, target",
         ignoreDuplicates: false,
       });

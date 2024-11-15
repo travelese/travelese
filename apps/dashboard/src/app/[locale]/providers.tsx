@@ -3,7 +3,6 @@
 import { ThemeProvider } from "@/components/theme-provider";
 import { I18nProviderClient } from "@/locales/client";
 import { isDesktopApp } from "@todesktop/client-core/platform/todesktop";
-import { TriggerProvider } from "@trigger.dev/react";
 import type { ReactNode } from "react";
 
 if (isDesktopApp()) {
@@ -24,12 +23,7 @@ export function Providers({ locale, children }: ProviderProps) {
         enableSystem
         disableTransitionOnChange
       >
-        <TriggerProvider
-          publicApiKey={process.env.NEXT_PUBLIC_TRIGGER_API_KEY!}
-          apiUrl={process.env.NEXT_PUBLIC_TRIGGER_API_URL}
-        >
-          {children}
-        </TriggerProvider>
+        {children}
       </ThemeProvider>
     </I18nProviderClient>
   );

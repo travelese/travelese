@@ -22,7 +22,7 @@ export const inboxMatch = task({
   run: async (payload: InboxMatchPayload) => {
     // NOTE: All inbox reciepts and invoices amount are
     // saved with positive values while transactions have signed values
-    const { data: transactionData } = await supabase.client
+    const { data: transactionData } = await supabase
       .from("transactions")
       .select("id, name, team_id, attachments:transaction_attachments(*)")
       .eq("amount", -Math.abs(payload.amount))
@@ -34,14 +34,14 @@ export const inboxMatch = task({
     if (transactionData?.length === 1) {
       const transaction = transactionData.at(0);
 
-      const { data: inboxData } = await supabase.client
+      const { data: inboxData } = await supabase
         .from("inbox")
         .select("*")
         .eq("team_id", payload.teamId)
         .eq("id", payload.inboxId)
         .single();
 
-      const { data: attachmentData } = await supabase.client
+      const { data: attachmentData } = await supabase
         .from("transaction_attachments")
         .insert({
           type: inboxData.content_type,
@@ -54,15 +54,12 @@ export const inboxMatch = task({
         .select()
         .single();
 
-      const { data: updatedInboxData } = await updateInboxById(
-        supabase.client,
-        {
-          id: inboxData.id,
-          attachment_id: attachmentData.id,
-          transaction_id: transaction?.id,
-          teamId: payload.teamId,
-        },
-      );
+      const { data: updatedInboxData } = await updateInboxById(supabase, {
+        id: inboxData.id,
+        attachment_id: attachmentData.id,
+        transaction_id: transaction?.id,
+        teamId: payload.teamId,
+      });
 
       if (!updatedInboxData) {
         throw Error("Nothing updated");
@@ -70,7 +67,7 @@ export const inboxMatch = task({
 
       revalidateTag(`transactions_${inboxData.team_id}`);
 
-      const { data: usersData } = await supabase.client
+      const { data: usersData } = await supabase
         .from("users_on_team")
         .select(
           "id, team_id, user:users(id, full_name, avatar_url, email, locale, team_id)",

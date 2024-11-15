@@ -1,41 +1,32 @@
 import { DocumentClient } from "@travelese/documents";
-import { client, db, supabase } from "../client";
-import { Events, Jobs } from "../constants";
+import { task } from "@trigger.dev/sdk/v3";
+import { z } from "zod";
+import { supabase } from "../client";
+import { Jobs } from "../constants";
+import { inboxMatch } from "./match";
 
-const concurrencyLimit = client.defineConcurrencyLimit({
-  id: "inbox-upload",
-  limit: 25,
+type InboxUploadPayload = z.infer<typeof schema>;
+
+const schema = z.object({
+  record: z.object({
+    path_tokens: z.array(z.string()),
+    metadata: z.object({
+      mimetype: z.string(),
+      size: z.number(),
+    }),
+    id: z.string(),
+    bucket_id: z.literal("vault"),
+  }),
 });
 
-client.defineJob({
+export const inboxUpload = task({
   id: Jobs.INBOX_UPLOAD,
-  name: "Inbox - Upload",
-  version: "0.0.1",
-  concurrencyLimit,
-  trigger: db.onInserted({
-    schema: "storage",
-    table: "objects",
-    filter: {
-      record: {
-        bucket_id: ["vault"],
-        path_tokens: [
-          {
-            // NOTE: This ensures jobs run only for files uploaded through the inbox bulk upload.
-            $includes: "uploaded",
-          },
-        ],
-      },
-    },
-  }),
-  integrations: {
-    supabase,
-  },
-  run: async (payload, io) => {
+  run: async (payload: InboxUploadPayload) => {
     const { path_tokens, metadata, id } = payload.record;
     const teamId = path_tokens.at(0);
     const filename = path_tokens.at(-1);
 
-    const { data: inboxData } = await io.supabase.client
+    const { data: inboxData } = await supabase
       .from("inbox")
       .insert({
         // NOTE: If we can't parse the name using OCR this will be the fallback name
@@ -51,7 +42,7 @@ client.defineJob({
       .single()
       .throwOnError();
 
-    const { data } = await io.supabase.client.storage
+    const { data } = await supabase.storage
       .from("vault")
       .download(path_tokens.join("/"));
 
@@ -71,7 +62,7 @@ client.defineJob({
         content: Buffer.from(buffer).toString("base64"),
       });
 
-      const { data: updatedInbox } = await io.supabase.client
+      const { data: updatedInbox } = await supabase
         .from("inbox")
         .update({
           amount: result.amount,
@@ -88,19 +79,16 @@ client.defineJob({
         .single();
 
       if (updatedInbox?.amount) {
-        await io.sendEvent("Match Inbox", {
-          name: Events.INBOX_MATCH,
-          payload: {
-            teamId: updatedInbox.team_id,
-            inboxId: updatedInbox.id,
-            amount: updatedInbox.amount,
-          },
+        await inboxMatch.trigger({
+          teamId: updatedInbox.team_id,
+          inboxId: updatedInbox.id,
+          amount: updatedInbox.amount,
         });
       }
     } catch {
       // If we end up here we could not parse the document
       // But we want to update the status so we show the record with fallback name
-      await io.supabase.client
+      await supabase
         .from("inbox")
         .update({ status: "pending" })
         .eq("id", inboxData.id);

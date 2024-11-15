@@ -7,41 +7,38 @@ import {
   TriggerEvents,
   triggerBulk,
 } from "@travelese/notification";
-import { eventTrigger } from "@trigger.dev/sdk";
+import { logger, task } from "@trigger.dev/sdk/v3";
 import { z } from "zod";
-import { client, supabase } from "../client";
-import { Events, Jobs } from "../constants";
+import { supabase } from "../client";
+import { Jobs } from "../constants";
 
-client.defineJob({
-  id: Jobs.TRANSACTIONS_NOTIFICATION,
-  name: "Transactions - Notification",
-  version: "0.0.1",
-  trigger: eventTrigger({
-    name: Events.TRANSACTIONS_NOTIFICATION,
-    schema: z.object({
-      teamId: z.string(),
-      transactions: z.array(
-        z.object({
-          id: z.string(),
-          date: z.coerce.date(),
-          amount: z.number(),
-          name: z.string(),
-          currency: z.string(),
-          category: z.string().optional().nullable(),
-          status: z.enum(["posted", "pending"]),
-        }),
-      ),
+type NotificationPayload = z.infer<typeof schema>;
+
+const schema = z.object({
+  teamId: z.string(),
+  transactions: z.array(
+    z.object({
+      id: z.string(),
+      date: z.coerce.date(),
+      amount: z.number(),
+      name: z.string(),
+      currency: z.string(),
+      category: z.string().optional().nullable(),
+      status: z.enum(["posted", "pending"]),
     }),
-  }),
-  integrations: { supabase },
-  run: async (payload, io) => {
+  ),
+});
+
+export const notification = task({
+  id: Jobs.TRANSACTIONS_NOTIFICATION,
+  run: async (payload: NotificationPayload) => {
     const { transactions, teamId } = payload;
 
     const sortedTransactions = transactions.sort(
       (a, b) => b.date.getTime() - a.date.getTime(),
     );
 
-    const { data: usersData } = await io.supabase.client
+    const { data: usersData } = await supabase
       .from("users_on_team")
       .select(
         "id, team_id, team:teams(inbox_id, name), user:users(id, full_name, avatar_url, email, locale)",
@@ -106,7 +103,9 @@ client.defineJob({
       try {
         await triggerBulk(notificationEvents.flat());
       } catch (error) {
-        await io.logger.error("notification events", error);
+        logger.error("notification events", {
+          error: error instanceof Error ? error.message : error,
+        });
       }
     }
 
@@ -145,7 +144,9 @@ client.defineJob({
       try {
         await triggerBulk(emailEvents);
       } catch (error) {
-        await io.logger.error("email events", error);
+        logger.error("email events", {
+          error: error instanceof Error ? error.message : error,
+        });
       }
     }
   },

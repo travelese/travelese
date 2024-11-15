@@ -1,5 +1,5 @@
 import { cn } from "@travelese/ui/cn";
-import { useEventRunStatuses } from "@trigger.dev/react";
+import { useRealtimeRun } from "@trigger.dev/react-hooks";
 import { useTheme } from "next-themes";
 import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
@@ -19,18 +19,17 @@ export function LoadingTransactionsEvent({
   setEventId,
   onClose,
 }: Props) {
-  const { statuses } = useEventRunStatuses(eventId);
-  const status = statuses?.at(0);
+  const { run } = useRealtimeRun(eventId ?? "");
   const [step, setStep] = useState(1);
   const { resolvedTheme } = useTheme();
 
   useEffect(() => {
-    if (status?.data?.step) {
-      if (status.data.step === "getting_transactions") {
+    if (run?.status) {
+      if (run.status === "EXECUTING") {
         setStep(2);
       }
 
-      if (status.data.step === "completed") {
+      if (run.status === "COMPLETED") {
         setStep(3);
         setTimeout(() => {
           onClose();
@@ -41,7 +40,7 @@ export function LoadingTransactionsEvent({
         }, 1000);
       }
     }
-  }, [status]);
+  }, [run?.status]);
 
   return (
     <div className="h-[250px]">

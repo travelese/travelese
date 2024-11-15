@@ -1,8 +1,8 @@
-import { eventTrigger } from "@trigger.dev/sdk";
+import { logger, task } from "@trigger.dev/sdk/v3";
 import { revalidateTag } from "next/cache";
 import { z } from "zod";
-import { client, supabase } from "../client";
-import { Events, Jobs } from "../constants";
+import { supabase } from "../client";
+import { Jobs } from "../constants";
 import { processBatch } from "../utils/process";
 
 const BATCH_LIMIT = 500;
@@ -47,21 +47,16 @@ function getTransactionAmount({
   return +(amount * (rate ?? 1)).toFixed(2);
 }
 
-client.defineJob({
-  id: Jobs.UPDATE_CURRENCY,
-  name: "Transactions - Update Base Currency",
-  version: "0.0.1",
-  trigger: eventTrigger({
-    name: Events.UPDATE_CURRENCY,
-    schema: z.object({
-      teamId: z.string(),
-      baseCurrency: z.string(),
-    }),
-  }),
-  integrations: { supabase },
-  run: async (payload, io) => {
-    const supabase = io.supabase.client;
+type UpdateCurrencyPayload = z.infer<typeof schema>;
 
+const schema = z.object({
+  teamId: z.string(),
+  baseCurrency: z.string(),
+});
+
+export const updateCurrency = task({
+  id: Jobs.UPDATE_CURRENCY,
+  run: async (payload: UpdateCurrencyPayload) => {
     const { teamId, baseCurrency } = payload;
 
     // Get all enabled accounts

@@ -1,33 +1,28 @@
-import { eventTrigger } from "@trigger.dev/sdk";
+import { logger, task } from "@trigger.dev/sdk/v3";
 import { revalidateTag } from "next/cache";
 import { z } from "zod";
-import { client, supabase } from "../client";
-import { Events, Jobs } from "../constants";
+import { supabase } from "../client";
+import { Jobs } from "../constants";
 import { engine } from "../utils/engine";
 import { parseAPIError } from "../utils/error";
 import { processBatch } from "../utils/process";
 import { getClassification, transformTransaction } from "../utils/transform";
 import { scheduler } from "./scheduler";
 
+type InitialSyncPayload = z.infer<typeof schema>;
+
+const schema = z.object({
+  teamId: z.string(),
+});
+
 const BATCH_LIMIT = 500;
 
-client.defineJob({
+export const initialSync = task({
   id: Jobs.TRANSACTIONS_INITIAL_SYNC,
-  name: "Transactions - Initial Sync",
-  version: "0.0.1",
-  trigger: eventTrigger({
-    name: Events.TRANSACTIONS_INITIAL_SYNC,
-    schema: z.object({
-      teamId: z.string(),
-    }),
-  }),
-  integrations: { supabase },
-  run: async (payload, io) => {
-    const supabase = io.supabase.client;
-
+  run: async (payload: InitialSyncPayload) => {
     const { teamId } = payload;
 
-    const settingUpAccount = await io.createStatus("setting-up-account-bank", {
+    const settingUpAccount = await createStatus("setting-up-account-bank", {
       label: "Setting up account",
       data: {
         step: "connecting_bank",
@@ -43,7 +38,7 @@ client.defineJob({
         },
       });
     } catch (error) {
-      await io.logger.debug(`Error register new scheduler for team: ${teamId}`);
+      await logger.debug(`Error register new scheduler for team: ${teamId}`);
     }
 
     const { data: accountsData } = await supabase
@@ -87,7 +82,7 @@ client.defineJob({
         if (error instanceof engine.APIError) {
           const parsedError = parseAPIError(error);
 
-          await io.supabase.client
+          await supabase
             .from("bank_connections")
             .update({
               status: parsedError.code,
@@ -105,7 +100,7 @@ client.defineJob({
 
       // Update bank account balance
       if (balance.data?.amount) {
-        await io.supabase.client
+        await supabase
           .from("bank_accounts")
           .update({
             balance: balance.data.amount,
@@ -115,7 +110,7 @@ client.defineJob({
 
       // Update bank connection last accessed
       // TODO: Fix so it only update once per connection
-      await io.supabase.client
+      await supabase
         .from("bank_connections")
         .update({ last_accessed: new Date().toISOString() })
         .eq("id", account.bank_connection.id);

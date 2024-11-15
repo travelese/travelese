@@ -1,7 +1,7 @@
 "use server";
 
 import { LogEvents } from "@travelese/events/events";
-import { Events, client } from "@travelese/jobs";
+import { Jobs } from "@travelese/jobs";
 import { authActionClient } from "./safe-action";
 import { exportTransactionsSchema } from "./schema";
 
@@ -16,7 +16,7 @@ export const exportTransactionsAction = authActionClient
   })
   .action(async ({ parsedInput: transactionIds, ctx: { user } }) => {
     const event = await client.sendEvent({
-      name: Events.TRANSACTIONS_EXPORT,
+      name: Jobs.TRANSACTIONS_EXPORT,
       payload: {
         transactionIds,
         teamId: user.team_id,
