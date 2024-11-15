@@ -3,7 +3,7 @@ import { task } from "@trigger.dev/sdk/v3";
 import Papa from "papaparse";
 import { z } from "zod";
 import { supabase } from "../client";
-import { Events, Jobs } from "../constants";
+import { Jobs } from "../constants";
 import { mapTransactions, processTransactions } from "../utils/import";
 
 type ImportTransactionsPayload = z.infer<typeof schema>;
@@ -113,7 +113,7 @@ export const importTransactions = task({
           transform({ transaction, inverted, timezone, dateAdjustment }),
         );
 
-        await processTransactions({ transactions, io, supabase, teamId });
+        await processTransactions({ transactions, supabase, teamId });
 
         break;
       }

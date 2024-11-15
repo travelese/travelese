@@ -2,7 +2,7 @@ import { logger, task } from "@trigger.dev/sdk/v3";
 import { revalidateTag } from "next/cache";
 import { z } from "zod";
 import { supabase } from "../client";
-import { Events, Jobs } from "../constants";
+import { Jobs } from "../constants";
 import { engine } from "../utils/engine";
 import { parseAPIError } from "../utils/error";
 import { processBatch } from "../utils/process";

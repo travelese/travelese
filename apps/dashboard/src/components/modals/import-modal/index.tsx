@@ -18,6 +18,7 @@ import { Icons } from "@travelese/ui/icons";
 import { useToast } from "@travelese/ui/use-toast";
 import { stripSpecialCharacters } from "@travelese/utils";
 import { useRealtimeRun } from "@trigger.dev/react-hooks";
+import { auth } from "@trigger.dev/sdk/v3";
 import { Loader2 } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
 import { useRouter } from "next/navigation";
@@ -41,6 +42,7 @@ type Props = {
 
 export function ImportModal({ currencies, defaultCurrency }: Props) {
   const [eventId, setEventId] = useState<string | undefined>();
+  const [publicToken, setPublicToken] = useState<string | undefined>();
   const [isImporting, setIsImporting] = useState(false);
   const [fileColumns, setFileColumns] = useState<string[] | null>(null);
   const [firstRows, setFirstRows] = useState<Record<string, string>[] | null>(
@@ -56,7 +58,9 @@ export function ImportModal({ currencies, defaultCurrency }: Props) {
   const { toast } = useToast();
   const router = useRouter();
 
-  const { run: runData } = useRealtimeRun(eventId ?? "");
+  const { run: runData } = publicToken
+    ? useRealtimeRun(eventId ?? "")
+    : { run: null };
 
   const status = runData?.status;
   const error = status === "FAILED" || status === "TIMED_OUT";
@@ -74,6 +78,7 @@ export function ImportModal({ currencies, defaultCurrency }: Props) {
     onSuccess: ({ data }) => {
       if (data?.id) {
         setEventId(data.id);
+        setPublicToken(data.publicToken);
       }
     },
     onError: () => {
@@ -165,6 +170,13 @@ export function ImportModal({ currencies, defaultCurrency }: Props) {
       setPageNumber(1);
     }
   }, [file, fileColumns, pageNumber]);
+
+  // Configure auth when publicToken is available
+  useEffect(() => {
+    if (publicToken) {
+      auth.configure({ accessToken: publicToken });
+    }
+  }, [publicToken]);
 
   return (
     <Dialog open={isOpen} onOpenChange={onclose}>

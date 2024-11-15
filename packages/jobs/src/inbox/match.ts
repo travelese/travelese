@@ -54,15 +54,12 @@ export const inboxMatch = task({
         .select()
         .single();
 
-      const { data: updatedInboxData } = await updateInboxById(
-        supabase.client,
-        {
-          id: inboxData.id,
-          attachment_id: attachmentData.id,
-          transaction_id: transaction?.id,
-          teamId: payload.teamId,
-        },
-      );
+      const { data: updatedInboxData } = await updateInboxById(supabase, {
+        id: inboxData.id,
+        attachment_id: attachmentData.id,
+        transaction_id: transaction?.id,
+        teamId: payload.teamId,
+      });
 
       if (!updatedInboxData) {
         throw Error("Nothing updated");

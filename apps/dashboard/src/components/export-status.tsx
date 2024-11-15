@@ -12,6 +12,7 @@ import {
 import { Icons } from "@travelese/ui/icons";
 import { useToast } from "@travelese/ui/use-toast";
 import { useRealtimeRun } from "@trigger.dev/react-hooks";
+import { auth } from "@trigger.dev/sdk/v3";
 import ms from "ms";
 import { useAction } from "next-safe-action/hooks";
 import { useEffect, useState } from "react";
@@ -35,7 +36,17 @@ export function ExportStatus() {
   const { toast, dismiss, update } = useToast();
   const [toastId, setToastId] = useState(null);
   const { exportId, setExportId } = useExportStore();
-  const { error, run } = useRealtimeRun(exportId ?? "");
+  const [publicToken, setPublicToken] = useState<string | undefined>();
+
+  const { error, run } = publicToken
+    ? useRealtimeRun(exportId ?? "")
+    : { error: null, run: null };
+
+  useEffect(() => {
+    if (publicToken) {
+      auth.configure({ accessToken: publicToken });
+    }
+  }, [publicToken]);
 
   const shareFile = useAction(shareFileAction, {
     onError: () => {
@@ -46,7 +57,10 @@ export function ExportStatus() {
       });
     },
     onSuccess: async ({ data }) => {
-      await navigator.clipboard.writeText(data ?? "");
+      if (data?.publicToken) {
+        setPublicToken(data.publicToken);
+      }
+      await navigator.clipboard.writeText(data?.shortLink ?? "");
 
       toast({
         duration: 2500,

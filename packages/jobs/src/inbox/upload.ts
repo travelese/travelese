@@ -1,8 +1,9 @@
 import { DocumentClient } from "@travelese/documents";
-import { logger, task } from "@trigger.dev/sdk/v3";
+import { task } from "@trigger.dev/sdk/v3";
 import { z } from "zod";
 import { supabase } from "../client";
-import { Events, Jobs } from "../constants";
+import { Jobs } from "../constants";
+import { inboxMatch } from "./match";
 
 type InboxUploadPayload = z.infer<typeof schema>;
 
@@ -78,13 +79,10 @@ export const inboxUpload = task({
         .single();
 
       if (updatedInbox?.amount) {
-        await io.sendEvent("Match Inbox", {
-          name: Events.INBOX_MATCH,
-          payload: {
-            teamId: updatedInbox.team_id,
-            inboxId: updatedInbox.id,
-            amount: updatedInbox.amount,
-          },
+        await inboxMatch.trigger({
+          teamId: updatedInbox.team_id,
+          inboxId: updatedInbox.id,
+          amount: updatedInbox.amount,
         });
       }
     } catch {

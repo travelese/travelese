@@ -28,10 +28,21 @@ import { parseAPIError } from "../utils/error";
 import { getClassification, transformTransaction } from "../utils/transform";
 import { scheduler } from "./scheduler";
 
-export const sync = task({
+export const transactionNotification = task({
   id: Jobs.TRANSACTIONS_SYNC,
-  run: async (_) => {
-    const teamId = ctx.source?.id as string;
+  run: async (payload: {
+    teamId: string;
+    transactions: Array<{
+      id: string;
+      date: Date;
+      amount: number;
+      name: string;
+      currency: string;
+      category?: string;
+      status: "posted" | "pending";
+    }>;
+  }) => {
+    const { teamId } = payload;
 
     // Fetch enabled bank accounts for the team
     const { data: accountsData, error: accountsError } = await supabase
@@ -244,20 +255,17 @@ export const sync = task({
 
           // Send notifications for new transactions
           if (transactionsData && transactionsData.length > 0) {
-            await io.sendEvent("🔔 Send notifications", {
-              name: Events.TRANSACTIONS_NOTIFICATION,
-              payload: {
-                teamId,
-                transactions: transactionsData.map((transaction) => ({
-                  id: transaction.id,
-                  date: transaction.date,
-                  amount: transaction.amount,
-                  name: transaction.name,
-                  currency: transaction.currency,
-                  category: transaction.category_slug,
-                  status: transaction.status,
-                })),
-              },
+            await transactionNotification.trigger({
+              teamId,
+              transactions: transactionsData.map((transaction) => ({
+                id: transaction.id,
+                date: transaction.date,
+                amount: transaction.amount,
+                name: transaction.name,
+                currency: transaction.currency,
+                category: transaction.category_slug,
+                status: transaction.status,
+              })),
             });
 
             revalidateTag(`transactions_${teamId}`);

@@ -12,15 +12,17 @@
   },
   "dependencies": {
     "@fast-csv/format": "5.0.0",
+    "@supabase/supabase-js": "^2.39.0",
     "@travelese/documents": "workspace:*",
     "@travelese/import": "workspace:*",
     "@travelese/invoice": "workspace:*",
     "@travelese/supabase": "workspace:*",
     "@trigger.dev/sdk": "^3.1.0",
+    "@types/papaparse": "^5.3.15",
     "@zip.js/zip.js": "2.7.52",
+    "D": "^1.0.0",
     "nanoid": "^5.0.8",
-    "resend": "^2.0.0",
-    "@supabase/supabase-js": "^2.39.0"
+    "resend": "^2.0.0"
   },
   "devDependencies": {
     "@trigger.dev/build": "^3.1.0"

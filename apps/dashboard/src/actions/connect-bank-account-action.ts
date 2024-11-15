@@ -2,7 +2,7 @@
 
 import { getMostFrequentCurrency } from "@/utils/currency";
 import { LogEvents } from "@travelese/events/events";
-import { Events, client } from "@travelese/jobs";
+import { Jobs } from "@travelese/jobs";
 import { getTeamSettings } from "@travelese/supabase/cached-queries";
 import { createBankAccounts } from "@travelese/supabase/mutations";
 import { revalidateTag } from "next/cache";
@@ -55,7 +55,7 @@ export const connectBankAccountAction = authActionClient
       });
 
       const event = await client.sendEvent({
-        name: Events.TRANSACTIONS_INITIAL_SYNC,
+        name: Jobs.TRANSACTIONS_INITIAL_SYNC,
         payload: {
           teamId,
         },

@@ -5,7 +5,7 @@ import { BlobReader, BlobWriter, TextReader, ZipWriter } from "@zip.js/zip.js";
 import { revalidateTag } from "next/cache";
 import { z } from "zod";
 import { supabase } from "../client";
-import { Events, Jobs } from "../constants";
+import { Jobs } from "../constants";
 
 type ExportTransactionsPayload = z.infer<typeof schema>;
 

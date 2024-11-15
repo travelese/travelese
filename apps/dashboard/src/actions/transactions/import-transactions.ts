@@ -4,7 +4,7 @@ import { LogEvents } from "@travelese/events/events";
 import { formatAmountValue } from "@travelese/import";
 import { Jobs } from "@travelese/jobs";
 import { getTimezone } from "@travelese/location";
-import { tasks } from "@trigger.dev/sdk/v3";
+import { auth, tasks } from "@trigger.dev/sdk/v3";
 import { z } from "zod";
 import { authActionClient } from "../safe-action";
 
@@ -49,6 +49,17 @@ export const importTransactionsAction = authActionClient
       },
       ctx: { user, supabase },
     }) => {
+      // Generate public token for this specific run
+      const publicToken = await auth.createPublicToken({
+        scopes: {
+          read: {
+            runs: true, // For testing only - in production specify exact runs
+          },
+        },
+      });
+
+      console.log("Public Token:", publicToken); // Log the token
+
       // Update currency for account
       const balance = currentBalance
         ? formatAmountValue({ amount: currentBalance })
@@ -74,6 +85,9 @@ export const importTransactionsAction = authActionClient
         timezone,
       });
 
-      return event;
+      return {
+        ...event,
+        publicToken, // Return token with event data
+      };
     },
   );

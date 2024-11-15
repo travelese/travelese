@@ -1,4 +1,6 @@
+import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Transaction } from "@travelese/import/src/types";
+import { logger, task } from "@trigger.dev/sdk/v3";
 import { revalidateTag } from "next/cache";
 import { z } from "zod";
 import { processBatch } from "./process";
@@ -21,9 +23,12 @@ export const createTransactionSchema = z.object({
 
 export const processTransactions = async ({
   transactions,
-  io,
   supabase,
   teamId,
+}: {
+  transactions: Record<string, string>[];
+  supabase: SupabaseClient;
+  teamId: string;
 }) => {
   const processedTransactions = transactions.map((transaction) =>
     createTransactionSchema.safeParse(transaction),
@@ -38,7 +43,7 @@ export const processTransactions = async ({
   );
 
   if (invalidTransactions.length > 0) {
-    await io.logger.error("Invalid transactions", {
+    logger.error("Invalid transactions", {
       invalidTransactions,
     });
 

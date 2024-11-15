@@ -103,7 +103,9 @@ export const notification = task({
       try {
         await triggerBulk(notificationEvents.flat());
       } catch (error) {
-        await logger.error("notification events", error);
+        logger.error("notification events", {
+          error: error instanceof Error ? error.message : error,
+        });
       }
     }
 
@@ -142,7 +144,9 @@ export const notification = task({
       try {
         await triggerBulk(emailEvents);
       } catch (error) {
-        await logger.error("email events", error);
+        logger.error("email events", {
+          error: error instanceof Error ? error.message : error,
+        });
       }
     }
   },

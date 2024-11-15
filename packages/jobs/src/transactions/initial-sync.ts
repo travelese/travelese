@@ -2,7 +2,7 @@ import { logger, task } from "@trigger.dev/sdk/v3";
 import { revalidateTag } from "next/cache";
 import { z } from "zod";
 import { supabase } from "../client";
-import { Events, Jobs } from "../constants";
+import { Jobs } from "../constants";
 import { engine } from "../utils/engine";
 import { parseAPIError } from "../utils/error";
 import { processBatch } from "../utils/process";
@@ -22,7 +22,7 @@ export const initialSync = task({
   run: async (payload: InitialSyncPayload) => {
     const { teamId } = payload;
 
-    const settingUpAccount = await io.createStatus("setting-up-account-bank", {
+    const settingUpAccount = await createStatus("setting-up-account-bank", {
       label: "Setting up account",
       data: {
         step: "connecting_bank",
@@ -82,7 +82,7 @@ export const initialSync = task({
         if (error instanceof engine.APIError) {
           const parsedError = parseAPIError(error);
 
-          await io.supabase.client
+          await supabase
             .from("bank_connections")
             .update({
               status: parsedError.code,
