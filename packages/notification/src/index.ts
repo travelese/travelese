@@ -1,7 +1,7 @@
 import { Novu } from "@novu/node";
 import { nanoid } from "nanoid";
 
-const novu = new Novu(process.env.NOVU_API_KEY!);
+const novu = new Novu(process.env.NOVU_SECRET_KEY!);
 
 const API_ENDPOINT = "https://api.novu.co/v1";
 
@@ -11,6 +11,10 @@ export enum TriggerEvents {
   TransactionNewEmail = "transaction_new_email",
   InboxNewInApp = "inbox_new_in_app",
   MatchNewInApp = "match_in_app",
+  InvoicePaidInApp = "invoice_paid_in_app",
+  InvoicePaidEmail = "invoice_paid_email",
+  InvoiceOverdueInApp = "invoice_overdue_in_app",
+  InvoiceOverdueEmail = "invoice_overdue_email",
 }
 
 export enum NotificationTypes {
@@ -18,6 +22,7 @@ export enum NotificationTypes {
   Transactions = "transactions",
   Inbox = "inbox",
   Match = "match",
+  Invoice = "invoice",
 }
 
 type TriggerUser = {
@@ -81,7 +86,7 @@ export async function triggerBulk(events: TriggerPayload[]) {
             },
           },
         },
-      }))
+      })),
     );
   } catch (error) {
     console.log(error);
@@ -102,9 +107,9 @@ export async function getSubscriberPreferences({
     {
       method: "GET",
       headers: {
-        Authorization: `ApiKey ${process.env.NOVU_API_KEY!}`,
+        Authorization: `ApiKey ${process.env.NOVU_SECRET_KEY!}`,
       },
-    }
+    },
   );
 
   return response.json();
@@ -130,7 +135,7 @@ export async function updateSubscriberPreference({
     {
       method: "PATCH",
       headers: {
-        Authorization: `ApiKey ${process.env.NOVU_API_KEY!}`,
+        Authorization: `ApiKey ${process.env.NOVU_SECRET_KEY!}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
@@ -139,7 +144,7 @@ export async function updateSubscriberPreference({
           enabled,
         },
       }),
-    }
+    },
   );
 
   return response.json();
