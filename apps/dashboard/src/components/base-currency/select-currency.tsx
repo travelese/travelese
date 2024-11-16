@@ -2,7 +2,7 @@
 
 import { updateCurrencyAction } from "@/actions/transactions/update-currency-action";
 import { SelectCurrency as SelectCurrencyBase } from "@/components/select-currency";
-import { uniqueCurrencies } from "@travelese/location/src/currencies";
+import { uniqueCurrencies } from "@travelese/location/currencies";
 import { Button } from "@travelese/ui/button";
 import { useToast } from "@travelese/ui/use-toast";
 import { useRealtimeRun } from "@trigger.dev/react-hooks";

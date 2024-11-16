@@ -3,7 +3,8 @@
 import { authActionClient } from "@/actions/safe-action";
 import { manualSyncTransactionsSchema } from "@/actions/schema";
 import { LogEvents } from "@travelese/events/events";
-import { Events, client } from "@travelese/jobs";
+import { Jobs } from "@travelese/jobs";
+import { auth, tasks } from "@trigger.dev/sdk/v3";
 
 export const manualSyncTransactionsAction = authActionClient
   .schema(manualSyncTransactionsSchema)
@@ -15,13 +16,21 @@ export const manualSyncTransactionsAction = authActionClient
     },
   })
   .action(async ({ parsedInput: { connectionId }, ctx: { user } }) => {
-    const event = await client.sendEvent({
-      name: Events.TRANSACTIONS_MANUAL_SYNC,
-      payload: {
-        connectionId,
-        teamId: user.team_id,
+    const publicToken = await auth.createPublicToken({
+      scopes: {
+        read: {
+          runs: true, // For testing - specify exact runs in production
+        },
       },
     });
 
-    return event;
+    const event = await tasks.trigger(Jobs.TRANSACTIONS_MANUAL_SYNC, {
+      connectionId,
+      teamId: user.team_id,
+    });
+
+    return {
+      ...event,
+      publicToken,
+    };
   });

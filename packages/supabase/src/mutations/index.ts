@@ -20,7 +20,7 @@ type CreateBankAccountsPayload = {
   referenceId?: string;
   teamId: string;
   userId: string;
-  provider: "plaid";
+  provider: "gocardless" | "teller" | "plaid";
 };
 
 export async function createBankAccounts(
@@ -54,7 +54,6 @@ export async function createBankAccounts(
         access_token: accessToken,
         enrollment_id: enrollmentId,
         reference_id: referenceId,
-        expires_at: expiresAt,
       },
       {
         onConflict: "institution_id, team_id",
@@ -343,11 +342,13 @@ export async function deleteAttachment(supabase: Client, id: string) {
 
 type CreateTeamParams = {
   name: string;
+  currency?: string;
 };
 
 export async function createTeam(supabase: Client, params: CreateTeamParams) {
-  const { data } = await supabase.rpc("create_team", {
+  const { data } = await supabase.rpc("create_team_v2", {
     name: params.name,
+    currency: params.currency,
   });
 
   return data;
@@ -475,23 +476,24 @@ export async function updateInboxById(
   return inbox;
 }
 
-type CreateBookingParams = {
+type CreateProjectParams = {
   name: string;
   description?: string;
   estimate?: number;
   billable?: boolean;
   rate?: number;
   currency?: string;
+  customer_id?: string;
 };
 
-export async function createBooking(
+export async function createProject(
   supabase: Client,
-  params: CreateBookingParams,
+  params: CreateProjectParams,
 ) {
   const { data: userData } = await getCurrentUserTeamQuery(supabase);
 
   return supabase
-    .from("travel_bookings")
+    .from("tracker_projects")
     .insert({
       ...params,
       team_id: userData?.team_id,

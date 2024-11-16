@@ -1,7 +1,7 @@
 "use client";
 
 import { updateInvoiceTemplateAction } from "@/actions/invoice/update-invoice-template-action";
-import { uniqueCurrencies } from "@travelese/location/src/currencies";
+import { uniqueCurrencies } from "@travelese/location/currencies";
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -12,7 +12,6 @@ import {
   DropdownMenuTrigger,
 } from "@travelese/ui/dropdown-menu";
 import { Icons } from "@travelese/ui/icons";
-import { format } from "date-fns";
 import { useAction } from "next-safe-action/hooks";
 import { useFormContext } from "react-hook-form";
 import { SelectCurrency } from "../select-currency";
@@ -154,9 +153,7 @@ export function SettingsMenu() {
                     }}
                     onSelect={(event) => event.preventDefault()}
                   >
-                    {watchKey === "template.date_format"
-                      ? format(new Date(), option.value as string)
-                      : option.label}
+                    {option.label}
                   </DropdownMenuCheckboxItem>
                 ))}
               </DropdownMenuSubContent>

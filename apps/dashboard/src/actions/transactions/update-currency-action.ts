@@ -1,8 +1,9 @@
 "use server";
 
 import { LogEvents } from "@travelese/events/events";
-import { Events, client } from "@travelese/jobs";
+import { Jobs } from "@travelese/jobs";
 import { updateTeam } from "@travelese/supabase/mutations";
+import { auth, tasks } from "@trigger.dev/sdk/v3";
 import { revalidatePath, revalidateTag } from "next/cache";
 import { z } from "zod";
 import { authActionClient } from "../safe-action";
@@ -30,14 +31,22 @@ export const updateCurrencyAction = authActionClient
       revalidateTag(`team_settings_${user.team_id}`);
       revalidatePath("/settings/accounts");
 
-      const event = await client.sendEvent({
-        name: Events.UPDATE_CURRENCY,
-        payload: {
-          baseCurrency,
-          teamId: user.team_id,
+      const publicToken = await auth.createPublicToken({
+        scopes: {
+          read: {
+            runs: true, // For testing - specify exact runs in production
+          },
         },
       });
 
-      return event;
+      const event = await tasks.trigger(Jobs.UPDATE_CURRENCY, {
+        baseCurrency,
+        teamId: user.team_id,
+      });
+
+      return {
+        ...event,
+        publicToken,
+      };
     },
   );

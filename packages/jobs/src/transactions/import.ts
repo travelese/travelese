@@ -87,7 +87,7 @@ export const importTransactions = task({
                 transform({ transaction, inverted, timezone, dateAdjustment }),
               );
 
-              await processTransactions({ transactions, io, supabase, teamId });
+              await processTransactions({ transactions, supabase, teamId });
 
               parser.resume();
             },

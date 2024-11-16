@@ -1,5 +1,5 @@
 import { CaretSortIcon, CheckIcon } from "@radix-ui/react-icons";
-import countries from "@travelese/location/src/country-flag";
+import countries from "@travelese/location/country-flags";
 import { Button } from "@travelese/ui/button";
 import { cn } from "@travelese/ui/cn";
 import {
@@ -45,7 +45,7 @@ export function CountrySelector({ defaultValue, onSelect }: Props) {
           className="w-full justify-between font-normal truncate bg-accent"
         >
           {value ? selected?.name : "Select country"}
-          <CaretSortIcon className="ml-2 size-4 shrink-0 opacity-50" />
+          <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
       <PopoverContentWithoutPortal className="w-[225px] p-0">
@@ -66,7 +66,7 @@ export function CountrySelector({ defaultValue, onSelect }: Props) {
                 {country.name}
                 <CheckIcon
                   className={cn(
-                    "ml-auto size-4",
+                    "ml-auto h-4 w-4",
                     value === country.code ? "opacity-100" : "opacity-0",
                   )}
                 />

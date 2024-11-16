@@ -17,6 +17,7 @@ import {
 } from "@travelese/ui/tooltip";
 import { useToast } from "@travelese/ui/use-toast";
 import { useRealtimeRun } from "@trigger.dev/react-hooks";
+import { auth } from "@trigger.dev/sdk/v3";
 import { differenceInDays, formatDistanceToNow } from "date-fns";
 import { useAction } from "next-safe-action/hooks";
 import { useRouter } from "next/navigation";
@@ -132,15 +133,23 @@ function ConnectionState({
 
 export function BankConnection({ connection }: BankConnectionProps) {
   const [eventId, setEventId] = useState<string | undefined>();
+  const [publicToken, setPublicToken] = useState<string | undefined>();
   const [isSyncing, setSyncing] = useState(false);
   const { toast, dismiss } = useToast();
-  const { run: runData } = useRealtimeRun(eventId ?? "");
   const router = useRouter();
 
+  const { run: runData } = publicToken
+    ? useRealtimeRun(eventId ?? "")
+    : { run: null };
   const status = runData?.status;
   const { show } = connectionStatus(connection);
-
   const error = status === "FAILED" || status === "TIMED_OUT";
+
+  useEffect(() => {
+    if (publicToken) {
+      auth.configure({ accessToken: publicToken });
+    }
+  }, [publicToken]);
 
   const [params] = useQueryStates({
     step: parseAsString,
@@ -152,6 +161,7 @@ export function BankConnection({ connection }: BankConnectionProps) {
     onSuccess: ({ data }) => {
       if (data?.id) {
         setEventId(data.id);
+        setPublicToken(data.publicToken);
       }
     },
     onError: () => {
@@ -190,7 +200,6 @@ export function BankConnection({ connection }: BankConnectionProps) {
     if (error) {
       setSyncing(false);
       setEventId(undefined);
-
       toast({
         duration: 3500,
         variant: "error",
@@ -212,10 +221,8 @@ export function BankConnection({ connection }: BankConnectionProps) {
         >
           <div className="flex space-x-4 items-center ml-4 w-full">
             <BankLogo src={connection.logo_url} alt={connection.name} />
-
             <div className="flex flex-col">
               <span className="text-sm">{connection.name}</span>
-
               <TooltipProvider delayDuration={70}>
                 <Tooltip>
                   <TooltipTrigger asChild>
@@ -264,20 +271,18 @@ export function BankConnection({ connection }: BankConnectionProps) {
 
       <AccordionContent className="bg-background">
         <div className="ml-[30px] divide-y">
-          {connection.accounts.map((account) => {
-            return (
-              <BankAccount
-                key={account.id}
-                id={account.id}
-                name={account.name}
-                enabled={account.enabled}
-                manual={account.manual}
-                currency={account.currency}
-                balance={account.balance ?? 0}
-                type={account.type}
-              />
-            );
-          })}
+          {connection.accounts.map((account) => (
+            <BankAccount
+              key={account.id}
+              id={account.id}
+              name={account.name}
+              enabled={account.enabled}
+              manual={account.manual}
+              currency={account.currency}
+              balance={account.balance ?? 0}
+              type={account.type}
+            />
+          ))}
         </div>
       </AccordionContent>
     </div>
@@ -286,23 +291,23 @@ export function BankConnection({ connection }: BankConnectionProps) {
 
 export function BankConnections({
   data,
-}: { data: BankConnectionProps["connection"][] }) {
+}: {
+  data: BankConnectionProps["connection"][];
+}) {
   const defaultValue = data.length === 1 ? ["connection-0"] : undefined;
 
   return (
     <div className="px-6 divide-y">
       <Accordion type="multiple" className="w-full" defaultValue={defaultValue}>
-        {data.map((connection, index) => {
-          return (
-            <AccordionItem
-              value={`connection-${index}`}
-              key={connection.id}
-              className="border-none"
-            >
-              <BankConnection connection={connection} />
-            </AccordionItem>
-          );
-        })}
+        {data.map((connection, index) => (
+          <AccordionItem
+            value={`connection-${index}`}
+            key={connection.id}
+            className="border-none"
+          >
+            <BankConnection connection={connection} />
+          </AccordionItem>
+        ))}
       </Accordion>
     </div>
   );
