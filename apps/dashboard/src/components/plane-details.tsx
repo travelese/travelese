@@ -1,9 +1,9 @@
-import Image from 'next/image';
-import BackgroundGlow from './assets/background-glow.svg';
-import Plane from './assets/plane.svg';
-import Stars from './assets/stars.svg';
-import { getPlaneDetails } from '../utils/get-plane-details';
-import { PlaneDetailsType } from './types';
+import BackgroundGlow from "@/assets/background-glow.svg";
+import Plane from "@/assets/plane.svg";
+import Stars from "@/assets/stars.svg";
+import { getPlaneDetails } from "@/utils/get-plane-details";
+import type { PlaneDetailsType } from "@/utils/types";
+import Image from "next/image";
 
 export async function PlaneDetails({
   params,
