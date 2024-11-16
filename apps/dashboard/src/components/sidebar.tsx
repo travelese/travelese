@@ -8,7 +8,7 @@ import { TeamMenu } from "./team-menu";
 
 export function Sidebar() {
   const initialItems = cookies().has(Cookies.MenuConfig)
-    ? JSON.parse(cookies().get(Cookies.MenuConfig)?.value)
+    ? JSON.parse(cookies().get(Cookies.MenuConfig)?.value ?? "{}")
     : null;
 
   return (

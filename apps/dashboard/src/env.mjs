@@ -17,7 +17,7 @@ export const env = createEnv({
     ENGINE_API_KEY: z.string(),
     PLAIN_API_KEY: z.string(),
     XAI_API_KEY: z.string(),
-    SUPABASE_SERVICE_ROLE_KEY: z.string(),
+    SUPABASE_SERVICE_KEY: z.string(),
     TRIGGER_SECRET_KEY: z.string(),
     TRIGGER_PROJECT_ID: z.string(),
     UPSTASH_REDIS_REST_TOKEN: z.string(),
@@ -65,7 +65,7 @@ export const env = createEnv({
     UPSTASH_REDIS_REST_TOKEN: process.env.UPSTASH_REDIS_REST_TOKEN,
     NEXT_PUBLIC_NOVU_APPLICATION_IDENTIFIER:
       process.env.NEXT_PUBLIC_NOVU_APPLICATION_IDENTIFIER,
-    SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY,
+    SUPABASE_SERVICE_KEY: process.env.SUPABASE_SERVICE_KEY,
     XAI_API_KEY: process.env.XAI_API_KEY,
     PLAIN_API_KEY: process.env.PLAIN_API_KEY,
     NEXT_PUBLIC_OPENPANEL_CLIENT_ID:

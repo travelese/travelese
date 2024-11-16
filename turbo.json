@@ -9,7 +9,7 @@
     "build": {
       "env": [
         "ENGINE_API_KEY",
-        "SUPABASE_SERVICE_ROLE_KEY",
+        "SUPABASE_SERVICE_KEY",
         "SUPABASE_API_KEY",
         "RESEND_API_KEY",
         "LOOPS_ENDPOINT",

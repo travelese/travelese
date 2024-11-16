@@ -87,7 +87,7 @@ export default function Layout({
       >
         <Providers locale={locale}>
           {children}
-          {shouldInjectToolbar && <VercelToolbar />}
+          {/* {shouldInjectToolbar && <VercelToolbar />} */}
         </Providers>
         <Toaster />
         <Analytics />

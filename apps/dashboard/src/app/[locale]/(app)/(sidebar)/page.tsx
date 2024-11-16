@@ -24,14 +24,18 @@ const defaultValue = {
   period: "monthly",
 };
 
-export default async function Overview({ searchParams }) {
+export default async function Overview({
+  searchParams,
+}: {
+  searchParams: Record<string, string>;
+}) {
   const accounts = await getTeamBankAccounts();
   const chartType = cookies().get(Cookies.ChartType)?.value ?? "profit";
 
   const hideConnectFlow = cookies().has(Cookies.HideConnectFlow);
 
   const initialPeriod = cookies().has(Cookies.SpendingPeriod)
-    ? JSON.parse(cookies().get(Cookies.SpendingPeriod)?.value)
+    ? JSON.parse(cookies().get(Cookies.SpendingPeriod)?.value ?? "{}")
     : {
         id: "this_year",
         from: startOfYear(new Date()).toISOString(),
