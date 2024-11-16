@@ -1,12 +1,12 @@
 "use client";
 
+import CircleMarker from "@/assets/circle-marker.svg";
+import { useMap } from "@/hooks/use-map";
+import { geocode } from "@/utils/geocode";
 import { Marker } from "mapbox-gl";
 import Image from "next/image";
 import { useParams } from "next/navigation";
 import { useEffect, useRef } from "react";
-import { useMap } from "../hooks/use-map";
-import { geocode } from "../utils/geocode";
-import CircleMarker from "./assets/circle-marker.svg";
 
 export function AirportMarker() {
   const circleMarkerRef = useRef<HTMLDivElement | null>(null);

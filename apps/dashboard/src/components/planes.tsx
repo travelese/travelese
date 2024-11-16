@@ -1,18 +1,17 @@
-'use client';
+"use client";
 
-import { Marker } from 'mapbox-gl';
-import { useMap } from '../hooks/use-map';
-import type type type { Flight } from '../utils/get-flights';
-import { type type type MouseEvent, useEffect, useMemo, useRef, useState } from 'react';
+import { useMap } from "@/hooks/use-map";
+import type { Flight } from "@/utils/get-flights";
+import { Marker } from "mapbox-gl";
+import Image from "next/image";
+import { useEffect, useMemo, useRef, useState } from "react";
 
-import Image from 'next/image';
+import NyanCat from "@/assets/nyan.gif";
 
-import NyanCat from './assets/nyan.gif';
-
-import { PlaneMarker } from './assets/plane-marker';
-import { PlaneTrack } from './flight-track';
-import { mapClickSubscribable } from './map';
-import Link from 'next/link';
+import { mapClickSubscribable } from "@/components/map";
+import { PlaneMarker } from "@/components/plane-marker";
+import { PlaneTrack } from "@/utils/flight-track";
+import Link from "next/link";
 
 /** Based on https://gist.github.com/chriswhong/8977c0d4e869e9eaf06b4e9fda80f3ab */
 class ClickableMarker extends Marker {
@@ -41,20 +40,20 @@ class ClickableMarker extends Marker {
 }
 
 interface PlanesProps {
-  color?: string | 'nyan';
+  color?: string | "nyan";
   flights: Flight[];
 }
 
 const colors = {
-  blue: '#0070F3',
-  red: '#ff5555',
-  green: '#66ac66',
-  yellow: '#ffff6e',
-  purple: '#b32eb3',
+  blue: "#0070F3",
+  red: "#ff5555",
+  green: "#66ac66",
+  yellow: "#ffff6e",
+  purple: "#b32eb3",
 };
 
 export function Planes({
-  color: selectedColor = '#0070F3',
+  color: selectedColor = "#0070F3",
   flights,
 }: PlanesProps) {
   const { map } = useMap();
@@ -124,7 +123,7 @@ export function Planes({
             color: color,
           }}
         >
-          {color === 'nyan' ? (
+          {color === "nyan" ? (
             <Image
               width={80}
               height={80}
@@ -147,11 +146,11 @@ export function Planes({
                     {selectedPlaneData.callsign}
                   </p>
                   <p className="leading-none">
-                    <b className="opacity-50">Latitude</b>{' '}
+                    <b className="opacity-50">Latitude</b>{" "}
                     {selectedPlaneData.lat}
                   </p>
                   <p className="leading-none">
-                    <b className="opacity-50">Longitude</b>{' '}
+                    <b className="opacity-50">Longitude</b>{" "}
                     {selectedPlaneData.lon}
                   </p>
                 </div>
