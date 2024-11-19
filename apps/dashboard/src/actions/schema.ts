@@ -306,6 +306,33 @@ export const updateInboxSchema = z.object({
 
 export type UpdateInboxFormValues = z.infer<typeof updateInboxSchema>;
 
+export const createBookingSchema = z.object({
+  name: z.string().min(1),
+  description: z.string().optional(),
+  estimate: z.number().optional(),
+  billable: z.boolean().optional().default(false),
+  rate: z.number().min(1).optional(),
+  currency: z.string().optional(),
+  status: z.enum(["in_progress", "completed"]).optional(),
+  customer_id: z.string().uuid().nullable().optional(),
+});
+
+export const updateBookingSchema = z.object({
+  id: z.string().uuid(),
+  name: z.string().min(1).optional(),
+  description: z.string().optional(),
+  estimate: z.number().optional(),
+  billable: z.boolean().optional().default(false),
+  rate: z.number().min(1).optional(),
+  currency: z.string().optional(),
+  status: z.enum(["in_progress", "completed"]).optional(),
+  customer_id: z.string().uuid().nullable().optional(),
+});
+
+export const deleteBookingSchema = z.object({
+  id: z.string().uuid(),
+});
+
 export const deleteEntriesSchema = z.object({
   id: z.string().uuid(),
 });
@@ -316,6 +343,11 @@ export const createReportSchema = z.object({
   to: z.string(),
   type: changeChartTypeSchema,
   expiresAt: z.string().datetime().optional(),
+});
+
+export const createBookingReportSchema = z.object({
+  baseUrl: z.string().url(),
+  bookingId: z.string().uuid(),
 });
 
 export const updateEntriesSchema = z.object({
@@ -676,38 +708,6 @@ export const changeTravelSchema = z.object({
       cancellation_reason: z.string().optional(),
     })
     .optional(),
-});
-
-export const createBookingSchema = z.object({
-  name: z.string().min(1),
-  description: z.string().optional(),
-  estimate: z.number().optional(),
-  billable: z.boolean().optional().default(false),
-  rate: z.number().min(1).optional(),
-  currency: z.string().optional(),
-  status: z.enum(["in_progress", "completed"]).optional(),
-  customer_id: z.string().uuid().nullable().optional(),
-});
-
-export const updateBookingSchema = z.object({
-  id: z.string().uuid(),
-  name: z.string().min(1).optional(),
-  description: z.string().optional(),
-  estimate: z.number().optional(),
-  billable: z.boolean().optional().default(false),
-  rate: z.number().min(1).optional(),
-  currency: z.string().optional(),
-  status: z.enum(["in_progress", "completed"]).optional(),
-  customer_id: z.string().uuid().nullable().optional(),
-});
-
-export const deleteBookingSchema = z.object({
-  id: z.string().uuid(),
-});
-
-export const createBookingReportSchema = z.object({
-  baseUrl: z.string().url(),
-  bookingId: z.string().uuid(),
 });
 
 const passengerSchema = z.object({
