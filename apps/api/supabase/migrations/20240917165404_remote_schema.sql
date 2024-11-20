@@ -1,13 +1,10 @@
--- Create Trigger on_auth_user_created
 CREATE TRIGGER on_auth_user_created AFTER INSERT ON auth.users FOR EACH ROW EXECUTE FUNCTION handle_new_user();
 
--- Create Trigger user_registered
 CREATE TRIGGER user_registered AFTER INSERT ON auth.users FOR EACH ROW EXECUTE FUNCTION webhook('webhook/registered');
 
--- Set check_function_bodies to off
+
 set check_function_bodies = off;
 
--- Create Function handle_empty_folder_placeholder
 CREATE OR REPLACE FUNCTION storage.handle_empty_folder_placeholder()
  RETURNS trigger
  LANGUAGE plpgsql
@@ -46,7 +43,6 @@ END;
 $function$
 ;
 
--- Create Function storage.extension
 CREATE OR REPLACE FUNCTION storage.extension(name text)
  RETURNS text
  LANGUAGE plpgsql
@@ -63,7 +59,6 @@ END
 $function$
 ;
 
--- Create Function storage.filename
 CREATE OR REPLACE FUNCTION storage.filename(name text)
  RETURNS text
  LANGUAGE plpgsql
@@ -77,7 +72,6 @@ END
 $function$
 ;
 
--- Create Function storage.foldername
 CREATE OR REPLACE FUNCTION storage.foldername(name text)
  RETURNS text[]
  LANGUAGE plpgsql
@@ -91,7 +85,6 @@ END
 $function$
 ;
 
--- Create Policy "Give members access to team folder 1oj01fe_0"
 create policy "Give members access to team folder 1oj01fe_0"
 on "storage"."objects"
 as permissive
@@ -102,7 +95,6 @@ using (((bucket_id = 'avatars'::text) AND (EXISTS ( SELECT 1
   WHERE ((users_on_team.user_id = auth.uid()) AND ((users_on_team.team_id)::text = (storage.foldername(objects.name))[1]))))));
 
 
--- Create Policy "Give members access to team folder 1oj01fe_1"
 create policy "Give members access to team folder 1oj01fe_1"
 on "storage"."objects"
 as permissive
@@ -113,7 +105,6 @@ with check (((bucket_id = 'avatars'::text) AND (EXISTS ( SELECT 1
   WHERE ((users_on_team.user_id = auth.uid()) AND ((users_on_team.team_id)::text = (storage.foldername(objects.name))[1]))))));
 
 
--- Create Policy "Give members access to team folder 1oj01fe_2"
 create policy "Give members access to team folder 1oj01fe_2"
 on "storage"."objects"
 as permissive
@@ -124,7 +115,6 @@ using (((bucket_id = 'avatars'::text) AND (EXISTS ( SELECT 1
   WHERE ((users_on_team.user_id = auth.uid()) AND ((users_on_team.team_id)::text = (storage.foldername(objects.name))[1]))))));
 
 
--- Create Policy "Give members access to team folder 1oj01fe_3"
 create policy "Give members access to team folder 1oj01fe_3"
 on "storage"."objects"
 as permissive
@@ -135,7 +125,6 @@ using (((bucket_id = 'avatars'::text) AND (EXISTS ( SELECT 1
   WHERE ((users_on_team.user_id = auth.uid()) AND ((users_on_team.team_id)::text = (storage.foldername(objects.name))[1]))))));
 
 
--- Create Policy "Give members access to team folder 1uo56a_0"
 create policy "Give members access to team folder 1uo56a_0"
 on "storage"."objects"
 as permissive
@@ -146,7 +135,6 @@ using (((bucket_id = 'vault'::text) AND (EXISTS ( SELECT 1
   WHERE ((users_on_team.user_id = auth.uid()) AND ((users_on_team.team_id)::text = (storage.foldername(objects.name))[1]))))));
 
 
--- Create Policy "Give members access to team folder 1uo56a_1"
 create policy "Give members access to team folder 1uo56a_1"
 on "storage"."objects"
 as permissive
@@ -157,7 +145,6 @@ with check (((bucket_id = 'vault'::text) AND (EXISTS ( SELECT 1
   WHERE ((users_on_team.user_id = auth.uid()) AND ((users_on_team.team_id)::text = (storage.foldername(objects.name))[1]))))));
 
 
--- Create Policy "Give members access to team folder 1uo56a_2"
 create policy "Give members access to team folder 1uo56a_2"
 on "storage"."objects"
 as permissive
@@ -168,7 +155,6 @@ using (((bucket_id = 'vault'::text) AND (EXISTS ( SELECT 1
   WHERE ((users_on_team.user_id = auth.uid()) AND ((users_on_team.team_id)::text = (storage.foldername(objects.name))[1]))))));
 
 
--- Create Policy "Give members access to team folder 1uo56a_3"
 create policy "Give members access to team folder 1uo56a_3"
 on "storage"."objects"
 as permissive
@@ -179,7 +165,6 @@ using (((bucket_id = 'vault'::text) AND (EXISTS ( SELECT 1
   WHERE ((users_on_team.user_id = auth.uid()) AND ((users_on_team.team_id)::text = (storage.foldername(objects.name))[1]))))));
 
 
--- Create Policy "Give users access to own folder 1oj01fe_0"
 create policy "Give users access to own folder 1oj01fe_0"
 on "storage"."objects"
 as permissive
@@ -188,7 +173,6 @@ to authenticated
 using (((bucket_id = 'avatars'::text) AND ((auth.uid())::text = (storage.foldername(name))[1])));
 
 
--- Create Policy "Give users access to own folder 1oj01fe_1"
 create policy "Give users access to own folder 1oj01fe_1"
 on "storage"."objects"
 as permissive
@@ -197,7 +181,6 @@ to authenticated
 with check (((bucket_id = 'avatars'::text) AND ((auth.uid())::text = (storage.foldername(name))[1])));
 
 
--- Create Policy "Give users access to own folder 1oj01fe_2"
 create policy "Give users access to own folder 1oj01fe_2"
 on "storage"."objects"
 as permissive
@@ -206,7 +189,6 @@ to authenticated
 using (((bucket_id = 'avatars'::text) AND ((auth.uid())::text = (storage.foldername(name))[1])));
 
 
--- Create Policy "Give users access to own folder 1oj01fe_3"
 create policy "Give users access to own folder 1oj01fe_3"
 on "storage"."objects"
 as permissive
@@ -215,14 +197,12 @@ to authenticated
 using (((bucket_id = 'avatars'::text) AND ((auth.uid())::text = (storage.foldername(name))[1])));
 
 
--- Create Trigger after_insert_objects
 CREATE TRIGGER after_insert_objects AFTER INSERT ON storage.objects FOR EACH ROW WHEN ((new.bucket_id = 'vault'::text)) EXECUTE FUNCTION insert_into_documents();
 
--- Create Trigger before_delete_objects
 CREATE TRIGGER before_delete_objects BEFORE DELETE ON storage.objects FOR EACH ROW WHEN ((old.bucket_id = 'vault'::text)) EXECUTE FUNCTION delete_from_documents();
 
--- Create Trigger tr_lp225ozlnzx2
 CREATE TRIGGER tr_lp225ozlnzx2 AFTER INSERT ON storage.objects FOR EACH ROW EXECUTE FUNCTION supabase_functions.http_request('https://cloud.trigger.dev/api/v1/sources/http/clz0yl7ai6652lp225ozlnzx2', 'POST', '{"Content-type":"application/json", "Authorization": "Bearer d8e3de5a468d1af4990e168c27e2b167e6911e93da67a7a8c9cf15b1dc2011dd" }', '{}', '1000');
 
--- Create Trigger vault_upload
 CREATE TRIGGER vault_upload AFTER INSERT ON storage.objects FOR EACH ROW EXECUTE FUNCTION supabase_functions.http_request('https://cloud.trigger.dev/api/v1/sources/http/clxhxy07hfixvo93155n4t3bw', 'POST', '{"Content-type":"application/json","Authorization":"Bearer 45fe98e53abae5f592f97432da5d3e388b71bbfe3194aa1c82e02ed83af225e1"}', '{}', '3000');
+
+

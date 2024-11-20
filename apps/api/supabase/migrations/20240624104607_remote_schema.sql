@@ -1,72 +1,41 @@
 
--- Statement Timeout:
 SET statement_timeout = 0;
-
--- Lock Timeout:
 SET lock_timeout = 0;
-
--- Idle in Transaction Session Timeout:
 SET idle_in_transaction_session_timeout = 0;
-
--- Client Encoding:
 SET client_encoding = 'UTF8';
-
--- Standard Conforming Strings:
 SET standard_conforming_strings = on;
-
--- Search Path:
 SELECT pg_catalog.set_config('search_path', '', false);
-
--- Check Function Bodies:
 SET check_function_bodies = false;
-
--- XML Option:
 SET xmloption = content;
-
--- Client Min Messages:
 SET client_min_messages = warning;
-
--- Row Security:
 SET row_security = off;
 
--- Pg Net Extension:
 CREATE EXTENSION IF NOT EXISTS "pg_net" WITH SCHEMA "extensions";
 
--- Pgsodium Extension:
 CREATE EXTENSION IF NOT EXISTS "pgsodium" WITH SCHEMA "pgsodium";
 
--- Private Schema:
 CREATE SCHEMA IF NOT EXISTS "private";
 
--- Private Schema Owner:
 ALTER SCHEMA "private" OWNER TO "postgres";
 
 COMMENT ON SCHEMA "public" IS 'standard public schema';
 
--- Pg Stat Statements Extension:
 CREATE EXTENSION IF NOT EXISTS "pg_stat_statements" WITH SCHEMA "extensions";
 
--- Pg Trgm Extension:
 CREATE EXTENSION IF NOT EXISTS "pg_trgm" WITH SCHEMA "public";
 
 CREATE EXTENSION IF NOT EXISTS "pgcrypto" WITH SCHEMA "extensions";
 
--- Pg Jwt Extension:
 CREATE EXTENSION IF NOT EXISTS "pgjwt" WITH SCHEMA "extensions";
 
--- Supabase Vault Extension:
 CREATE EXTENSION IF NOT EXISTS "supabase_vault" WITH SCHEMA "vault";
 
--- Unaccent Extension:
 CREATE EXTENSION IF NOT EXISTS "unaccent" WITH SCHEMA "public";
 
--- Uuid OSSP Extension:
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp" WITH SCHEMA "extensions";
 
--- Vector Extension:
 CREATE EXTENSION IF NOT EXISTS "vector" WITH SCHEMA "extensions";
 
--- Account Type Definition:
 CREATE TYPE "public"."account_type" AS ENUM (
     'depository',
     'credit',
@@ -77,21 +46,22 @@ CREATE TYPE "public"."account_type" AS ENUM (
 
 ALTER TYPE "public"."account_type" OWNER TO "postgres";
 
--- Bank Providers Type Definition:
 CREATE TYPE "public"."bankProviders" AS ENUM (
-    'plaid'
+    'gocardless',
+    'plaid',
+    'teller'
 );
 
 ALTER TYPE "public"."bankProviders" OWNER TO "postgres";
 
--- Bank Providers Type Definition:
 CREATE TYPE "public"."bank_providers" AS ENUM (
-    'plaid'
+    'gocardless',
+    'plaid',
+    'teller'
 );
 
 ALTER TYPE "public"."bank_providers" OWNER TO "postgres";
 
--- Inbox Status Type Definition:
 CREATE TYPE "public"."inbox_status" AS ENUM (
     'processing',
     'pending',
@@ -102,7 +72,6 @@ CREATE TYPE "public"."inbox_status" AS ENUM (
 
 ALTER TYPE "public"."inbox_status" OWNER TO "postgres";
 
--- Metrics Record Type Definition:
 CREATE TYPE "public"."metrics_record" AS (
 	"date" "date",
 	"value" integer
@@ -110,7 +79,6 @@ CREATE TYPE "public"."metrics_record" AS (
 
 ALTER TYPE "public"."metrics_record" OWNER TO "postgres";
 
--- Report Types Definition:
 CREATE TYPE "public"."reportTypes" AS ENUM (
     'profit',
     'revenue',
@@ -119,7 +87,6 @@ CREATE TYPE "public"."reportTypes" AS ENUM (
 
 ALTER TYPE "public"."reportTypes" OWNER TO "postgres";
 
--- Team Roles Definition:
 CREATE TYPE "public"."teamRoles" AS ENUM (
     'owner',
     'member'
@@ -127,8 +94,13 @@ CREATE TYPE "public"."teamRoles" AS ENUM (
 
 ALTER TYPE "public"."teamRoles" OWNER TO "postgres";
 
+CREATE TYPE "public"."trackerStatus" AS ENUM (
+    'in_progress',
+    'completed'
+);
 
--- Transaction Categories Definition:
+ALTER TYPE "public"."trackerStatus" OWNER TO "postgres";
+
 CREATE TYPE "public"."transactionCategories" AS ENUM (
     'travel',
     'office_supplies',
@@ -150,7 +122,6 @@ CREATE TYPE "public"."transactionCategories" AS ENUM (
 
 ALTER TYPE "public"."transactionCategories" OWNER TO "postgres";
 
--- Transaction Methods Definition:
 CREATE TYPE "public"."transactionMethods" AS ENUM (
     'payment',
     'card_purchase',
@@ -167,7 +138,6 @@ CREATE TYPE "public"."transactionMethods" AS ENUM (
 
 ALTER TYPE "public"."transactionMethods" OWNER TO "postgres";
 
--- Transaction Status Definition:
 CREATE TYPE "public"."transactionStatus" AS ENUM (
     'posted',
     'pending',
@@ -177,7 +147,6 @@ CREATE TYPE "public"."transactionStatus" AS ENUM (
 
 ALTER TYPE "public"."transactionStatus" OWNER TO "postgres";
 
--- Get Invites for Authenticated User Function:
 CREATE OR REPLACE FUNCTION "private"."get_invites_for_authenticated_user"() RETURNS SETOF "uuid"
     LANGUAGE "sql" STABLE SECURITY DEFINER
     SET "search_path" TO 'public'
@@ -189,7 +158,6 @@ $$;
 
 ALTER FUNCTION "private"."get_invites_for_authenticated_user"() OWNER TO "postgres";
 
--- Get Teams for Authenticated User Function:
 CREATE OR REPLACE FUNCTION "private"."get_teams_for_authenticated_user"() RETURNS SETOF "uuid"
     LANGUAGE "sql" STABLE SECURITY DEFINER
     SET "search_path" TO 'public'
@@ -201,13 +169,10 @@ $$;
 
 ALTER FUNCTION "private"."get_teams_for_authenticated_user"() OWNER TO "postgres";
 
--- Default Tablespace:
 SET default_tablespace = '';
 
--- Default Table Access Method:
 SET default_table_access_method = "heap";
 
--- Transactions Table:
 CREATE TABLE IF NOT EXISTS "public"."transactions" (
     "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
     "date" "date" NOT NULL,
@@ -233,7 +198,6 @@ CREATE TABLE IF NOT EXISTS "public"."transactions" (
 
 ALTER TABLE "public"."transactions" OWNER TO "postgres";
 
--- Amount Text Function:
 CREATE OR REPLACE FUNCTION "public"."amount_text"("public"."transactions") RETURNS "text"
     LANGUAGE "sql"
     AS $_$
@@ -242,7 +206,6 @@ $_$;
 
 ALTER FUNCTION "public"."amount_text"("public"."transactions") OWNER TO "postgres";
 
--- Calculated VAT Function:
 CREATE OR REPLACE FUNCTION "public"."calculated_vat"("public"."transactions") RETURNS numeric
     LANGUAGE "plpgsql"
     AS $_$
@@ -267,7 +230,6 @@ $_$;
 
 ALTER FUNCTION "public"."calculated_vat"("public"."transactions") OWNER TO "postgres";
 
--- Create Team Function:
 CREATE OR REPLACE FUNCTION "public"."create_team"("name" character varying) RETURNS "uuid"
     LANGUAGE "plpgsql" SECURITY DEFINER
     SET "search_path" TO 'public'
@@ -284,7 +246,6 @@ $$;
 
 ALTER FUNCTION "public"."create_team"("name" character varying) OWNER TO "postgres";
 
--- Extract Product Names Function:
 CREATE OR REPLACE FUNCTION "public"."extract_product_names"("products_json" "json") RETURNS "text"
     LANGUAGE "plpgsql" IMMUTABLE
     AS $$
@@ -298,7 +259,6 @@ $$;
 
 ALTER FUNCTION "public"."extract_product_names"("products_json" "json") OWNER TO "postgres";
 
--- Generate HMAC Function:
 CREATE OR REPLACE FUNCTION "public"."generate_hmac"("secret_key" "text", "message" "text") RETURNS "text"
     LANGUAGE "plpgsql"
     AS $$
@@ -312,7 +272,6 @@ $$;
 
 ALTER FUNCTION "public"."generate_hmac"("secret_key" "text", "message" "text") OWNER TO "postgres";
 
--- Generate ID Function:
 CREATE OR REPLACE FUNCTION "public"."generate_id"("size" integer) RETURNS "text"
     LANGUAGE "plpgsql"
     AS $$
@@ -333,7 +292,6 @@ $$;
 
 ALTER FUNCTION "public"."generate_id"("size" integer) OWNER TO "postgres";
 
--- Generate Inbox Function:
 CREATE OR REPLACE FUNCTION "public"."generate_inbox"("size" integer) RETURNS "text"
     LANGUAGE "plpgsql"
     AS $$
@@ -354,7 +312,6 @@ $$;
 
 ALTER FUNCTION "public"."generate_inbox"("size" integer) OWNER TO "postgres";
 
--- Generate Inbox FTS Function:
 CREATE OR REPLACE FUNCTION "public"."generate_inbox_fts"("display_name" "text", "products_json" "json") RETURNS "tsvector"
     LANGUAGE "plpgsql" IMMUTABLE
     AS $$
@@ -368,7 +325,6 @@ $$;
 
 ALTER FUNCTION "public"."generate_inbox_fts"("display_name" "text", "products_json" "json") OWNER TO "postgres";
 
--- Generate Inbox FTS Function:
 CREATE OR REPLACE FUNCTION "public"."generate_inbox_fts"("display_name_text" "text", "product_names" "text") RETURNS "tsvector"
     LANGUAGE "plpgsql" IMMUTABLE
     AS $$
@@ -379,7 +335,6 @@ $$;
 
 ALTER FUNCTION "public"."generate_inbox_fts"("display_name_text" "text", "product_names" "text") OWNER TO "postgres";
 
--- Generate Inbox FTS Function:
 CREATE OR REPLACE FUNCTION "public"."generate_inbox_fts"("display_name_text" "text", "product_names" "text", "amount" numeric, "due_date" "date") RETURNS "tsvector"
     LANGUAGE "plpgsql" IMMUTABLE
     AS $$
@@ -390,7 +345,6 @@ $$;
 
 ALTER FUNCTION "public"."generate_inbox_fts"("display_name_text" "text", "product_names" "text", "amount" numeric, "due_date" "date") OWNER TO "postgres";
 
--- Generate Slug from Name Function:
 CREATE OR REPLACE FUNCTION "public"."generate_slug_from_name"() RETURNS "trigger"
     LANGUAGE "plpgsql"
     AS $$begin
@@ -404,7 +358,6 @@ end$$;
 
 ALTER FUNCTION "public"."generate_slug_from_name"() OWNER TO "postgres";
 
--- Get Bank Account Currencies Function:
 CREATE OR REPLACE FUNCTION "public"."get_bank_account_currencies"("team_id" "uuid") RETURNS TABLE("currency" "text")
     LANGUAGE "plpgsql"
     AS $$
@@ -415,7 +368,6 @@ $$;
 
 ALTER FUNCTION "public"."get_bank_account_currencies"("team_id" "uuid") OWNER TO "postgres";
 
--- Get Burn Rate Function:
 CREATE OR REPLACE FUNCTION "public"."get_burn_rate"("team_id" "uuid", "date_from" "date", "date_to" "date", "currency" "text") RETURNS TABLE("date" timestamp with time zone, "value" numeric)
     LANGUAGE "plpgsql"
     AS $$begin
@@ -443,7 +395,6 @@ end;$$;
 
 ALTER FUNCTION "public"."get_burn_rate"("team_id" "uuid", "date_from" "date", "date_to" "date", "currency" "text") OWNER TO "postgres";
 
--- Get Current Burn Rate Function:
 CREATE OR REPLACE FUNCTION "public"."get_current_burn_rate"("team_id" "uuid", "currency" "text") RETURNS numeric
     LANGUAGE "plpgsql"
     AS $$declare
@@ -466,7 +417,6 @@ end;$$;
 
 ALTER FUNCTION "public"."get_current_burn_rate"("team_id" "uuid", "currency" "text") OWNER TO "postgres";
 
--- Get Profit Function:
 CREATE OR REPLACE FUNCTION "public"."get_profit"("team_id" "uuid", "date_from" "date", "date_to" "date", "currency" "text") RETURNS TABLE("date" timestamp with time zone, "value" numeric)
     LANGUAGE "plpgsql"
     AS $$begin
@@ -493,7 +443,6 @@ end;$$;
 
 ALTER FUNCTION "public"."get_profit"("team_id" "uuid", "date_from" "date", "date_to" "date", "currency" "text") OWNER TO "postgres";
 
--- Get Revenue Function:
 CREATE OR REPLACE FUNCTION "public"."get_revenue"("team_id" "uuid", "date_from" "date", "date_to" "date", "currency" "text") RETURNS TABLE("date" timestamp with time zone, "value" numeric)
     LANGUAGE "plpgsql"
     AS $$begin
@@ -521,7 +470,6 @@ end;$$;
 
 ALTER FUNCTION "public"."get_revenue"("team_id" "uuid", "date_from" "date", "date_to" "date", "currency" "text") OWNER TO "postgres";
 
--- Get Runway Function:
 CREATE OR REPLACE FUNCTION "public"."get_runway"("team_id" "uuid", "date_from" "date", "date_to" "date", "currency" "text") RETURNS numeric
     LANGUAGE "plpgsql"
     AS $$
@@ -541,7 +489,6 @@ $$;
 
 ALTER FUNCTION "public"."get_runway"("team_id" "uuid", "date_from" "date", "date_to" "date", "currency" "text") OWNER TO "postgres";
 
--- Get Spending Function:
 CREATE OR REPLACE FUNCTION "public"."get_spending"("team_id" "uuid", "date_from" "date", "date_to" "date", "currency_target" "text") RETURNS TABLE("name" "text", "slug" "text", "amount" numeric, "currency" "text", "color" "text", "percentage" numeric)
     LANGUAGE "plpgsql"
     AS $$
@@ -593,7 +540,6 @@ $$;
 
 ALTER FUNCTION "public"."get_spending"("team_id" "uuid", "date_from" "date", "date_to" "date", "currency_target" "text") OWNER TO "postgres";
 
--- Get Spending V2 Function:
 CREATE OR REPLACE FUNCTION "public"."get_spending_v2"("team_id" "uuid", "date_from" "date", "date_to" "date", "currency_target" "text") RETURNS TABLE("name" "text", "slug" "text", "amount" numeric, "currency" "text", "color" "text", "percentage" numeric)
     LANGUAGE "plpgsql"
     AS $$
@@ -647,7 +593,6 @@ $$;
 
 ALTER FUNCTION "public"."get_spending_v2"("team_id" "uuid", "date_from" "date", "date_to" "date", "currency_target" "text") OWNER TO "postgres";
 
--- Get Total Balance Function:
 CREATE OR REPLACE FUNCTION "public"."get_total_balance"("team_id" "uuid", "currency" "text") RETURNS numeric
     LANGUAGE "plpgsql"
     AS $$
@@ -669,7 +614,6 @@ $$;
 
 ALTER FUNCTION "public"."get_total_balance"("team_id" "uuid", "currency" "text") OWNER TO "postgres";
 
--- Handle New User Function:
 CREATE OR REPLACE FUNCTION "public"."handle_new_user"() RETURNS "trigger"
     LANGUAGE "plpgsql" SECURITY DEFINER
     SET "search_path" TO 'public'
@@ -726,7 +670,6 @@ $$;
 
 ALTER FUNCTION "public"."handle_new_user"() OWNER TO "postgres";
 
--- Inbox Table:
 CREATE TABLE IF NOT EXISTS "public"."inbox" (
     "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
     "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
@@ -751,7 +694,6 @@ CREATE TABLE IF NOT EXISTS "public"."inbox" (
 
 ALTER TABLE "public"."inbox" OWNER TO "postgres";
 
--- Inbox Status Definition:
 CREATE OR REPLACE FUNCTION "public"."inbox_amount_text"("public"."inbox") RETURNS "text"
     LANGUAGE "sql"
     AS $_$
@@ -759,7 +701,6 @@ CREATE OR REPLACE FUNCTION "public"."inbox_amount_text"("public"."inbox") RETURN
 $_$;
 
 ALTER FUNCTION "public"."inbox_amount_text"("public"."inbox") OWNER TO "postgres";
-
 
 CREATE OR REPLACE FUNCTION "public"."insert_system_categories"() RETURNS "trigger"
     LANGUAGE "plpgsql" SECURITY DEFINER
@@ -801,7 +742,6 @@ $_$;
 
 ALTER FUNCTION "public"."is_fulfilled"("public"."transactions") OWNER TO "postgres";
 
--- Nanoid function
 CREATE OR REPLACE FUNCTION "public"."nanoid"("size" integer DEFAULT 21, "alphabet" "text" DEFAULT '_-0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'::"text", "additionalbytesfactor" double precision DEFAULT 1.6) RETURNS "text"
     LANGUAGE "plpgsql" PARALLEL SAFE
     AS $$
@@ -838,7 +778,6 @@ $$;
 
 ALTER FUNCTION "public"."nanoid"("size" integer, "alphabet" "text", "additionalbytesfactor" double precision) OWNER TO "postgres";
 
--- Nanoid optimized function
 CREATE OR REPLACE FUNCTION "public"."nanoid_optimized"("size" integer, "alphabet" "text", "mask" integer, "step" integer) RETURNS "text"
     LANGUAGE "plpgsql" PARALLEL SAFE
     AS $$
@@ -871,7 +810,71 @@ $$;
 
 ALTER FUNCTION "public"."nanoid_optimized"("size" integer, "alphabet" "text", "mask" integer, "step" integer) OWNER TO "postgres";
 
--- Slugify Function
+CREATE TABLE IF NOT EXISTS "public"."tracker_entries" (
+    "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
+    "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
+    "duration" bigint,
+    "project_id" "uuid",
+    "start" timestamp without time zone,
+    "stop" timestamp without time zone,
+    "assigned_id" "uuid",
+    "team_id" "uuid",
+    "description" "text",
+    "rate" numeric,
+    "currency" "text",
+    "billed" boolean DEFAULT false,
+    "date" "date" DEFAULT "now"()
+);
+
+ALTER TABLE "public"."tracker_entries" OWNER TO "postgres";
+
+COMMENT ON COLUMN "public"."tracker_entries"."duration" IS 'Time entry duration. For running entries should be negative, preferable -1';
+
+COMMENT ON COLUMN "public"."tracker_entries"."start" IS 'Start time in UTC';
+
+COMMENT ON COLUMN "public"."tracker_entries"."stop" IS 'Stop time in UTC, can be null if it''s still running or created with duration';
+
+COMMENT ON COLUMN "public"."tracker_entries"."description" IS 'Time Entry description, null if not provided at creation/update';
+
+CREATE OR REPLACE FUNCTION "public"."project_members"("public"."tracker_entries") RETURNS TABLE("id" "uuid", "avatar_url" "text", "full_name" "text")
+    LANGUAGE "sql"
+    AS $_$
+  select distinct on (users.id) users.id, users.avatar_url, users.full_name
+  from tracker_entries
+  join users on tracker_entries.user_id = users.id
+  where tracker_entries.project_id = $1.project_id;
+$_$;
+
+ALTER FUNCTION "public"."project_members"("public"."tracker_entries") OWNER TO "postgres";
+
+CREATE TABLE IF NOT EXISTS "public"."tracker_projects" (
+    "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
+    "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
+    "team_id" "uuid",
+    "rate" numeric,
+    "currency" "text",
+    "status" "public"."trackerStatus" DEFAULT 'in_progress'::"public"."trackerStatus" NOT NULL,
+    "description" "text",
+    "name" "text" NOT NULL,
+    "billable" boolean DEFAULT false,
+    "estimate" bigint
+);
+
+ALTER TABLE "public"."tracker_projects" OWNER TO "postgres";
+
+COMMENT ON COLUMN "public"."tracker_projects"."rate" IS 'Custom rate for project';
+
+CREATE OR REPLACE FUNCTION "public"."project_members"("public"."tracker_projects") RETURNS TABLE("id" "uuid", "avatar_url" "text", "full_name" "text")
+    LANGUAGE "sql"
+    AS $$
+  select distinct on (users.id) users.id, users.avatar_url, users.full_name
+  from tracker_projects
+  left join tracker_entries on tracker_projects.id = tracker_entries.project_id
+  left join users on tracker_entries.user_id = users.id;
+$$;
+
+ALTER FUNCTION "public"."project_members"("public"."tracker_projects") OWNER TO "postgres";
+
 CREATE OR REPLACE FUNCTION "public"."slugify"("value" "text") RETURNS "text"
     LANGUAGE "sql" IMMUTABLE STRICT
     AS $_$
@@ -904,8 +907,21 @@ $_$;
 
 ALTER FUNCTION "public"."slugify"("value" "text") OWNER TO "postgres";
 
+CREATE OR REPLACE FUNCTION "public"."total_duration"("public"."tracker_projects") RETURNS integer
+    LANGUAGE "sql"
+    AS $_$
+  select sum(tracker_entries.duration) as total_duration
+  from
+    tracker_projects
+    join tracker_entries on tracker_projects.id = tracker_entries.project_id
+  where
+    tracker_projects.id = $1.id
+  group by
+    tracker_projects.id;
+$_$;
 
--- Update Enrich Transaction Function
+ALTER FUNCTION "public"."total_duration"("public"."tracker_projects") OWNER TO "postgres";
+
 CREATE OR REPLACE FUNCTION "public"."update_enrich_transaction"() RETURNS "trigger"
     LANGUAGE "plpgsql" SECURITY DEFINER
     AS $$declare
@@ -926,7 +942,6 @@ end;$$;
 
 ALTER FUNCTION "public"."update_enrich_transaction"() OWNER TO "postgres";
 
--- Update Transactions on Category Delete Function
 CREATE OR REPLACE FUNCTION "public"."update_transactions_on_category_delete"() RETURNS "trigger"
     LANGUAGE "plpgsql"
     AS $$
@@ -942,7 +957,6 @@ $$;
 
 ALTER FUNCTION "public"."update_transactions_on_category_delete"() OWNER TO "postgres";
 
--- Upsert Transaction Enrichment Function
 CREATE OR REPLACE FUNCTION "public"."upsert_transaction_enrichment"() RETURNS "trigger"
     LANGUAGE "plpgsql" SECURITY DEFINER
     SET "search_path" TO 'public'
@@ -966,7 +980,6 @@ end;$$;
 
 ALTER FUNCTION "public"."upsert_transaction_enrichment"() OWNER TO "postgres";
 
--- Webhook Function
 CREATE OR REPLACE FUNCTION "public"."webhook"() RETURNS "trigger"
     LANGUAGE "plpgsql" SECURITY DEFINER
     SET "search_path" TO 'public'
@@ -1023,7 +1036,6 @@ $$;
 
 ALTER FUNCTION "public"."webhook"() OWNER TO "postgres";
 
--- Bank Accounts Table
 CREATE TABLE IF NOT EXISTS "public"."bank_accounts" (
     "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
     "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
@@ -1042,7 +1054,6 @@ CREATE TABLE IF NOT EXISTS "public"."bank_accounts" (
 
 ALTER TABLE "public"."bank_accounts" OWNER TO "postgres";
 
--- Bank Connections Table
 CREATE TABLE IF NOT EXISTS "public"."bank_connections" (
     "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
     "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
@@ -1058,7 +1069,6 @@ CREATE TABLE IF NOT EXISTS "public"."bank_connections" (
 
 ALTER TABLE "public"."bank_connections" OWNER TO "postgres";
 
--- Reports Table
 CREATE TABLE IF NOT EXISTS "public"."reports" (
     "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
     "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
@@ -1075,7 +1085,6 @@ CREATE TABLE IF NOT EXISTS "public"."reports" (
 
 ALTER TABLE "public"."reports" OWNER TO "postgres";
 
--- Teams Table
 CREATE TABLE IF NOT EXISTS "public"."teams" (
     "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
     "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
@@ -1089,7 +1098,18 @@ CREATE TABLE IF NOT EXISTS "public"."teams" (
 
 ALTER TABLE "public"."teams" OWNER TO "postgres";
 
--- Transaction Attachments Table
+CREATE TABLE IF NOT EXISTS "public"."tracker_reports" (
+    "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
+    "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
+    "link_id" "text",
+    "short_link" "text",
+    "team_id" "uuid" DEFAULT "gen_random_uuid"(),
+    "project_id" "uuid" DEFAULT "gen_random_uuid"(),
+    "created_by" "uuid"
+);
+
+ALTER TABLE "public"."tracker_reports" OWNER TO "postgres";
+
 CREATE TABLE IF NOT EXISTS "public"."transaction_attachments" (
     "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
     "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
@@ -1103,7 +1123,6 @@ CREATE TABLE IF NOT EXISTS "public"."transaction_attachments" (
 
 ALTER TABLE "public"."transaction_attachments" OWNER TO "postgres";
 
--- Transaction Categories Table
 CREATE TABLE IF NOT EXISTS "public"."transaction_categories" (
     "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
     "name" "text" NOT NULL,
@@ -1119,7 +1138,6 @@ CREATE TABLE IF NOT EXISTS "public"."transaction_categories" (
 
 ALTER TABLE "public"."transaction_categories" OWNER TO "postgres";
 
--- Transaction Enrichments Table
 CREATE TABLE IF NOT EXISTS "public"."transaction_enrichments" (
     "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
     "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
@@ -1131,7 +1149,6 @@ CREATE TABLE IF NOT EXISTS "public"."transaction_enrichments" (
 
 ALTER TABLE "public"."transaction_enrichments" OWNER TO "postgres";
 
--- User Invites Table
 CREATE TABLE IF NOT EXISTS "public"."user_invites" (
     "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
     "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
@@ -1144,7 +1161,6 @@ CREATE TABLE IF NOT EXISTS "public"."user_invites" (
 
 ALTER TABLE "public"."user_invites" OWNER TO "postgres";
 
--- Users Table
 CREATE TABLE IF NOT EXISTS "public"."users" (
     "id" "uuid" NOT NULL,
     "full_name" "text",
@@ -1158,7 +1174,6 @@ CREATE TABLE IF NOT EXISTS "public"."users" (
 
 ALTER TABLE "public"."users" OWNER TO "postgres";
 
--- Users on Team Table
 CREATE TABLE IF NOT EXISTS "public"."users_on_team" (
     "user_id" "uuid" NOT NULL,
     "team_id" "uuid" NOT NULL,
@@ -1169,865 +1184,738 @@ CREATE TABLE IF NOT EXISTS "public"."users_on_team" (
 
 ALTER TABLE "public"."users_on_team" OWNER TO "postgres";
 
--- Transaction Attachments Primary Key
 ALTER TABLE ONLY "public"."transaction_attachments"
     ADD CONSTRAINT "attachments_pkey" PRIMARY KEY ("id");
 
--- Bank Accounts Primary Key
 ALTER TABLE ONLY "public"."bank_accounts"
     ADD CONSTRAINT "bank_accounts_pkey" PRIMARY KEY ("id");
 
--- Bank Connections Primary Key
 ALTER TABLE ONLY "public"."bank_connections"
     ADD CONSTRAINT "bank_connections_pkey" PRIMARY KEY ("id");
 
--- Inbox Primary Key
 ALTER TABLE ONLY "public"."inbox"
     ADD CONSTRAINT "inbox_pkey" PRIMARY KEY ("id");
 
--- Inbox Reference ID Key
 ALTER TABLE ONLY "public"."inbox"
     ADD CONSTRAINT "inbox_reference_id_key" UNIQUE ("reference_id");
 
--- Users on Team Primary Key
 ALTER TABLE ONLY "public"."users_on_team"
     ADD CONSTRAINT "members_pkey" PRIMARY KEY ("user_id", "team_id", "id");
 
--- Users Primary Key
 ALTER TABLE ONLY "public"."users"
     ADD CONSTRAINT "profiles_pkey" PRIMARY KEY ("id");
 
--- Reports Primary Key
+ALTER TABLE ONLY "public"."tracker_reports"
+    ADD CONSTRAINT "project_reports_pkey" PRIMARY KEY ("id");
+
 ALTER TABLE ONLY "public"."reports"
     ADD CONSTRAINT "reports_pkey" PRIMARY KEY ("id");
 
--- Teams Inbox ID Key
 ALTER TABLE ONLY "public"."teams"
     ADD CONSTRAINT "teams_inbox_id_key" UNIQUE ("inbox_id");
 
--- Teams Primary Key
 ALTER TABLE ONLY "public"."teams"
     ADD CONSTRAINT "teams_pkey" PRIMARY KEY ("id");
 
--- Transaction Categories Primary Key
+ALTER TABLE ONLY "public"."tracker_projects"
+    ADD CONSTRAINT "tracker_projects_pkey" PRIMARY KEY ("id");
+
+ALTER TABLE ONLY "public"."tracker_entries"
+    ADD CONSTRAINT "tracker_records_pkey" PRIMARY KEY ("id");
+
 ALTER TABLE ONLY "public"."transaction_categories"
     ADD CONSTRAINT "transaction_categories_pkey" PRIMARY KEY ("team_id", "slug");
 
--- Transaction Enrichments Primary Key
 ALTER TABLE ONLY "public"."transaction_enrichments"
     ADD CONSTRAINT "transaction_enrichments_pkey" PRIMARY KEY ("id");
 
--- Transactions Internal ID Key
 ALTER TABLE ONLY "public"."transactions"
     ADD CONSTRAINT "transactions_internal_id_key" UNIQUE ("internal_id");
 
--- Transactions Primary Key
 ALTER TABLE ONLY "public"."transactions"
     ADD CONSTRAINT "transactions_pkey" PRIMARY KEY ("id");
 
--- Bank Connections Unique
 ALTER TABLE ONLY "public"."bank_connections"
     ADD CONSTRAINT "unique_bank_connections" UNIQUE ("team_id", "institution_id");
 
--- User Invites Unique
 ALTER TABLE ONLY "public"."user_invites"
     ADD CONSTRAINT "unique_team_invite" UNIQUE ("email", "team_id");
 
--- Transaction Enrichments Unique
 ALTER TABLE ONLY "public"."transaction_enrichments"
     ADD CONSTRAINT "unique_team_name" UNIQUE ("team_id", "name");
 
--- Transaction Categories Unique
 ALTER TABLE ONLY "public"."transaction_categories"
     ADD CONSTRAINT "unique_team_slug" UNIQUE ("team_id", "slug");
 
--- User Invites Code Key
 ALTER TABLE ONLY "public"."user_invites"
     ADD CONSTRAINT "user_invites_code_key" UNIQUE ("code");
 
--- User Invites Primary Key
 ALTER TABLE ONLY "public"."user_invites"
     ADD CONSTRAINT "user_invites_pkey" PRIMARY KEY ("id");
 
--- Bank Accounts Bank Connection ID Index
 CREATE INDEX "bank_accounts_bank_connection_id_idx" ON "public"."bank_accounts" USING "btree" ("bank_connection_id");
 
--- Bank Accounts Created By Index
 CREATE INDEX "bank_accounts_created_by_idx" ON "public"."bank_accounts" USING "btree" ("created_by");
 
--- Bank Accounts Team ID Index
 CREATE INDEX "bank_accounts_team_id_idx" ON "public"."bank_accounts" USING "btree" ("team_id");
 
--- Bank Connections Team ID Index
 CREATE INDEX "bank_connections_team_id_idx" ON "public"."bank_connections" USING "btree" ("team_id");
 
--- Inbox Attachment ID Index
 CREATE INDEX "inbox_attachment_id_idx" ON "public"."inbox" USING "btree" ("attachment_id");
 
--- Inbox Team ID Index
 CREATE INDEX "inbox_team_id_idx" ON "public"."inbox" USING "btree" ("team_id");
 
--- Inbox Transaction ID Index
 CREATE INDEX "inbox_transaction_id_idx" ON "public"."inbox" USING "btree" ("transaction_id");
 
--- Transaction Attachments Team ID Index
 CREATE INDEX "transaction_attachments_team_id_idx" ON "public"."transaction_attachments" USING "btree" ("team_id");
 
--- Transaction Attachments Transaction ID Index
 CREATE INDEX "transaction_attachments_transaction_id_idx" ON "public"."transaction_attachments" USING "btree" ("transaction_id");
 
--- Transactions Category Slug Index
 CREATE INDEX "transactions_category_slug_idx" ON "public"."transactions" USING "btree" ("category_slug");
 
--- Transactions Team ID Date Currency Bank Account ID Category Index
 CREATE INDEX "transactions_team_id_date_currency_bank_account_id_category_idx" ON "public"."transactions" USING "btree" ("team_id", "date", "currency", "bank_account_id", "category");
 
--- Transactions Team ID Index
 CREATE INDEX "transactions_team_id_idx" ON "public"."transactions" USING "btree" ("team_id");
 
--- Users on Team Team ID Index
 CREATE INDEX "users_on_team_team_id_idx" ON "public"."users_on_team" USING "btree" ("team_id");
 
--- Embed Category Trigger
-CREATE OR REPLACE TRIGGER "embed_category" AFTER INSERT OR UPDATE ON "public"."transaction_categories" FOR EACH ROW EXECUTE FUNCTION "supabase_functions"."http_request"('https://jylavktzapdciiteepdf.supabase.co/functions/v1/generate-category-embedding', 'POST', '{"Content-type":"application/json"}', '{}', '5000');
+CREATE OR REPLACE TRIGGER "embed_category" AFTER INSERT OR UPDATE ON "public"."transaction_categories" FOR EACH ROW EXECUTE FUNCTION "supabase_functions"."http_request"('https://pytddvqiozwrhfbwqazp.supabase.co/functions/v1/generate-category-embedding', 'POST', '{"Content-type":"application/json"}', '{}', '5000');
 
--- Generate Category Slug Trigger
 CREATE OR REPLACE TRIGGER "generate_category_slug" BEFORE INSERT ON "public"."transaction_categories" FOR EACH ROW EXECUTE FUNCTION "public"."generate_slug_from_name"();
 
--- Insert System Categories Trigger
 CREATE OR REPLACE TRIGGER "insert_system_categories_trigger" AFTER INSERT ON "public"."teams" FOR EACH ROW EXECUTE FUNCTION "public"."insert_system_categories"();
 
--- Match Transaction Trigger
 CREATE OR REPLACE TRIGGER "match_transaction" AFTER INSERT ON "public"."transactions" FOR EACH ROW EXECUTE FUNCTION "public"."webhook"('webhook/inbox/match');
 
--- On Updated Transaction Category Trigger
 CREATE OR REPLACE TRIGGER "on_updated_transaction_category" AFTER UPDATE OF "category_slug" ON "public"."transactions" FOR EACH ROW EXECUTE FUNCTION "public"."upsert_transaction_enrichment"();
 
--- Trigger to update transactions on category delete
 CREATE OR REPLACE TRIGGER "trigger_update_transactions_category" BEFORE DELETE ON "public"."transaction_categories" FOR EACH ROW EXECUTE FUNCTION "public"."update_transactions_on_category_delete"();
 
--- Trigger to update enrichment on transaction insert
 CREATE OR REPLACE TRIGGER "update_enrich_transaction_trigger" BEFORE INSERT ON "public"."transactions" FOR EACH ROW EXECUTE FUNCTION "public"."update_enrich_transaction"();
 
--- Bank Accounts Bank Connection ID Foreign Key
 ALTER TABLE ONLY "public"."bank_accounts"
     ADD CONSTRAINT "bank_accounts_bank_connection_id_fkey" FOREIGN KEY ("bank_connection_id") REFERENCES "public"."bank_connections"("id") ON DELETE SET NULL;
 
--- Bank Accounts Created By Foreign Key
 ALTER TABLE ONLY "public"."bank_accounts"
     ADD CONSTRAINT "bank_accounts_created_by_fkey" FOREIGN KEY ("created_by") REFERENCES "public"."users"("id") ON DELETE CASCADE;
 
--- Bank Connections Team ID Foreign Key
 ALTER TABLE ONLY "public"."bank_connections"
     ADD CONSTRAINT "bank_connections_team_id_fkey" FOREIGN KEY ("team_id") REFERENCES "public"."teams"("id") ON DELETE CASCADE;
 
--- Inbox Attachment ID Foreign Key
 ALTER TABLE ONLY "public"."inbox"
     ADD CONSTRAINT "inbox_attachment_id_fkey" FOREIGN KEY ("attachment_id") REFERENCES "public"."transaction_attachments"("id") ON DELETE SET NULL;
 
--- Bank Accounts Team ID Foreign Key
 ALTER TABLE ONLY "public"."bank_accounts"
     ADD CONSTRAINT "public_bank_accounts_team_id_fkey" FOREIGN KEY ("team_id") REFERENCES "public"."teams"("id") ON DELETE CASCADE;
 
--- Inbox Team ID Foreign Key
 ALTER TABLE ONLY "public"."inbox"
     ADD CONSTRAINT "public_inbox_team_id_fkey" FOREIGN KEY ("team_id") REFERENCES "public"."teams"("id") ON DELETE CASCADE;
 
--- Inbox Transaction ID Foreign Key
 ALTER TABLE ONLY "public"."inbox"
     ADD CONSTRAINT "public_inbox_transaction_id_fkey" FOREIGN KEY ("transaction_id") REFERENCES "public"."transactions"("id") ON DELETE SET NULL;
 
--- Reports Created By Foreign Key
 ALTER TABLE ONLY "public"."reports"
     ADD CONSTRAINT "public_reports_created_by_fkey" FOREIGN KEY ("created_by") REFERENCES "public"."users"("id") ON DELETE CASCADE;
 
--- Transaction Attachments Team ID Foreign Key
+ALTER TABLE ONLY "public"."tracker_reports"
+    ADD CONSTRAINT "public_tracker_reports_created_by_fkey" FOREIGN KEY ("created_by") REFERENCES "public"."users"("id") ON DELETE CASCADE;
+
+ALTER TABLE ONLY "public"."tracker_reports"
+    ADD CONSTRAINT "public_tracker_reports_project_id_fkey" FOREIGN KEY ("project_id") REFERENCES "public"."tracker_projects"("id") ON UPDATE CASCADE ON DELETE CASCADE;
+
 ALTER TABLE ONLY "public"."transaction_attachments"
     ADD CONSTRAINT "public_transaction_attachments_team_id_fkey" FOREIGN KEY ("team_id") REFERENCES "public"."teams"("id") ON DELETE CASCADE;
 
--- Transaction Attachments Transaction ID Foreign Key
 ALTER TABLE ONLY "public"."transaction_attachments"
     ADD CONSTRAINT "public_transaction_attachments_transaction_id_fkey" FOREIGN KEY ("transaction_id") REFERENCES "public"."transactions"("id") ON DELETE SET NULL;
 
--- Transactions Assigned ID Foreign Key
 ALTER TABLE ONLY "public"."transactions"
     ADD CONSTRAINT "public_transactions_assigned_id_fkey" FOREIGN KEY ("assigned_id") REFERENCES "public"."users"("id") ON DELETE SET NULL;
 
--- Transactions Team ID Foreign Key
 ALTER TABLE ONLY "public"."transactions"
     ADD CONSTRAINT "public_transactions_team_id_fkey" FOREIGN KEY ("team_id") REFERENCES "public"."teams"("id") ON DELETE CASCADE;
 
--- User Invites Team ID Foreign Key
 ALTER TABLE ONLY "public"."user_invites"
     ADD CONSTRAINT "public_user_invites_team_id_fkey" FOREIGN KEY ("team_id") REFERENCES "public"."teams"("id") ON DELETE CASCADE;
 
--- Reports Team ID Foreign Key
 ALTER TABLE ONLY "public"."reports"
     ADD CONSTRAINT "reports_team_id_fkey" FOREIGN KEY ("team_id") REFERENCES "public"."teams"("id") ON UPDATE CASCADE;
 
--- Transaction Categories Team ID Foreign Key
+ALTER TABLE ONLY "public"."tracker_entries"
+    ADD CONSTRAINT "tracker_entries_assigned_id_fkey" FOREIGN KEY ("assigned_id") REFERENCES "public"."users"("id") ON DELETE SET NULL;
+
+ALTER TABLE ONLY "public"."tracker_entries"
+    ADD CONSTRAINT "tracker_entries_project_id_fkey" FOREIGN KEY ("project_id") REFERENCES "public"."tracker_projects"("id") ON DELETE CASCADE;
+
+ALTER TABLE ONLY "public"."tracker_entries"
+    ADD CONSTRAINT "tracker_entries_team_id_fkey" FOREIGN KEY ("team_id") REFERENCES "public"."teams"("id") ON DELETE CASCADE;
+
+ALTER TABLE ONLY "public"."tracker_projects"
+    ADD CONSTRAINT "tracker_projects_team_id_fkey" FOREIGN KEY ("team_id") REFERENCES "public"."teams"("id") ON DELETE CASCADE;
+
+ALTER TABLE ONLY "public"."tracker_reports"
+    ADD CONSTRAINT "tracker_reports_team_id_fkey" FOREIGN KEY ("team_id") REFERENCES "public"."teams"("id") ON UPDATE CASCADE ON DELETE CASCADE;
+
 ALTER TABLE ONLY "public"."transaction_categories"
     ADD CONSTRAINT "transaction_categories_team_id_fkey" FOREIGN KEY ("team_id") REFERENCES "public"."teams"("id") ON DELETE CASCADE;
 
--- Transaction Enrichments Category Slug Team ID Foreign Key
 ALTER TABLE ONLY "public"."transaction_enrichments"
     ADD CONSTRAINT "transaction_enrichments_category_slug_team_id_fkey" FOREIGN KEY ("category_slug", "team_id") REFERENCES "public"."transaction_categories"("slug", "team_id") ON DELETE CASCADE;
 
--- Transaction Enrichments Team ID Foreign Key
 ALTER TABLE ONLY "public"."transaction_enrichments"
     ADD CONSTRAINT "transaction_enrichments_team_id_fkey" FOREIGN KEY ("team_id") REFERENCES "public"."teams"("id") ON DELETE CASCADE;
 
--- Transactions Bank Account ID Foreign Key
 ALTER TABLE ONLY "public"."transactions"
     ADD CONSTRAINT "transactions_bank_account_id_fkey" FOREIGN KEY ("bank_account_id") REFERENCES "public"."bank_accounts"("id") ON DELETE CASCADE;
 
--- Transactions Category Slug Team ID Foreign Key
 ALTER TABLE ONLY "public"."transactions"
     ADD CONSTRAINT "transactions_category_slug_team_id_fkey" FOREIGN KEY ("category_slug", "team_id") REFERENCES "public"."transaction_categories"("slug", "team_id");
 
--- User Invites Invited By Foreign Key
 ALTER TABLE ONLY "public"."user_invites"
     ADD CONSTRAINT "user_invites_invited_by_fkey" FOREIGN KEY ("invited_by") REFERENCES "public"."users"("id") ON DELETE CASCADE;
 
--- Users ID Foreign Key
 ALTER TABLE ONLY "public"."users"
     ADD CONSTRAINT "users_id_fkey" FOREIGN KEY ("id") REFERENCES "auth"."users"("id") ON DELETE CASCADE;
 
--- Users on Team Team ID Foreign Key
 ALTER TABLE ONLY "public"."users_on_team"
     ADD CONSTRAINT "users_on_team_team_id_fkey" FOREIGN KEY ("team_id") REFERENCES "public"."teams"("id") ON UPDATE CASCADE ON DELETE CASCADE;
 
--- Users on Team User ID Foreign Key
 ALTER TABLE ONLY "public"."users_on_team"
     ADD CONSTRAINT "users_on_team_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE CASCADE;
 
--- Users Team ID Foreign Key
 ALTER TABLE ONLY "public"."users"
     ADD CONSTRAINT "users_team_id_fkey" FOREIGN KEY ("team_id") REFERENCES "public"."teams"("id") ON DELETE SET NULL;
 
--- Bank Accounts can be created by a member of the team
 CREATE POLICY "Bank Accounts can be created by a member of the team" ON "public"."bank_accounts" FOR INSERT WITH CHECK (("team_id" IN ( SELECT "private"."get_teams_for_authenticated_user"() AS "get_teams_for_authenticated_user")));
 
--- Bank Accounts can be deleted by a member of the team
 CREATE POLICY "Bank Accounts can be deleted by a member of the team" ON "public"."bank_accounts" FOR DELETE USING (("team_id" IN ( SELECT "private"."get_teams_for_authenticated_user"() AS "get_teams_for_authenticated_user")));
 
--- Bank Accounts can be selected by a member of the team
 CREATE POLICY "Bank Accounts can be selected by a member of the team" ON "public"."bank_accounts" FOR SELECT USING (("team_id" IN ( SELECT "private"."get_teams_for_authenticated_user"() AS "get_teams_for_authenticated_user")));
 
--- Bank Accounts can be updated by a member of the team
 CREATE POLICY "Bank Accounts can be updated by a member of the team" ON "public"."bank_accounts" FOR UPDATE USING (("team_id" IN ( SELECT "private"."get_teams_for_authenticated_user"() AS "get_teams_for_authenticated_user")));
 
--- Bank Connections can be created by a member of the team
 CREATE POLICY "Bank Connections can be created by a member of the team" ON "public"."bank_connections" FOR INSERT WITH CHECK (("team_id" IN ( SELECT "private"."get_teams_for_authenticated_user"() AS "get_teams_for_authenticated_user")));
 
--- Bank Connections can be deleted by a member of the team
 CREATE POLICY "Bank Connections can be deleted by a member of the team" ON "public"."bank_connections" FOR DELETE USING (("team_id" IN ( SELECT "private"."get_teams_for_authenticated_user"() AS "get_teams_for_authenticated_user")));
 
--- Bank Connections can be selected by a member of the team
 CREATE POLICY "Bank Connections can be selected by a member of the team" ON "public"."bank_connections" FOR SELECT USING (("team_id" IN ( SELECT "private"."get_teams_for_authenticated_user"() AS "get_teams_for_authenticated_user")));
 
--- Bank Connections can be updated by a member of the team
 CREATE POLICY "Bank Connections can be updated by a member of the team" ON "public"."bank_connections" FOR UPDATE USING (("team_id" IN ( SELECT "private"."get_teams_for_authenticated_user"() AS "get_teams_for_authenticated_user")));
 
--- Enable insert for authenticated users only
 CREATE POLICY "Enable insert for authenticated users only" ON "public"."teams" FOR INSERT TO "authenticated" WITH CHECK (true);
 
--- Enable insert for authenticated users only
 CREATE POLICY "Enable insert for authenticated users only" ON "public"."transaction_enrichments" FOR INSERT TO "authenticated" WITH CHECK (true);
 
--- Enable insert for authenticated users only
 CREATE POLICY "Enable insert for authenticated users only" ON "public"."users_on_team" FOR INSERT TO "authenticated" WITH CHECK (true);
 
--- Enable read access for all users
 CREATE POLICY "Enable read access for all users" ON "public"."users_on_team" FOR SELECT USING (true);
 
--- Enable select for users based on email
 CREATE POLICY "Enable select for users based on email" ON "public"."user_invites" FOR SELECT USING ((("auth"."jwt"() ->> 'email'::"text") = "email"));
 
--- Enable update for authenticated users only
 CREATE POLICY "Enable update for authenticated users only" ON "public"."transaction_enrichments" FOR UPDATE TO "authenticated" WITH CHECK (true);
 
--- Enable updates for users on team
 CREATE POLICY "Enable updates for users on team" ON "public"."users_on_team" FOR UPDATE TO "authenticated" USING (("team_id" IN ( SELECT "private"."get_teams_for_authenticated_user"() AS "get_teams_for_authenticated_user"))) WITH CHECK (("team_id" IN ( SELECT "private"."get_teams_for_authenticated_user"() AS "get_teams_for_authenticated_user")));
 
--- Inbox can be deleted by a member of the team
+CREATE POLICY "Entries can be created by a member of the team" ON "public"."tracker_entries" FOR INSERT TO "authenticated" WITH CHECK (("team_id" IN ( SELECT "private"."get_teams_for_authenticated_user"() AS "get_teams_for_authenticated_user")));
+
+CREATE POLICY "Entries can be deleted by a member of the team" ON "public"."tracker_entries" FOR DELETE TO "authenticated" USING (("team_id" IN ( SELECT "private"."get_teams_for_authenticated_user"() AS "get_teams_for_authenticated_user")));
+
+CREATE POLICY "Entries can be selected by a member of the team" ON "public"."tracker_entries" FOR SELECT TO "authenticated" USING (("team_id" IN ( SELECT "private"."get_teams_for_authenticated_user"() AS "get_teams_for_authenticated_user")));
+
+CREATE POLICY "Entries can be updated by a member of the team" ON "public"."tracker_entries" FOR UPDATE TO "authenticated" WITH CHECK (("team_id" IN ( SELECT "private"."get_teams_for_authenticated_user"() AS "get_teams_for_authenticated_user")));
+
 CREATE POLICY "Inbox can be deleted by a member of the team" ON "public"."inbox" FOR DELETE USING (("team_id" IN ( SELECT "private"."get_teams_for_authenticated_user"() AS "get_teams_for_authenticated_user")));
 
--- Inbox can be selected by a member of the team
 CREATE POLICY "Inbox can be selected by a member of the team" ON "public"."inbox" FOR SELECT USING (("team_id" IN ( SELECT "private"."get_teams_for_authenticated_user"() AS "get_teams_for_authenticated_user")));
 
--- Inbox can be updated by a member of the team
 CREATE POLICY "Inbox can be updated by a member of the team" ON "public"."inbox" FOR UPDATE USING (("team_id" IN ( SELECT "private"."get_teams_for_authenticated_user"() AS "get_teams_for_authenticated_user")));
 
--- Invited users can select team if they are invited.
 CREATE POLICY "Invited users can select team if they are invited." ON "public"."teams" FOR SELECT USING (("id" IN ( SELECT "private"."get_invites_for_authenticated_user"() AS "get_invites_for_authenticated_user")));
 
--- Reports can be created by a member of the team
+CREATE POLICY "Projects can be created by a member of the team" ON "public"."tracker_projects" FOR INSERT TO "authenticated" WITH CHECK (("team_id" IN ( SELECT "private"."get_teams_for_authenticated_user"() AS "get_teams_for_authenticated_user")));
+
+CREATE POLICY "Projects can be deleted by a member of the team" ON "public"."tracker_projects" FOR DELETE TO "authenticated" USING (("team_id" IN ( SELECT "private"."get_teams_for_authenticated_user"() AS "get_teams_for_authenticated_user")));
+
+CREATE POLICY "Projects can be selected by a member of the team" ON "public"."tracker_projects" FOR SELECT TO "authenticated" USING (("team_id" IN ( SELECT "private"."get_teams_for_authenticated_user"() AS "get_teams_for_authenticated_user")));
+
+CREATE POLICY "Projects can be updated by a member of the team" ON "public"."tracker_projects" FOR UPDATE TO "authenticated" USING (("team_id" IN ( SELECT "private"."get_teams_for_authenticated_user"() AS "get_teams_for_authenticated_user")));
+
 CREATE POLICY "Reports can be created by a member of the team" ON "public"."reports" FOR INSERT WITH CHECK (("team_id" IN ( SELECT "private"."get_teams_for_authenticated_user"() AS "get_teams_for_authenticated_user")));
 
--- Reports can be deleted by a member of the team
 CREATE POLICY "Reports can be deleted by a member of the team" ON "public"."reports" FOR DELETE USING (("team_id" IN ( SELECT "private"."get_teams_for_authenticated_user"() AS "get_teams_for_authenticated_user")));
 
--- Reports can be selected by a member of the team
+CREATE POLICY "Reports can be handled by a member of the team" ON "public"."tracker_reports" USING (("team_id" IN ( SELECT "private"."get_teams_for_authenticated_user"() AS "get_teams_for_authenticated_user")));
+
 CREATE POLICY "Reports can be selected by a member of the team" ON "public"."reports" FOR SELECT USING (("team_id" IN ( SELECT "private"."get_teams_for_authenticated_user"() AS "get_teams_for_authenticated_user")));
 
--- Reports can be updated by a member of the team
 CREATE POLICY "Reports can be updated by member of team" ON "public"."reports" FOR UPDATE USING (("team_id" IN ( SELECT "private"."get_teams_for_authenticated_user"() AS "get_teams_for_authenticated_user")));
 
--- Teams can be deleted by a member of the team
 CREATE POLICY "Teams can be deleted by a member of the team" ON "public"."teams" FOR DELETE USING (("id" IN ( SELECT "private"."get_teams_for_authenticated_user"() AS "get_teams_for_authenticated_user")));
 
--- Teams can be selected by a member of the team
 CREATE POLICY "Teams can be selected by a member of the team" ON "public"."teams" FOR SELECT USING (("id" IN ( SELECT "private"."get_teams_for_authenticated_user"() AS "get_teams_for_authenticated_user")));
 
--- Teams can be updated by a member of the team
 CREATE POLICY "Teams can be updated by a member of the team" ON "public"."teams" FOR UPDATE USING (("id" IN ( SELECT "private"."get_teams_for_authenticated_user"() AS "get_teams_for_authenticated_user")));
 
--- Transaction Attachments can be created by a member of the team
 CREATE POLICY "Transaction Attachments can be created by a member of the team" ON "public"."transaction_attachments" FOR INSERT WITH CHECK (("team_id" IN ( SELECT "private"."get_teams_for_authenticated_user"() AS "get_teams_for_authenticated_user")));
 
--- Transaction Attachments can be deleted by a member of the team
 CREATE POLICY "Transaction Attachments can be deleted by a member of the team" ON "public"."transaction_attachments" FOR DELETE USING (("team_id" IN ( SELECT "private"."get_teams_for_authenticated_user"() AS "get_teams_for_authenticated_user")));
 
--- Transaction Attachments can be selected by a member of the team
 CREATE POLICY "Transaction Attachments can be selected by a member of the team" ON "public"."transaction_attachments" FOR SELECT USING (("team_id" IN ( SELECT "private"."get_teams_for_authenticated_user"() AS "get_teams_for_authenticated_user")));
 
--- Transaction Attachments can be updated by a member of the team
 CREATE POLICY "Transaction Attachments can be updated by a member of the team" ON "public"."transaction_attachments" FOR UPDATE USING (("team_id" IN ( SELECT "private"."get_teams_for_authenticated_user"() AS "get_teams_for_authenticated_user")));
 
--- Transactions can be created by a member of the team
 CREATE POLICY "Transactions can be created by a member of the team" ON "public"."transactions" FOR INSERT WITH CHECK (("team_id" IN ( SELECT "private"."get_teams_for_authenticated_user"() AS "get_teams_for_authenticated_user")));
 
--- Transactions can be deleted by a member of the team
 CREATE POLICY "Transactions can be deleted by a member of the team" ON "public"."transactions" FOR DELETE USING (("team_id" IN ( SELECT "private"."get_teams_for_authenticated_user"() AS "get_teams_for_authenticated_user")));
 
--- Transactions can be selected by a member of the team
 CREATE POLICY "Transactions can be selected by a member of the team" ON "public"."transactions" FOR SELECT USING (("team_id" IN ( SELECT "private"."get_teams_for_authenticated_user"() AS "get_teams_for_authenticated_user")));
 
--- Transactions can be updated by a member of the team
 CREATE POLICY "Transactions can be updated by a member of the team" ON "public"."transactions" FOR UPDATE USING (("team_id" IN ( SELECT "private"."get_teams_for_authenticated_user"() AS "get_teams_for_authenticated_user")));
 
--- User Invites can be created by a member of the team
 CREATE POLICY "User Invites can be created by a member of the team" ON "public"."user_invites" FOR INSERT WITH CHECK (("team_id" IN ( SELECT "private"."get_teams_for_authenticated_user"() AS "get_teams_for_authenticated_user")));
 
--- User Invites can be deleted by a member of the team
 CREATE POLICY "User Invites can be deleted by a member of the team" ON "public"."user_invites" FOR DELETE USING (("team_id" IN ( SELECT "private"."get_teams_for_authenticated_user"() AS "get_teams_for_authenticated_user")));
 
--- User Invites can be deleted by invited email
 CREATE POLICY "User Invites can be deleted by invited email" ON "public"."user_invites" FOR DELETE USING ((("auth"."jwt"() ->> 'email'::"text") = "email"));
 
--- User Invites can be selected by a member of the team
 CREATE POLICY "User Invites can be selected by a member of the team" ON "public"."user_invites" FOR SELECT USING (("team_id" IN ( SELECT "private"."get_teams_for_authenticated_user"() AS "get_teams_for_authenticated_user")));
 
--- User Invites can be updated by a member of the team
 CREATE POLICY "User Invites can be updated by a member of the team" ON "public"."user_invites" FOR UPDATE USING (("team_id" IN ( SELECT "private"."get_teams_for_authenticated_user"() AS "get_teams_for_authenticated_user")));
 
--- Users can insert their own profile.
 CREATE POLICY "Users can insert their own profile." ON "public"."users" FOR INSERT WITH CHECK (("auth"."uid"() = "id"));
 
--- Users can select their own profile.
 CREATE POLICY "Users can select their own profile." ON "public"."users" FOR SELECT USING (("auth"."uid"() = "id"));
 
--- Users can select users if they are in the same team
 CREATE POLICY "Users can select users if they are in the same team" ON "public"."users" FOR SELECT TO "authenticated" USING ((EXISTS ( SELECT 1
    FROM "public"."users_on_team"
   WHERE (("users_on_team"."user_id" = ( SELECT "auth"."uid"() AS "uid")) AND ("users_on_team"."team_id" = "users"."team_id")))));
 
--- Users can update their own profile.
 CREATE POLICY "Users can update own profile." ON "public"."users" FOR UPDATE USING (("auth"."uid"() = "id"));
 
--- Users on team can be deleted by a member of the team
 CREATE POLICY "Users on team can be deleted by a member of the team" ON "public"."users_on_team" FOR DELETE USING (("team_id" IN ( SELECT "private"."get_teams_for_authenticated_user"() AS "get_teams_for_authenticated_user")));
 
--- Users on team can manage categories
 CREATE POLICY "Users on team can manage categories" ON "public"."transaction_categories" USING (("team_id" IN ( SELECT "private"."get_teams_for_authenticated_user"() AS "get_teams_for_authenticated_user")));
 
--- Enable row level security for all tables
 ALTER TABLE "public"."bank_accounts" ENABLE ROW LEVEL SECURITY;
 
--- Enable row level security for bank connections
 ALTER TABLE "public"."bank_connections" ENABLE ROW LEVEL SECURITY;
 
--- Enable row level security for inbox
 ALTER TABLE "public"."inbox" ENABLE ROW LEVEL SECURITY;
 
--- Enable row level security for reports
 ALTER TABLE "public"."reports" ENABLE ROW LEVEL SECURITY;
 
--- Enable row level security for teams
 ALTER TABLE "public"."teams" ENABLE ROW LEVEL SECURITY;
 
--- Enable row level security for transaction attachments
+ALTER TABLE "public"."tracker_entries" ENABLE ROW LEVEL SECURITY;
+
+ALTER TABLE "public"."tracker_projects" ENABLE ROW LEVEL SECURITY;
+
+ALTER TABLE "public"."tracker_reports" ENABLE ROW LEVEL SECURITY;
+
 ALTER TABLE "public"."transaction_attachments" ENABLE ROW LEVEL SECURITY;
 
--- Enable row level security for transaction categories
 ALTER TABLE "public"."transaction_categories" ENABLE ROW LEVEL SECURITY;
 
--- Enable row level security for transaction enrichments
 ALTER TABLE "public"."transaction_enrichments" ENABLE ROW LEVEL SECURITY;
 
--- Enable row level security for transactions
 ALTER TABLE "public"."transactions" ENABLE ROW LEVEL SECURITY;
 
--- Enable row level security for user invites
 ALTER TABLE "public"."user_invites" ENABLE ROW LEVEL SECURITY;
 
--- Enable row level security for users
 ALTER TABLE "public"."users" ENABLE ROW LEVEL SECURITY;
 
--- Enable row level security for users on team
 ALTER TABLE "public"."users_on_team" ENABLE ROW LEVEL SECURITY;
 
--- Enable publication for supabase realtime
 ALTER PUBLICATION "supabase_realtime" OWNER TO "postgres";
 
--- Add inbox to supabase realtime publication
 ALTER PUBLICATION "supabase_realtime" ADD TABLE ONLY "public"."inbox";
 
--- Grant usage on public schema to all roles
 GRANT USAGE ON SCHEMA "public" TO "postgres";
 GRANT USAGE ON SCHEMA "public" TO "anon";
 GRANT USAGE ON SCHEMA "public" TO "authenticated";
 GRANT USAGE ON SCHEMA "public" TO "service_role";
 
--- Grant all on gtrgm functions to all roles
 GRANT ALL ON FUNCTION "public"."gtrgm_in"("cstring") TO "postgres";
 GRANT ALL ON FUNCTION "public"."gtrgm_in"("cstring") TO "anon";
 GRANT ALL ON FUNCTION "public"."gtrgm_in"("cstring") TO "authenticated";
 GRANT ALL ON FUNCTION "public"."gtrgm_in"("cstring") TO "service_role";
 
--- Grant all on gtrgm_out to all roles
 GRANT ALL ON FUNCTION "public"."gtrgm_out"("public"."gtrgm") TO "postgres";
 GRANT ALL ON FUNCTION "public"."gtrgm_out"("public"."gtrgm") TO "anon";
 GRANT ALL ON FUNCTION "public"."gtrgm_out"("public"."gtrgm") TO "authenticated";
 GRANT ALL ON FUNCTION "public"."gtrgm_out"("public"."gtrgm") TO "service_role";
 
--- Grant all on transactions to all roles
 GRANT ALL ON TABLE "public"."transactions" TO "anon";
 GRANT ALL ON TABLE "public"."transactions" TO "authenticated";
 GRANT ALL ON TABLE "public"."transactions" TO "service_role";
 
--- Grant all on amount_text to all roles
 GRANT ALL ON FUNCTION "public"."amount_text"("public"."transactions") TO "anon";
 GRANT ALL ON FUNCTION "public"."amount_text"("public"."transactions") TO "authenticated";
 GRANT ALL ON FUNCTION "public"."amount_text"("public"."transactions") TO "service_role";
 
--- Grant all on calculated_vat to all roles
 GRANT ALL ON FUNCTION "public"."calculated_vat"("public"."transactions") TO "anon";
 GRANT ALL ON FUNCTION "public"."calculated_vat"("public"."transactions") TO "authenticated";
 GRANT ALL ON FUNCTION "public"."calculated_vat"("public"."transactions") TO "service_role";
 
--- Grant all on create_team to all roles
 GRANT ALL ON FUNCTION "public"."create_team"("name" character varying) TO "anon";
 GRANT ALL ON FUNCTION "public"."create_team"("name" character varying) TO "authenticated";
 GRANT ALL ON FUNCTION "public"."create_team"("name" character varying) TO "service_role";
 
--- Grant all on extract_product_names to all roles
 GRANT ALL ON FUNCTION "public"."extract_product_names"("products_json" "json") TO "anon";
 GRANT ALL ON FUNCTION "public"."extract_product_names"("products_json" "json") TO "authenticated";
 GRANT ALL ON FUNCTION "public"."extract_product_names"("products_json" "json") TO "service_role";
 
--- Grant all on generate_hmac to all roles
 GRANT ALL ON FUNCTION "public"."generate_hmac"("secret_key" "text", "message" "text") TO "anon";
 GRANT ALL ON FUNCTION "public"."generate_hmac"("secret_key" "text", "message" "text") TO "authenticated";
 GRANT ALL ON FUNCTION "public"."generate_hmac"("secret_key" "text", "message" "text") TO "service_role";
 
--- Grant all on generate_id to all roles
 GRANT ALL ON FUNCTION "public"."generate_id"("size" integer) TO "anon";
 GRANT ALL ON FUNCTION "public"."generate_id"("size" integer) TO "authenticated";
 GRANT ALL ON FUNCTION "public"."generate_id"("size" integer) TO "service_role";
 
--- Grant all on generate_inbox to all roles
 GRANT ALL ON FUNCTION "public"."generate_inbox"("size" integer) TO "anon";
 GRANT ALL ON FUNCTION "public"."generate_inbox"("size" integer) TO "authenticated";
 GRANT ALL ON FUNCTION "public"."generate_inbox"("size" integer) TO "service_role";
 
--- Grant all on generate_inbox_fts to all roles
 GRANT ALL ON FUNCTION "public"."generate_inbox_fts"("display_name" "text", "products_json" "json") TO "anon";
 GRANT ALL ON FUNCTION "public"."generate_inbox_fts"("display_name" "text", "products_json" "json") TO "authenticated";
 GRANT ALL ON FUNCTION "public"."generate_inbox_fts"("display_name" "text", "products_json" "json") TO "service_role";
 
--- Grant all on generate_inbox_fts to all roles
 GRANT ALL ON FUNCTION "public"."generate_inbox_fts"("display_name_text" "text", "product_names" "text") TO "anon";
 GRANT ALL ON FUNCTION "public"."generate_inbox_fts"("display_name_text" "text", "product_names" "text") TO "authenticated";
 GRANT ALL ON FUNCTION "public"."generate_inbox_fts"("display_name_text" "text", "product_names" "text") TO "service_role";
 
--- Grant all on generate_inbox_fts to all roles
 GRANT ALL ON FUNCTION "public"."generate_inbox_fts"("display_name_text" "text", "product_names" "text", "amount" numeric, "due_date" "date") TO "anon";
 GRANT ALL ON FUNCTION "public"."generate_inbox_fts"("display_name_text" "text", "product_names" "text", "amount" numeric, "due_date" "date") TO "authenticated";
 GRANT ALL ON FUNCTION "public"."generate_inbox_fts"("display_name_text" "text", "product_names" "text", "amount" numeric, "due_date" "date") TO "service_role";
 
--- Grant all on generate_slug_from_name to all roles
 GRANT ALL ON FUNCTION "public"."generate_slug_from_name"() TO "anon";
 GRANT ALL ON FUNCTION "public"."generate_slug_from_name"() TO "authenticated";
 GRANT ALL ON FUNCTION "public"."generate_slug_from_name"() TO "service_role";
 
--- Grant all on get_bank_account_currencies to all roles
 GRANT ALL ON FUNCTION "public"."get_bank_account_currencies"("team_id" "uuid") TO "anon";
 GRANT ALL ON FUNCTION "public"."get_bank_account_currencies"("team_id" "uuid") TO "authenticated";
 GRANT ALL ON FUNCTION "public"."get_bank_account_currencies"("team_id" "uuid") TO "service_role";
 
--- Grant all on get_burn_rate to all roles
 GRANT ALL ON FUNCTION "public"."get_burn_rate"("team_id" "uuid", "date_from" "date", "date_to" "date", "currency" "text") TO "anon";
 GRANT ALL ON FUNCTION "public"."get_burn_rate"("team_id" "uuid", "date_from" "date", "date_to" "date", "currency" "text") TO "authenticated";
 GRANT ALL ON FUNCTION "public"."get_burn_rate"("team_id" "uuid", "date_from" "date", "date_to" "date", "currency" "text") TO "service_role";
 
--- Grant all on get_current_burn_rate to all roles
 GRANT ALL ON FUNCTION "public"."get_current_burn_rate"("team_id" "uuid", "currency" "text") TO "anon";
 GRANT ALL ON FUNCTION "public"."get_current_burn_rate"("team_id" "uuid", "currency" "text") TO "authenticated";
 GRANT ALL ON FUNCTION "public"."get_current_burn_rate"("team_id" "uuid", "currency" "text") TO "service_role";
 
--- Grant all on get_profit to all roles
 GRANT ALL ON FUNCTION "public"."get_profit"("team_id" "uuid", "date_from" "date", "date_to" "date", "currency" "text") TO "anon";
 GRANT ALL ON FUNCTION "public"."get_profit"("team_id" "uuid", "date_from" "date", "date_to" "date", "currency" "text") TO "authenticated";
 GRANT ALL ON FUNCTION "public"."get_profit"("team_id" "uuid", "date_from" "date", "date_to" "date", "currency" "text") TO "service_role";
 
--- Grant all on get_revenue to all roles
 GRANT ALL ON FUNCTION "public"."get_revenue"("team_id" "uuid", "date_from" "date", "date_to" "date", "currency" "text") TO "anon";
 GRANT ALL ON FUNCTION "public"."get_revenue"("team_id" "uuid", "date_from" "date", "date_to" "date", "currency" "text") TO "authenticated";
 GRANT ALL ON FUNCTION "public"."get_revenue"("team_id" "uuid", "date_from" "date", "date_to" "date", "currency" "text") TO "service_role";
 
--- Grant all on get_runway to all roles
 GRANT ALL ON FUNCTION "public"."get_runway"("team_id" "uuid", "date_from" "date", "date_to" "date", "currency" "text") TO "anon";
 GRANT ALL ON FUNCTION "public"."get_runway"("team_id" "uuid", "date_from" "date", "date_to" "date", "currency" "text") TO "authenticated";
 GRANT ALL ON FUNCTION "public"."get_runway"("team_id" "uuid", "date_from" "date", "date_to" "date", "currency" "text") TO "service_role";
 
--- Grant all on get_spending to all roles
 GRANT ALL ON FUNCTION "public"."get_spending"("team_id" "uuid", "date_from" "date", "date_to" "date", "currency_target" "text") TO "anon";
 GRANT ALL ON FUNCTION "public"."get_spending"("team_id" "uuid", "date_from" "date", "date_to" "date", "currency_target" "text") TO "authenticated";
 GRANT ALL ON FUNCTION "public"."get_spending"("team_id" "uuid", "date_from" "date", "date_to" "date", "currency_target" "text") TO "service_role";
 
--- Grant all on get_spending_v2 to all roles
 GRANT ALL ON FUNCTION "public"."get_spending_v2"("team_id" "uuid", "date_from" "date", "date_to" "date", "currency_target" "text") TO "anon";
 GRANT ALL ON FUNCTION "public"."get_spending_v2"("team_id" "uuid", "date_from" "date", "date_to" "date", "currency_target" "text") TO "authenticated";
 GRANT ALL ON FUNCTION "public"."get_spending_v2"("team_id" "uuid", "date_from" "date", "date_to" "date", "currency_target" "text") TO "service_role";
 
--- Grant all on get_total_balance to all roles
 GRANT ALL ON FUNCTION "public"."get_total_balance"("team_id" "uuid", "currency" "text") TO "anon";
 GRANT ALL ON FUNCTION "public"."get_total_balance"("team_id" "uuid", "currency" "text") TO "authenticated";
 GRANT ALL ON FUNCTION "public"."get_total_balance"("team_id" "uuid", "currency" "text") TO "service_role";
 
--- Grant all on gin_extract_query_trgm to all roles
 GRANT ALL ON FUNCTION "public"."gin_extract_query_trgm"("text", "internal", smallint, "internal", "internal", "internal", "internal") TO "postgres";
 GRANT ALL ON FUNCTION "public"."gin_extract_query_trgm"("text", "internal", smallint, "internal", "internal", "internal", "internal") TO "anon";
 GRANT ALL ON FUNCTION "public"."gin_extract_query_trgm"("text", "internal", smallint, "internal", "internal", "internal", "internal") TO "authenticated";
 GRANT ALL ON FUNCTION "public"."gin_extract_query_trgm"("text", "internal", smallint, "internal", "internal", "internal", "internal") TO "service_role";
 
--- Grant all on gin_extract_value_trgm to all roles
 GRANT ALL ON FUNCTION "public"."gin_extract_value_trgm"("text", "internal") TO "postgres";
 GRANT ALL ON FUNCTION "public"."gin_extract_value_trgm"("text", "internal") TO "anon";
 GRANT ALL ON FUNCTION "public"."gin_extract_value_trgm"("text", "internal") TO "authenticated";
 GRANT ALL ON FUNCTION "public"."gin_extract_value_trgm"("text", "internal") TO "service_role";
 
--- Grant all on gin_trgm_consistent to all roles
 GRANT ALL ON FUNCTION "public"."gin_trgm_consistent"("internal", smallint, "text", integer, "internal", "internal", "internal", "internal") TO "postgres";
 GRANT ALL ON FUNCTION "public"."gin_trgm_consistent"("internal", smallint, "text", integer, "internal", "internal", "internal", "internal") TO "anon";
 GRANT ALL ON FUNCTION "public"."gin_trgm_consistent"("internal", smallint, "text", integer, "internal", "internal", "internal", "internal") TO "authenticated";
 GRANT ALL ON FUNCTION "public"."gin_trgm_consistent"("internal", smallint, "text", integer, "internal", "internal", "internal", "internal") TO "service_role";
 
--- Grant all on gin_trgm_triconsistent to all roles
 GRANT ALL ON FUNCTION "public"."gin_trgm_triconsistent"("internal", smallint, "text", integer, "internal", "internal", "internal") TO "postgres";
 GRANT ALL ON FUNCTION "public"."gin_trgm_triconsistent"("internal", smallint, "text", integer, "internal", "internal", "internal") TO "anon";
 GRANT ALL ON FUNCTION "public"."gin_trgm_triconsistent"("internal", smallint, "text", integer, "internal", "internal", "internal") TO "authenticated";
 GRANT ALL ON FUNCTION "public"."gin_trgm_triconsistent"("internal", smallint, "text", integer, "internal", "internal", "internal") TO "service_role";
 
--- Grant all on gtrgm_compress to all roles
 GRANT ALL ON FUNCTION "public"."gtrgm_compress"("internal") TO "postgres";
 GRANT ALL ON FUNCTION "public"."gtrgm_compress"("internal") TO "anon";
 GRANT ALL ON FUNCTION "public"."gtrgm_compress"("internal") TO "authenticated";
 GRANT ALL ON FUNCTION "public"."gtrgm_compress"("internal") TO "service_role";
 
--- Grant all on gtrgm_consistent to all roles
 GRANT ALL ON FUNCTION "public"."gtrgm_consistent"("internal", "text", smallint, "oid", "internal") TO "postgres";
 GRANT ALL ON FUNCTION "public"."gtrgm_consistent"("internal", "text", smallint, "oid", "internal") TO "anon";
 GRANT ALL ON FUNCTION "public"."gtrgm_consistent"("internal", "text", smallint, "oid", "internal") TO "authenticated";
 GRANT ALL ON FUNCTION "public"."gtrgm_consistent"("internal", "text", smallint, "oid", "internal") TO "service_role";
 
--- Grant all on gtrgm_decompress to all roles
 GRANT ALL ON FUNCTION "public"."gtrgm_decompress"("internal") TO "postgres";
 GRANT ALL ON FUNCTION "public"."gtrgm_decompress"("internal") TO "anon";
 GRANT ALL ON FUNCTION "public"."gtrgm_decompress"("internal") TO "authenticated";
 GRANT ALL ON FUNCTION "public"."gtrgm_decompress"("internal") TO "service_role";
 
--- Grant all on gtrgm_distance to all roles
 GRANT ALL ON FUNCTION "public"."gtrgm_distance"("internal", "text", smallint, "oid", "internal") TO "postgres";
 GRANT ALL ON FUNCTION "public"."gtrgm_distance"("internal", "text", smallint, "oid", "internal") TO "anon";
 GRANT ALL ON FUNCTION "public"."gtrgm_distance"("internal", "text", smallint, "oid", "internal") TO "authenticated";
 GRANT ALL ON FUNCTION "public"."gtrgm_distance"("internal", "text", smallint, "oid", "internal") TO "service_role";
 
--- Grant all on gtrgm_options to all roles
 GRANT ALL ON FUNCTION "public"."gtrgm_options"("internal") TO "postgres";
 GRANT ALL ON FUNCTION "public"."gtrgm_options"("internal") TO "anon";
 GRANT ALL ON FUNCTION "public"."gtrgm_options"("internal") TO "authenticated";
 GRANT ALL ON FUNCTION "public"."gtrgm_options"("internal") TO "service_role";
 
--- Grant all on gtrgm_penalty to all roles
 GRANT ALL ON FUNCTION "public"."gtrgm_penalty"("internal", "internal", "internal") TO "postgres";
 GRANT ALL ON FUNCTION "public"."gtrgm_penalty"("internal", "internal", "internal") TO "anon";
 GRANT ALL ON FUNCTION "public"."gtrgm_penalty"("internal", "internal", "internal") TO "authenticated";
 GRANT ALL ON FUNCTION "public"."gtrgm_penalty"("internal", "internal", "internal") TO "service_role";
 
--- Grant all on gtrgm_picksplit to all roles
 GRANT ALL ON FUNCTION "public"."gtrgm_picksplit"("internal", "internal") TO "postgres";
 GRANT ALL ON FUNCTION "public"."gtrgm_picksplit"("internal", "internal") TO "anon";
 GRANT ALL ON FUNCTION "public"."gtrgm_picksplit"("internal", "internal") TO "authenticated";
 GRANT ALL ON FUNCTION "public"."gtrgm_picksplit"("internal", "internal") TO "service_role";
 
--- Grant all on gtrgm_same to all roles
 GRANT ALL ON FUNCTION "public"."gtrgm_same"("public"."gtrgm", "public"."gtrgm", "internal") TO "postgres";
 GRANT ALL ON FUNCTION "public"."gtrgm_same"("public"."gtrgm", "public"."gtrgm", "internal") TO "anon";
 GRANT ALL ON FUNCTION "public"."gtrgm_same"("public"."gtrgm", "public"."gtrgm", "internal") TO "authenticated";
 GRANT ALL ON FUNCTION "public"."gtrgm_same"("public"."gtrgm", "public"."gtrgm", "internal") TO "service_role";
 
--- Grant all on gtrgm_union to all roles
 GRANT ALL ON FUNCTION "public"."gtrgm_union"("internal", "internal") TO "postgres";
 GRANT ALL ON FUNCTION "public"."gtrgm_union"("internal", "internal") TO "anon";
 GRANT ALL ON FUNCTION "public"."gtrgm_union"("internal", "internal") TO "authenticated";
 GRANT ALL ON FUNCTION "public"."gtrgm_union"("internal", "internal") TO "service_role";
 
--- Grant all on handle_new_user to all roles
 GRANT ALL ON FUNCTION "public"."handle_new_user"() TO "anon";
 GRANT ALL ON FUNCTION "public"."handle_new_user"() TO "authenticated";
 GRANT ALL ON FUNCTION "public"."handle_new_user"() TO "service_role";
 
--- Grant all on inbox to all roles
 GRANT ALL ON TABLE "public"."inbox" TO "anon";
 GRANT ALL ON TABLE "public"."inbox" TO "authenticated";
 GRANT ALL ON TABLE "public"."inbox" TO "service_role";
 
--- Grant all on inbox_amount_text to all roles
 GRANT ALL ON FUNCTION "public"."inbox_amount_text"("public"."inbox") TO "anon";
 GRANT ALL ON FUNCTION "public"."inbox_amount_text"("public"."inbox") TO "authenticated";
 GRANT ALL ON FUNCTION "public"."inbox_amount_text"("public"."inbox") TO "service_role";
 
--- Grant all on insert_system_categories to all roles
 GRANT ALL ON FUNCTION "public"."insert_system_categories"() TO "anon";
 GRANT ALL ON FUNCTION "public"."insert_system_categories"() TO "authenticated";
 GRANT ALL ON FUNCTION "public"."insert_system_categories"() TO "service_role";
 
--- Grant all on is_fulfilled to all roles
 GRANT ALL ON FUNCTION "public"."is_fulfilled"("public"."transactions") TO "anon";
 GRANT ALL ON FUNCTION "public"."is_fulfilled"("public"."transactions") TO "authenticated";
 GRANT ALL ON FUNCTION "public"."is_fulfilled"("public"."transactions") TO "service_role";
 
--- Grant all on nanoid to all roles
 GRANT ALL ON FUNCTION "public"."nanoid"("size" integer, "alphabet" "text", "additionalbytesfactor" double precision) TO "anon";
 GRANT ALL ON FUNCTION "public"."nanoid"("size" integer, "alphabet" "text", "additionalbytesfactor" double precision) TO "authenticated";
 GRANT ALL ON FUNCTION "public"."nanoid"("size" integer, "alphabet" "text", "additionalbytesfactor" double precision) TO "service_role";
 
--- Grant all on nanoid_optimized to all roles
 GRANT ALL ON FUNCTION "public"."nanoid_optimized"("size" integer, "alphabet" "text", "mask" integer, "step" integer) TO "anon";
 GRANT ALL ON FUNCTION "public"."nanoid_optimized"("size" integer, "alphabet" "text", "mask" integer, "step" integer) TO "authenticated";
 GRANT ALL ON FUNCTION "public"."nanoid_optimized"("size" integer, "alphabet" "text", "mask" integer, "step" integer) TO "service_role";
 
--- Grant all on set_limit to all roles
+GRANT ALL ON TABLE "public"."tracker_entries" TO "anon";
+GRANT ALL ON TABLE "public"."tracker_entries" TO "authenticated";
+GRANT ALL ON TABLE "public"."tracker_entries" TO "service_role";
+
+GRANT ALL ON FUNCTION "public"."project_members"("public"."tracker_entries") TO "anon";
+GRANT ALL ON FUNCTION "public"."project_members"("public"."tracker_entries") TO "authenticated";
+GRANT ALL ON FUNCTION "public"."project_members"("public"."tracker_entries") TO "service_role";
+
+GRANT ALL ON TABLE "public"."tracker_projects" TO "anon";
+GRANT ALL ON TABLE "public"."tracker_projects" TO "authenticated";
+GRANT ALL ON TABLE "public"."tracker_projects" TO "service_role";
+
+GRANT ALL ON FUNCTION "public"."project_members"("public"."tracker_projects") TO "anon";
+GRANT ALL ON FUNCTION "public"."project_members"("public"."tracker_projects") TO "authenticated";
+GRANT ALL ON FUNCTION "public"."project_members"("public"."tracker_projects") TO "service_role";
+
 GRANT ALL ON FUNCTION "public"."set_limit"(real) TO "postgres";
 GRANT ALL ON FUNCTION "public"."set_limit"(real) TO "anon";
 GRANT ALL ON FUNCTION "public"."set_limit"(real) TO "authenticated";
 GRANT ALL ON FUNCTION "public"."set_limit"(real) TO "service_role";
 
--- Grant all on show_limit to all roles
 GRANT ALL ON FUNCTION "public"."show_limit"() TO "postgres";
 GRANT ALL ON FUNCTION "public"."show_limit"() TO "anon";
 GRANT ALL ON FUNCTION "public"."show_limit"() TO "authenticated";
 GRANT ALL ON FUNCTION "public"."show_limit"() TO "service_role";
 
--- Grant all on show_trgm to all roles
 GRANT ALL ON FUNCTION "public"."show_trgm"("text") TO "postgres";
 GRANT ALL ON FUNCTION "public"."show_trgm"("text") TO "anon";
 GRANT ALL ON FUNCTION "public"."show_trgm"("text") TO "authenticated";
 GRANT ALL ON FUNCTION "public"."show_trgm"("text") TO "service_role";
 
--- Grant all on similarity to all roles
 GRANT ALL ON FUNCTION "public"."similarity"("text", "text") TO "postgres";
 GRANT ALL ON FUNCTION "public"."similarity"("text", "text") TO "anon";
 GRANT ALL ON FUNCTION "public"."similarity"("text", "text") TO "authenticated";
 GRANT ALL ON FUNCTION "public"."similarity"("text", "text") TO "service_role";
 
--- Grant all on similarity_dist to all roles
 GRANT ALL ON FUNCTION "public"."similarity_dist"("text", "text") TO "postgres";
 GRANT ALL ON FUNCTION "public"."similarity_dist"("text", "text") TO "anon";
 GRANT ALL ON FUNCTION "public"."similarity_dist"("text", "text") TO "authenticated";
 GRANT ALL ON FUNCTION "public"."similarity_dist"("text", "text") TO "service_role";
 
--- Grant all on similarity_op to all roles
 GRANT ALL ON FUNCTION "public"."similarity_op"("text", "text") TO "postgres";
 GRANT ALL ON FUNCTION "public"."similarity_op"("text", "text") TO "anon";
 GRANT ALL ON FUNCTION "public"."similarity_op"("text", "text") TO "authenticated";
 GRANT ALL ON FUNCTION "public"."similarity_op"("text", "text") TO "service_role";
 
--- Grant all on slugify to all roles
 GRANT ALL ON FUNCTION "public"."slugify"("value" "text") TO "anon";
 GRANT ALL ON FUNCTION "public"."slugify"("value" "text") TO "authenticated";
 GRANT ALL ON FUNCTION "public"."slugify"("value" "text") TO "service_role";
 
--- Grant all on strict_word_similarity to all roles
 GRANT ALL ON FUNCTION "public"."strict_word_similarity"("text", "text") TO "postgres";
 GRANT ALL ON FUNCTION "public"."strict_word_similarity"("text", "text") TO "anon";
 GRANT ALL ON FUNCTION "public"."strict_word_similarity"("text", "text") TO "authenticated";
 GRANT ALL ON FUNCTION "public"."strict_word_similarity"("text", "text") TO "service_role";
 
--- Grant all on strict_word_similarity_commutator_op to all roles
 GRANT ALL ON FUNCTION "public"."strict_word_similarity_commutator_op"("text", "text") TO "postgres";
 GRANT ALL ON FUNCTION "public"."strict_word_similarity_commutator_op"("text", "text") TO "anon";
 GRANT ALL ON FUNCTION "public"."strict_word_similarity_commutator_op"("text", "text") TO "authenticated";
 GRANT ALL ON FUNCTION "public"."strict_word_similarity_commutator_op"("text", "text") TO "service_role";
 
--- Grant all on strict_word_similarity_dist_commutator_op to all roles
 GRANT ALL ON FUNCTION "public"."strict_word_similarity_dist_commutator_op"("text", "text") TO "postgres";
 GRANT ALL ON FUNCTION "public"."strict_word_similarity_dist_commutator_op"("text", "text") TO "anon";
 GRANT ALL ON FUNCTION "public"."strict_word_similarity_dist_commutator_op"("text", "text") TO "authenticated";
 GRANT ALL ON FUNCTION "public"."strict_word_similarity_dist_commutator_op"("text", "text") TO "service_role";
 
--- Grant all on strict_word_similarity_dist_op to all roles
 GRANT ALL ON FUNCTION "public"."strict_word_similarity_dist_op"("text", "text") TO "postgres";
 GRANT ALL ON FUNCTION "public"."strict_word_similarity_dist_op"("text", "text") TO "anon";
 GRANT ALL ON FUNCTION "public"."strict_word_similarity_dist_op"("text", "text") TO "authenticated";
 GRANT ALL ON FUNCTION "public"."strict_word_similarity_dist_op"("text", "text") TO "service_role";
 
--- Grant all on strict_word_similarity_op to all roles
 GRANT ALL ON FUNCTION "public"."strict_word_similarity_op"("text", "text") TO "postgres";
 GRANT ALL ON FUNCTION "public"."strict_word_similarity_op"("text", "text") TO "anon";
 GRANT ALL ON FUNCTION "public"."strict_word_similarity_op"("text", "text") TO "authenticated";
 GRANT ALL ON FUNCTION "public"."strict_word_similarity_op"("text", "text") TO "service_role";
 
--- Grant all on unaccent to all roles
+GRANT ALL ON FUNCTION "public"."total_duration"("public"."tracker_projects") TO "anon";
+GRANT ALL ON FUNCTION "public"."total_duration"("public"."tracker_projects") TO "authenticated";
+GRANT ALL ON FUNCTION "public"."total_duration"("public"."tracker_projects") TO "service_role";
+
 GRANT ALL ON FUNCTION "public"."unaccent"("text") TO "postgres";
 GRANT ALL ON FUNCTION "public"."unaccent"("text") TO "anon";
 GRANT ALL ON FUNCTION "public"."unaccent"("text") TO "authenticated";
 GRANT ALL ON FUNCTION "public"."unaccent"("text") TO "service_role";
 
--- Grant all on unaccent to all roles
 GRANT ALL ON FUNCTION "public"."unaccent"("regdictionary", "text") TO "postgres";
 GRANT ALL ON FUNCTION "public"."unaccent"("regdictionary", "text") TO "anon";
 GRANT ALL ON FUNCTION "public"."unaccent"("regdictionary", "text") TO "authenticated";
 GRANT ALL ON FUNCTION "public"."unaccent"("regdictionary", "text") TO "service_role";
 
--- Grant all on unaccent_init to all roles
 GRANT ALL ON FUNCTION "public"."unaccent_init"("internal") TO "postgres";
 GRANT ALL ON FUNCTION "public"."unaccent_init"("internal") TO "anon";
 GRANT ALL ON FUNCTION "public"."unaccent_init"("internal") TO "authenticated";
 GRANT ALL ON FUNCTION "public"."unaccent_init"("internal") TO "service_role";
 
--- Grant all on unaccent_lexize to all roles
 GRANT ALL ON FUNCTION "public"."unaccent_lexize"("internal", "internal", "internal", "internal") TO "postgres";
 GRANT ALL ON FUNCTION "public"."unaccent_lexize"("internal", "internal", "internal", "internal") TO "anon";
 GRANT ALL ON FUNCTION "public"."unaccent_lexize"("internal", "internal", "internal", "internal") TO "authenticated";
 GRANT ALL ON FUNCTION "public"."unaccent_lexize"("internal", "internal", "internal", "internal") TO "service_role";
 
--- Grant all on update_enrich_transaction to all roles
 GRANT ALL ON FUNCTION "public"."update_enrich_transaction"() TO "anon";
 GRANT ALL ON FUNCTION "public"."update_enrich_transaction"() TO "authenticated";
 GRANT ALL ON FUNCTION "public"."update_enrich_transaction"() TO "service_role";
 
--- Grant all on update_transactions_on_category_delete to all roles
 GRANT ALL ON FUNCTION "public"."update_transactions_on_category_delete"() TO "anon";
 GRANT ALL ON FUNCTION "public"."update_transactions_on_category_delete"() TO "authenticated";
 GRANT ALL ON FUNCTION "public"."update_transactions_on_category_delete"() TO "service_role";
 
--- Grant all on upsert_transaction_enrichment to all roles
 GRANT ALL ON FUNCTION "public"."upsert_transaction_enrichment"() TO "anon";
 GRANT ALL ON FUNCTION "public"."upsert_transaction_enrichment"() TO "authenticated";
 GRANT ALL ON FUNCTION "public"."upsert_transaction_enrichment"() TO "service_role";
 
--- Grant all on webhook to all roles
 GRANT ALL ON FUNCTION "public"."webhook"() TO "anon";
 GRANT ALL ON FUNCTION "public"."webhook"() TO "authenticated";
 GRANT ALL ON FUNCTION "public"."webhook"() TO "service_role";
 
--- Grant all on word_similarity to all roles
 GRANT ALL ON FUNCTION "public"."word_similarity"("text", "text") TO "postgres";
 GRANT ALL ON FUNCTION "public"."word_similarity"("text", "text") TO "anon";
 GRANT ALL ON FUNCTION "public"."word_similarity"("text", "text") TO "authenticated";
 GRANT ALL ON FUNCTION "public"."word_similarity"("text", "text") TO "service_role";
 
--- Grant all on word_similarity_commutator_op to all roles
 GRANT ALL ON FUNCTION "public"."word_similarity_commutator_op"("text", "text") TO "postgres";
 GRANT ALL ON FUNCTION "public"."word_similarity_commutator_op"("text", "text") TO "anon";
 GRANT ALL ON FUNCTION "public"."word_similarity_commutator_op"("text", "text") TO "authenticated";
 GRANT ALL ON FUNCTION "public"."word_similarity_commutator_op"("text", "text") TO "service_role";
 
--- Grant all on word_similarity_dist_commutator_op to all roles
 GRANT ALL ON FUNCTION "public"."word_similarity_dist_commutator_op"("text", "text") TO "postgres";
 GRANT ALL ON FUNCTION "public"."word_similarity_dist_commutator_op"("text", "text") TO "anon";
 GRANT ALL ON FUNCTION "public"."word_similarity_dist_commutator_op"("text", "text") TO "authenticated";
 GRANT ALL ON FUNCTION "public"."word_similarity_dist_commutator_op"("text", "text") TO "service_role";
 
--- Grant all on word_similarity_dist_op to all roles
 GRANT ALL ON FUNCTION "public"."word_similarity_dist_op"("text", "text") TO "postgres";
 GRANT ALL ON FUNCTION "public"."word_similarity_dist_op"("text", "text") TO "anon";
 GRANT ALL ON FUNCTION "public"."word_similarity_dist_op"("text", "text") TO "authenticated";
 GRANT ALL ON FUNCTION "public"."word_similarity_dist_op"("text", "text") TO "service_role";
 
--- Grant all on word_similarity_op to all roles
 GRANT ALL ON FUNCTION "public"."word_similarity_op"("text", "text") TO "postgres";
 GRANT ALL ON FUNCTION "public"."word_similarity_op"("text", "text") TO "anon";
 GRANT ALL ON FUNCTION "public"."word_similarity_op"("text", "text") TO "authenticated";
 GRANT ALL ON FUNCTION "public"."word_similarity_op"("text", "text") TO "service_role";
 
--- Grant all on bank_accounts to all roles
 GRANT ALL ON TABLE "public"."bank_accounts" TO "anon";
 GRANT ALL ON TABLE "public"."bank_accounts" TO "authenticated";
 GRANT ALL ON TABLE "public"."bank_accounts" TO "service_role";
 
--- Grant all on bank_connections to all roles
 GRANT ALL ON TABLE "public"."bank_connections" TO "anon";
 GRANT ALL ON TABLE "public"."bank_connections" TO "authenticated";
 GRANT ALL ON TABLE "public"."bank_connections" TO "service_role";
 
--- Grant all on reports to all roles
 GRANT ALL ON TABLE "public"."reports" TO "anon";
 GRANT ALL ON TABLE "public"."reports" TO "authenticated";
 GRANT ALL ON TABLE "public"."reports" TO "service_role";
 
--- Grant all on teams to all roles
 GRANT ALL ON TABLE "public"."teams" TO "anon";
 GRANT ALL ON TABLE "public"."teams" TO "authenticated";
 GRANT ALL ON TABLE "public"."teams" TO "service_role";
 
--- Grant all on transaction_attachments to all roles
+GRANT ALL ON TABLE "public"."tracker_reports" TO "anon";
+GRANT ALL ON TABLE "public"."tracker_reports" TO "authenticated";
+GRANT ALL ON TABLE "public"."tracker_reports" TO "service_role";
+
 GRANT ALL ON TABLE "public"."transaction_attachments" TO "anon";
 GRANT ALL ON TABLE "public"."transaction_attachments" TO "authenticated";
 GRANT ALL ON TABLE "public"."transaction_attachments" TO "service_role";
 
--- Grant all on transaction_categories to all roles
 GRANT ALL ON TABLE "public"."transaction_categories" TO "anon";
 GRANT ALL ON TABLE "public"."transaction_categories" TO "authenticated";
 GRANT ALL ON TABLE "public"."transaction_categories" TO "service_role";
 
--- Grant all on transaction_enrichments to all roles
 GRANT ALL ON TABLE "public"."transaction_enrichments" TO "anon";
 GRANT ALL ON TABLE "public"."transaction_enrichments" TO "authenticated";
 GRANT ALL ON TABLE "public"."transaction_enrichments" TO "service_role";
 
--- Grant all on user_invites to all roles
 GRANT ALL ON TABLE "public"."user_invites" TO "anon";
 GRANT ALL ON TABLE "public"."user_invites" TO "authenticated";
 GRANT ALL ON TABLE "public"."user_invites" TO "service_role";
 
--- Grant all on users to all roles
 GRANT ALL ON TABLE "public"."users" TO "anon";
 GRANT ALL ON TABLE "public"."users" TO "authenticated";
 GRANT ALL ON TABLE "public"."users" TO "service_role";
 
--- Grant all on users_on_team to all roles
 GRANT ALL ON TABLE "public"."users_on_team" TO "anon";
 GRANT ALL ON TABLE "public"."users_on_team" TO "authenticated";
 GRANT ALL ON TABLE "public"."users_on_team" TO "service_role";
 
--- Grant all on sequences to all roles
 ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON SEQUENCES  TO "postgres";
 ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON SEQUENCES  TO "anon";
 ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON SEQUENCES  TO "authenticated";
 ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON SEQUENCES  TO "service_role";
 
--- Grant all on functions to all roles
 ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON FUNCTIONS  TO "postgres";
 ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON FUNCTIONS  TO "anon";
 ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON FUNCTIONS  TO "authenticated";
 ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON FUNCTIONS  TO "service_role";
 
--- Grant all on tables to all roles
 ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON TABLES  TO "postgres";
 ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON TABLES  TO "anon";
 ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON TABLES  TO "authenticated";
