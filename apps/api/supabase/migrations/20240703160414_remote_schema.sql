@@ -1,42 +1,36 @@
--- Drop Trigger:
 drop trigger if exists "update_enrich_transaction_trigger" on "public"."transactions";
 
--- Drop Function:
 drop function if exists "public"."get_spending_v2"(team_id uuid, date_from date, date_to date, currency_target text);
 
--- Create Table:
 create table "public"."total_amount" (
     "sum" numeric
 );
 
--- Create Index reports_team_id
+
 CREATE INDEX reports_team_id_idx ON public.reports USING btree (team_id);
 
--- Create Index transaction_categories_team_id
+CREATE INDEX tracker_entries_team_id_idx ON public.tracker_entries USING btree (team_id);
+
+CREATE INDEX tracker_projects_team_id_idx ON public.tracker_projects USING btree (team_id);
+
+CREATE INDEX tracker_reports_team_id_idx ON public.tracker_reports USING btree (team_id);
+
 CREATE INDEX transaction_categories_team_id_idx ON public.transaction_categories USING btree (team_id);
 
--- Create Index transaction_enrichments_category_slug_team_id
 CREATE INDEX transaction_enrichments_category_slug_team_id_idx ON public.transaction_enrichments USING btree (category_slug, team_id);
 
--- Create Index transactions_assigned_id
 CREATE INDEX transactions_assigned_id_idx ON public.transactions USING btree (assigned_id);
 
--- Create Index transactions_bank_account_id
 CREATE INDEX transactions_bank_account_id_idx ON public.transactions USING btree (bank_account_id);
 
--- Create Index user_invites_team_id
 CREATE INDEX user_invites_team_id_idx ON public.user_invites USING btree (team_id);
 
--- Create Index users_on_team_user_id
 CREATE INDEX users_on_team_user_id_idx ON public.users_on_team USING btree (user_id);
 
--- Create Index users_team_id
 CREATE INDEX users_team_id_idx ON public.users USING btree (team_id);
 
--- Set Function Bodies:
 set check_function_bodies = off;
 
--- Create Function:
 CREATE OR REPLACE FUNCTION public.get_spending(team_id uuid, date_from date, date_to date, currency_target text)
  RETURNS TABLE(name text, slug text, amount numeric, currency text, color text, percentage numeric)
  LANGUAGE plpgsql
@@ -86,68 +80,48 @@ begin
 end;$function$
 ;
 
--- Grant all on total_amount to anon
 grant delete on table "public"."total_amount" to "anon";
 
--- Grant insert on table "public"."total_amount" to "anon";
 grant insert on table "public"."total_amount" to "anon";
 
--- Grant references on table "public"."total_amount" to "anon";
 grant references on table "public"."total_amount" to "anon";
 
--- Grant select on table "public"."total_amount" to "anon";
 grant select on table "public"."total_amount" to "anon";
 
--- Grant trigger on table "public"."total_amount" to "anon";
 grant trigger on table "public"."total_amount" to "anon";
 
--- Grant truncate on table "public"."total_amount" to "anon";
 grant truncate on table "public"."total_amount" to "anon";
 
--- Grant update on table "public"."total_amount" to "anon";
 grant update on table "public"."total_amount" to "anon";
 
--- Grant delete on table "public"."total_amount" to "authenticated";
 grant delete on table "public"."total_amount" to "authenticated";
 
--- Grant insert on table "public"."total_amount" to "authenticated";
 grant insert on table "public"."total_amount" to "authenticated";
 
--- Grant references on table "public"."total_amount" to "authenticated";
 grant references on table "public"."total_amount" to "authenticated";
 
--- Grant select on table "public"."total_amount" to "authenticated";
 grant select on table "public"."total_amount" to "authenticated";
 
--- Grant trigger on table "public"."total_amount" to "authenticated";
 grant trigger on table "public"."total_amount" to "authenticated";
 
--- Grant truncate on table "public"."total_amount" to "authenticated";
 grant truncate on table "public"."total_amount" to "authenticated";
 
--- Grant update on table "public"."total_amount" to "authenticated";
 grant update on table "public"."total_amount" to "authenticated";
 
--- Grant delete on table "public"."total_amount" to "service_role";
 grant delete on table "public"."total_amount" to "service_role";
 
--- Grant insert on table "public"."total_amount" to "service_role";
 grant insert on table "public"."total_amount" to "service_role";
 
--- Grant references on table "public"."total_amount" to "service_role";
 grant references on table "public"."total_amount" to "service_role";
 
--- Grant select on table "public"."total_amount" to "service_role";
 grant select on table "public"."total_amount" to "service_role";
 
--- Grant trigger on table "public"."total_amount" to "service_role";
 grant trigger on table "public"."total_amount" to "service_role";
 
--- Grant truncate on table "public"."total_amount" to "service_role";
 grant truncate on table "public"."total_amount" to "service_role";
 
--- Grant update on table "public"."total_amount" to "service_role";
 grant update on table "public"."total_amount" to "service_role";
 
--- Create Trigger:
 CREATE TRIGGER enrich_transaction AFTER INSERT ON public.transactions FOR EACH ROW EXECUTE FUNCTION update_enrich_transaction();
+
+

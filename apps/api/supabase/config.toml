@@ -1,4 +1,4 @@
-project_id = "jylavktzapdciiteepdf"
+project_id = "hfgtyawqemeozrtjzevl"
 
 [api]
 enabled = true
@@ -22,6 +22,12 @@ port = 54323
 enabled = true
 client_id = "env(GOOGLE_CLIENT_ID)"
 secret = "env(GOOGLE_SECRET)"
+redirect_uri = "http://localhost:54321/auth/v1/callback"
+
+[auth.external.github]
+enabled = true
+client_id = "env(GITHUB_CLIENT_ID)"
+secret = "env(GITHUB_SECRET)"
 redirect_uri = "http://localhost:54321/auth/v1/callback"
 
 [auth.email]
