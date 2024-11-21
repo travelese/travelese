@@ -9,32 +9,24 @@ SET check_function_bodies = false;
 SET xmloption = content;
 SET client_min_messages = warning;
 SET row_security = off;
+SET default_tablespace = '';
+SET default_table_access_method = "heap";
+SET check_function_bodies = off;
 
 CREATE EXTENSION IF NOT EXISTS "pg_net" WITH SCHEMA "extensions";
-
 CREATE EXTENSION IF NOT EXISTS "pgsodium" WITH SCHEMA "pgsodium";
+CREATE EXTENSION IF NOT EXISTS "pg_stat_statements" WITH SCHEMA "extensions";
+CREATE EXTENSION IF NOT EXISTS "pg_trgm" WITH SCHEMA "public";
+CREATE EXTENSION IF NOT EXISTS "pgcrypto" WITH SCHEMA "extensions";
+CREATE EXTENSION IF NOT EXISTS "pgjwt" WITH SCHEMA "extensions";
+CREATE EXTENSION IF NOT EXISTS "supabase_vault" WITH SCHEMA "vault";
+CREATE EXTENSION IF NOT EXISTS "unaccent" WITH SCHEMA "public";
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp" WITH SCHEMA "extensions";
+CREATE EXTENSION IF NOT EXISTS "vector" WITH SCHEMA "extensions";
 
 CREATE SCHEMA IF NOT EXISTS "private";
-
 ALTER SCHEMA "private" OWNER TO "postgres";
-
 COMMENT ON SCHEMA "public" IS 'standard public schema';
-
-CREATE EXTENSION IF NOT EXISTS "pg_stat_statements" WITH SCHEMA "extensions";
-
-CREATE EXTENSION IF NOT EXISTS "pg_trgm" WITH SCHEMA "public";
-
-CREATE EXTENSION IF NOT EXISTS "pgcrypto" WITH SCHEMA "extensions";
-
-CREATE EXTENSION IF NOT EXISTS "pgjwt" WITH SCHEMA "extensions";
-
-CREATE EXTENSION IF NOT EXISTS "supabase_vault" WITH SCHEMA "vault";
-
-CREATE EXTENSION IF NOT EXISTS "unaccent" WITH SCHEMA "public";
-
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp" WITH SCHEMA "extensions";
-
-CREATE EXTENSION IF NOT EXISTS "vector" WITH SCHEMA "extensions";
 
 CREATE TYPE "public"."account_type" AS ENUM (
     'depository',
@@ -43,24 +35,21 @@ CREATE TYPE "public"."account_type" AS ENUM (
     'loan',
     'other_liability'
 );
-
 ALTER TYPE "public"."account_type" OWNER TO "postgres";
-
-CREATE TYPE "public"."bankProviders" AS ENUM (
-    'gocardless',
-    'plaid',
-    'teller'
-);
-
-ALTER TYPE "public"."bankProviders" OWNER TO "postgres";
 
 CREATE TYPE "public"."bank_providers" AS ENUM (
     'gocardless',
     'plaid',
     'teller'
 );
-
 ALTER TYPE "public"."bank_providers" OWNER TO "postgres";
+
+CREATE TYPE "public"."connection_status" AS ENUM (
+    'disconnected',
+    'connected',
+    'unknown'
+);
+ALTER TYPE "public"."connection_status" OWNER TO "postgres";
 
 CREATE TYPE "public"."inbox_status" AS ENUM (
     'processing',
@@ -69,39 +58,41 @@ CREATE TYPE "public"."inbox_status" AS ENUM (
     'new',
     'deleted'
 );
-
 ALTER TYPE "public"."inbox_status" OWNER TO "postgres";
 
-CREATE TYPE "public"."metrics_record" AS (
-	"date" "date",
-	"value" integer
+CREATE TYPE "public"."inbox_type" AS ENUM (
+    'invoice',
+    'expense'
 );
+ALTER TYPE "public"."inbox_type" OWNER TO "postgres";
 
+CREATE TYPE "public"."metrics_record" AS (
+    "date" "date",
+    "value" integer
+);
 ALTER TYPE "public"."metrics_record" OWNER TO "postgres";
 
-CREATE TYPE "public"."reportTypes" AS ENUM (
+CREATE TYPE "public"."report_types" AS ENUM (
     'profit',
     'revenue',
-    'burn_rate'
+    'burn_rate',
+    'expense'
 );
+ALTER TYPE "public"."report_types" OWNER TO "postgres";
 
-ALTER TYPE "public"."reportTypes" OWNER TO "postgres";
-
-CREATE TYPE "public"."teamRoles" AS ENUM (
+CREATE TYPE "public"."team_roles" AS ENUM (
     'owner',
     'member'
 );
+ALTER TYPE "public"."team_roles" OWNER TO "postgres";
 
-ALTER TYPE "public"."teamRoles" OWNER TO "postgres";
-
-CREATE TYPE "public"."trackerStatus" AS ENUM (
+CREATE TYPE "public"."tracker_status" AS ENUM (
     'in_progress',
     'completed'
 );
+ALTER TYPE "public"."tracker_status" OWNER TO "postgres";
 
-ALTER TYPE "public"."trackerStatus" OWNER TO "postgres";
-
-CREATE TYPE "public"."transactionCategories" AS ENUM (
+CREATE TYPE "public"."transaction_categories" AS ENUM (
     'travel',
     'office_supplies',
     'meals',
@@ -119,10 +110,9 @@ CREATE TYPE "public"."transactionCategories" AS ENUM (
     'salary',
     'fees'
 );
+ALTER TYPE "public"."transaction_categories" OWNER TO "postgres";
 
-ALTER TYPE "public"."transactionCategories" OWNER TO "postgres";
-
-CREATE TYPE "public"."transactionMethods" AS ENUM (
+CREATE TYPE "public"."transaction_methods" AS ENUM (
     'payment',
     'card_purchase',
     'card_atm',
@@ -135,133 +125,576 @@ CREATE TYPE "public"."transactionMethods" AS ENUM (
     'wire',
     'fee'
 );
+ALTER TYPE "public"."transaction_methods" OWNER TO "postgres";
 
-ALTER TYPE "public"."transactionMethods" OWNER TO "postgres";
-
-CREATE TYPE "public"."transactionStatus" AS ENUM (
+CREATE TYPE "public"."transaction_status" AS ENUM (
     'posted',
     'pending',
     'excluded',
     'completed'
 );
+ALTER TYPE "public"."transaction_status" OWNER TO "postgres";
 
-ALTER TYPE "public"."transactionStatus" OWNER TO "postgres";
+CREATE TYPE "public"."transaction_frequency" AS ENUM (
+    'weekly',
+    'biweekly',
+    'monthly',
+    'semi_monthly',
+    'annually',
+    'irregular',
+    'unknown'
+);
+ALTER TYPE "public"."transaction_frequency" OWNER TO "postgres";
 
-CREATE OR REPLACE FUNCTION "private"."get_invites_for_authenticated_user"() RETURNS SETOF "uuid"
-    LANGUAGE "sql" STABLE SECURITY DEFINER
+CREATE TABLE IF NOT EXISTS "public"."transactions" (
+    "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
+    "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
+    "updated_at" timestamp with time zone,
+    "date" "date" NOT NULL,
+    "name" "text" NOT NULL,
+    "description" "text",
+    "method" "public"."transactionMethods" NOT NULL,
+    "amount" numeric NOT NULL,
+    "base_amount" numeric,
+    "currency" "text" NOT NULL,
+    "base_currency" text,
+    "balance" numeric,
+    "team_id" "uuid" NOT NULL,
+    "assigned_id" "uuid",
+    "bank_account_id" "uuid",
+    "note" character varying,
+    "internal_id" "text" NOT NULL,
+    "status" "public"."transactionStatus" DEFAULT 'posted'::"public"."transactionStatus",
+    "category" "public"."transactionCategories",
+    "category_slug" "text",
+    "manual" boolean DEFAULT false,
+    "frequency" transaction_frequency,
+    "recurring" boolean,
+    "fts_vector" tsvector GENERATED ALWAYS AS (to_tsvector('english'::regconfig, ((COALESCE(name, ''::text) || ' '::text) || COALESCE(description, ''::text)))) STORED,
+    CONSTRAINT "transactions_pkey" PRIMARY KEY ("id"),
+    CONSTRAINT "transactions_internal_id_key" UNIQUE ("internal_id"),
+    CONSTRAINT "public_transactions_assigned_id_fkey" FOREIGN KEY ("assigned_id") 
+        REFERENCES "public"."users"("id") ON DELETE SET NULL,
+    CONSTRAINT "public_transactions_team_id_fkey" FOREIGN KEY ("team_id") 
+        REFERENCES "public"."teams"("id") ON DELETE CASCADE,
+    CONSTRAINT "transactions_bank_account_id_fkey" FOREIGN KEY ("bank_account_id") 
+        REFERENCES "public"."bank_accounts"("id") ON DELETE CASCADE,
+    CONSTRAINT "transactions_category_slug_team_id_fkey" FOREIGN KEY ("category_slug", "team_id") 
+        REFERENCES "public"."transaction_categories"("slug", "team_id")
+);
+
+ALTER TABLE "public"."transactions" OWNER TO "postgres";
+ALTER TABLE "public"."transactions" ENABLE ROW LEVEL SECURITY;
+
+CREATE TABLE IF NOT EXISTS "public"."tracker_entries" (
+    "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
+    "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
+    "duration" bigint,
+    "project_id" "uuid",
+    "start" timestamp with time zone,
+    "stop" timestamp with time zone,
+    "assigned_id" "uuid",
+    "team_id" "uuid",
+    "description" "text",
+    "rate" numeric,
+    "currency" "text",
+    "billed" boolean DEFAULT false,
+    "date" "date" DEFAULT "now"(),
+    CONSTRAINT "tracker_records_pkey" PRIMARY KEY ("id"),
+    CONSTRAINT "tracker_entries_assigned_id_fkey" FOREIGN KEY ("assigned_id") 
+        REFERENCES "public"."users"("id") ON DELETE SET NULL,
+    CONSTRAINT "tracker_entries_project_id_fkey" FOREIGN KEY ("project_id") 
+        REFERENCES "public"."tracker_projects"("id") ON DELETE CASCADE,
+    CONSTRAINT "tracker_entries_team_id_fkey" FOREIGN KEY ("team_id") 
+        REFERENCES "public"."teams"("id") ON DELETE CASCADE
+);
+
+ALTER TABLE "public"."tracker_entries" OWNER TO "postgres";
+ALTER TABLE "public"."tracker_entries" ENABLE ROW LEVEL SECURITY;
+
+CREATE TABLE IF NOT EXISTS "public"."inbox" (
+    "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
+    "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
+    "team_id" "uuid",
+    "file_path" "text"[],
+    "file_name" "text",
+    "transaction_id" "uuid",
+    "amount" numeric,
+    "base_amount" numeric,
+    "currency" "text",
+    "base_currency" text,
+    "content_type" "text",
+    "size" bigint,
+    "attachment_id" "uuid",
+    "forwarded_to" "text",
+    "reference_id" "text",
+    "meta" "json",
+    "status" "public"."inbox_status" DEFAULT 'new'::"public"."inbox_status",
+    "website" "text",
+    "display_name" "text",
+    "date" date,
+    "description" text,
+    "type" inbox_type,
+    "fts" "tsvector" GENERATED ALWAYS AS ("public"."generate_inbox_fts"("display_name", "public"."extract_product_names"(("meta" -> 'products'::"text")))) STORED,
+    CONSTRAINT "inbox_pkey" PRIMARY KEY ("id"),
+    CONSTRAINT "inbox_reference_id_key" UNIQUE ("reference_id"),
+    CONSTRAINT "inbox_attachment_id_fkey" FOREIGN KEY ("attachment_id") 
+        REFERENCES "public"."transaction_attachments"("id") ON DELETE SET NULL,
+    CONSTRAINT "public_inbox_team_id_fkey" FOREIGN KEY ("team_id") 
+        REFERENCES "public"."teams"("id") ON DELETE CASCADE,
+    CONSTRAINT "public_inbox_transaction_id_fkey" FOREIGN KEY ("transaction_id") 
+        REFERENCES "public"."transactions"("id") ON DELETE SET NULL
+);
+
+ALTER TABLE "public"."inbox" OWNER TO "postgres";
+ALTER TABLE "public"."inbox" ENABLE ROW LEVEL SECURITY;
+
+CREATE TABLE IF NOT EXISTS "public"."bank_accounts" (
+    "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
+    "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
+    "created_by" "uuid" NOT NULL,
+    "team_id" "uuid" NOT NULL,
+    "name" "text",
+    "currency" "text",
+    "base_currency" text,
+    "bank_connection_id" "uuid",
+    "enabled" boolean DEFAULT true NOT NULL,
+    "account_id" "text" NOT NULL,
+    "balance" numeric DEFAULT '0'::numeric,
+    "base_balance" numeric,
+    "manual" boolean DEFAULT false,
+    "type" "public"."account_type",
+    CONSTRAINT "bank_accounts_pkey" PRIMARY KEY ("id"),
+    CONSTRAINT "bank_accounts_bank_connection_id_fkey" FOREIGN KEY ("bank_connection_id") 
+        REFERENCES "public"."bank_connections"("id") ON DELETE SET NULL,
+    CONSTRAINT "bank_accounts_created_by_fkey" FOREIGN KEY ("created_by") 
+        REFERENCES "public"."users"("id") ON DELETE CASCADE,
+    CONSTRAINT "public_bank_accounts_team_id_fkey" FOREIGN KEY ("team_id") 
+        REFERENCES "public"."teams"("id") ON DELETE CASCADE
+);
+
+ALTER TABLE "public"."bank_accounts" OWNER TO "postgres";
+ALTER TABLE "public"."bank_accounts" ENABLE ROW LEVEL SECURITY;
+
+CREATE TABLE IF NOT EXISTS "public"."reports" (
+    "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
+    "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
+    "link_id" "text",
+    "team_id" "uuid",
+    "short_link" "text",
+    "from" timestamp with time zone,
+    "to" timestamp with time zone,
+    "type" "public"."report_types",
+    "expire_at" timestamp with time zone,
+    "currency" "text",
+    "created_by" "uuid",
+    CONSTRAINT "reports_pkey" PRIMARY KEY ("id"),
+    CONSTRAINT "public_reports_created_by_fkey" FOREIGN KEY ("created_by") 
+        REFERENCES "public"."users"("id") ON DELETE CASCADE,
+    CONSTRAINT "reports_team_id_fkey" FOREIGN KEY ("team_id") 
+        REFERENCES "public"."teams"("id") ON UPDATE CASCADE
+);
+
+ALTER TABLE "public"."reports" OWNER TO "postgres";
+ALTER TABLE "public"."reports" ENABLE ROW LEVEL SECURITY;
+
+CREATE TABLE IF NOT EXISTS "public"."teams" (
+    "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
+    "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
+    "name" "text",
+    "logo_url" "text",
+    "inbox_id" "text" DEFAULT "public"."generate_inbox"(10),
+    "email" "text",
+    "inbox_email" "text",
+    "inbox_forwarding" boolean DEFAULT true,
+    "base_currency" text,
+    "document_classification" boolean DEFAULT false,
+    CONSTRAINT "teams_inbox_id_key" UNIQUE ("inbox_id"),
+    CONSTRAINT "teams_pkey" PRIMARY KEY ("id")
+);
+
+ALTER TABLE "public"."teams" OWNER TO "postgres";
+ALTER TABLE "public"."teams" ENABLE ROW LEVEL SECURITY;
+
+CREATE TABLE IF NOT EXISTS "public"."tracker_reports" (
+    "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
+    "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
+    "link_id" "text",
+    "short_link" "text",
+    "team_id" "uuid" DEFAULT "gen_random_uuid"(),
+    "project_id" "uuid" DEFAULT "gen_random_uuid"(),
+    "created_by" "uuid",
+    CONSTRAINT "project_reports_pkey" PRIMARY KEY ("id"),
+    CONSTRAINT "public_tracker_reports_created_by_fkey" FOREIGN KEY ("created_by") 
+        REFERENCES "public"."users"("id") ON DELETE CASCADE,
+    CONSTRAINT "public_tracker_reports_project_id_fkey" FOREIGN KEY ("project_id") 
+        REFERENCES "public"."tracker_projects"("id") ON UPDATE CASCADE ON DELETE CASCADE,
+    CONSTRAINT "tracker_reports_team_id_fkey" FOREIGN KEY ("team_id") 
+        REFERENCES "public"."teams"("id") ON UPDATE CASCADE ON DELETE CASCADE
+);
+
+ALTER TABLE "public"."tracker_reports" OWNER TO "postgres";
+ALTER TABLE "public"."tracker_reports" ENABLE ROW LEVEL SECURITY;
+
+CREATE TABLE IF NOT EXISTS "public"."transaction_attachments" (
+    "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
+    "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
+    "type" "text",
+    "transaction_id" "uuid",
+    "team_id" "uuid",
+    "size" bigint,
+    "name" "text",
+    "path" "text"[],
+    CONSTRAINT "attachments_pkey" PRIMARY KEY ("id"),
+    CONSTRAINT "public_transaction_attachments_team_id_fkey" FOREIGN KEY ("team_id") 
+        REFERENCES "public"."teams"("id") ON DELETE CASCADE,
+    CONSTRAINT "public_transaction_attachments_transaction_id_fkey" FOREIGN KEY ("transaction_id") 
+        REFERENCES "public"."transactions"("id") ON DELETE SET NULL
+);
+
+ALTER TABLE "public"."transaction_attachments" OWNER TO "postgres";
+ALTER TABLE "public"."transaction_attachments" ENABLE ROW LEVEL SECURITY;
+
+CREATE TABLE IF NOT EXISTS "public"."transaction_categories" (
+    "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
+    "name" "text" NOT NULL,
+    "team_id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
+    "color" "text",
+    "created_at" timestamp with time zone DEFAULT "now"(),
+    "system" boolean DEFAULT false,
+    "slug" "text" NOT NULL,
+    "vat" numeric,
+    "description" "text",
+    "embedding" "extensions"."vector"(384),
+    CONSTRAINT "transaction_categories_pkey" PRIMARY KEY ("team_id", "slug"),
+    CONSTRAINT "unique_team_slug" UNIQUE ("team_id", "slug"),
+    CONSTRAINT "transaction_categories_team_id_fkey" FOREIGN KEY ("team_id") 
+        REFERENCES "public"."teams"("id") ON DELETE CASCADE
+);
+
+ALTER TABLE "public"."transaction_categories" OWNER TO "postgres";
+ALTER TABLE "public"."transaction_categories" ENABLE ROW LEVEL SECURITY;
+
+CREATE TABLE IF NOT EXISTS "public"."transaction_enrichments" (
+    "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
+    "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
+    "name" "text",
+    "team_id" "uuid",
+    "category_slug" "text",
+    "system" boolean DEFAULT false,
+    CONSTRAINT "transaction_enrichments_pkey" PRIMARY KEY ("id"),
+    CONSTRAINT "unique_team_name" UNIQUE ("team_id", "name"),
+    CONSTRAINT "transaction_enrichments_category_slug_team_id_fkey" FOREIGN KEY ("category_slug", "team_id") 
+        REFERENCES "public"."transaction_categories"("slug", "team_id") ON DELETE CASCADE,
+    CONSTRAINT "transaction_enrichments_team_id_fkey" FOREIGN KEY ("team_id") 
+        REFERENCES "public"."teams"("id") ON DELETE CASCADE
+);
+
+ALTER TABLE "public"."transaction_enrichments" OWNER TO "postgres";
+ALTER TABLE "public"."transaction_enrichments" ENABLE ROW LEVEL SECURITY;
+
+CREATE TABLE IF NOT EXISTS "public"."user_invites" (
+    "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
+    "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
+    "team_id" "uuid",
+    "email" "text",
+    "role" "public"."team_roles",
+    "code" "text" DEFAULT "public"."nanoid"(24),
+    "invited_by" "uuid",
+    CONSTRAINT "user_invites_pkey" PRIMARY KEY ("id"),
+    CONSTRAINT "unique_team_invite" UNIQUE ("email", "team_id"),
+    CONSTRAINT "user_invites_code_key" UNIQUE ("code"),
+    CONSTRAINT "public_user_invites_team_id_fkey" FOREIGN KEY ("team_id") 
+        REFERENCES "public"."teams"("id") ON DELETE CASCADE,
+    CONSTRAINT "user_invites_invited_by_fkey" FOREIGN KEY ("invited_by") 
+        REFERENCES "public"."users"("id") ON DELETE CASCADE
+);
+
+ALTER TABLE "public"."user_invites" OWNER TO "postgres";
+ALTER TABLE "public"."user_invites" ENABLE ROW LEVEL SECURITY;
+
+CREATE TABLE IF NOT EXISTS "public"."users" (
+    "id" "uuid" NOT NULL,
+    "full_name" "text",
+    "avatar_url" "text",
+    "email" "text",
+    "team_id" "uuid",
+    "created_at" timestamp with time zone DEFAULT "now"(),
+    "locale" "text" DEFAULT 'en'::"text",
+    "week_starts_on_monday" boolean DEFAULT false,
+    "timezone" text,
+    "time_format" numeric DEFAULT '24'::numeric,
+    CONSTRAINT "profiles_pkey" PRIMARY KEY ("id"),
+    CONSTRAINT "users_id_fkey" FOREIGN KEY ("id") 
+        REFERENCES "auth"."users"("id") ON DELETE CASCADE,
+    CONSTRAINT "users_team_id_fkey" FOREIGN KEY ("team_id") 
+        REFERENCES "public"."teams"("id") ON DELETE SET NULL
+);
+
+ALTER TABLE "public"."users" OWNER TO "postgres";
+ALTER TABLE "public"."users" ENABLE ROW LEVEL SECURITY;
+
+CREATE TABLE IF NOT EXISTS "public"."users_on_team" (
+    "user_id" "uuid" NOT NULL,
+    "team_id" "uuid" NOT NULL,
+    "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
+    "role" "public"."team_roles",
+    "created_at" timestamp with time zone DEFAULT "now"(),
+    CONSTRAINT "members_pkey" PRIMARY KEY ("user_id", "team_id", "id"),
+    CONSTRAINT "users_on_team_team_id_fkey" FOREIGN KEY ("team_id") 
+        REFERENCES "public"."teams"("id") ON UPDATE CASCADE ON DELETE CASCADE,
+    CONSTRAINT "users_on_team_user_id_fkey" FOREIGN KEY ("user_id") 
+        REFERENCES "public"."users"("id") ON DELETE CASCADE
+);
+
+ALTER TABLE "public"."users_on_team" OWNER TO "postgres";
+ALTER TABLE "public"."users_on_team" ENABLE ROW LEVEL SECURITY;
+
+CREATE TABLE IF NOT EXISTS "public"."documents" (
+    "id" uuid NOT NULL DEFAULT gen_random_uuid(),
+    "name" text,
+    "created_at" timestamp with time zone DEFAULT now(),
+    "metadata" jsonb,
+    "path_tokens" text[],
+    "team_id" uuid,
+    "parent_id" text,
+    "object_id" uuid,
+    "owner_id" uuid,
+    "tag" text,
+    "title" text,
+    "body" text,
+    "fts" tsvector GENERATED ALWAYS AS (to_tsvector('english'::regconfig, ((title || ' '::text) || body))) STORED,
+    CONSTRAINT "documents_pkey" PRIMARY KEY ("id"),
+    CONSTRAINT "documents_created_by_fkey" FOREIGN KEY (owner_id) 
+        REFERENCES users(id) ON DELETE SET NULL,
+    CONSTRAINT "storage_team_id_fkey" FOREIGN KEY (team_id) 
+        REFERENCES teams(id) ON DELETE CASCADE
+);
+
+ALTER TABLE "public"."documents" ENABLE ROW LEVEL SECURITY;
+
+-- Grants for anon
+GRANT DELETE ON TABLE "public"."documents" TO "anon";
+GRANT INSERT ON TABLE "public"."documents" TO "anon";
+GRANT REFERENCES ON TABLE "public"."documents" TO "anon";
+GRANT SELECT ON TABLE "public"."documents" TO "anon";
+GRANT TRIGGER ON TABLE "public"."documents" TO "anon";
+GRANT TRUNCATE ON TABLE "public"."documents" TO "anon";
+GRANT UPDATE ON TABLE "public"."documents" TO "anon";
+
+-- Grants for authenticated
+GRANT DELETE ON TABLE "public"."documents" TO "authenticated";
+GRANT INSERT ON TABLE "public"."documents" TO "authenticated";
+GRANT REFERENCES ON TABLE "public"."documents" TO "authenticated";
+GRANT SELECT ON TABLE "public"."documents" TO "authenticated";
+GRANT TRIGGER ON TABLE "public"."documents" TO "authenticated";
+GRANT TRUNCATE ON TABLE "public"."documents" TO "authenticated";
+GRANT UPDATE ON TABLE "public"."documents" TO "authenticated";
+
+-- Grants for service_role
+GRANT DELETE ON TABLE "public"."documents" TO "service_role";
+GRANT INSERT ON TABLE "public"."documents" TO "service_role";
+GRANT REFERENCES ON TABLE "public"."documents" TO "service_role";
+GRANT SELECT ON TABLE "public"."documents" TO "service_role";
+GRANT TRIGGER ON TABLE "public"."documents" TO "service_role";
+GRANT TRUNCATE ON TABLE "public"."documents" TO "service_role";
+GRANT UPDATE ON TABLE "public"."documents" TO "service_role";
+
+
+CREATE TABLE IF NOT EXISTS "public"."exchange_rates" (
+    "id" uuid NOT NULL DEFAULT gen_random_uuid(),
+    "base" text,
+    "rate" numeric,
+    "target" text,
+    "updated_at" timestamp with time zone,
+    CONSTRAINT "currencies_pkey" PRIMARY KEY ("id"),
+    CONSTRAINT "unique_rate" UNIQUE ("base", "target")
+);
+
+ALTER TABLE "public"."exchange_rates" ENABLE ROW LEVEL SECURITY;
+
+-- Grants for anon
+GRANT DELETE ON TABLE "public"."exchange_rates" TO "anon";
+GRANT INSERT ON TABLE "public"."exchange_rates" TO "anon";
+GRANT REFERENCES ON TABLE "public"."exchange_rates" TO "anon";
+GRANT SELECT ON TABLE "public"."exchange_rates" TO "anon";
+GRANT TRIGGER ON TABLE "public"."exchange_rates" TO "anon";
+GRANT TRUNCATE ON TABLE "public"."exchange_rates" TO "anon";
+GRANT UPDATE ON TABLE "public"."exchange_rates" TO "anon";
+
+-- Grants for authenticated
+GRANT DELETE ON TABLE "public"."exchange_rates" TO "authenticated";
+GRANT INSERT ON TABLE "public"."exchange_rates" TO "authenticated";
+GRANT REFERENCES ON TABLE "public"."exchange_rates" TO "authenticated";
+GRANT SELECT ON TABLE "public"."exchange_rates" TO "authenticated";
+GRANT TRIGGER ON TABLE "public"."exchange_rates" TO "authenticated";
+GRANT TRUNCATE ON TABLE "public"."exchange_rates" TO "authenticated";
+GRANT UPDATE ON TABLE "public"."exchange_rates" TO "authenticated";
+
+-- Grants for service_role
+GRANT DELETE ON TABLE "public"."exchange_rates" TO "service_role";
+GRANT INSERT ON TABLE "public"."exchange_rates" TO "service_role";
+GRANT REFERENCES ON TABLE "public"."exchange_rates" TO "service_role";
+GRANT SELECT ON TABLE "public"."exchange_rates" TO "service_role";
+GRANT TRIGGER ON TABLE "public"."exchange_rates" TO "service_role";
+GRANT TRUNCATE ON TABLE "public"."exchange_rates" TO "service_role";
+GRANT UPDATE ON TABLE "public"."exchange_rates" TO "service_role";
+
+CREATE TABLE IF NOT EXISTS "public"."apps" (
+    "id" uuid NOT NULL DEFAULT gen_random_uuid(),
+    "team_id" uuid DEFAULT gen_random_uuid(),
+    "config" jsonb,
+    "created_at" timestamp with time zone DEFAULT now(),
+    "app_id" text NOT NULL,
+    "created_by" uuid DEFAULT gen_random_uuid(),
+    "settings" jsonb,
+    CONSTRAINT "integrations_pkey" PRIMARY KEY ("id"),
+    CONSTRAINT "apps_created_by_fkey" FOREIGN KEY (created_by) 
+        REFERENCES users(id) ON DELETE CASCADE,
+    CONSTRAINT "integrations_team_id_fkey" FOREIGN KEY (team_id) 
+        REFERENCES teams(id) ON DELETE CASCADE,
+    CONSTRAINT "unique_app_id_team_id" UNIQUE (app_id, team_id)
+);
+
+ALTER TABLE "public"."apps" ENABLE ROW LEVEL SECURITY;
+
+-- Grants for anon
+GRANT DELETE ON TABLE "public"."apps" TO "anon";
+GRANT INSERT ON TABLE "public"."apps" TO "anon";
+GRANT REFERENCES ON TABLE "public"."apps" TO "anon";
+GRANT SELECT ON TABLE "public"."apps" TO "anon";
+GRANT TRIGGER ON TABLE "public"."apps" TO "anon";
+GRANT TRUNCATE ON TABLE "public"."apps" TO "anon";
+GRANT UPDATE ON TABLE "public"."apps" TO "anon";
+
+-- Grants for authenticated
+GRANT DELETE ON TABLE "public"."apps" TO "authenticated";
+GRANT INSERT ON TABLE "public"."apps" TO "authenticated";
+GRANT REFERENCES ON TABLE "public"."apps" TO "authenticated";
+GRANT SELECT ON TABLE "public"."apps" TO "authenticated";
+GRANT TRIGGER ON TABLE "public"."apps" TO "authenticated";
+GRANT TRUNCATE ON TABLE "public"."apps" TO "authenticated";
+GRANT UPDATE ON TABLE "public"."apps" TO "authenticated";
+
+-- Grants for service_role
+GRANT DELETE ON TABLE "public"."apps" TO "service_role";
+GRANT INSERT ON TABLE "public"."apps" TO "service_role";
+GRANT REFERENCES ON TABLE "public"."apps" TO "service_role";
+GRANT SELECT ON TABLE "public"."apps" TO "service_role";
+GRANT TRIGGER ON TABLE "public"."apps" TO "service_role";
+GRANT TRUNCATE ON TABLE "public"."apps" TO "service_role";
+GRANT UPDATE ON TABLE "public"."apps" TO "service_role";
+
+-- Function to get invites for authenticated user
+CREATE OR REPLACE FUNCTION "private"."get_invites_for_authenticated_user"() 
+RETURNS SETOF "uuid"
+    LANGUAGE "sql" 
+    STABLE 
+    SECURITY DEFINER
     SET "search_path" TO 'public'
-    AS $$
-  select team_id
-  from user_invites
-  where email = auth.jwt() ->> 'email'
+AS $$
+    SELECT team_id
+    FROM user_invites
+    WHERE email = auth.jwt() ->> 'email'
 $$;
 
 ALTER FUNCTION "private"."get_invites_for_authenticated_user"() OWNER TO "postgres";
 
-CREATE OR REPLACE FUNCTION "private"."get_teams_for_authenticated_user"() RETURNS SETOF "uuid"
-    LANGUAGE "sql" STABLE SECURITY DEFINER
+-- Function to get teams for authenticated user
+CREATE OR REPLACE FUNCTION "private"."get_teams_for_authenticated_user"() 
+RETURNS SETOF "uuid"
+    LANGUAGE "sql" 
+    STABLE 
+    SECURITY DEFINER
     SET "search_path" TO 'public'
-    AS $$
-  select team_id
-  from users_on_team
-  where user_id = auth.uid()
+AS $$
+    SELECT team_id
+    FROM users_on_team
+    WHERE user_id = auth.uid()
 $$;
 
 ALTER FUNCTION "private"."get_teams_for_authenticated_user"() OWNER TO "postgres";
 
-SET default_tablespace = '';
-
-SET default_table_access_method = "heap";
-
-CREATE TABLE IF NOT EXISTS "public"."transactions" (
-    "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
-    "date" "date" NOT NULL,
-    "name" "text" NOT NULL,
-    "method" "public"."transactionMethods" NOT NULL,
-    "amount" numeric NOT NULL,
-    "currency" "text" NOT NULL,
-    "team_id" "uuid" NOT NULL,
-    "assigned_id" "uuid",
-    "note" character varying,
-    "bank_account_id" "uuid",
-    "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
-    "internal_id" "text" NOT NULL,
-    "status" "public"."transactionStatus" DEFAULT 'posted'::"public"."transactionStatus",
-    "category" "public"."transactionCategories",
-    "balance" numeric,
-    "manual" boolean DEFAULT false,
-    "currency_rate" numeric,
-    "currency_source" "text",
-    "description" "text",
-    "category_slug" "text"
-);
-
-ALTER TABLE "public"."transactions" OWNER TO "postgres";
-
-CREATE OR REPLACE FUNCTION "public"."amount_text"("public"."transactions") RETURNS "text"
+-- Function to convert transaction amount to text
+CREATE OR REPLACE FUNCTION "public"."amount_text"("public"."transactions") 
+RETURNS "text"
     LANGUAGE "sql"
-    AS $_$
-  select ABS($1.amount)::text;
+AS $_$
+    SELECT ABS($1.amount)::text;
 $_$;
 
 ALTER FUNCTION "public"."amount_text"("public"."transactions") OWNER TO "postgres";
 
-CREATE OR REPLACE FUNCTION "public"."calculated_vat"("public"."transactions") RETURNS numeric
+-- Function to calculate VAT for a transaction
+CREATE OR REPLACE FUNCTION "public"."calculated_vat"("public"."transactions") 
+RETURNS numeric
     LANGUAGE "plpgsql"
-    AS $_$
-declare
+AS $_$
+DECLARE
     vat_rate numeric;
     vat_amount numeric;
-begin
-    if $1.category_slug is null then
-        return 0;
-    end if;
+BEGIN
+    IF $1.category_slug IS NULL THEN
+        RETURN 0;
+    END IF;
 
-    select vat into vat_rate
-        from transaction_categories as tc
-        where $1.category_slug = tc.slug
-        and $1.team_id = tc.team_id;
+    SELECT vat INTO vat_rate
+    FROM transaction_categories AS tc
+    WHERE $1.category_slug = tc.slug
+    AND $1.team_id = tc.team_id;
 
     vat_amount := $1.amount * (vat_rate / 100);
 
-    return abs(round(vat_amount, 2));
-end;
+    RETURN abs(round(vat_amount, 2));
+END;
 $_$;
 
 ALTER FUNCTION "public"."calculated_vat"("public"."transactions") OWNER TO "postgres";
 
-CREATE OR REPLACE FUNCTION "public"."create_team"("name" character varying) RETURNS "uuid"
-    LANGUAGE "plpgsql" SECURITY DEFINER
+-- Function to create a new team and assign owner
+CREATE OR REPLACE FUNCTION "public"."create_team"("name" character varying) 
+RETURNS "uuid"
+    LANGUAGE "plpgsql" 
+    SECURITY DEFINER
     SET "search_path" TO 'public'
-    AS $$
-declare
+AS $$
+DECLARE
     new_team_id uuid;
-begin
-    insert into teams (name) values (name) returning id into new_team_id;
-    insert into users_on_team (user_id, team_id, role) values (auth.uid(), new_team_id, 'owner');
+BEGIN
+    INSERT INTO teams (name) 
+    VALUES (name) 
+    RETURNING id INTO new_team_id;
 
-    return new_team_id;
-end;
+    INSERT INTO users_on_team (user_id, team_id, role) 
+    VALUES (auth.uid(), new_team_id, 'owner');
+
+    RETURN new_team_id;
+END;
 $$;
 
 ALTER FUNCTION "public"."create_team"("name" character varying) OWNER TO "postgres";
 
-CREATE OR REPLACE FUNCTION "public"."extract_product_names"("products_json" "json") RETURNS "text"
-    LANGUAGE "plpgsql" IMMUTABLE
-    AS $$
-begin
-    return (
-        select string_agg(value, ',') 
-        from json_array_elements_text(products_json) as arr(value)
+-- Function to extract product names from JSON array
+CREATE OR REPLACE FUNCTION "public"."extract_product_names"("products_json" "json") 
+RETURNS "text"
+    LANGUAGE "plpgsql" 
+    IMMUTABLE
+AS $$
+BEGIN
+    RETURN (
+        SELECT string_agg(value, ',') 
+        FROM json_array_elements_text(products_json) AS arr(value)
     );
-end;
+END;
 $$;
 
 ALTER FUNCTION "public"."extract_product_names"("products_json" "json") OWNER TO "postgres";
 
-CREATE OR REPLACE FUNCTION "public"."generate_hmac"("secret_key" "text", "message" "text") RETURNS "text"
+-- Function to generate HMAC using SHA256
+CREATE OR REPLACE FUNCTION "public"."generate_hmac"("secret_key" "text", "message" "text") 
+RETURNS "text"
     LANGUAGE "plpgsql"
-    AS $$
+AS $$
 DECLARE
     hmac_result bytea;
 BEGIN
@@ -272,435 +705,507 @@ $$;
 
 ALTER FUNCTION "public"."generate_hmac"("secret_key" "text", "message" "text") OWNER TO "postgres";
 
-CREATE OR REPLACE FUNCTION "public"."generate_id"("size" integer) RETURNS "text"
+-- Function to generate random ID of specified size
+CREATE OR REPLACE FUNCTION "public"."generate_id"("size" integer) 
+RETURNS "text"
     LANGUAGE "plpgsql"
-    AS $$
+AS $$
 DECLARE
-  characters TEXT := 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  bytes BYTEA := gen_random_bytes(size);
-  l INT := length(characters);
-  i INT := 0;
-  output TEXT := '';
+    characters TEXT := 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    bytes BYTEA := gen_random_bytes(size);
+    l INT := length(characters);
+    i INT := 0;
+    output TEXT := '';
 BEGIN
-  WHILE i < size LOOP
-    output := output || substr(characters, get_byte(bytes, i) % l + 1, 1);
-    i := i + 1;
-  END LOOP;
-  RETURN lower(output);
+    WHILE i < size LOOP
+        output := output || substr(characters, get_byte(bytes, i) % l + 1, 1);
+        i := i + 1;
+    END LOOP;
+    RETURN lower(output);
 END;
 $$;
 
 ALTER FUNCTION "public"."generate_id"("size" integer) OWNER TO "postgres";
 
-CREATE OR REPLACE FUNCTION "public"."generate_inbox"("size" integer) RETURNS "text"
+-- Function to generate inbox ID of specified size
+CREATE OR REPLACE FUNCTION "public"."generate_inbox"("size" integer) 
+RETURNS "text"
     LANGUAGE "plpgsql"
-    AS $$
+AS $$
 DECLARE
-  characters TEXT := 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  bytes BYTEA := extensions.gen_random_bytes(size);
-  l INT := length(characters);
-  i INT := 0;
-  output TEXT := '';
+    characters TEXT := 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    bytes BYTEA := extensions.gen_random_bytes(size);
+    l INT := length(characters);
+    i INT := 0;
+    output TEXT := '';
 BEGIN
-  WHILE i < size LOOP
-    output := output || substr(characters, get_byte(bytes, i) % l + 1, 1);
-    i := i + 1;
-  END LOOP;
-  RETURN lower(output);
+    WHILE i < size LOOP
+        output := output || substr(characters, get_byte(bytes, i) % l + 1, 1);
+        i := i + 1;
+    END LOOP;
+    RETURN lower(output);
 END;
 $$;
 
 ALTER FUNCTION "public"."generate_inbox"("size" integer) OWNER TO "postgres";
 
-CREATE OR REPLACE FUNCTION "public"."generate_inbox_fts"("display_name" "text", "products_json" "json") RETURNS "tsvector"
-    LANGUAGE "plpgsql" IMMUTABLE
-    AS $$
-begin
-    return to_tsvector('english', coalesce(display_name, '') || ' ' || (
-        select string_agg(value, ',') 
-        from json_array_elements_text(products_json) as arr(value)
+-- Function to generate inbox full-text search vector from display name and products JSON
+CREATE OR REPLACE FUNCTION "public"."generate_inbox_fts"("display_name" "text", "products_json" "json") 
+RETURNS "tsvector"
+    LANGUAGE "plpgsql" 
+    IMMUTABLE
+AS $$
+BEGIN
+    RETURN to_tsvector('english', coalesce(display_name, '') || ' ' || (
+        SELECT string_agg(value, ',') 
+        FROM json_array_elements_text(products_json) AS arr(value)
     ));
-end;
+END;
 $$;
 
 ALTER FUNCTION "public"."generate_inbox_fts"("display_name" "text", "products_json" "json") OWNER TO "postgres";
 
-CREATE OR REPLACE FUNCTION "public"."generate_inbox_fts"("display_name_text" "text", "product_names" "text") RETURNS "tsvector"
-    LANGUAGE "plpgsql" IMMUTABLE
-    AS $$
-begin
-    return to_tsvector('english', coalesce(display_name_text, '') || ' ' || coalesce(product_names, ''));
-end;
+-- Function to generate inbox full-text search vector from display name and product names
+CREATE OR REPLACE FUNCTION "public"."generate_inbox_fts"("display_name_text" "text", "product_names" "text") 
+RETURNS "tsvector"
+    LANGUAGE "plpgsql" 
+    IMMUTABLE
+AS $$
+BEGIN
+    RETURN to_tsvector('english', coalesce(display_name_text, '') || ' ' || coalesce(product_names, ''));
+END;
 $$;
 
 ALTER FUNCTION "public"."generate_inbox_fts"("display_name_text" "text", "product_names" "text") OWNER TO "postgres";
 
-CREATE OR REPLACE FUNCTION "public"."generate_inbox_fts"("display_name_text" "text", "product_names" "text", "amount" numeric, "due_date" "date") RETURNS "tsvector"
-    LANGUAGE "plpgsql" IMMUTABLE
-    AS $$
-begin
-    return to_tsvector('english', coalesce(display_name_text, '') || ' ' || coalesce(product_names, '') || ' ' || coalesce(amount::text, '') || ' ' || due_date);
-end;
+-- Function to generate inbox full-text search vector with amount and due date
+CREATE OR REPLACE FUNCTION "public"."generate_inbox_fts"("display_name_text" "text", "product_names" "text", "amount" numeric, "due_date" "date") 
+RETURNS "tsvector"
+    LANGUAGE "plpgsql" 
+    IMMUTABLE
+AS $$
+BEGIN
+    RETURN to_tsvector('english', 
+        coalesce(display_name_text, '') || ' ' || 
+        coalesce(product_names, '') || ' ' || 
+        coalesce(amount::text, '') || ' ' || 
+        due_date
+    );
+END;
 $$;
 
 ALTER FUNCTION "public"."generate_inbox_fts"("display_name_text" "text", "product_names" "text", "amount" numeric, "due_date" "date") OWNER TO "postgres";
 
-CREATE OR REPLACE FUNCTION "public"."generate_slug_from_name"() RETURNS "trigger"
+-- Trigger function to generate slug from name
+CREATE OR REPLACE FUNCTION "public"."generate_slug_from_name"() 
+RETURNS "trigger"
     LANGUAGE "plpgsql"
-    AS $$begin
-  if new.system is true then
-    return new;
-  end if;
+AS $$
+BEGIN
+    IF new.system IS TRUE THEN
+        RETURN new;
+    END IF;
 
-  new.slug := public.slugify(new.name);
-  return new;
-end$$;
+    new.slug := public.slugify(new.name);
+    RETURN new;
+END;
+$$;
 
 ALTER FUNCTION "public"."generate_slug_from_name"() OWNER TO "postgres";
 
-CREATE OR REPLACE FUNCTION "public"."get_bank_account_currencies"("team_id" "uuid") RETURNS TABLE("currency" "text")
+-- Function to get unique currencies for bank accounts in a team
+CREATE OR REPLACE FUNCTION "public"."get_bank_account_currencies"("team_id" "uuid") 
+RETURNS TABLE("currency" "text")
     LANGUAGE "plpgsql"
-    AS $$
-begin
-  return query select distinct bank_accounts.currency from bank_accounts where bank_accounts.team_id = get_bank_account_currencies.team_id order by bank_accounts.currency;
-end;
+AS $$
+BEGIN
+    RETURN QUERY 
+    SELECT DISTINCT bank_accounts.currency 
+    FROM bank_accounts 
+    WHERE bank_accounts.team_id = get_bank_account_currencies.team_id 
+    ORDER BY bank_accounts.currency;
+END;
 $$;
 
 ALTER FUNCTION "public"."get_bank_account_currencies"("team_id" "uuid") OWNER TO "postgres";
 
-CREATE OR REPLACE FUNCTION "public"."get_burn_rate"("team_id" "uuid", "date_from" "date", "date_to" "date", "currency" "text") RETURNS TABLE("date" timestamp with time zone, "value" numeric)
+-- Function to calculate burn rate over time
+CREATE OR REPLACE FUNCTION "public"."get_burn_rate"(
+    "team_id" "uuid", 
+    "date_from" "date", 
+    "date_to" "date", 
+    "currency" "text"
+) RETURNS TABLE("date" timestamp with time zone, "value" numeric)
     LANGUAGE "plpgsql"
-    AS $$begin
-  return query
-    select 
-      date_trunc('month', month_series) as date,
-      coalesce(sum(abs(amount)), 0) as value
-    from 
-      generate_series(
-        date_trunc('month', date_from),
-        date_trunc('month', date_to),
-        interval '1 month'
-      ) as month_series
-      left join transactions as t on date_trunc('month', t.date) = date_trunc('month', month_series)
-                                 and t.team_id = get_burn_rate.team_id
-                                 and t.category_slug != 'transfer'
-                                 and t.status = 'posted'
-                                 and t.amount < 0
-                                 and t.currency = get_burn_rate.currency
-    group by 
-      date_trunc('month', month_series)
-    order by 
-      date_trunc('month', month_series) asc;
-end;$$;
+AS $$
+BEGIN
+    RETURN QUERY
+    SELECT 
+        date_trunc('month', month_series) AS date,
+        coalesce(sum(abs(amount)), 0) AS value
+    FROM 
+        generate_series(
+            date_trunc('month', date_from),
+            date_trunc('month', date_to),
+            interval '1 month'
+        ) AS month_series
+        LEFT JOIN transactions AS t 
+            ON date_trunc('month', t.date) = date_trunc('month', month_series)
+            AND t.team_id = get_burn_rate.team_id
+            AND t.category_slug != 'transfer'
+            AND t.status = 'posted'
+            AND t.amount < 0
+            AND t.currency = get_burn_rate.currency
+    GROUP BY 
+        date_trunc('month', month_series)
+    ORDER BY 
+        date_trunc('month', month_series) ASC;
+END;
+$$;
 
-ALTER FUNCTION "public"."get_burn_rate"("team_id" "uuid", "date_from" "date", "date_to" "date", "currency" "text") OWNER TO "postgres";
-
-CREATE OR REPLACE FUNCTION "public"."get_current_burn_rate"("team_id" "uuid", "currency" "text") RETURNS numeric
+-- Function to get current month's burn rate
+CREATE OR REPLACE FUNCTION "public"."get_current_burn_rate"(
+    "team_id" "uuid", 
+    "currency" "text"
+) RETURNS numeric
     LANGUAGE "plpgsql"
-    AS $$declare
+AS $$
+DECLARE
     current_burn_rate numeric;
-begin
-    select 
-        coalesce(sum(abs(amount)), 0) into current_burn_rate
-    from 
-        transactions AS t
-    where 
-        date_trunc('month', t.date) = date_trunc('month', current_date)
-        and t.team_id = get_current_burn_rate.team_id
-        and t.category_slug != 'transfer'
-        and t.status = 'posted'
-        and t.currency = get_current_burn_rate.currency
-        and t.amount < 0;
+BEGIN
+    SELECT coalesce(sum(abs(amount)), 0) INTO current_burn_rate
+    FROM transactions AS t
+    WHERE date_trunc('month', t.date) = date_trunc('month', current_date)
+        AND t.team_id = get_current_burn_rate.team_id
+        AND t.category_slug != 'transfer'
+        AND t.status = 'posted'
+        AND t.currency = get_current_burn_rate.currency
+        AND t.amount < 0;
 
-    return current_burn_rate;
-end;$$;
+    RETURN current_burn_rate;
+END;
+$$;
 
-ALTER FUNCTION "public"."get_current_burn_rate"("team_id" "uuid", "currency" "text") OWNER TO "postgres";
-
-CREATE OR REPLACE FUNCTION "public"."get_profit"("team_id" "uuid", "date_from" "date", "date_to" "date", "currency" "text") RETURNS TABLE("date" timestamp with time zone, "value" numeric)
+-- Function to calculate profit over time
+CREATE OR REPLACE FUNCTION "public"."get_profit"(
+    "team_id" "uuid", 
+    "date_from" "date", 
+    "date_to" "date", 
+    "currency" "text"
+) RETURNS TABLE("date" timestamp with time zone, "value" numeric)
     LANGUAGE "plpgsql"
-    AS $$begin
-  return query
-    select
-      date_trunc('month', month_series) as date,
-      coalesce(sum(amount), 0) as value
-    from
-      generate_series(
-        date_from::date,
-        date_to::date,
-        interval '1 month'
-      ) as month_series
-      left join transactions as t on date_trunc('month', t.date) = date_trunc('month', month_series)
-      and t.team_id = get_profit.team_id
-      and t.category_slug != 'transfer'
-      and t.status = 'posted'
-      and t.currency = get_profit.currency
-    group by
-      date_trunc('month', month_series)
-    order by
-      date_trunc('month', month_series);
-end;$$;
+AS $$
+BEGIN
+    RETURN QUERY
+    SELECT
+        date_trunc('month', month_series) AS date,
+        coalesce(sum(amount), 0) AS value
+    FROM
+        generate_series(
+            date_from::date,
+            date_to::date,
+            interval '1 month'
+        ) AS month_series
+        LEFT JOIN transactions AS t 
+            ON date_trunc('month', t.date) = date_trunc('month', month_series)
+            AND t.team_id = get_profit.team_id
+            AND t.category_slug != 'transfer'
+            AND t.status = 'posted'
+            AND t.currency = get_profit.currency
+    GROUP BY
+        date_trunc('month', month_series)
+    ORDER BY
+        date_trunc('month', month_series);
+END;
+$$;
 
-ALTER FUNCTION "public"."get_profit"("team_id" "uuid", "date_from" "date", "date_to" "date", "currency" "text") OWNER TO "postgres";
-
-CREATE OR REPLACE FUNCTION "public"."get_revenue"("team_id" "uuid", "date_from" "date", "date_to" "date", "currency" "text") RETURNS TABLE("date" timestamp with time zone, "value" numeric)
+-- Function to calculate revenue over time
+CREATE OR REPLACE FUNCTION "public"."get_revenue"(
+    "team_id" "uuid", 
+    "date_from" "date", 
+    "date_to" "date", 
+    "currency" "text"
+) RETURNS TABLE("date" timestamp with time zone, "value" numeric)
     LANGUAGE "plpgsql"
-    AS $$begin
-  return query
-    select
-      date_trunc('month', month_series) as date,
-      coalesce(sum(amount), 0) as value
-    from
-      generate_series(
-        date_from::date,
-        date_to::date,
-        interval '1 month'
-      ) as month_series
-      left join transactions as t on date_trunc('month', t.date) = date_trunc('month', month_series)
-      and t.team_id = get_revenue.team_id
-      and t.category_slug != 'transfer'
-      and t.category_slug = 'income'
-      and t.status = 'posted'
-      and t.currency = get_revenue.currency
-    group by
-      date_trunc('month', month_series)
-    order by
-      date_trunc('month', month_series);
-end;$$;
+AS $$
+BEGIN
+    RETURN QUERY
+    SELECT
+        date_trunc('month', month_series) AS date,
+        coalesce(sum(amount), 0) AS value
+    FROM
+        generate_series(
+            date_from::date,
+            date_to::date,
+            interval '1 month'
+        ) AS month_series
+        LEFT JOIN transactions AS t 
+            ON date_trunc('month', t.date) = date_trunc('month', month_series)
+            AND t.team_id = get_revenue.team_id
+            AND t.category_slug != 'transfer'
+            AND t.category_slug = 'income'
+            AND t.status = 'posted'
+            AND t.currency = get_revenue.currency
+    GROUP BY
+        date_trunc('month', month_series)
+    ORDER BY
+        date_trunc('month', month_series);
+END;
+$$;
 
-ALTER FUNCTION "public"."get_revenue"("team_id" "uuid", "date_from" "date", "date_to" "date", "currency" "text") OWNER TO "postgres";
-
-CREATE OR REPLACE FUNCTION "public"."get_runway"("team_id" "uuid", "date_from" "date", "date_to" "date", "currency" "text") RETURNS numeric
+-- Function to calculate runway (months of operation remaining based on burn rate)
+CREATE OR REPLACE FUNCTION "public"."get_runway"(
+    "team_id" "uuid", 
+    "date_from" "date", 
+    "date_to" "date", 
+    "currency" "text"
+) RETURNS numeric
     LANGUAGE "plpgsql"
-    AS $$
-declare
+AS $$
+DECLARE
     total_balance numeric;
     avg_burn_rate numeric;
     number_of_months numeric;
-begin
-    select * from get_total_balance(team_id, currency) into total_balance;
-    select (extract(year FROM date_to) - extract(year FROM date_from)) * 12 +
-           extract(month FROM date_to) - extract(month FROM date_from) into number_of_months;
-    select round(avg(value)) from get_burn_rate(team_id, date_from, date_to, currency) into avg_burn_rate;
+BEGIN
+    SELECT * FROM get_total_balance(team_id, currency) INTO total_balance;
+    
+    SELECT (extract(year FROM date_to) - extract(year FROM date_from)) * 12 +
+           extract(month FROM date_to) - extract(month FROM date_from) 
+    INTO number_of_months;
+    
+    SELECT round(avg(value)) 
+    FROM get_burn_rate(team_id, date_from, date_to, currency) 
+    INTO avg_burn_rate;
 
-    return round(total_balance / avg_burn_rate);
-end;
+    RETURN round(total_balance / avg_burn_rate);
+END;
 $$;
 
-ALTER FUNCTION "public"."get_runway"("team_id" "uuid", "date_from" "date", "date_to" "date", "currency" "text") OWNER TO "postgres";
-
-CREATE OR REPLACE FUNCTION "public"."get_spending"("team_id" "uuid", "date_from" "date", "date_to" "date", "currency_target" "text") RETURNS TABLE("name" "text", "slug" "text", "amount" numeric, "currency" "text", "color" "text", "percentage" numeric)
+-- Function to analyze spending by category
+CREATE OR REPLACE FUNCTION "public"."get_spending"(
+    "team_id" "uuid", 
+    "date_from" "date", 
+    "date_to" "date", 
+    "currency_target" "text"
+) RETURNS TABLE(
+    "name" "text", 
+    "slug" "text", 
+    "amount" numeric, 
+    "currency" "text", 
+    "color" "text", 
+    "percentage" numeric
+)
     LANGUAGE "plpgsql"
-    AS $$
-declare
+AS $$
+DECLARE
     total_amount numeric;
-begin
-    select sum(t.amount) into total_amount
-    from transactions as t
-    where t.team_id = get_spending.team_id
-        and t.category != 'transfer'
-        and t.currency = currency_target
-        and t.date >= date_from
-        and t.date <= date_to
-        and t.amount < 0;
+BEGIN
+    -- Calculate total amount for percentage calculations
+    SELECT sum(t.amount) INTO total_amount
+    FROM transactions AS t
+    WHERE t.team_id = get_spending.team_id
+        AND t.category != 'transfer'
+        AND t.currency = currency_target
+        AND t.date >= date_from
+        AND t.date <= date_to
+        AND t.amount < 0;
 
-    return query
-    select 
+    RETURN QUERY
+    SELECT 
         coalesce(category.name, 'Uncategorized') AS name,
-        coalesce(category.slug, 'uncategorized') as slug,
-        sum(t.amount) as amount,
+        coalesce(category.slug, 'uncategorized') AS slug,
+        sum(t.amount) AS amount,
         t.currency,
-        coalesce(category.color, '#606060') as color,
-        case 
-            when ((sum(t.amount) / total_amount) * 100) > 1 then
+        coalesce(category.color, '#606060') AS color,
+        CASE 
+            WHEN ((sum(t.amount) / total_amount) * 100) > 1 THEN
                 round((sum(t.amount) / total_amount) * 100)
-            else
+            ELSE
                 round((sum(t.amount) / total_amount) * 100, 2)
-        end as percentage
-    from 
-        transactions as t
-    left join
-        transaction_categories as category on t.team_id = category.team_id and t.category_slug = category.slug
-    where 
-        t.team_id = get_spending.team_id
-        and t.category_slug != 'transfer'
-        and t.currency = currency_target
-        and t.date >= date_from
-        and t.date <= date_to
-        and t.amount < 0
-    group by
+        END AS percentage
+    FROM transactions AS t
+    LEFT JOIN transaction_categories AS category 
+        ON t.team_id = category.team_id 
+        AND t.category_slug = category.slug
+    WHERE t.team_id = get_spending.team_id
+        AND t.category_slug != 'transfer'
+        AND t.currency = currency_target
+        AND t.date >= date_from
+        AND t.date <= date_to
+        AND t.amount < 0
+    GROUP BY
         category.name,
         coalesce(category.slug, 'uncategorized'),
         t.currency,
         category.color
-    order by
-        sum(t.amount) asc;
-end;
+    ORDER BY
+        sum(t.amount) ASC;
+END;
 $$;
 
+-- Set ownership for all functions
+ALTER FUNCTION "public"."get_burn_rate"("team_id" "uuid", "date_from" "date", "date_to" "date", "currency" "text") OWNER TO "postgres";
+ALTER FUNCTION "public"."get_current_burn_rate"("team_id" "uuid", "currency" "text") OWNER TO "postgres";
+ALTER FUNCTION "public"."get_profit"("team_id" "uuid", "date_from" "date", "date_to" "date", "currency" "text") OWNER TO "postgres";
+ALTER FUNCTION "public"."get_revenue"("team_id" "uuid", "date_from" "date", "date_to" "date", "currency" "text") OWNER TO "postgres";
+ALTER FUNCTION "public"."get_runway"("team_id" "uuid", "date_from" "date", "date_to" "date", "currency" "text") OWNER TO "postgres";
 ALTER FUNCTION "public"."get_spending"("team_id" "uuid", "date_from" "date", "date_to" "date", "currency_target" "text") OWNER TO "postgres";
 
-CREATE OR REPLACE FUNCTION "public"."get_spending_v2"("team_id" "uuid", "date_from" "date", "date_to" "date", "currency_target" "text") RETURNS TABLE("name" "text", "slug" "text", "amount" numeric, "currency" "text", "color" "text", "percentage" numeric)
+-- Function to analyze spending by category (version 2)
+CREATE OR REPLACE FUNCTION "public"."get_spending_v2"(
+    "team_id" "uuid", 
+    "date_from" "date", 
+    "date_to" "date", 
+    "currency_target" "text"
+) RETURNS TABLE(
+    "name" "text", 
+    "slug" "text", 
+    "amount" numeric, 
+    "currency" "text", 
+    "color" "text", 
+    "percentage" numeric
+)
     LANGUAGE "plpgsql"
-    AS $$
-
-declare
+AS $$
+DECLARE
     total_amount numeric;
-begin
+BEGIN
     -- Calculate the total amount spent
-    select sum(t.amount) into total_amount
-    from transactions as t
-    where t.team_id = get_spending_v2.team_id
-        and t.category != 'transfer'
-        and t.currency = currency_target
-        and t.date >= date_from
-        and t.date <= date_to
-        and t.amount < 0;
+    SELECT sum(t.amount) INTO total_amount
+    FROM transactions AS t
+    WHERE t.team_id = get_spending_v2.team_id
+        AND t.category != 'transfer'
+        AND t.currency = currency_target
+        AND t.date >= date_from
+        AND t.date <= date_to
+        AND t.amount < 0;
 
-    return query
-    select 
+    RETURN QUERY
+    SELECT 
         coalesce(category.name, 'Uncategorized') AS name,
-        coalesce(category.slug, 'uncategorized') as slug,
-        sum(t.amount) as amount,
+        coalesce(category.slug, 'uncategorized') AS slug,
+        sum(t.amount) AS amount,
         t.currency,
-        coalesce(category.color, '#606060') as color,
-        case 
-            when ((sum(t.amount) / total_amount) * 100) > 1 then
+        coalesce(category.color, '#606060') AS color,
+        CASE 
+            WHEN ((sum(t.amount) / total_amount) * 100) > 1 THEN
                 round((sum(t.amount) / total_amount) * 100)
-            else
+            ELSE
                 round((sum(t.amount) / total_amount) * 100, 2)
-        end as percentage
-    from 
-        transactions as t
-    left join
-        transaction_categories as category on t.team_id = category.team_id and t.category_slug = category.slug
-    where 
-        t.team_id = get_spending_v2.team_id
-        and t.category_slug != 'transfer'
-        and t.currency = currency_target
-        and t.date >= date_from
-        and t.date <= date_to
-        and t.amount < 0
-    group by
+        END AS percentage
+    FROM transactions AS t
+    LEFT JOIN transaction_categories AS category 
+        ON t.team_id = category.team_id 
+        AND t.category_slug = category.slug
+    WHERE t.team_id = get_spending_v2.team_id
+        AND t.category_slug != 'transfer'
+        AND t.currency = currency_target
+        AND t.date >= date_from
+        AND t.date <= date_to
+        AND t.amount < 0
+    GROUP BY
         category.name,
         coalesce(category.slug, 'uncategorized'),
         t.currency,
         category.color
-    order by
-        sum(t.amount) asc;
-end;
+    ORDER BY
+        sum(t.amount) ASC;
+END;
 $$;
 
-ALTER FUNCTION "public"."get_spending_v2"("team_id" "uuid", "date_from" "date", "date_to" "date", "currency_target" "text") OWNER TO "postgres";
-
-CREATE OR REPLACE FUNCTION "public"."get_total_balance"("team_id" "uuid", "currency" "text") RETURNS numeric
+-- Function to get total balance for a team in specific currency
+CREATE OR REPLACE FUNCTION "public"."get_total_balance"(
+    "team_id" "uuid", 
+    "currency" "text"
+) RETURNS numeric
     LANGUAGE "plpgsql"
-    AS $$
-declare
+AS $$
+DECLARE
     total_balance numeric;
-begin
-    select 
-        coalesce(sum(abs(balance)), 0) into total_balance
-    from 
-        bank_accounts AS b
-    where 
-        enabled = true
-        and b.team_id = get_total_balance.team_id
-        and b.currency = get_total_balance.currency;
+BEGIN
+    SELECT coalesce(sum(abs(balance)), 0) INTO total_balance
+    FROM bank_accounts AS b
+    WHERE enabled = true
+        AND b.team_id = get_total_balance.team_id
+        AND b.currency = get_total_balance.currency;
 
-    return total_balance;
-end;
+    RETURN total_balance;
+END;
 $$;
 
-ALTER FUNCTION "public"."get_total_balance"("team_id" "uuid", "currency" "text") OWNER TO "postgres";
-
-CREATE OR REPLACE FUNCTION "public"."handle_new_user"() RETURNS "trigger"
-    LANGUAGE "plpgsql" SECURITY DEFINER
+-- Trigger function to handle new user creation
+CREATE OR REPLACE FUNCTION "public"."handle_new_user"() 
+RETURNS "trigger"
+    LANGUAGE "plpgsql" 
+    SECURITY DEFINER
     SET "search_path" TO 'public'
-    AS $$
-declare
-  new_team_id uuid;
-begin
-  -- insert into public.users
-  insert into public.users (
-    id,
-    full_name,
-    avatar_url,
-    email
-  )
-  values (
-    new.id,
-    new.raw_user_meta_data->>'full_name',
-    new.raw_user_meta_data->>'avatar_url',
-    new.email
-  );
+AS $$
+DECLARE
+    new_team_id uuid;
+BEGIN
+    -- Create user profile
+    INSERT INTO public.users (
+        id,
+        full_name,
+        avatar_url,
+        email
+    )
+    VALUES (
+        new.id,
+        new.raw_user_meta_data->>'full_name',
+        new.raw_user_meta_data->>'avatar_url',
+        new.email
+    );
 
-  -- insert into public.teams and return the new_team_id
-  insert into public.teams (
-    name,
-    email,
-    inbox_email
-  )
-  values (
-    new.raw_user_meta_data->>'full_name',
-    new.email,
-    new.email
-  )
-  returning id into new_team_id; -- capture the team_id here
+    -- Create team for user
+    INSERT INTO public.teams (
+        name,
+        email,
+        inbox_email
+    )
+    VALUES (
+        new.raw_user_meta_data->>'full_name',
+        new.email,
+        new.email
+    )
+    RETURNING id INTO new_team_id;
 
-  -- insert into public.users_on_team using the captured team_id
-  insert into public.users_on_team (
-    user_id,
-    team_id,
-    role
-  )
-  values (
-    new.id,
-    new_team_id, -- use the captured team_id here
-    'owner'
-  );
+    -- Associate user with team
+    INSERT INTO public.users_on_team (
+        user_id,
+        team_id,
+        role
+    )
+    VALUES (
+        new.id,
+        new_team_id,
+        'owner'
+    );
 
-  update public.users
-  set team_id = new_team_id
-  where id = new.id;
+    -- Update user's default team
+    UPDATE public.users
+    SET team_id = new_team_id
+    WHERE id = new.id;
 
-  return new;
-end;
+    RETURN new;
+END;
 $$;
 
-ALTER FUNCTION "public"."handle_new_user"() OWNER TO "postgres";
-
-CREATE TABLE IF NOT EXISTS "public"."inbox" (
-    "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
-    "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
-    "team_id" "uuid",
-    "file_path" "text"[],
-    "file_name" "text",
-    "transaction_id" "uuid",
-    "amount" numeric,
-    "currency" "text",
-    "content_type" "text",
-    "size" bigint,
-    "attachment_id" "uuid",
-    "due_date" "date",
-    "forwarded_to" "text",
-    "reference_id" "text",
-    "meta" "json",
-    "status" "public"."inbox_status" DEFAULT 'new'::"public"."inbox_status",
-    "website" "text",
-    "display_name" "text",
-    "fts" "tsvector" GENERATED ALWAYS AS ("public"."generate_inbox_fts"("display_name", "public"."extract_product_names"(("meta" -> 'products'::"text")))) STORED
-);
-
-ALTER TABLE "public"."inbox" OWNER TO "postgres";
-
-CREATE OR REPLACE FUNCTION "public"."inbox_amount_text"("public"."inbox") RETURNS "text"
+-- Function to format inbox amount as text
+CREATE OR REPLACE FUNCTION "public"."inbox_amount_text"("public"."inbox") 
+RETURNS "text"
     LANGUAGE "sql"
-    AS $_$
-  select ABS($1.amount)::text;
+AS $_$
+    SELECT ABS($1.amount)::text;
 $_$;
 
+-- Set ownership for all functions
+ALTER FUNCTION "public"."get_spending_v2"("team_id" "uuid", "date_from" "date", "date_to" "date", "currency_target" "text") OWNER TO "postgres";
+ALTER FUNCTION "public"."get_total_balance"("team_id" "uuid", "currency" "text") OWNER TO "postgres";
+ALTER FUNCTION "public"."handle_new_user"() OWNER TO "postgres";
 ALTER FUNCTION "public"."inbox_amount_text"("public"."inbox") OWNER TO "postgres";
+
+
 
 CREATE OR REPLACE FUNCTION "public"."insert_system_categories"() RETURNS "trigger"
     LANGUAGE "plpgsql" SECURITY DEFINER
@@ -729,28 +1234,47 @@ end$$;
 
 ALTER FUNCTION "public"."insert_system_categories"() OWNER TO "postgres";
 
-CREATE OR REPLACE FUNCTION "public"."is_fulfilled"("public"."transactions") RETURNS boolean
-    LANGUAGE "plpgsql"
-    AS $_$
-declare
-    attachment_count int;
-begin
-    select count(*) into attachment_count from transaction_attachments where transaction_id = $1.id;
-    return attachment_count > 0 or $1.status = 'completed';
-end;
+
+-- Function to format inbox amount as text
+CREATE OR REPLACE FUNCTION "public"."inbox_amount_text"("public"."inbox") 
+RETURNS "text"
+    LANGUAGE "sql"
+AS $_$
+    SELECT ABS($1.amount)::text;
 $_$;
 
-ALTER FUNCTION "public"."is_fulfilled"("public"."transactions") OWNER TO "postgres";
+-- Function to check if a transaction is fulfilled
+CREATE OR REPLACE FUNCTION "public"."is_fulfilled"("public"."transactions") 
+RETURNS boolean
+    LANGUAGE "plpgsql"
+AS $_$
+DECLARE
+    attachment_count int;
+BEGIN
+    SELECT count(*) INTO attachment_count 
+    FROM transaction_attachments 
+    WHERE transaction_id = $1.id;
+    
+    RETURN attachment_count > 0 OR $1.status = 'completed';
+END;
+$_$;
 
-CREATE OR REPLACE FUNCTION "public"."nanoid"("size" integer DEFAULT 21, "alphabet" "text" DEFAULT '_-0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'::"text", "additionalbytesfactor" double precision DEFAULT 1.6) RETURNS "text"
-    LANGUAGE "plpgsql" PARALLEL SAFE
-    AS $$
+-- Function to generate nanoid with custom parameters
+CREATE OR REPLACE FUNCTION "public"."nanoid"(
+    "size" integer DEFAULT 21, 
+    "alphabet" "text" DEFAULT '_-0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ', 
+    "additionalbytesfactor" double precision DEFAULT 1.6
+) RETURNS "text"
+    LANGUAGE "plpgsql" 
+    PARALLEL SAFE
+AS $$
 DECLARE
     alphabetArray  text[];
     alphabetLength int := 64;
-    mask           int := 63;
-    step           int := 34;
+    mask          int := 63;
+    step          int := 34;
 BEGIN
+    -- Input validation
     IF size IS NULL OR size < 1 THEN
         RAISE EXCEPTION 'The size must be defined and greater than 0!';
     END IF;
@@ -763,24 +1287,30 @@ BEGIN
         RAISE EXCEPTION 'The additional bytes factor can''t be less than 1!';
     END IF;
 
+    -- Calculate parameters
     alphabetArray := regexp_split_to_array(alphabet, '');
     alphabetLength := array_length(alphabetArray, 1);
     mask := (2 << cast(floor(log(alphabetLength - 1) / log(2)) as int)) - 1;
     step := cast(ceil(additionalBytesFactor * mask * size / alphabetLength) AS int);
 
     IF step > 1024 THEN
-        step := 1024; -- The step size % can''t be bigger then 1024!
+        step := 1024; -- The step size can't be bigger than 1024
     END IF;
 
     RETURN nanoid_optimized(size, alphabet, mask, step);
-END
+END;
 $$;
 
-ALTER FUNCTION "public"."nanoid"("size" integer, "alphabet" "text", "additionalbytesfactor" double precision) OWNER TO "postgres";
-
-CREATE OR REPLACE FUNCTION "public"."nanoid_optimized"("size" integer, "alphabet" "text", "mask" integer, "step" integer) RETURNS "text"
-    LANGUAGE "plpgsql" PARALLEL SAFE
-    AS $$
+-- Optimized nanoid generation function
+CREATE OR REPLACE FUNCTION "public"."nanoid_optimized"(
+    "size" integer, 
+    "alphabet" "text", 
+    "mask" integer, 
+    "step" integer
+) RETURNS "text"
+    LANGUAGE "plpgsql" 
+    PARALLEL SAFE
+AS $$
 DECLARE
     idBuilder      text := '';
     counter        int  := 0;
@@ -794,196 +1324,193 @@ BEGIN
 
     LOOP
         bytes := extensions.gen_random_bytes(step);
-        FOR counter IN 0..step - 1
-            LOOP
-                alphabetIndex := (get_byte(bytes, counter) & mask) + 1;
-                IF alphabetIndex <= alphabetLength THEN
-                    idBuilder := idBuilder || alphabetArray[alphabetIndex];
-                    IF length(idBuilder) = size THEN
-                        RETURN idBuilder;
-                    END IF;
+        FOR counter IN 0..step - 1 LOOP
+            alphabetIndex := (get_byte(bytes, counter) & mask) + 1;
+            IF alphabetIndex <= alphabetLength THEN
+                idBuilder := idBuilder || alphabetArray[alphabetIndex];
+                IF length(idBuilder) = size THEN
+                    RETURN idBuilder;
                 END IF;
-            END LOOP;
+            END IF;
+        END LOOP;
     END LOOP;
-END
+END;
 $$;
 
-ALTER FUNCTION "public"."nanoid_optimized"("size" integer, "alphabet" "text", "mask" integer, "step" integer) OWNER TO "postgres";
-
-CREATE TABLE IF NOT EXISTS "public"."tracker_entries" (
-    "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
-    "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
-    "duration" bigint,
-    "project_id" "uuid",
-    "start" timestamp without time zone,
-    "stop" timestamp without time zone,
-    "assigned_id" "uuid",
-    "team_id" "uuid",
-    "description" "text",
-    "rate" numeric,
-    "currency" "text",
-    "billed" boolean DEFAULT false,
-    "date" "date" DEFAULT "now"()
-);
-
-ALTER TABLE "public"."tracker_entries" OWNER TO "postgres";
-
-COMMENT ON COLUMN "public"."tracker_entries"."duration" IS 'Time entry duration. For running entries should be negative, preferable -1';
-
-COMMENT ON COLUMN "public"."tracker_entries"."start" IS 'Start time in UTC';
-
-COMMENT ON COLUMN "public"."tracker_entries"."stop" IS 'Stop time in UTC, can be null if it''s still running or created with duration';
-
-COMMENT ON COLUMN "public"."tracker_entries"."description" IS 'Time Entry description, null if not provided at creation/update';
-
-CREATE OR REPLACE FUNCTION "public"."project_members"("public"."tracker_entries") RETURNS TABLE("id" "uuid", "avatar_url" "text", "full_name" "text")
+-- Function to get project members from entries
+CREATE OR REPLACE FUNCTION "public"."project_members"("public"."tracker_entries") 
+RETURNS TABLE("id" "uuid", "avatar_url" "text", "full_name" "text")
     LANGUAGE "sql"
-    AS $_$
-  select distinct on (users.id) users.id, users.avatar_url, users.full_name
-  from tracker_entries
-  join users on tracker_entries.user_id = users.id
-  where tracker_entries.project_id = $1.project_id;
+AS $_$
+    SELECT DISTINCT ON (users.id) 
+        users.id, 
+        users.avatar_url, 
+        users.full_name
+    FROM tracker_entries
+    JOIN users ON tracker_entries.user_id = users.id
+    WHERE tracker_entries.project_id = $1.project_id;
 $_$;
 
-ALTER FUNCTION "public"."project_members"("public"."tracker_entries") OWNER TO "postgres";
+-- Function to get project members from projects
+CREATE OR REPLACE FUNCTION "public"."project_members"("public"."tracker_projects") 
+RETURNS TABLE("id" "uuid", "avatar_url" "text", "full_name" "text")
+    LANGUAGE "sql"
+AS $$
+    SELECT DISTINCT ON (users.id) 
+        users.id, 
+        users.avatar_url, 
+        users.full_name
+    FROM tracker_projects
+    LEFT JOIN tracker_entries ON tracker_projects.id = tracker_entries.project_id
+    LEFT JOIN users ON tracker_entries.user_id = users.id;
+$$;
 
-CREATE TABLE IF NOT EXISTS "public"."tracker_projects" (
-    "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
-    "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
-    "team_id" "uuid",
-    "rate" numeric,
-    "currency" "text",
-    "status" "public"."trackerStatus" DEFAULT 'in_progress'::"public"."trackerStatus" NOT NULL,
-    "description" "text",
-    "name" "text" NOT NULL,
-    "billable" boolean DEFAULT false,
-    "estimate" bigint
-);
+-- Function to convert text to URL-friendly slug
+CREATE OR REPLACE FUNCTION "public"."slugify"("value" "text") 
+RETURNS "text"
+    LANGUAGE "sql" 
+    IMMUTABLE STRICT
+AS $_$
+    -- removes accents (diacritic signs) from a given string
+    WITH "unaccented" AS (
+        SELECT unaccent("value") AS "value"
+    ),
+    -- lowercase the string
+    "lowercase" AS (
+        SELECT lower("value") AS "value"
+        FROM "unaccented"
+    ),
+    -- remove single and double quotes
+    "removed_quotes" AS (
+        SELECT regexp_replace("value", '[''"]+', '', 'gi') AS "value"
+        FROM "lowercase"
+    ),
+    -- replace non-alphanumeric with hyphen
+    "hyphenated" AS (
+        SELECT regexp_replace("value", '[^a-z0-9\\-_]+', '-', 'gi') AS "value"
+        FROM "removed_quotes"
+    ),
+    -- trim hyphens from ends
+    "trimmed" AS (
+        SELECT regexp_replace(regexp_replace("value", '\-+$', ''), '^\-', '') AS "value"
+        FROM "hyphenated"
+    )
+    SELECT "value" FROM "trimmed";
+$_$;
 
-ALTER TABLE "public"."tracker_projects" OWNER TO "postgres";
+-- Function to calculate total duration for a project
+CREATE OR REPLACE FUNCTION "public"."total_duration"("public"."tracker_projects") 
+RETURNS integer
+    LANGUAGE "sql"
+AS $_$
+    SELECT sum(tracker_entries.duration) AS total_duration
+    FROM tracker_projects
+    JOIN tracker_entries ON tracker_projects.id = tracker_entries.project_id
+    WHERE tracker_projects.id = $1.id
+    GROUP BY tracker_projects.id;
+$_$;
 
+-- Trigger function to enrich transaction with category
+CREATE OR REPLACE FUNCTION "public"."update_enrich_transaction"() 
+RETURNS "trigger"
+    LANGUAGE "plpgsql" 
+    SECURITY DEFINER
+AS $$
+DECLARE
+    enrichment_category text;
+BEGIN
+    IF new.category_slug IS NULL THEN
+        SELECT category_slug INTO enrichment_category
+        FROM transaction_enrichments te
+        WHERE te.name = new.name
+            AND (te.system = true OR new.team_id = te.team_id)
+        LIMIT 1;
+        
+        new.category_slug := enrichment_category;
+    END IF;
+
+    RETURN new;
+END;
+$$;
+
+-- Column comments
+COMMENT ON COLUMN "public"."tracker_entries"."duration" IS 'Time entry duration. For running entries should be negative, preferable -1';
+COMMENT ON COLUMN "public"."tracker_entries"."start" IS 'Start time in UTC';
+COMMENT ON COLUMN "public"."tracker_entries"."stop" IS 'Stop time in UTC, can be null if it''s still running or created with duration';
+COMMENT ON COLUMN "public"."tracker_entries"."description" IS 'Time Entry description, null if not provided at creation/update';
 COMMENT ON COLUMN "public"."tracker_projects"."rate" IS 'Custom rate for project';
 
-CREATE OR REPLACE FUNCTION "public"."project_members"("public"."tracker_projects") RETURNS TABLE("id" "uuid", "avatar_url" "text", "full_name" "text")
-    LANGUAGE "sql"
-    AS $$
-  select distinct on (users.id) users.id, users.avatar_url, users.full_name
-  from tracker_projects
-  left join tracker_entries on tracker_projects.id = tracker_entries.project_id
-  left join users on tracker_entries.user_id = users.id;
-$$;
-
+-- Set ownership for all functions
+ALTER FUNCTION "public"."inbox_amount_text"("public"."inbox") OWNER TO "postgres";
+ALTER FUNCTION "public"."is_fulfilled"("public"."transactions") OWNER TO "postgres";
+ALTER FUNCTION "public"."nanoid"("size" integer, "alphabet" "text", "additionalbytesfactor" double precision) OWNER TO "postgres";
+ALTER FUNCTION "public"."nanoid_optimized"("size" integer, "alphabet" "text", "mask" integer, "step" integer) OWNER TO "postgres";
+ALTER FUNCTION "public"."project_members"("public"."tracker_entries") OWNER TO "postgres";
 ALTER FUNCTION "public"."project_members"("public"."tracker_projects") OWNER TO "postgres";
-
-CREATE OR REPLACE FUNCTION "public"."slugify"("value" "text") RETURNS "text"
-    LANGUAGE "sql" IMMUTABLE STRICT
-    AS $_$
-  -- removes accents (diacritic signs) from a given string --
-  with "unaccented" as (
-    select unaccent("value") as "value"
-  ),
-  -- lowercases the string
-  "lowercase" as (
-    select lower("value") as "value"
-    from "unaccented"
-  ),
-  -- remove single and double quotes
-  "removed_quotes" as (
-    select regexp_replace("value", '[''"]+', '', 'gi') as "value"
-    from "lowercase"
-  ),
-  -- replaces anything that's not a letter, number, hyphen('-'), or underscore('_') with a hyphen('-')
-  "hyphenated" as (
-    select regexp_replace("value", '[^a-z0-9\\-_]+', '-', 'gi') as "value"
-    from "removed_quotes"
-  ),
-  -- trims hyphens('-') if they exist on the head or tail of the string
-  "trimmed" as (
-    select regexp_replace(regexp_replace("value", '\-+$', ''), '^\-', '') as "value"
-    from "hyphenated"
-  )
-  select "value" from "trimmed";
-$_$;
-
 ALTER FUNCTION "public"."slugify"("value" "text") OWNER TO "postgres";
-
-CREATE OR REPLACE FUNCTION "public"."total_duration"("public"."tracker_projects") RETURNS integer
-    LANGUAGE "sql"
-    AS $_$
-  select sum(tracker_entries.duration) as total_duration
-  from
-    tracker_projects
-    join tracker_entries on tracker_projects.id = tracker_entries.project_id
-  where
-    tracker_projects.id = $1.id
-  group by
-    tracker_projects.id;
-$_$;
-
 ALTER FUNCTION "public"."total_duration"("public"."tracker_projects") OWNER TO "postgres";
-
-CREATE OR REPLACE FUNCTION "public"."update_enrich_transaction"() RETURNS "trigger"
-    LANGUAGE "plpgsql" SECURITY DEFINER
-    AS $$declare
-  enrichment_category text;
-begin
-  if new.category_slug is null then
-    select category_slug into enrichment_category
-    from transaction_enrichments te
-    where te.name = new.name
-    and (te.system = true or new.team_id = te.team_id)
-    limit 1;
-    
-    new.category_slug := enrichment_category;
-  end if;
-
-  return new;
-end;$$;
-
 ALTER FUNCTION "public"."update_enrich_transaction"() OWNER TO "postgres";
 
-CREATE OR REPLACE FUNCTION "public"."update_transactions_on_category_delete"() RETURNS "trigger"
-    LANGUAGE "plpgsql"
-    AS $$
-begin
-    update transactions
-    set category_slug = null
-    where category_slug = old.slug
-    and team_id = old.team_id;
 
-    return old;
-end;
+-- Trigger function to update transactions when category is deleted
+CREATE OR REPLACE FUNCTION "public"."update_transactions_on_category_delete"() 
+RETURNS "trigger"
+    LANGUAGE "plpgsql"
+AS $$
+BEGIN
+    UPDATE transactions
+    SET category_slug = null
+    WHERE category_slug = old.slug
+        AND team_id = old.team_id;
+
+    RETURN old;
+END;
 $$;
 
-ALTER FUNCTION "public"."update_transactions_on_category_delete"() OWNER TO "postgres";
-
-CREATE OR REPLACE FUNCTION "public"."upsert_transaction_enrichment"() RETURNS "trigger"
-    LANGUAGE "plpgsql" SECURITY DEFINER
+-- Trigger function to upsert transaction enrichment
+CREATE OR REPLACE FUNCTION "public"."upsert_transaction_enrichment"() 
+RETURNS "trigger"
+    LANGUAGE "plpgsql" 
+    SECURITY DEFINER
     SET "search_path" TO 'public'
-    AS $$declare
+AS $$
+DECLARE
     transaction_name text;
     system_value boolean;
-begin
-    select new.name into transaction_name;
+BEGIN
+    SELECT new.name INTO transaction_name;
 
-    select system into system_value
-    from transaction_categories as tc
-    where tc.slug = new.category_slug and tc.team_id = new.team_id;
+    SELECT system INTO system_value
+    FROM transaction_categories AS tc
+    WHERE tc.slug = new.category_slug 
+        AND tc.team_id = new.team_id;
     
-    insert into transaction_enrichments(name, category_slug, team_id, system)
-    values (transaction_name, new.category_slug, new.team_id, system_value)
-    on conflict (team_id, name) do update
-    set category_slug = excluded.category_slug;
+    INSERT INTO transaction_enrichments(
+        name, 
+        category_slug, 
+        team_id, 
+        system
+    )
+    VALUES (
+        transaction_name, 
+        new.category_slug, 
+        new.team_id, 
+        system_value
+    )
+    ON CONFLICT (team_id, name) DO UPDATE
+    SET category_slug = excluded.category_slug;
 
-    return new;
-end;$$;
+    RETURN new;
+END;
+$$;
 
-ALTER FUNCTION "public"."upsert_transaction_enrichment"() OWNER TO "postgres";
-
-CREATE OR REPLACE FUNCTION "public"."webhook"() RETURNS "trigger"
-    LANGUAGE "plpgsql" SECURITY DEFINER
+-- Webhook trigger function for sending HTTP notifications
+CREATE OR REPLACE FUNCTION "public"."webhook"() 
+RETURNS "trigger"
+    LANGUAGE "plpgsql" 
+    SECURITY DEFINER
     SET "search_path" TO 'public'
-    AS $$
+AS $$
 DECLARE
     url text;
     secret text;
@@ -992,14 +1519,21 @@ DECLARE
     signature text;
     path text;
 BEGIN
-    -- Extract the first item from TG_ARGV as path
+    -- Extract the webhook path from trigger arguments
     path = TG_ARGV[0];
 
-    -- Get the webhook URL and secret from the vault
-    SELECT decrypted_secret INTO url FROM vault.decrypted_secrets WHERE name = 'WEBHOOK_ENDPOINT' LIMIT 1;
-    SELECT decrypted_secret INTO secret FROM vault.decrypted_secrets WHERE name = 'WEBHOOK_SECRET' LIMIT 1;
+    -- Get webhook configuration from vault
+    SELECT decrypted_secret INTO url 
+    FROM vault.decrypted_secrets 
+    WHERE name = 'WEBHOOK_ENDPOINT' 
+    LIMIT 1;
 
-    -- Generate the payload
+    SELECT decrypted_secret INTO secret 
+    FROM vault.decrypted_secrets 
+    WHERE name = 'WEBHOOK_SECRET' 
+    LIMIT 1;
+
+    -- Build webhook payload
     payload = jsonb_build_object(
         'old_record', old,
         'record', new,
@@ -1008,527 +1542,2977 @@ BEGIN
         'schema', tg_table_schema
     );
 
-    -- Generate the signature
+    -- Generate HMAC signature for security
     signature = generate_hmac(secret, payload::text);
 
-    -- Send the webhook request
-    SELECT http_post
-    INTO request_id
-    FROM
-        net.http_post(
-                url :=  url || '/' || path,
-                body := payload,
-                headers := jsonb_build_object(
-                        'Content-Type', 'application/json',
-                        'X-Supabase-Signature', signature
-                ),
-               timeout_milliseconds := 3000
-        );
+    -- Send HTTP POST request
+    SELECT http_post INTO request_id
+    FROM net.http_post(
+        url := url || '/' || path,
+        body := payload,
+        headers := jsonb_build_object(
+            'Content-Type', 'application/json',
+            'X-Supabase-Signature', signature
+        ),
+        timeout_milliseconds := 3000
+    );
 
-    -- Insert the request ID into the Supabase hooks table
-    INSERT INTO supabase_functions.hooks
-        (hook_table_id, hook_name, request_id)
-    VALUES (tg_relid, tg_name, request_id);
+    -- Log webhook request
+    INSERT INTO supabase_functions.hooks (
+        hook_table_id, 
+        hook_name, 
+        request_id
+    )
+    VALUES (
+        tg_relid, 
+        tg_name, 
+        request_id
+    );
 
     RETURN new;
 END;
 $$;
 
+-- Set ownership for all functions
+ALTER FUNCTION "public"."update_transactions_on_category_delete"() OWNER TO "postgres";
+ALTER FUNCTION "public"."upsert_transaction_enrichment"() OWNER TO "postgres";
 ALTER FUNCTION "public"."webhook"() OWNER TO "postgres";
 
-CREATE TABLE IF NOT EXISTS "public"."bank_accounts" (
-    "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
-    "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
-    "created_by" "uuid" NOT NULL,
-    "team_id" "uuid" NOT NULL,
-    "last_accessed" timestamp with time zone,
-    "name" "text",
-    "currency" "text",
-    "bank_connection_id" "uuid",
-    "enabled" boolean DEFAULT true NOT NULL,
-    "account_id" "text" NOT NULL,
-    "balance" numeric DEFAULT '0'::numeric,
-    "manual" boolean DEFAULT false,
-    "type" "public"."account_type"
+-- Views
+CREATE OR REPLACE VIEW "private"."current_user_teams" AS 
+SELECT 
+    (SELECT auth.uid() AS uid) AS user_id,
+    t.team_id
+FROM users_on_team t
+WHERE t.user_id = (SELECT auth.uid() AS uid);
+
+CREATE OR REPLACE VIEW "public"."current_user_teams" AS 
+SELECT 
+    (SELECT auth.uid() AS uid) AS user_id,
+    t.team_id
+FROM users_on_team t
+WHERE t.user_id = (SELECT auth.uid() AS uid);
+
+-- Functions
+CREATE OR REPLACE FUNCTION public.get_current_user_team_id()
+RETURNS uuid
+    LANGUAGE plpgsql
+AS $function$
+BEGIN
+    RETURN (SELECT team_id FROM users WHERE id = (SELECT auth.uid()));
+END;
+$function$;
+
+-- Spending analysis function
+CREATE OR REPLACE FUNCTION public.get_spending(
+    team_id uuid, 
+    date_from date, 
+    date_to date, 
+    currency_target text
+) RETURNS TABLE(
+    name text, 
+    slug text, 
+    amount numeric, 
+    currency text, 
+    color text, 
+    percentage numeric
+)
+    LANGUAGE plpgsql
+AS $function$
+DECLARE
+    total_amount numeric;
+BEGIN
+    -- Calculate total amount for percentage calculations
+    SELECT sum(t.amount) INTO total_amount
+    FROM transactions AS t
+    WHERE t.team_id = get_spending.team_id
+        AND t.category_slug != 'transfer'
+        AND t.currency = currency_target
+        AND t.date >= date_from
+        AND t.date <= date_to
+        AND t.amount < 0;
+
+    RETURN QUERY
+    SELECT 
+        COALESCE(category.name, 'Uncategorized') AS name,
+        COALESCE(category.slug, 'uncategorized') AS slug,
+        sum(t.amount) AS amount,
+        t.currency,
+        COALESCE(category.color, '#606060') AS color,
+        CASE 
+            WHEN ((sum(t.amount) / total_amount) * 100) > 1 THEN
+                round((sum(t.amount) / total_amount) * 100)
+            ELSE
+                round((sum(t.amount) / total_amount) * 100, 2)
+        END AS percentage
+    FROM transactions AS t
+    LEFT JOIN transaction_categories AS category 
+        ON t.team_id = category.team_id 
+        AND t.category_slug = category.slug
+    WHERE t.team_id = get_spending.team_id
+        AND t.category_slug != 'transfer'
+        AND t.currency = currency_target
+        AND t.date >= date_from
+        AND t.date <= date_to
+        AND t.amount < 0
+    GROUP BY
+        category.name,
+        COALESCE(category.slug, 'uncategorized'),
+        t.currency,
+        category.color
+    ORDER BY
+        sum(t.amount) ASC;
+END;
+$function$;
+
+-- Similarity calculation functions
+CREATE OR REPLACE FUNCTION public.calculate_amount_similarity(
+    transaction_currency text, 
+    inbox_currency text, 
+    transaction_amount numeric, 
+    inbox_amount numeric
+) RETURNS numeric
+    LANGUAGE plpgsql
+AS $function$
+/* Function implementation */
+$function$;
+
+CREATE OR REPLACE FUNCTION public.calculate_bank_account_base_balance()
+RETURNS trigger
+    LANGUAGE plpgsql
+AS $function$
+/* Function implementation */
+$function$;
+
+CREATE OR REPLACE FUNCTION public.calculate_base_amount_score(
+    transaction_base_currency text, 
+    inbox_base_currency text, 
+    transaction_base_amount numeric, 
+    inbox_base_amount numeric
+) RETURNS numeric
+    LANGUAGE plpgsql
+AS $function$
+/* Function implementation */
+$function$;
+
+CREATE OR REPLACE FUNCTION public.calculate_date_proximity_score(
+    t_date date, 
+    i_date date
+) RETURNS numeric
+    LANGUAGE plpgsql
+AS $function$
+/* Function implementation */
+$function$;
+
+CREATE OR REPLACE FUNCTION public.calculate_date_similarity(
+    transaction_date date, 
+    inbox_date date
+) RETURNS numeric
+    LANGUAGE plpgsql
+AS $function$
+/* Function implementation */
+$function$;
+
+-- Policies
+CREATE POLICY "Select for current user teams"
+ON "public"."users_on_team"
+AS PERMISSIVE
+FOR SELECT
+TO authenticated
+USING (
+    EXISTS (
+        SELECT 1
+        FROM private.current_user_teams cut
+        WHERE cut.user_id = (SELECT auth.uid() AS uid)
+            AND cut.team_id = users_on_team.team_id
+    )
 );
 
-ALTER TABLE "public"."bank_accounts" OWNER TO "postgres";
+-- Cleanup statements
+DROP POLICY IF EXISTS "Enable read access for all users" ON "public"."users_on_team";
+DROP POLICY IF EXISTS "New Policy Name" ON "public"."users_on_team";
+DROP VIEW IF EXISTS "public"."current_user_teams";
+DROP TRIGGER IF EXISTS "update_enrich_transaction_trigger" ON "public"."transactions";
+DROP FUNCTION IF EXISTS "public"."get_spending_v2"(team_id uuid, date_from date, date_to date, currency_target text);
 
-CREATE TABLE IF NOT EXISTS "public"."bank_connections" (
-    "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
-    "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
-    "institution_id" "text" NOT NULL,
-    "expires_at" timestamp with time zone,
-    "team_id" "uuid" NOT NULL,
-    "name" "text" NOT NULL,
-    "logo_url" "text",
-    "access_token" "text",
-    "enrollment_id" "text",
-    "provider" "public"."bank_providers"
+-- Function to analyze spending patterns for a team
+CREATE OR REPLACE FUNCTION public.get_spending(
+    team_id uuid, 
+    date_from date, 
+    date_to date, 
+    currency_target text
+) RETURNS TABLE(
+    name text, 
+    slug text, 
+    amount numeric, 
+    currency text, 
+    color text, 
+    percentage numeric
+)
+    LANGUAGE plpgsql
+AS $function$
+DECLARE
+    total_amount numeric;
+BEGIN
+    -- Calculate total spending amount
+    SELECT sum(t.amount) INTO total_amount
+    FROM transactions AS t
+    WHERE t.team_id = get_spending.team_id
+        AND t.category_slug != 'transfer'
+        AND t.currency = currency_target
+        AND t.date >= date_from
+        AND t.date <= date_to
+        AND t.amount < 0;
+
+    -- Return spending breakdown by category
+    RETURN QUERY
+    SELECT 
+        COALESCE(category.name, 'Uncategorized') AS name,
+        COALESCE(category.slug, 'uncategorized') AS slug,
+        sum(t.amount) AS amount,
+        t.currency,
+        COALESCE(category.color, '#606060') AS color,
+        CASE 
+            WHEN ((sum(t.amount) / total_amount) * 100) > 1 THEN
+                round((sum(t.amount) / total_amount) * 100)
+            ELSE
+                round((sum(t.amount) / total_amount) * 100, 2)
+        END AS percentage
+    FROM transactions AS t
+    LEFT JOIN transaction_categories AS category 
+        ON t.team_id = category.team_id 
+        AND t.category_slug = category.slug
+    WHERE t.team_id = get_spending.team_id
+        AND t.category_slug != 'transfer'
+        AND t.currency = currency_target
+        AND t.date >= date_from
+        AND t.date <= date_to
+        AND t.amount < 0
+    GROUP BY
+        category.name,
+        COALESCE(category.slug, 'uncategorized'),
+        t.currency,
+        category.color
+    ORDER BY
+        sum(t.amount) ASC;
+END;
+$function$;
+
+-- Function to calculate similarity between transaction amounts
+CREATE OR REPLACE FUNCTION public.calculate_amount_similarity(
+    transaction_currency text, 
+    inbox_currency text, 
+    transaction_amount numeric, 
+    inbox_amount numeric
+) RETURNS numeric
+    LANGUAGE plpgsql
+AS $function$
+DECLARE
+    similarity_score numeric := 0;
+    relative_difference numeric;
+    abs_transaction_amount numeric;
+    abs_inbox_amount numeric;
+BEGIN
+    IF transaction_currency = inbox_currency THEN
+        abs_transaction_amount := abs(transaction_amount);
+        abs_inbox_amount := abs(inbox_amount);
+        
+        relative_difference := abs(abs_transaction_amount - abs_inbox_amount) / 
+                             greatest(abs_transaction_amount, abs_inbox_amount, 1);
+        
+        IF relative_difference < 0.02 THEN -- Exact matches
+            similarity_score := 1;
+        ELSIF relative_difference < 0.08 THEN -- Very close matches
+            similarity_score := 0.9;
+        ELSIF relative_difference < 0.15 THEN -- Intermediate matches
+            similarity_score := 0.8;
+        ELSE
+            similarity_score := 1 - least(relative_difference, 1);
+            -- Quadratic scaling for more leniency
+            similarity_score := similarity_score * similarity_score * 0.9;
+        END IF;
+    ELSE
+        similarity_score := 0.1; -- Base score for currency mismatch
+    END IF;
+
+    RETURN round(least(similarity_score, 1), 2);
+END;
+$function$;
+
+-- Trigger function to calculate base balance for bank accounts
+CREATE OR REPLACE FUNCTION public.calculate_bank_account_base_balance()
+RETURNS trigger
+    LANGUAGE plpgsql
+AS $function$
+DECLARE
+    team_base_currency text;
+    exchange_rate numeric;
+BEGIN
+    -- Get team's base currency
+    SELECT base_currency INTO team_base_currency
+    FROM teams
+    WHERE id = new.team_id;
+
+    -- Handle same currency or null base currency
+    IF new.currency = team_base_currency OR team_base_currency IS NULL THEN
+        new.base_balance := new.balance;
+        new.base_currency := new.currency;
+    ELSE
+        -- Convert using exchange rate
+        SELECT rate INTO exchange_rate
+        FROM exchange_rates
+        WHERE base = new.currency
+            AND target = team_base_currency
+        LIMIT 1;
+
+        new.base_balance := round(new.balance * exchange_rate, 2);
+        new.base_currency := team_base_currency;
+    END IF;
+
+    RETURN new;
+END;
+$function$;
+
+-- Function to calculate similarity score between base amounts
+CREATE OR REPLACE FUNCTION public.calculate_base_amount_score(
+    transaction_base_currency text, 
+    inbox_base_currency text, 
+    transaction_base_amount numeric, 
+    inbox_base_amount numeric
+) RETURNS numeric
+    LANGUAGE plpgsql
+AS $function$
+DECLARE
+    final_score numeric := 0;
+    relative_amount_difference numeric;
+BEGIN
+    IF transaction_base_currency = inbox_base_currency THEN
+        DECLARE
+            abs_transaction_amount numeric := abs(transaction_base_amount);
+            abs_inbox_amount numeric := abs(inbox_base_amount);
+        BEGIN
+            relative_amount_difference := abs(abs_transaction_amount - abs_inbox_amount) / 
+                                       greatest(abs_transaction_amount, abs_inbox_amount, 1);
+            
+            final_score := 1 - least(relative_amount_difference, 1);
+            final_score := final_score * final_score * 0.5; -- Quadratic scaling
+            
+            IF relative_amount_difference < 0.1 THEN
+                final_score := final_score + 0.3; -- Bonus for close matches
+            END IF;
+        END;
+    END IF;
+
+    RETURN round(least(final_score, 0.8), 2);
+END;
+$function$;
+
+-- Function to calculate similarity score based on date proximity
+CREATE OR REPLACE FUNCTION public.calculate_date_proximity_score(
+    t_date date, 
+    i_date date
+) RETURNS numeric
+    LANGUAGE plpgsql
+AS $function$
+DECLARE
+    v_date_diff integer;
+    v_score numeric := 0;
+BEGIN
+    v_date_diff := abs(t_date - i_date);
+    
+    IF v_date_diff = 0 THEN
+        v_score := 0.8; -- Exact date match
+    ELSIF v_date_diff <= 3 THEN
+        -- Within 3 days
+        v_score := round(0.7 * (1 - (v_date_diff / 3.0))::numeric, 2);
+    ELSIF v_date_diff <= 7 THEN
+        -- Within a week
+        v_score := round(0.5 * (1 - ((v_date_diff - 3) / 4.0))::numeric, 2);
+    ELSIF v_date_diff <= 30 THEN
+        -- Within a month
+        v_score := round(0.3 * (1 - ln(v_date_diff - 6) / ln(25))::numeric, 2);
+    END IF;
+
+    RETURN v_score;
+END;
+$function$;
+
+-- Function to calculate similarity between dates
+CREATE OR REPLACE FUNCTION public.calculate_date_similarity(
+    transaction_date date, 
+    inbox_date date
+) RETURNS numeric
+    LANGUAGE plpgsql
+AS $function$
+DECLARE
+    date_difference integer;
+BEGIN
+    date_difference := abs(transaction_date - inbox_date);
+  
+    RETURN CASE
+        WHEN date_difference = 0 THEN 1
+        WHEN date_difference <= 3 THEN 0.9  -- 1-3 day difference
+        WHEN date_difference <= 7 THEN 0.7  -- 4-7 day difference
+        WHEN date_difference <= 14 THEN 0.5 -- 8-14 day difference
+        WHEN date_difference <= 30 THEN 0.3 -- 15-30 day difference
+        ELSE 0.1                           -- Default base score
+    END;
+END;
+$function$;
+
+-- Trigger function to calculate base amount for inbox items
+CREATE OR REPLACE FUNCTION public.calculate_inbox_base_amount()
+RETURNS trigger
+    LANGUAGE plpgsql
+AS $function$
+DECLARE
+    team_base_currency text;
+    exchange_rate numeric;
+BEGIN
+    SELECT base_currency INTO team_base_currency
+    FROM teams
+    WHERE id = new.team_id;
+
+    IF new.currency = team_base_currency OR team_base_currency IS NULL THEN
+        new.base_amount := new.amount;
+        new.base_currency := new.currency;
+    ELSE
+        SELECT rate INTO exchange_rate
+        FROM exchange_rates
+        WHERE base = new.currency
+            AND target = team_base_currency
+        LIMIT 1;
+
+        new.base_amount := round(new.amount * exchange_rate, 2);
+        new.base_currency := team_base_currency;
+    END IF;
+
+    RETURN new;
+END;
+$function$;
+
+-- Function to calculate overall match score between records
+CREATE OR REPLACE FUNCTION public.calculate_match_score(
+    t_record record, 
+    i_record record
+) RETURNS numeric
+    LANGUAGE plpgsql
+AS $function$
+DECLARE
+    v_score numeric := 0;
+BEGIN
+    -- Check for exact currency and amount match
+    IF t_record.currency = i_record.currency 
+        AND abs(t_record.abs_amount - i_record.amount) < 0.01 THEN
+        v_score := 1;
+    ELSE
+        -- Calculate base amount similarity
+        v_score := v_score + calculate_base_amount_score(
+            t_record.base_currency,
+            i_record.base_currency,
+            t_record.base_amount,
+            i_record.base_amount
+        );
+    END IF;
+
+    -- Add additional scoring factors if not perfect match
+    IF v_score < 1 THEN
+        v_score := v_score + calculate_date_proximity_score(t_record.date, i_record.date);
+    END IF;
+
+    IF v_score < 0.9 THEN
+        v_score := v_score + calculate_name_similarity_score(t_record.name, i_record.display_name);
+    END IF;
+
+    RETURN least(v_score, 1);
+END;
+$function$;
+
+-- Function to calculate name similarity score
+CREATE OR REPLACE FUNCTION public.calculate_name_similarity_score(
+    transaction_name text, 
+    inbox_name text
+) RETURNS numeric
+    LANGUAGE plpgsql
+AS $function$
+DECLARE
+    name_similarity numeric;
+    similarity_score numeric := 0;
+BEGIN
+    IF transaction_name IS NULL OR inbox_name IS NULL THEN
+        RETURN 0;
+    END IF;
+
+    name_similarity := similarity(lower(transaction_name), lower(inbox_name));
+    similarity_score := 0.7 * name_similarity; -- 70% base score
+    
+    IF name_similarity > 0.8 THEN
+        similarity_score := similarity_score + 0.3; -- Bonus for high similarity
+    END IF;
+    
+    RETURN round(least(similarity_score, 1), 2);
+END;
+$function$;
+
+-- Function to calculate overall similarity between records
+CREATE OR REPLACE FUNCTION public.calculate_overall_similarity(
+    transaction_record record, 
+    inbox_record record
+) RETURNS numeric
+    LANGUAGE plpgsql
+AS $function$
+DECLARE
+    overall_score numeric := 0;
+    amount_score numeric;
+    date_score numeric;
+    name_score numeric;
+BEGIN
+    -- Calculate component scores
+    amount_score := calculate_amount_similarity(
+        transaction_record.currency,
+        inbox_record.currency,
+        transaction_record.amount,
+        inbox_record.amount
+    );
+    date_score := calculate_date_similarity(transaction_record.date, inbox_record.date);
+    name_score := calculate_name_similarity_score(transaction_record.name, inbox_record.display_name);
+
+    -- Weighted score calculation (70% amount, 20% date, 10% name)
+    overall_score := (amount_score * 0.70) + (date_score * 0.20) + (name_score * 0.10);
+
+    -- Apply bonuses
+    IF amount_score >= 0.9 THEN
+        overall_score := overall_score + 0.1;  -- Bonus for high amount match
+    END IF;
+
+    IF name_score >= 0.5 THEN
+        overall_score := overall_score + 0.05; -- Bonus for good name match
+    END IF;
+
+    RETURN least(overall_score, 1);
+END;
+$function$;
+
+-- Function to calculate total sum in target currency
+CREATE OR REPLACE FUNCTION public.calculate_total_sum(target_currency text)
+RETURNS numeric
+    LANGUAGE plpgsql
+AS $function$
+DECLARE
+    total_sum numeric := 0;
+    currency_rate numeric;
+    currency_sum record;
+BEGIN
+    FOR currency_sum IN
+        SELECT currency, sum(abs(amount)) AS sum_amount
+        FROM transactions
+        GROUP BY currency
+    LOOP
+        SELECT rate INTO currency_rate
+        FROM exchange_rates
+        WHERE base = currency_sum.currency
+            AND target = target_currency
+        LIMIT 1;
+
+        IF currency_rate IS NULL THEN
+            RAISE NOTICE 'No exchange rate found for currency % to target currency %', 
+                currency_sum.currency, target_currency;
+            CONTINUE;
+        END IF;
+
+        total_sum := total_sum + (currency_sum.sum_amount * currency_rate);
+    END LOOP;
+
+    RETURN round(total_sum, 2);
+END;
+$function$;
+
+-- Trigger function to calculate transaction base amount
+CREATE OR REPLACE FUNCTION public.calculate_transaction_base_amount()
+RETURNS trigger
+    LANGUAGE plpgsql
+AS $function$
+DECLARE
+    team_base_currency text;
+    exchange_rate numeric;
+BEGIN
+    SELECT base_currency INTO team_base_currency
+    FROM teams
+    WHERE id = new.team_id;
+
+    IF new.currency = team_base_currency OR team_base_currency IS NULL THEN
+        new.base_amount := new.amount;
+        new.base_currency := new.currency;
+    ELSE
+        SELECT rate INTO exchange_rate
+        FROM exchange_rates
+        WHERE base = new.currency
+            AND target = team_base_currency
+        LIMIT 1;
+
+        new.base_amount := round(new.amount * exchange_rate, 2);
+        new.base_currency := team_base_currency;
+    END IF;
+
+    RETURN new;
+END;
+$function$;
+
+-- Function to calculate transaction differences with time windows
+CREATE OR REPLACE FUNCTION public.calculate_transaction_differences_v2(p_team_id uuid)
+RETURNS TABLE(
+    transaction_group text,
+    date date,
+    team_id uuid,
+    recurring boolean,
+    frequency transaction_frequency,
+    days_diff double precision
+)
+LANGUAGE plpgsql
+AS $function$
+BEGIN
+    RETURN QUERY
+    SELECT 
+        gt.transaction_group,
+        gt.date,
+        gt.team_id,
+        gt.recurring,
+        gt.frequency,
+        extract(epoch FROM (gt.date::timestamp - lag(gt.date::timestamp) OVER w))::float / (24 * 60 * 60) AS days_diff
+    FROM group_transactions_v2(p_team_id) gt
+    WHERE gt.team_id = p_team_id -- Ensure filtering on team_id is done as early as possible
+    WINDOW w AS (PARTITION BY gt.transaction_group, gt.team_id ORDER BY gt.date);
+END;
+$function$;
+
+-- Function to calculate transaction frequency with optimized aggregations
+CREATE OR REPLACE FUNCTION public.calculate_transaction_frequency(
+    p_transaction_group text,
+    p_team_id uuid,
+    p_new_date date
+)
+RETURNS TABLE(
+    avg_days_between double precision,
+    transaction_count integer,
+    is_recurring boolean,
+    latest_frequency text
+)
+LANGUAGE plpgsql
+AS $function$
+DECLARE
+    v_avg_days_between float;
+    v_transaction_count int;
+    v_is_recurring boolean;
+    v_latest_frequency text;
+BEGIN
+    -- Optimize the query by avoiding subqueries and using more efficient aggregations
+    SELECT 
+        COALESCE(avg(extract(epoch FROM (p_new_date::timestamp - t.date::timestamp)) / (24 * 60 * 60)), 0),
+        count(*) + 1,
+        COALESCE(bool_or(t.recurring), false),
+        COALESCE(max(CASE WHEN t.recurring THEN t.frequency ELSE NULL END), 'unknown')
+    INTO v_avg_days_between, v_transaction_count, v_is_recurring, v_latest_frequency
+    FROM transactions t
+    WHERE t.team_id = p_team_id
+      AND t.name IN (p_transaction_group, identify_transaction_group(p_transaction_group, p_team_id))
+      AND t.date < p_new_date;
+
+    RETURN QUERY 
+    SELECT v_avg_days_between, v_transaction_count, v_is_recurring, v_latest_frequency;
+END;
+$function$;
+
+-- Function to classify transaction frequency patterns
+CREATE OR REPLACE FUNCTION public.classify_frequency_v2(p_team_id uuid)
+RETURNS TABLE(
+    transaction_group text,
+    team_id uuid,
+    transaction_count bigint,
+    avg_days_between double precision,
+    stddev_days_between double precision,
+    frequency transaction_frequency
+)
+LANGUAGE plpgsql
+AS $function$
+BEGIN
+    RETURN QUERY
+    SELECT 
+        td.transaction_group,
+        td.team_id,
+        count(*) AS transaction_count,
+        avg(td.days_diff) AS avg_days_between,
+        stddev(td.days_diff) AS stddev_days_between,
+        CASE 
+            WHEN bool_or(td.recurring) AND max(td.frequency) != 'unknown' THEN max(td.frequency)
+            WHEN avg(td.days_diff) BETWEEN 1 AND 8 THEN 'weekly'::transaction_frequency
+            WHEN avg(td.days_diff) BETWEEN 9 AND 16 THEN 'biweekly'::transaction_frequency
+            WHEN avg(td.days_diff) BETWEEN 18 AND 40 THEN 'monthly'::transaction_frequency
+            WHEN avg(td.days_diff) BETWEEN 60 AND 80 THEN 'semi_monthly'::transaction_frequency
+            WHEN avg(td.days_diff) BETWEEN 330 AND 370 THEN 'annually'::transaction_frequency
+            WHEN count(*) < 2 THEN 'unknown'::transaction_frequency
+            ELSE 'irregular'::transaction_frequency
+        END AS frequency
+    FROM calculate_transaction_differences_v2(p_team_id) td
+    GROUP BY td.transaction_group, td.team_id;
+END;
+$function$;
+
+-- Simple trigger function to clean up documents
+CREATE OR REPLACE FUNCTION public.delete_from_documents()
+RETURNS trigger
+    LANGUAGE plpgsql
+AS $function$
+BEGIN
+    DELETE FROM public.documents
+    WHERE object_id = OLD.id;
+    RETURN OLD;
+END;
+$function$;
+
+-- Complex trigger function to detect recurring transactions
+CREATE OR REPLACE FUNCTION public.detect_recurring_transactions()
+RETURNS trigger
+    LANGUAGE plpgsql
+AS $function$
+DECLARE
+    last_transaction record;
+    days_diff numeric;
+    frequency_type transaction_frequency;
+    search_query text;
+BEGIN
+    -- Prepare the search query
+    search_query := regexp_replace(
+        regexp_replace(COALESCE(NEW.name, '') || ' ' || COALESCE(NEW.description, ''), '[^\w\s]', ' ', 'g'),
+        '\s+', ' ', 'g'
+    );
+    search_query := trim(search_query);
+ 
+    -- Convert to tsquery format with prefix matching
+    search_query := (
+        SELECT string_agg(lexeme || ':*', ' & ')
+        FROM unnest(string_to_array(search_query, ' ')) lexeme
+        WHERE length(lexeme) > 0
+    );
+  
+    -- Find the last similar transaction using ts_query
+    SELECT * INTO last_transaction
+    FROM transactions
+    WHERE team_id = NEW.team_id
+      AND id <> NEW.id
+      AND date < NEW.date
+      AND category_slug != 'income'
+      AND category_slug != 'transfer'
+      AND fts_vector @@ to_tsquery('english', search_query)
+    ORDER BY ts_rank(fts_vector, to_tsquery('english', search_query)) DESC, date DESC
+    LIMIT 1;
+
+    -- Process similar transactions
+    IF last_transaction.id IS NOT NULL THEN
+        IF last_transaction.frequency IS NOT NULL AND last_transaction.recurring = true THEN
+            frequency_type := last_transaction.frequency;
+            UPDATE transactions SET
+                recurring = true,
+                frequency = frequency_type
+            WHERE id = NEW.id;
+        ELSIF last_transaction.recurring = false THEN
+            UPDATE transactions SET
+                recurring = false,
+                frequency = NULL
+            WHERE id = NEW.id;
+        ELSE
+            days_diff := extract(epoch FROM (NEW.date::timestamp - last_transaction.date::timestamp)) / (24 * 60 * 60);
+            
+            CASE
+                WHEN days_diff BETWEEN 1 AND 16 THEN
+                    frequency_type := 'weekly'::transaction_frequency;
+                WHEN days_diff BETWEEN 18 AND 80 THEN
+                    frequency_type := 'monthly'::transaction_frequency;
+                WHEN days_diff BETWEEN 330 AND 370 THEN
+                    frequency_type := 'annually'::transaction_frequency;
+                ELSE
+                    frequency_type := 'irregular'::transaction_frequency;
+            END CASE;
+
+            IF frequency_type != 'irregular'::transaction_frequency THEN
+                UPDATE transactions SET
+                    recurring = true,
+                    frequency = frequency_type
+                WHERE id = NEW.id;
+            ELSE
+                UPDATE transactions SET
+                    recurring = false,
+                    frequency = NULL
+                WHERE id = NEW.id;
+            END IF;
+        END IF;
+    ELSE
+        UPDATE transactions SET
+            recurring = false,
+            frequency = NULL
+        WHERE id = NEW.id;
+    END IF;
+
+    RETURN NEW;
+END;
+$function$;
+
+-- Basic frequency determination function
+CREATE OR REPLACE FUNCTION public.determine_transaction_frequency(
+    p_avg_days_between double precision,
+    p_transaction_count integer
+)
+RETURNS text
+    LANGUAGE plpgsql
+AS $function$
+BEGIN
+    RETURN CASE 
+        WHEN p_avg_days_between BETWEEN 1 AND 8 THEN 'WEEKLY'
+        WHEN p_avg_days_between BETWEEN 9 AND 16 THEN 'BIWEEKLY'
+        WHEN p_avg_days_between BETWEEN 18 AND 40 THEN 'MONTHLY'
+        WHEN p_avg_days_between BETWEEN 60 AND 80 THEN 'SEMI_MONTHLY'
+        WHEN p_avg_days_between BETWEEN 330 AND 370 THEN 'ANNUALLY'
+        WHEN p_transaction_count < 2 THEN 'UNKNOWN'
+        ELSE 'IRREGULAR'
+    END;
+END;
+$function$;
+
+-- Enhanced frequency determination function
+CREATE OR REPLACE FUNCTION public.determine_transaction_frequency(
+    p_avg_days_between double precision,
+    p_transaction_count integer,
+    p_is_recurring boolean,
+    p_latest_frequency text
+)
+RETURNS text
+    LANGUAGE plpgsql
+AS $function$
+BEGIN
+    IF p_is_recurring AND p_latest_frequency != 'unknown' THEN
+        RETURN p_latest_frequency;
+    ELSE
+        RETURN CASE 
+            WHEN p_avg_days_between BETWEEN 1 AND 8 THEN 'weekly'
+            WHEN p_avg_days_between BETWEEN 9 AND 16 THEN 'biweekly'
+            WHEN p_avg_days_between BETWEEN 18 AND 40 THEN 'monthly'
+            WHEN p_avg_days_between BETWEEN 60 AND 80 THEN 'semi_monthly'
+            WHEN p_avg_days_between BETWEEN 330 AND 370 THEN 'annually'
+            WHEN p_transaction_count < 2 THEN 'unknown'
+            ELSE 'irregular'
+        END;
+    END IF;
+END;
+$function$;
+
+-- Function to find matching inbox items with similarity scoring
+CREATE OR REPLACE FUNCTION public.find_matching_inbox_item(
+    input_transaction_id uuid,
+    specific_inbox_id uuid DEFAULT NULL::uuid
+)
+RETURNS TABLE(
+    inbox_id uuid,
+    transaction_id uuid,
+    transaction_name text,
+    similarity_score numeric,
+    file_name text
+)
+    LANGUAGE plpgsql
+AS $function$
+DECLARE
+    transaction_data record;
+    inbox_data record;
+    calculated_score numeric;
+    similarity_threshold numeric := 0.90; -- Lowered threshold for more matches
+BEGIN
+    -- Fetch transaction data
+    SELECT t.* 
+    INTO transaction_data 
+    FROM transactions t
+    WHERE t.id = input_transaction_id;
+
+    IF specific_inbox_id IS NOT NULL THEN
+        -- Check for a specific inbox item
+        SELECT * 
+        INTO inbox_data 
+        FROM inbox 
+        WHERE id = specific_inbox_id
+          AND team_id = transaction_data.team_id
+          AND status = 'pending';
+        
+        IF inbox_data.id IS NOT NULL THEN
+            calculated_score := calculate_overall_similarity(transaction_data, inbox_data);
+            
+            IF calculated_score >= similarity_threshold THEN
+                RETURN QUERY 
+                SELECT specific_inbox_id, 
+                       input_transaction_id, 
+                       transaction_data.name, 
+                       calculated_score, 
+                       inbox_data.file_name;
+            END IF;
+        END IF;
+    ELSE
+        -- Find best matching inbox item
+        RETURN QUERY
+        SELECT 
+            i.id AS inbox_id, 
+            transaction_data.id AS transaction_id, 
+            transaction_data.name AS transaction_name,
+            calculate_overall_similarity(transaction_data, i.*) AS similarity_score,
+            i.file_name
+        FROM inbox i
+        WHERE 
+            i.team_id = transaction_data.team_id 
+            AND i.status = 'pending'
+            AND calculate_overall_similarity(transaction_data, i.*) >= similarity_threshold
+        ORDER BY 
+            calculate_overall_similarity(transaction_data, i.*) DESC,
+            abs(i.date - transaction_data.date) ASC
+        LIMIT 1; -- Return only the best match
+    END IF;
+END;
+$function$;
+
+-- Simple function to get all transactions for an account
+CREATE OR REPLACE FUNCTION public.get_all_transactions_by_account(account_id uuid)
+RETURNS SETOF transactions
+    LANGUAGE sql
+AS $function$
+    SELECT * FROM transactions WHERE bank_account_id = $1;
+$function$;
+
+-- Function to calculate burn rate with currency handling
+CREATE OR REPLACE FUNCTION public.get_burn_rate_v2(
+    team_id uuid,
+    date_from date,
+    date_to date,
+    base_currency text DEFAULT NULL::text
+)
+RETURNS TABLE(
+    date timestamp with time zone,
+    value numeric,
+    currency text
+)
+    LANGUAGE plpgsql
+AS $function$
+DECLARE
+    target_currency text;
+BEGIN
+    IF get_burn_rate_v2.base_currency IS NOT NULL THEN
+        target_currency := get_burn_rate_v2.base_currency;
+    ELSE
+        SELECT teams.base_currency INTO target_currency
+        FROM teams
+        WHERE teams.id = get_burn_rate_v2.team_id;
+    END IF;
+
+    RETURN QUERY
+    SELECT
+        date_trunc('month', month_series) AS date,
+        COALESCE(sum(abs(base_amount)), 0) AS value,
+        target_currency AS currency
+    FROM
+        generate_series(
+            date_trunc('month', date_from),
+            date_trunc('month', date_to),
+            interval '1 month'
+        ) AS month_series
+        LEFT JOIN transactions AS t
+            ON date_trunc('month', t.date) = date_trunc('month', month_series)
+            AND t.team_id = get_burn_rate_v2.team_id
+            AND t.category_slug != 'transfer'
+            AND t.status = 'posted'
+            AND t.base_amount < 0
+            AND t.base_currency = target_currency
+    GROUP BY
+        date_trunc('month', month_series)
+    ORDER BY
+        date_trunc('month', month_series) ASC;
+END;
+$function$;
+
+-- Enhanced burn rate calculation with flexible currency handling
+CREATE OR REPLACE FUNCTION public.get_burn_rate_v3(
+    team_id uuid,
+    date_from date,
+    date_to date,
+    base_currency text DEFAULT NULL::text
+)
+RETURNS TABLE(
+    date timestamp with time zone,
+    value numeric,
+    currency text
+)
+    LANGUAGE plpgsql
+AS $function$
+DECLARE
+    target_currency text;
+BEGIN
+    IF get_burn_rate_v3.base_currency IS NOT NULL THEN
+        target_currency := get_burn_rate_v3.base_currency;
+    ELSE
+        SELECT teams.base_currency INTO target_currency
+        FROM teams
+        WHERE teams.id = get_burn_rate_v3.team_id;
+    END IF;
+
+    RETURN QUERY
+    SELECT
+        date_trunc('month', month_series) AS date,
+        COALESCE(abs(sum(
+            CASE
+                WHEN get_burn_rate_v3.base_currency IS NOT NULL THEN t.amount
+                ELSE t.base_amount
+            END
+        )), 0) AS value,
+        target_currency AS currency
+    FROM
+        generate_series(
+            date_trunc('month', date_from),
+            date_trunc('month', date_to),
+            interval '1 month'
+        ) AS month_series
+        LEFT JOIN transactions AS t
+            ON date_trunc('month', t.date) = date_trunc('month', month_series)
+            AND t.team_id = get_burn_rate_v3.team_id
+            AND t.category_slug != 'transfer'
+            AND t.status = 'posted'
+            AND (
+                CASE
+                    WHEN get_burn_rate_v3.base_currency IS NOT NULL THEN t.amount
+                    ELSE t.base_amount
+                END
+            ) < 0
+            AND (
+                (get_burn_rate_v3.base_currency IS NOT NULL AND t.currency = target_currency) OR
+                (get_burn_rate_v3.base_currency IS NULL AND t.base_currency = target_currency)
+            )
+    GROUP BY
+        date_trunc('month', month_series)
+    ORDER BY
+        date_trunc('month', month_series) ASC;
+END;
+$function$;
+
+-- Current burn rate calculation v2
+CREATE OR REPLACE FUNCTION public.get_current_burn_rate_v2(
+    team_id uuid,
+    base_currency text DEFAULT NULL::text
+)
+RETURNS TABLE(
+    currency text,
+    value numeric
+)
+    LANGUAGE plpgsql
+AS $function$
+DECLARE
+    current_burn_rate numeric;
+    target_currency text;
+BEGIN
+    IF get_current_burn_rate_v2.base_currency IS NOT NULL THEN
+        target_currency := get_current_burn_rate_v2.base_currency;
+    ELSE
+        SELECT teams.base_currency INTO target_currency
+        FROM teams
+        WHERE teams.id = get_current_burn_rate_v2.team_id;
+    END IF;
+
+    SELECT
+        COALESCE(sum(abs(base_amount)), 0) INTO current_burn_rate
+    FROM
+        transactions AS t
+    WHERE
+        date_trunc('month', t.date) = date_trunc('month', current_date)
+        AND t.team_id = get_current_burn_rate_v2.team_id
+        AND t.category_slug != 'transfer'
+        AND t.status = 'posted'
+        AND t.base_currency = target_currency
+        AND t.base_amount < 0;
+
+    RETURN QUERY
+    SELECT
+        target_currency AS currency,
+        current_burn_rate AS value;
+END;
+$function$;
+
+-- Enhanced current burn rate calculation v3
+CREATE OR REPLACE FUNCTION public.get_current_burn_rate_v3(
+    team_id uuid,
+    base_currency text DEFAULT NULL::text
+)
+RETURNS TABLE(
+    currency text,
+    value numeric
+)
+    LANGUAGE plpgsql
+AS $function$
+DECLARE
+    current_burn_rate numeric;
+    target_currency text;
+BEGIN
+    IF get_current_burn_rate_v3.base_currency IS NOT NULL THEN
+        target_currency := get_current_burn_rate_v3.base_currency;
+    ELSE
+        SELECT teams.base_currency INTO target_currency
+        FROM teams
+        WHERE teams.id = get_current_burn_rate_v3.team_id;
+    END IF;
+  
+    SELECT
+        COALESCE(abs(sum(
+            CASE
+                WHEN get_current_burn_rate_v3.base_currency IS NOT NULL THEN t.amount
+                ELSE t.base_amount
+            END
+        )), 0) INTO current_burn_rate
+    FROM
+        transactions AS t
+    WHERE
+        date_trunc('month', t.date) = date_trunc('month', current_date)
+        AND t.team_id = get_current_burn_rate_v3.team_id
+        AND t.category_slug != 'transfer'
+        AND t.status = 'posted'
+        AND (
+            (get_current_burn_rate_v3.base_currency IS NOT NULL AND t.currency = target_currency) OR
+            (get_current_burn_rate_v3.base_currency IS NULL AND t.base_currency = target_currency)
+        )
+        AND (
+            CASE
+                WHEN get_current_burn_rate_v3.base_currency IS NOT NULL THEN t.amount
+                ELSE t.base_amount
+            END
+        ) < 0;
+
+    RETURN QUERY
+    SELECT
+        target_currency AS currency,
+        current_burn_rate AS value;
+END;
+$function$;
+
+-- Function to get expenses with recurring vs non-recurring breakdown
+CREATE OR REPLACE FUNCTION public.get_expenses(
+    team_id uuid,
+    date_from date,
+    date_to date,
+    base_currency text DEFAULT NULL::text
+)
+RETURNS TABLE(
+    date timestamp without time zone,
+    value numeric,
+    recurring_value numeric,
+    currency text
+)
+    LANGUAGE plpgsql
+AS $function$
+DECLARE
+    target_currency text;
+BEGIN
+    IF base_currency IS NOT NULL THEN
+        target_currency := base_currency;
+    ELSE
+        SELECT teams.base_currency INTO target_currency
+        FROM teams
+        WHERE teams.id = team_id;
+    END IF;
+
+    RETURN QUERY
+    SELECT
+        date_trunc('month', month_series)::timestamp without time zone AS date,
+        COALESCE(SUM(
+            CASE
+                WHEN get_expenses.base_currency IS NOT NULL AND (t.recurring = false OR t.recurring IS NULL) THEN abs(t.amount)
+                WHEN get_expenses.base_currency IS NULL AND (t.recurring = false OR t.recurring IS NULL) THEN abs(t.base_amount)
+                ELSE 0
+            END
+        ), 0) AS value,
+        COALESCE(SUM(
+            CASE
+                WHEN get_expenses.base_currency IS NOT NULL AND t.recurring = true THEN abs(t.amount)
+                WHEN get_expenses.base_currency IS NULL AND t.recurring = true THEN abs(t.base_amount)
+                ELSE 0
+            END
+        ), 0) AS recurring_value,
+        target_currency AS currency
+    FROM
+        generate_series(
+            date_from::date,
+            date_to::date,
+            interval '1 month'
+        ) AS month_series
+    LEFT JOIN transactions AS t ON date_trunc('month', t.date) = date_trunc('month', month_series)
+        AND t.team_id = get_expenses.team_id
+        AND (t.category_slug IS NULL OR t.category_slug != 'transfer')
+        AND t.status = 'posted'
+        AND (
+            (get_expenses.base_currency IS NOT NULL AND t.currency = target_currency AND t.amount < 0) OR
+            (get_expenses.base_currency IS NULL AND t.base_currency = target_currency AND t.base_amount < 0)
+        )
+    GROUP BY
+        date_trunc('month', month_series)
+    ORDER BY
+        date_trunc('month', month_series);
+END;
+$function$;
+
+-- Function to calculate profit v2
+CREATE OR REPLACE FUNCTION public.get_profit_v2(
+    team_id uuid,
+    date_from date,
+    date_to date,
+    base_currency text DEFAULT NULL::text
+)
+RETURNS TABLE(
+    date timestamp with time zone,
+    value numeric,
+    currency text
+)
+    LANGUAGE plpgsql
+AS $function$
+DECLARE
+    target_currency text;
+BEGIN
+    IF get_profit_v2.base_currency IS NOT NULL THEN
+        target_currency := get_profit_v2.base_currency;
+    ELSE
+        SELECT teams.base_currency INTO target_currency
+        FROM teams
+        WHERE teams.id = get_profit_v2.team_id;
+    END IF;
+
+    RETURN QUERY
+    SELECT
+        date_trunc('month', month_series) AS date,
+        COALESCE(sum(base_amount), 0) AS value,
+        target_currency AS currency
+    FROM
+        generate_series(
+            date_from::date,
+            date_to::date,
+            interval '1 month'
+        ) AS month_series
+    LEFT JOIN transactions AS t ON date_trunc('month', t.date) = date_trunc('month', month_series)
+        AND t.team_id = get_profit_v2.team_id
+        AND t.category_slug != 'transfer'
+        AND t.status = 'posted'
+        AND t.base_currency = target_currency
+    GROUP BY
+        date_trunc('month', month_series)
+    ORDER BY
+        date_trunc('month', month_series);
+END;
+$function$;
+
+-- Enhanced profit calculation v3
+CREATE OR REPLACE FUNCTION public.get_profit_v3(
+    team_id uuid,
+    date_from date,
+    date_to date,
+    base_currency text DEFAULT NULL::text
+)
+RETURNS TABLE(
+    date timestamp with time zone,
+    value numeric,
+    currency text
+)
+    LANGUAGE plpgsql
+AS $function$
+DECLARE
+    target_currency text;
+BEGIN
+    IF get_profit_v3.base_currency IS NOT NULL THEN
+        target_currency := get_profit_v3.base_currency;
+    ELSE
+        SELECT teams.base_currency INTO target_currency
+        FROM teams
+        WHERE teams.id = get_profit_v3.team_id;
+    END IF;
+
+    RETURN QUERY
+    SELECT
+        date_trunc('month', month_series) AS date,
+        COALESCE(sum(
+            CASE
+                WHEN get_profit_v3.base_currency IS NOT NULL THEN t.amount
+                ELSE t.base_amount
+            END
+        ), 0) AS value,
+        target_currency AS currency
+    FROM
+        generate_series(
+            date_from::date,
+            date_to::date,
+            interval '1 month'
+        ) AS month_series
+    LEFT JOIN transactions AS t ON date_trunc('month', t.date) = date_trunc('month', month_series)
+        AND t.team_id = get_profit_v3.team_id
+        AND t.category_slug != 'transfer'
+        AND t.status = 'posted'
+        AND (
+            (get_profit_v3.base_currency IS NOT NULL AND t.currency = target_currency) OR
+            (get_profit_v3.base_currency IS NULL AND t.base_currency = target_currency)
+        )
+    GROUP BY
+        date_trunc('month', month_series)
+    ORDER BY
+        date_trunc('month', month_series);
+END;
+$function$;
+
+-- Revenue calculation v2
+CREATE OR REPLACE FUNCTION public.get_revenue_v2(
+    team_id uuid,
+    date_from date,
+    date_to date,
+    base_currency text DEFAULT NULL::text
+)
+RETURNS TABLE(
+    date timestamp with time zone,
+    value numeric,
+    currency text
+)
+    LANGUAGE plpgsql
+AS $function$
+DECLARE
+    target_currency text;
+BEGIN
+    IF get_revenue_v2.base_currency IS NOT NULL THEN
+        target_currency := get_revenue_v2.base_currency;
+    ELSE
+        SELECT teams.base_currency INTO target_currency
+        FROM teams
+        WHERE teams.id = get_revenue_v2.team_id;
+    END IF;
+
+    RETURN QUERY
+    SELECT
+        date_trunc('month', month_series) AS date,
+        COALESCE(sum(base_amount), 0) AS value,
+        target_currency AS currency
+    FROM
+        generate_series(
+            date_from::date,
+            date_to::date,
+            interval '1 month'
+        ) AS month_series
+        LEFT JOIN transactions AS t ON date_trunc('month', t.date) = date_trunc('month', month_series)
+            AND t.team_id = get_revenue_v2.team_id
+            AND t.category_slug != 'transfer'
+            AND t.category_slug = 'income'
+            AND t.status = 'posted'
+            AND t.base_currency = target_currency
+    GROUP BY
+        date_trunc('month', month_series)
+    ORDER BY
+        date_trunc('month', month_series);
+END;
+$function$;
+
+-- Enhanced revenue calculation v3
+CREATE OR REPLACE FUNCTION public.get_revenue_v3(
+    team_id uuid,
+    date_from date,
+    date_to date,
+    base_currency text DEFAULT NULL::text
+)
+RETURNS TABLE(
+    date timestamp with time zone,
+    value numeric,
+    currency text
+)
+    LANGUAGE plpgsql
+AS $function$
+DECLARE
+    target_currency text;
+BEGIN
+    IF get_revenue_v3.base_currency IS NOT NULL THEN
+        target_currency := get_revenue_v3.base_currency;
+    ELSE
+        SELECT teams.base_currency INTO target_currency
+        FROM teams
+        WHERE teams.id = get_revenue_v3.team_id;
+    END IF;
+
+    RETURN QUERY
+    SELECT
+        date_trunc('month', month_series) AS date,
+        COALESCE(sum(
+            CASE
+                WHEN get_revenue_v3.base_currency IS NOT NULL THEN t.amount
+                ELSE t.base_amount
+            END
+        ), 0) AS value,
+        target_currency AS currency
+    FROM
+        generate_series(
+            date_from::date,
+            date_to::date,
+            interval '1 month'
+        ) AS month_series
+        LEFT JOIN transactions AS t ON date_trunc('month', t.date) = date_trunc('month', month_series)
+            AND t.team_id = get_revenue_v3.team_id
+            AND t.category_slug != 'transfer'
+            AND t.category_slug = 'income'
+            AND t.status = 'posted'
+            AND (
+                (get_revenue_v3.base_currency IS NOT NULL AND t.currency = target_currency) OR
+                (get_revenue_v3.base_currency IS NULL AND t.base_currency = target_currency)
+            )
+    GROUP BY
+        date_trunc('month', month_series)
+    ORDER BY
+        date_trunc('month', month_series);
+END;
+$function$;
+
+-- Runway calculation v2
+CREATE OR REPLACE FUNCTION public.get_runway_v2(
+    team_id uuid,
+    date_from date,
+    date_to date,
+    base_currency text DEFAULT NULL::text
+)
+RETURNS numeric
+    LANGUAGE plpgsql
+AS $function$
+DECLARE
+    target_currency text;
+    total_balance numeric;
+    avg_burn_rate numeric;
+    number_of_months numeric;
+BEGIN
+    IF get_runway_v2.base_currency IS NOT NULL THEN
+        target_currency := get_runway_v2.base_currency;
+    ELSE
+        SELECT teams.base_currency INTO target_currency
+        FROM teams
+        WHERE teams.id = get_runway_v2.team_id;
+    END IF;
+
+    SELECT * FROM get_total_balance_v2(team_id, target_currency) INTO total_balance;
+    
+    SELECT (extract(year FROM date_to) - extract(year FROM date_from)) * 12 +
+           extract(month FROM date_to) - extract(month FROM date_from) 
+    INTO number_of_months;
+    
+    SELECT round(avg(value)) 
+    FROM get_burn_rate_v2(team_id, date_from, date_to, target_currency) 
+    INTO avg_burn_rate;
+
+    RETURN round(total_balance / avg_burn_rate);
+END;
+$function$;
+
+-- Runway calculation v3
+CREATE OR REPLACE FUNCTION public.get_runway_v3(
+    team_id uuid,
+    date_from date,
+    date_to date,
+    base_currency text DEFAULT NULL::text
+)
+RETURNS numeric
+    LANGUAGE plpgsql
+AS $function$
+DECLARE
+    target_currency text;
+    total_balance numeric;
+    avg_burn_rate numeric;
+    number_of_months numeric;
+BEGIN
+    IF get_runway_v3.base_currency IS NOT NULL THEN
+        target_currency := get_runway_v3.base_currency;
+    ELSE
+        SELECT teams.base_currency INTO target_currency
+        FROM teams
+        WHERE teams.id = get_runway_v3.team_id;
+    END IF;
+
+    SELECT * FROM get_total_balance_v3(team_id, target_currency) INTO total_balance;
+    
+    SELECT (extract(year FROM date_to) - extract(year FROM date_from)) * 12 +
+           extract(month FROM date_to) - extract(month FROM date_from) 
+    INTO number_of_months;
+    
+    SELECT round(avg(value)) 
+    FROM get_burn_rate_v3(team_id, date_from, date_to, target_currency) 
+    INTO avg_burn_rate;
+
+    RETURN round(total_balance / avg_burn_rate);
+END;
+$function$;
+
+-- Spending calculation v2
+CREATE OR REPLACE FUNCTION public.get_spending_v2(
+    team_id uuid,
+    date_from date,
+    date_to date,
+    base_currency text DEFAULT NULL::text
+)
+RETURNS TABLE(
+    name text,
+    slug text,
+    amount numeric,
+    currency text,
+    color text,
+    percentage numeric
+)
+    LANGUAGE plpgsql
+AS $function$
+DECLARE
+    target_currency text;
+    total_amount numeric;
+BEGIN
+    IF get_spending_v2.base_currency IS NOT NULL THEN
+        target_currency := get_spending_v2.base_currency;
+    ELSE
+        SELECT teams.base_currency INTO target_currency
+        FROM teams
+        WHERE teams.id = get_spending_v2.team_id;
+    END IF;
+
+    SELECT sum(t.base_amount) INTO total_amount
+    FROM transactions AS t
+    WHERE t.team_id = get_spending_v2.team_id
+        AND t.category_slug != 'transfer'
+        AND t.base_currency = target_currency
+        AND t.date >= date_from
+        AND t.date <= date_to
+        AND t.base_amount < 0;
+
+    RETURN QUERY
+    SELECT 
+        COALESCE(category.name, 'Uncategorized') AS name,
+        COALESCE(category.slug, 'uncategorized') AS slug,
+        sum(t.base_amount) AS amount,
+        t.base_currency,
+        COALESCE(category.color, '#606060') AS color,
+        CASE 
+            WHEN ((sum(t.base_amount) / total_amount) * 100) > 1 THEN
+                round((sum(t.base_amount) / total_amount) * 100)
+            ELSE
+                round((sum(t.base_amount) / total_amount) * 100, 2)
+        END AS percentage
+    FROM 
+        transactions AS t
+    LEFT JOIN
+        transaction_categories AS category ON t.team_id = category.team_id AND t.category_slug = category.slug
+    WHERE 
+        t.team_id = get_spending_v2.team_id
+        AND t.category_slug != 'transfer'
+        AND t.base_currency = target_currency
+        AND t.date >= date_from
+        AND t.date <= date_to
+        AND t.base_amount < 0
+    GROUP BY
+        category.name,
+        COALESCE(category.slug, 'uncategorized'),
+        t.base_currency,
+        category.color
+    ORDER BY
+        sum(t.base_amount) ASC;
+END;
+$function$;
+
+-- Spending calculation v3
+CREATE OR REPLACE FUNCTION public.get_spending_v3(
+    team_id uuid,
+    date_from date,
+    date_to date,
+    base_currency text DEFAULT NULL::text
+)
+RETURNS TABLE(
+    name text,
+    slug text,
+    amount numeric,
+    currency text,
+    color text,
+    percentage numeric
+)
+    LANGUAGE plpgsql
+AS $function$
+DECLARE
+    target_currency text;
+    total_amount numeric;
+BEGIN
+    IF get_spending_v3.base_currency IS NOT NULL THEN
+        target_currency := get_spending_v3.base_currency;
+    ELSE
+        SELECT teams.base_currency INTO target_currency
+        FROM teams
+        WHERE teams.id = get_spending_v3.team_id;
+    END IF;
+
+    SELECT sum(
+        CASE
+            WHEN get_spending_v3.base_currency IS NOT NULL THEN t.amount
+            ELSE t.base_amount
+        END
+    ) INTO total_amount
+    FROM transactions AS t
+    WHERE t.team_id = get_spending_v3.team_id
+        AND t.category_slug != 'transfer'
+        AND (t.base_currency = target_currency OR t.currency = target_currency)
+        AND t.date >= date_from
+        AND t.date <= date_to
+        AND t.base_amount < 0;
+
+    RETURN QUERY
+    SELECT 
+        COALESCE(category.name, 'Uncategorized') AS name,
+        COALESCE(category.slug, 'uncategorized') AS slug,
+        sum(
+            CASE
+                WHEN get_spending_v3.base_currency IS NOT NULL THEN t.amount
+                ELSE t.base_amount
+            END
+        ) AS amount,
+        target_currency AS currency,
+        COALESCE(category.color, '#606060') AS color,
+        CASE 
+            WHEN ((sum(
+                CASE
+                    WHEN get_spending_v3.base_currency IS NOT NULL THEN t.amount
+                    ELSE t.base_amount
+                END
+            ) / total_amount) * 100) > 1 THEN
+                round((sum(
+                    CASE
+                        WHEN get_spending_v3.base_currency IS NOT NULL THEN t.amount
+                        ELSE t.base_amount
+                    END
+                ) / total_amount) * 100)
+            ELSE
+                round((sum(
+                    CASE
+                        WHEN get_spending_v3.base_currency IS NOT NULL THEN t.amount
+                        ELSE t.base_amount
+                    END
+                ) / total_amount) * 100, 2)
+        END AS percentage
+    FROM 
+        transactions AS t
+    LEFT JOIN
+        transaction_categories AS category ON t.team_id = category.team_id AND t.category_slug = category.slug
+    WHERE 
+        t.team_id = get_spending_v3.team_id
+        AND t.category_slug != 'transfer'
+        AND (t.base_currency = target_currency OR t.currency = target_currency)
+        AND t.date >= date_from
+        AND t.date <= date_to
+        AND t.base_amount < 0
+    GROUP BY
+        category.name,
+        COALESCE(category.slug, 'uncategorized'),
+        category.color
+    ORDER BY
+        sum(
+            CASE
+                WHEN get_spending_v3.base_currency IS NOT NULL THEN t.amount
+                ELSE t.base_amount
+            END
+        ) ASC;
+END;
+$function$;
+
+-- Total balance calculation v2
+CREATE OR REPLACE FUNCTION public.get_total_balance_v2(
+    team_id uuid,
+    currency text
+)
+RETURNS numeric
+    LANGUAGE plpgsql
+AS $function$
+DECLARE
+    total_balance numeric;
+BEGIN
+    SELECT COALESCE(sum(abs(base_balance)), 0) INTO total_balance
+    FROM bank_accounts AS b
+    WHERE enabled = true
+        AND b.team_id = get_total_balance_v2.team_id
+        AND b.base_currency = get_total_balance_v2.currency;
+
+    RETURN total_balance;
+END;
+$function$;
+
+-- Total balance calculation v3
+CREATE OR REPLACE FUNCTION public.get_total_balance_v3(
+    team_id uuid,
+    currency text
+)
+RETURNS numeric
+    LANGUAGE plpgsql
+AS $function$
+DECLARE
+    total_balance numeric;
+BEGIN
+    SELECT COALESCE(sum(abs(
+        CASE 
+            WHEN b.base_currency = get_total_balance_v3.currency THEN base_balance 
+            ELSE balance 
+        END
+    )), 0) INTO total_balance
+    FROM bank_accounts AS b
+    WHERE enabled = true
+        AND b.team_id = get_total_balance_v3.team_id
+        AND (b.base_currency = get_total_balance_v3.currency OR b.currency = get_total_balance_v3.currency);
+
+    RETURN total_balance;
+END;
+$function$;
+
+-- Group transactions v2
+CREATE OR REPLACE FUNCTION public.group_transactions_v2(p_team_id uuid)
+RETURNS TABLE(
+    transaction_group text,
+    date date,
+    team_id uuid,
+    recurring boolean,
+    frequency transaction_frequency
+)
+    LANGUAGE plpgsql
+AS $function$
+BEGIN
+    RETURN QUERY
+    SELECT 
+        COALESCE(st.similar_transaction_name, t.name) AS transaction_group,
+        t.date,
+        t.team_id,
+        t.recurring,
+        t.frequency
+    FROM transactions t
+    LEFT JOIN identify_similar_transactions_v2(p_team_id) st
+    ON t.name = st.original_transaction_name
+    WHERE t.team_id = p_team_id;
+END;
+$function$;
+
+-- Handle empty folder placeholder
+CREATE OR REPLACE FUNCTION public.handle_empty_folder_placeholder()
+RETURNS trigger
+    LANGUAGE plpgsql
+AS $function$
+BEGIN
+    -- Check if the name does not end with '.folderPlaceholder'
+    IF NEW.bucket_id = 'vault' AND NEW.name NOT LIKE '%/.folderPlaceholder' THEN
+
+        -- Create a modified name with '.folderPlaceholder' at the end
+        DECLARE
+            modified_name TEXT;
+        BEGIN
+            modified_name := regexp_replace(NEW.name, '([^/]+)$', '.folderPlaceholder');
+
+            -- Check if the modified name already exists in the TABLE
+            IF NOT EXISTS (
+                SELECT 1 
+                FROM storage.objects 
+                WHERE bucket_id = NEW.bucket_id 
+                AND name = modified_name
+            ) THEN
+                -- Insert the new row with the modified name
+                INSERT INTO storage.objects (
+                    bucket_id, 
+                    name, 
+                    owner, 
+                    owner_id, 
+                    team_id, 
+                    parent_path, 
+                    depth
+                )
+                VALUES (
+                    NEW.bucket_id, 
+                    modified_name, 
+                    NEW.owner, 
+                    NEW.owner_id, 
+                    NEW.team_id, 
+                    NEW.parent_path, 
+                    NEW.depth
+                );
+            END IF;
+        END;
+    END IF;
+
+    -- Allow the original row to be inserted without modifying NEW.name
+    RETURN NEW;
+END;
+$function$;
+
+-- Identify similar transactions v2
+CREATE OR REPLACE FUNCTION public.identify_similar_transactions_v2(p_team_id uuid)
+RETURNS TABLE(
+    original_transaction_name text,
+    similar_transaction_name text,
+    team_id uuid
+)
+    LANGUAGE plpgsql
+AS $function$
+BEGIN
+    RETURN QUERY
+    SELECT 
+        t1.name AS original_transaction_name,
+        t2.name AS similar_transaction_name,
+        t1.team_id
+    FROM transactions t1
+    JOIN transactions t2 ON t1.team_id = t2.team_id
+    WHERE t1.team_id = p_team_id
+      AND t1.name <> t2.name
+      AND similarity(t1.name, t2.name) > 0.8
+      AND t1.name ILIKE t2.name || '%'; -- Example of limiting comparisons
+END;
+$function$;
+
+-- Identify transaction group
+CREATE OR REPLACE FUNCTION public.identify_transaction_group(p_name text, p_team_id uuid)
+RETURNS text
+    LANGUAGE plpgsql
+AS $function$
+DECLARE
+    v_transaction_group text;
+BEGIN
+    -- Use a more efficient similarity check with trigram index and lateral join
+    -- Add a LIMIT clause to prevent excessive processing
+    SELECT COALESCE(similar_name, p_name) INTO v_transaction_group
+    FROM (
+        SELECT p_name AS original_name
+    ) AS original
+    LEFT JOIN LATERAL (
+        SELECT t.name AS similar_name
+        FROM transactions t
+        WHERE t.team_id = p_team_id
+          AND t.name <> p_name
+          AND similarity(t.name, p_name) > 0.8  -- Use similarity function with a threshold
+        ORDER BY similarity(t.name, p_name) DESC
+    ) AS similar_transactions ON true;
+
+    RETURN v_transaction_group;
+END;
+$function$;
+
+-- Insert into documents
+CREATE OR REPLACE FUNCTION public.insert_into_documents()
+RETURNS trigger
+    LANGUAGE plpgsql
+AS $function$
+DECLARE
+    modified_name TEXT;
+    team_id UUID;
+    parent_id TEXT;
+BEGIN
+    team_id := NEW.path_tokens[1];
+
+    BEGIN
+        -- Extract parent_id from path_tokens
+        IF array_length(NEW.path_tokens, 1) > 1 THEN
+            IF NEW.path_tokens[array_length(NEW.path_tokens, 1)] = '.emptyFolderPlaceholder' THEN
+                -- If the last token is '.folderPlaceholder', take the second to last token
+                parent_id := NEW.path_tokens[array_length(NEW.path_tokens, 1) - 2];
+            ELSE
+                -- Otherwise, take the last token
+                parent_id := NEW.path_tokens[array_length(NEW.path_tokens, 1) - 1];
+            END IF;
+        ELSE
+            -- If there's only one token, set parent_id to null
+            parent_id := null;
+        END IF;
+    END;
+
+    IF NOT NEW.name LIKE '%.emptyFolderPlaceholder' THEN
+        INSERT INTO documents (
+            id,
+            name,
+            created_at,
+            metadata,
+            path_tokens,
+            team_id,
+            parent_id,
+            object_id,
+            owner_id
+        )
+        VALUES (
+            NEW.id,
+            NEW.name,
+            NEW.created_at,
+            NEW.metadata,
+            NEW.path_tokens,
+            team_id,
+            parent_id,
+            NEW.id,
+            NEW.owner_id::uuid
+        );
+    END IF;
+
+    BEGIN
+        IF array_length(NEW.path_tokens, 1) > 2 AND parent_id NOT IN ('inbox', 'transactions', 'exports', 'imports') THEN
+            -- Create a modified name with '.folderPlaceholder' at the end
+            modified_name := regexp_replace(NEW.name, '([^/]+)$', '.folderPlaceholder');
+            
+            -- Check if the modified name already exists in the TABLE
+            IF NOT EXISTS (
+                SELECT 1 
+                FROM documents 
+                WHERE name = modified_name
+            ) THEN
+                -- Insert the new row with the modified name
+                INSERT INTO documents (
+                    name, 
+                    team_id,
+                    path_tokens,
+                    parent_id,
+                    object_id
+                )
+                VALUES (
+                    modified_name, 
+                    team_id, 
+                    string_to_array(modified_name, '/'),
+                    parent_id,
+                    NEW.id
+                );
+            END IF;
+        END IF;
+    END;
+
+    RETURN NEW;
+END;
+$function$;
+
+-- Match transaction with inbox (including commented code)
+CREATE OR REPLACE FUNCTION public.match_transaction_with_inbox(
+    p_transaction_id uuid,
+    p_inbox_id uuid DEFAULT NULL::uuid
+)
+RETURNS TABLE(
+    inbox_id uuid,
+    transaction_id uuid,
+    transaction_name text,
+    score numeric,
+    file_name text
+)
+    LANGUAGE plpgsql
+AS $function$
+DECLARE
+    v_transaction record;
+    v_inbox record;
+    v_score numeric;
+    v_threshold numeric := 0.9; -- 90% threshold
+BEGIN
+    -- Fetch transaction details
+    SELECT t.*, 
+           abs(t.amount) AS abs_amount,
+           abs(t.base_amount) AS abs_base_amount
+    INTO v_transaction 
+    FROM transactions t
+    WHERE t.id = p_transaction_id;
+
+    -- If p_inbox_id is provided, match only with that specific inbox item
+--    IF p_inbox_id IS NOT NULL THEN
+--        SELECT *, abs(amount) AS abs_amount, abs(base_amount) AS abs_base_amount 
+--        INTO v_inbox 
+--        FROM inbox 
+--        WHERE id = p_inbox_id
+--            AND team_id = v_transaction.team_id
+--            AND status = 'pending';
+    
+--        IF v_inbox.id IS NOT NULL THEN
+--            v_score := calculate_match_score(v_transaction, v_inbox);
+      
+--            IF v_score >= v_threshold THEN
+--                RETURN QUERY SELECT p_inbox_id, p_transaction_id, v_transaction.name, v_score, v_inbox.file_name;
+--            END IF;
+--        END IF;
+--    ELSE
+    -- Find potential matches for the transaction
+    RETURN QUERY
+    SELECT 
+        i.id AS inbox_id, 
+        v_transaction.id AS transaction_id, 
+        v_transaction.name AS transaction_name,
+        calculate_match_score(v_transaction, i.*) AS score,
+        i.file_name
+    FROM inbox i
+    WHERE 
+        i.team_id = v_transaction.team_id 
+        AND i.status = 'pending'
+        AND calculate_match_score(v_transaction, i.*) >= v_threshold
+    ORDER BY 
+        calculate_match_score(v_transaction, i.*) DESC,
+        abs(i.date - v_transaction.date) ASC
+    LIMIT 1;
+--    END IF;
+END;
+$function$;
+
+-- Set updated_at timestamp
+CREATE OR REPLACE FUNCTION public.set_updated_at()
+RETURNS trigger
+    LANGUAGE plpgsql
+AS $function$
+BEGIN
+    NEW.updated_at = now();
+    RETURN NEW;
+END;
+$function$;
+
+-- Update transaction frequency
+CREATE OR REPLACE FUNCTION public.update_transaction_frequency()
+RETURNS trigger
+    LANGUAGE plpgsql
+AS $function$
+DECLARE
+    v_transaction_group text;
+    v_frequency transaction_frequency;
+    v_recurring boolean;
+BEGIN
+    -- Optimize the query by adding limits and using more efficient date comparisons
+    WITH transaction_data AS (
+        SELECT 
+            identify_transaction_group(NEW.name, NEW.team_id) AS group_name,
+            COALESCE(avg(extract(epoch FROM (NEW.date::timestamp - t.date::timestamp)) / (24 * 60 * 60)), 0) AS avg_days_between,
+            count(*) + 1 AS transaction_count,
+            COALESCE(bool_or(t.recurring), false) AS is_recurring,
+            COALESCE(max(CASE WHEN t.recurring THEN t.frequency ELSE NULL END), 'unknown'::transaction_frequency) AS latest_frequency
+        FROM transactions t
+        WHERE t.team_id = NEW.team_id
+          AND t.name IN (NEW.name, identify_transaction_group(NEW.name, NEW.team_id))
+          AND t.date < NEW.date
+          AND t.date > (NEW.date - interval '13 months')  -- Limit to transactions within the last 13 months
+    )
+    SELECT 
+        td.group_name,
+        CASE
+            WHEN td.is_recurring AND td.latest_frequency != 'unknown' THEN td.latest_frequency
+            WHEN td.avg_days_between BETWEEN 1 AND 8 THEN 'weekly'::transaction_frequency
+            WHEN td.avg_days_between BETWEEN 9 AND 16 THEN 'biweekly'::transaction_frequency
+            WHEN td.avg_days_between BETWEEN 18 AND 40 THEN 'monthly'::transaction_frequency
+            WHEN td.avg_days_between BETWEEN 60 AND 80 THEN 'semi_monthly'::transaction_frequency
+            WHEN td.avg_days_between BETWEEN 330 AND 370 THEN 'annually'::transaction_frequency
+            WHEN td.transaction_count < 2 THEN 'unknown'::transaction_frequency
+            ELSE 'irregular'::transaction_frequency
+        END AS frequency,
+        CASE
+            WHEN td.is_recurring THEN true
+            WHEN td.transaction_count >= 2 THEN true
+            ELSE false
+        END AS recurring
+    INTO v_transaction_group, v_frequency, v_recurring
+    FROM transaction_data td;
+
+    -- Update the frequency and recurring status on the transaction
+    UPDATE transactions
+    SET frequency = v_frequency,
+        recurring = v_recurring
+    WHERE id = NEW.id;
+
+    RETURN NEW;
+END;
+$function$;
+
+-- Update transaction frequency v2
+CREATE OR REPLACE FUNCTION public.update_transaction_frequency_v2()
+RETURNS trigger
+    LANGUAGE plpgsql
+AS $function$
+DECLARE
+    v_transaction_group text;
+    v_frequency transaction_frequency;
+    v_recurring boolean;
+BEGIN
+    -- Get the transaction group and update frequency and recurring flag
+    SELECT 
+        cf.transaction_group, 
+        cf.frequency, 
+        cf.transaction_count >= 2
+    INTO 
+        v_transaction_group, 
+        v_frequency, 
+        v_recurring
+    FROM classify_frequency_v2(NEW.team_id) cf
+    WHERE cf.transaction_group = (SELECT transaction_group FROM group_transactions_v2(NEW.team_id) WHERE date = NEW.date LIMIT 1);
+
+    -- Update the frequency and recurring status on the transaction
+    UPDATE transactions
+    SET frequency = COALESCE(v_frequency, 'unknown'::transaction_frequency),
+        recurring = COALESCE(v_recurring, false)
+    WHERE id = NEW.id;
+
+    RETURN NEW;
+END;
+$function$;
+
+-- Update transaction frequency v3
+CREATE OR REPLACE FUNCTION public.update_transaction_frequency_v3()
+RETURNS trigger
+    LANGUAGE plpgsql
+AS $function$
+DECLARE
+    v_transaction_group text;
+    v_frequency transaction_frequency;
+    v_recurring boolean;
+    v_transaction_count bigint;
+    v_avg_days_between float;
+BEGIN
+    -- Get the transaction group for the new transaction
+    SELECT COALESCE(st.similar_transaction_name, NEW.name)
+    INTO v_transaction_group
+    FROM identify_similar_transactions_v2(NEW.team_id) st
+    WHERE st.original_transaction_name = NEW.name
+    LIMIT 1;
+
+    -- If no similar transaction found, use the new transaction name
+    v_transaction_group := COALESCE(v_transaction_group, NEW.name);
+
+    -- Calculate frequency only for the affected transaction group
+    WITH group_stats AS (
+        SELECT 
+            count(*) AS transaction_count,
+            avg(extract(epoch FROM (date::timestamp - lag(date::timestamp) OVER (ORDER BY date)))::float / (24 * 60 * 60)) AS avg_days_between
+        FROM transactions
+        WHERE team_id = NEW.team_id AND COALESCE(similar_transaction_name, name) = v_transaction_group
+    )
+    SELECT
+        transaction_count,
+        avg_days_between,
+        CASE 
+            WHEN transaction_count >= 2 AND avg_days_between BETWEEN 1 AND 8 THEN 'weekly'::transaction_frequency
+            WHEN transaction_count >= 2 AND avg_days_between BETWEEN 9 AND 16 THEN 'biweekly'::transaction_frequency
+            WHEN transaction_count >= 2 AND avg_days_between BETWEEN 18 AND 40 THEN 'monthly'::transaction_frequency
+            WHEN transaction_count >= 2 AND avg_days_between BETWEEN 60 AND 80 THEN 'semi_monthly'::transaction_frequency
+            WHEN transaction_count >= 2 AND avg_days_between BETWEEN 330 AND 370 THEN 'annually'::transaction_frequency
+            WHEN transaction_count < 2 THEN 'unknown'::transaction_frequency
+            ELSE 'irregular'::transaction_frequency
+        END,
+        transaction_count >= 2
+    INTO
+        v_transaction_count,
+        v_avg_days_between,
+        v_frequency,
+        v_recurring
+    FROM group_stats;
+
+    -- Update the frequency and recurring status on the new transaction
+    UPDATE transactions
+    SET 
+        frequency = v_frequency,
+        recurring = v_recurring,
+        similar_transaction_name = v_transaction_group
+    WHERE id = NEW.id;
+
+    RETURN NEW;
+END;
+$function$;
+
+-- Handle new user
+CREATE OR REPLACE FUNCTION public.handle_new_user()
+RETURNS trigger
+    LANGUAGE plpgsql
+    SECURITY DEFINER
+    SET search_path TO 'public'
+AS $function$
+BEGIN
+    INSERT INTO public.users (
+        id,
+        full_name,
+        avatar_url,
+        email
+    )
+    VALUES (
+        NEW.id,
+        NEW.raw_user_meta_data->>'full_name',
+        NEW.raw_user_meta_data->>'avatar_url',
+        NEW.email
+    );
+
+    RETURN NEW;
+END;
+$function$;
+
+-- Update enrich transaction
+CREATE OR REPLACE FUNCTION public.update_enrich_transaction()
+RETURNS trigger
+    LANGUAGE plpgsql
+    SECURITY DEFINER
+AS $function$
+BEGIN
+    IF NEW.category_slug IS NULL THEN
+        -- Find matching category_slug from transaction_enrichments and transaction_categories in one query
+        NEW.category_slug := (
+            SELECT te.category_slug
+            FROM transaction_enrichments te
+            JOIN transaction_categories tc ON tc.slug = te.category_slug AND tc.team_id = NEW.team_id
+            WHERE te.name = NEW.name
+                AND (te.system = true OR te.team_id = NEW.team_id)
+            LIMIT 1
+        );
+    END IF;
+
+    RETURN NEW;
+END;
+$function$;
+
+-- Upsert transaction enrichment
+CREATE OR REPLACE FUNCTION public.upsert_transaction_enrichment()
+RETURNS trigger
+    LANGUAGE plpgsql
+    SECURITY DEFINER
+    SET search_path TO 'public'
+AS $function$
+DECLARE
+    transaction_name text;
+    system_value boolean;
+BEGIN
+    SELECT NEW.name INTO transaction_name;
+
+    SELECT system INTO system_value
+    FROM transaction_categories AS tc
+    WHERE tc.slug = NEW.category_slug AND tc.team_id = NEW.team_id;
+    
+    IF NEW.team_id IS NOT NULL THEN
+        INSERT INTO transaction_enrichments(name, category_slug, team_id, system)
+        VALUES (transaction_name, NEW.category_slug, NEW.team_id, system_value)
+        ON CONFLICT (team_id, name) DO UPDATE
+        SET category_slug = excluded.category_slug;
+    END IF;
+
+    RETURN NEW;
+END;
+$function$;
+
+-- Handle empty folder placeholder for storage
+CREATE OR REPLACE FUNCTION storage.handle_empty_folder_placeholder()
+RETURNS trigger
+    LANGUAGE plpgsql
+AS $function$
+DECLARE
+    name_tokens text[];
+    modified_name text;
+BEGIN
+    -- Split the name into an array of tokens based on '/'
+    name_tokens := string_to_array(NEW.name, '/');
+
+    -- Check if the last item in name_tokens is '.emptyFolderPlaceholder'
+    IF name_tokens[array_length(name_tokens, 1)] = '.emptyFolderPlaceholder' THEN
+        
+        -- Change the last item to '.folderPlaceholder'
+        name_tokens[array_length(name_tokens, 1)] := '.folderPlaceholder';
+        
+        -- Reassemble the tokens back into a string
+        modified_name := array_to_string(name_tokens, '/');
+
+        -- Insert a new row with the modified name
+        INSERT INTO storage.objects (bucket_id, name, owner, owner_id, team_id, parent_path)
+        VALUES (
+            NEW.bucket_id,
+            modified_name,
+            NEW.owner,
+            NEW.owner_id,
+            NEW.team_id,
+            NEW.parent_path
+        );
+    END IF;
+
+    -- Insert the original row
+    RETURN NEW;
+END;
+$function$;
+
+-- Get file extension
+CREATE OR REPLACE FUNCTION storage.extension(name text)
+RETURNS text
+    LANGUAGE plpgsql
+AS $function$
+DECLARE
+    _parts text[];
+    _filename text;
+BEGIN
+    SELECT string_to_array(name, '/') INTO _parts;
+    SELECT _parts[array_length(_parts,1)] INTO _filename;
+    -- @todo return the last part instead of 2
+    RETURN split_part(_filename, '.', 2);
+END
+$function$;
+
+-- Get filename
+CREATE OR REPLACE FUNCTION storage.filename(name text)
+RETURNS text
+    LANGUAGE plpgsql
+AS $function$
+DECLARE
+    _parts text[];
+BEGIN
+    SELECT string_to_array(name, '/') INTO _parts;
+    RETURN _parts[array_length(_parts,1)];
+END
+$function$;
+
+-- Get foldername
+CREATE OR REPLACE FUNCTION storage.foldername(name text)
+RETURNS text[]
+    LANGUAGE plpgsql
+AS $function$
+DECLARE
+    _parts text[];
+BEGIN
+    SELECT string_to_array(name, '/') INTO _parts;
+    RETURN _parts[1:array_length(_parts,1)-1];
+END
+$function$;
+
+-- Get assigned users for project
+CREATE OR REPLACE FUNCTION public.get_assigned_users_for_project(tracker_projects)
+RETURNS json
+    LANGUAGE sql
+AS $function$
+    SELECT COALESCE(
+        (SELECT json_agg(
+            json_build_object(
+                'user_id', u.id,
+                'full_name', u.full_name,
+                'avatar_url', u.avatar_url
+            )
+        )
+        FROM (
+            SELECT DISTINCT u.id, u.full_name, u.avatar_url
+            FROM public.users u
+            JOIN public.tracker_entries te ON u.id = te.assigned_id
+            WHERE te.project_id = $1.id
+        ) u
+    ), '[]'::json);
+$function$;
+
+-- Get project total amount
+CREATE OR REPLACE FUNCTION public.get_project_total_amount(tracker_projects)
+RETURNS numeric
+    LANGUAGE sql
+AS $function$
+    SELECT COALESCE(
+        (SELECT 
+            CASE 
+                WHEN $1.rate IS NOT NULL THEN 
+                    ROUND(SUM(te.duration) * $1.rate / 3600, 2)
+                ELSE 
+                    0
+            END
+        FROM public.tracker_entries te
+        WHERE te.project_id = $1.id
+        ), 0
+    );
+$function$;
+
+-- Get runway v4
+CREATE OR REPLACE FUNCTION public.get_runway_v4(team_id text, date_from date, date_to date, base_currency text DEFAULT NULL::text)
+RETURNS numeric
+    LANGUAGE plpgsql
+AS $function$
+DECLARE
+    target_currency text;
+    total_balance numeric;
+    avg_burn_rate numeric;
+    number_of_months numeric;
+BEGIN
+    IF get_runway_v4.base_currency IS NOT NULL THEN
+        target_currency := get_runway_v4.base_currency;
+    ELSE
+        SELECT teams.base_currency INTO target_currency
+        FROM teams
+        WHERE teams.id = get_runway_v4.team_id;
+    END IF;
+
+    SELECT * FROM get_total_balance_v3(team_id, target_currency) INTO total_balance;
+    
+    SELECT (extract(year FROM date_to) - extract(year FROM date_from)) * 12 +
+           extract(month FROM date_to) - extract(month FROM date_from) 
+    INTO number_of_months;
+    
+    SELECT round(avg(value)) 
+    FROM get_burn_rate_v3(team_id, date_from, date_to, target_currency) 
+    INTO avg_burn_rate;
+
+    IF avg_burn_rate = 0 THEN
+        RETURN NULL;
+    ELSE
+        RETURN round(total_balance / avg_burn_rate);
+    END IF;
+END;
+$function$;
+
+-- Calculate bank account base balance
+CREATE OR REPLACE FUNCTION public.calculate_bank_account_base_balance()
+RETURNS trigger
+    LANGUAGE plpgsql
+AS $function$
+DECLARE
+    team_base_currency text;
+    exchange_rate numeric;
+BEGIN
+    BEGIN
+        SELECT base_currency INTO team_base_currency
+        FROM teams
+        WHERE id = NEW.team_id;
+
+        -- If the account currency is the same as the team's base currency or the team's base currency is null
+        IF NEW.currency = team_base_currency OR team_base_currency IS NULL THEN
+            NEW.base_balance := NEW.balance;
+            NEW.base_currency := NEW.currency;
+        ELSE
+            SELECT rate INTO exchange_rate
+            FROM exchange_rates
+            WHERE base = NEW.currency
+            AND target = team_base_currency
+            LIMIT 1;
+
+            IF exchange_rate IS NULL THEN
+                RAISE EXCEPTION 'Exchange rate not found for % to %', NEW.currency, team_base_currency;
+            END IF;
+
+            NEW.base_balance := round(NEW.balance * exchange_rate, 2);
+            NEW.base_currency := team_base_currency;
+        END IF;
+
+        RETURN NEW;
+    EXCEPTION
+        WHEN others THEN
+            -- Log the error
+            RAISE LOG 'Error in calculate_bank_account_base_balance: %', SQLERRM;
+            -- Set default values in case of error
+            NEW.base_balance := NEW.balance;
+            NEW.base_currency := NEW.currency;
+            RETURN NEW;
+    END;
+END;
+$function$;
+
+-- Calculate inbox base amount
+CREATE OR REPLACE FUNCTION public.calculate_inbox_base_amount()
+RETURNS trigger
+    LANGUAGE plpgsql
+AS $function$
+DECLARE
+    team_base_currency text;
+    exchange_rate numeric;
+BEGIN
+    BEGIN
+        SELECT base_currency INTO team_base_currency
+        FROM teams
+        WHERE id = NEW.team_id;
+
+        -- If the inbox item currency is the same as the team's base currency or the team's base currency is null
+        IF NEW.currency = team_base_currency OR team_base_currency IS NULL THEN
+            NEW.base_amount := NEW.amount;
+            NEW.base_currency := NEW.currency;
+        ELSE
+            BEGIN
+                SELECT rate INTO exchange_rate
+                FROM exchange_rates
+                WHERE base = NEW.currency
+                AND target = team_base_currency
+                LIMIT 1;
+
+                IF exchange_rate IS NULL THEN
+                    RAISE EXCEPTION 'Exchange rate not found for % to %', NEW.currency, team_base_currency;
+                END IF;
+
+                NEW.base_amount := round(NEW.amount * exchange_rate, 2);
+                NEW.base_currency := team_base_currency;
+            EXCEPTION
+                WHEN others THEN
+                    RAISE LOG 'Error calculating exchange rate: %', SQLERRM;
+                    -- Set default values in case of error
+                    NEW.base_amount := NEW.amount;
+                    NEW.base_currency := NEW.currency;
+            END;
+        END IF;
+    EXCEPTION
+        WHEN others THEN
+            RAISE LOG 'Error in calculate_inbox_base_amount: %', SQLERRM;
+            -- Set default values in case of error
+            NEW.base_amount := NEW.amount;
+            NEW.base_currency := NEW.currency;
+    END;
+
+    RETURN NEW;
+END;
+$function$;
+
+-- Calculate transaction base amount
+CREATE OR REPLACE FUNCTION public.calculate_transaction_base_amount()
+RETURNS trigger
+    LANGUAGE plpgsql
+AS $function$
+DECLARE
+    team_base_currency text;
+    exchange_rate numeric;
+BEGIN
+    BEGIN
+        SELECT base_currency INTO team_base_currency
+        FROM teams
+        WHERE id = NEW.team_id;
+
+        -- If the account currency is the same as the team's base currency or the team's base currency is null
+        IF NEW.currency = team_base_currency OR team_base_currency IS NULL THEN
+            NEW.base_balance := NEW.balance;
+            NEW.base_currency := NEW.currency;
+        ELSE
+            SELECT rate INTO exchange_rate
+            FROM exchange_rates
+            WHERE base = NEW.currency
+            AND target = team_base_currency
+            LIMIT 1;
+
+            IF exchange_rate IS NULL THEN
+                RAISE EXCEPTION 'Exchange rate not found for % to %', NEW.currency, team_base_currency;
+            END IF;
+
+            NEW.base_balance := round(NEW.balance * exchange_rate, 2);
+            NEW.base_currency := team_base_currency;
+        END IF;
+
+        RETURN NEW;
+    EXCEPTION
+        WHEN others THEN
+            -- Log the error
+            RAISE NOTICE 'Error in calculate_bank_account_base_balance: %', SQLERRM;
+            -- Return the original record without modification
+            RETURN NEW;
+    END;
+END;
+$function$;
+
+-- Detect recurring transactions
+CREATE OR REPLACE FUNCTION public.detect_recurring_transactions()
+RETURNS trigger
+    LANGUAGE plpgsql
+AS $function$
+DECLARE
+    last_transaction record;
+    days_diff numeric;
+    frequency_type transaction_frequency;
+    search_query text;
+BEGIN
+    -- Wrap the entire function in a try-catch block
+    BEGIN
+        -- Prepare the search query
+        search_query := regexp_replace(
+            regexp_replace(COALESCE(NEW.name, '') || ' ' || COALESCE(NEW.description, ''), '[^\w\s]', ' ', 'g'),
+            '\s+', ' ', 'g'
+        );
+        search_query := trim(search_query);
+     
+        -- Convert to tsquery format with prefix matching
+        search_query := (
+            SELECT string_agg(lexeme || ':*', ' & ')
+            FROM unnest(string_to_array(search_query, ' ')) lexeme
+            WHERE length(lexeme) > 0
+        );
+      
+        -- Find the last similar transaction using ts_query
+        SELECT * INTO last_transaction
+        FROM transactions
+        WHERE team_id = NEW.team_id
+          AND id <> NEW.id -- exclude the current transaction
+          AND date < NEW.date -- ensure we're looking at previous transactions
+          AND category_slug != 'income' -- exclude income transactions
+          AND category_slug != 'transfer' -- exclude transfer transactions
+          AND fts_vector @@ to_tsquery('english', search_query)
+        ORDER BY ts_rank(fts_vector, to_tsquery('english', search_query)) DESC, date DESC
+        LIMIT 1;
+
+        -- If at least one similar transaction exists, calculate frequency
+        IF last_transaction.id IS NOT NULL THEN
+            IF last_transaction.frequency IS NOT NULL AND last_transaction.recurring = true THEN
+                frequency_type := last_transaction.frequency;
+                -- Save recurring if last_transaction is true
+                UPDATE transactions SET
+                    recurring = true,
+                    frequency = frequency_type
+                WHERE id = NEW.id;
+            ELSIF last_transaction.recurring = false THEN
+                -- Set as non-recurring if last_transaction is false
+                UPDATE transactions SET
+                    recurring = false,
+                    frequency = NULL
+                WHERE id = NEW.id;
+            ELSE
+                days_diff := extract(epoch FROM (NEW.date::timestamp - last_transaction.date::timestamp)) / (24 * 60 * 60);
+                
+                CASE
+                    WHEN days_diff BETWEEN 1 AND 16 THEN
+                        frequency_type := 'weekly'::transaction_frequency;
+                    WHEN days_diff BETWEEN 18 AND 80 THEN
+                        frequency_type := 'monthly'::transaction_frequency;
+                    WHEN days_diff BETWEEN 330 AND 370 THEN
+                        frequency_type := 'annually'::transaction_frequency;
+                    ELSE
+                        frequency_type := 'irregular'::transaction_frequency;
+                END CASE;
+
+                -- Update the recurring flag and frequency only if not irregular
+                IF frequency_type != 'irregular'::transaction_frequency THEN
+                    UPDATE transactions SET
+                        recurring = true,
+                        frequency = frequency_type
+                    WHERE id = NEW.id;
+                ELSE
+                    -- Mark as non-recurring if irregular
+                    UPDATE transactions SET
+                        recurring = false,
+                        frequency = NULL
+                    WHERE id = NEW.id;
+                END IF;
+            END IF;
+        ELSE
+            -- No similar transaction found, mark as non-recurring
+            UPDATE transactions SET
+                recurring = false,
+                frequency = NULL
+            WHERE id = NEW.id;
+        END IF;
+
+    EXCEPTION
+        WHEN others THEN
+            -- Log the error
+            RAISE NOTICE 'An error occurred: %', SQLERRM;
+            
+            -- Ensure we still return NEW even if an error occurs
+            RETURN NEW;
+    END;
+
+    RETURN NEW;
+END;
+$function$;
+
+-- Update enrich transaction
+CREATE OR REPLACE FUNCTION public.update_enrich_transaction()
+RETURNS trigger
+    LANGUAGE plpgsql
+    SECURITY DEFINER
+AS $function$
+BEGIN
+    IF NEW.category_slug IS NULL THEN
+        -- Find matching category_slug from transaction_enrichments and transaction_categories in one query
+        BEGIN
+            NEW.category_slug := (
+                SELECT te.category_slug
+                FROM transaction_enrichments te
+                JOIN transaction_categories tc ON tc.slug = te.category_slug AND tc.team_id = NEW.team_id
+                WHERE te.name = NEW.name
+                    AND (te.system = true OR te.team_id = NEW.team_id)
+                    AND te.category_slug != 'income'
+                LIMIT 1
+            );
+        EXCEPTION
+            WHEN others THEN
+                NEW.category_slug := NULL; -- or set to a default value
+        END;
+    END IF;
+
+    RETURN NEW;
+END;
+$function$;
+
+-- Upsert transaction enrichment
+CREATE OR REPLACE FUNCTION public.upsert_transaction_enrichment()
+RETURNS trigger
+    LANGUAGE plpgsql
+    SECURITY DEFINER
+    SET search_path TO 'public'
+AS $function$
+DECLARE
+    transaction_name text;
+    system_value boolean;
+BEGIN
+    BEGIN
+        SELECT NEW.name INTO transaction_name;
+
+        SELECT system INTO system_value
+        FROM transaction_categories AS tc
+        WHERE tc.slug = NEW.category_slug AND tc.team_id = NEW.team_id;
+        
+        IF NEW.team_id IS NOT NULL THEN
+            INSERT INTO transaction_enrichments(name, category_slug, team_id, system)
+            VALUES (transaction_name, NEW.category_slug, NEW.team_id, system_value)
+            ON CONFLICT (team_id, name) DO UPDATE
+            SET category_slug = excluded.category_slug;
+        END IF;
+
+        RETURN NEW;
+    EXCEPTION
+        WHEN others THEN
+            -- Log the error
+            RAISE NOTICE 'Error in upsert_transaction_enrichment: %', SQLERRM;
+            
+            -- Return the original NEW record without modifications
+            RETURN NEW;
+    END;
+END;
+$function$;
+
+-- Bank Account Indexes
+CREATE INDEX bank_accounts_bank_connection_id_idx ON public.bank_accounts USING btree (bank_connection_id);
+CREATE INDEX bank_accounts_created_by_idx ON public.bank_accounts USING btree (created_by);
+CREATE INDEX bank_accounts_team_id_idx ON public.bank_accounts USING btree (team_id);
+
+-- Bank Connections Index
+CREATE INDEX bank_connections_team_id_idx ON public.bank_connections USING btree (team_id);
+
+-- Inbox Indexes
+CREATE INDEX inbox_attachment_id_idx ON public.inbox USING btree (attachment_id);
+CREATE INDEX inbox_team_id_idx ON public.inbox USING btree (team_id);
+CREATE INDEX inbox_transaction_id_idx ON public.inbox USING btree (transaction_id);
+
+-- Transaction Attachments Indexes
+CREATE INDEX transaction_attachments_team_id_idx ON public.transaction_attachments USING btree (team_id);
+CREATE INDEX transaction_attachments_transaction_id_idx ON public.transaction_attachments USING btree (transaction_id);
+
+-- Transactions Indexes
+CREATE INDEX transactions_category_slug_idx ON public.transactions USING btree (category_slug);
+CREATE INDEX transactions_team_id_date_currency_bank_account_id_category_idx ON public.transactions USING btree (team_id, date, currency, bank_account_id, category);
+CREATE INDEX transactions_team_id_idx ON public.transactions USING btree (team_id);
+CREATE INDEX transactions_assigned_id_idx ON public.transactions USING btree (assigned_id);
+CREATE INDEX transactions_bank_account_id_idx ON public.transactions USING btree (bank_account_id);
+
+-- Users and Teams Indexes
+CREATE INDEX users_on_team_team_id_idx ON public.users_on_team USING btree (team_id);
+CREATE INDEX users_on_team_user_id_idx ON public.users_on_team USING btree (user_id);
+CREATE INDEX users_team_id_idx ON public.users USING btree (team_id);
+CREATE INDEX user_invites_team_id_idx ON public.user_invites USING btree (team_id);
+
+-- Reports and Tracker Indexes
+CREATE INDEX reports_team_id_idx ON public.reports USING btree (team_id);
+CREATE INDEX tracker_entries_team_id_idx ON public.tracker_entries USING btree (team_id);
+CREATE INDEX tracker_projects_team_id_idx ON public.tracker_projects USING btree (team_id);
+CREATE INDEX tracker_reports_team_id_idx ON public.tracker_reports USING btree (team_id);
+
+-- Transaction Categories Indexes
+CREATE INDEX transaction_categories_team_id_idx ON public.transaction_categories USING btree (team_id);
+CREATE INDEX transaction_enrichments_category_slug_team_id_idx ON public.transaction_enrichments USING btree (category_slug, team_id);
+
+-- Triggers
+CREATE OR REPLACE TRIGGER embed_category 
+AFTER INSERT OR UPDATE ON public.transaction_categories 
+FOR EACH ROW 
+EXECUTE FUNCTION supabase_functions.http_request(
+    'https://hfgtyawqemeozrtjzevl.supabase.co/functions/v1/generate-category-embedding',
+    'POST',
+    '{"Content-type":"application/json"}',
+    '{}',
+    '5000'
 );
 
-ALTER TABLE "public"."bank_connections" OWNER TO "postgres";
-
-CREATE TABLE IF NOT EXISTS "public"."reports" (
-    "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
-    "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
-    "link_id" "text",
-    "team_id" "uuid",
-    "short_link" "text",
-    "from" timestamp with time zone,
-    "to" timestamp with time zone,
-    "type" "public"."reportTypes",
-    "expire_at" timestamp with time zone,
-    "currency" "text",
-    "created_by" "uuid"
-);
-
-ALTER TABLE "public"."reports" OWNER TO "postgres";
-
-CREATE TABLE IF NOT EXISTS "public"."teams" (
-    "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
-    "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
-    "name" "text",
-    "logo_url" "text",
-    "inbox_id" "text" DEFAULT "public"."generate_inbox"(10),
-    "email" "text",
-    "inbox_email" "text",
-    "inbox_forwarding" boolean DEFAULT true
-);
-
-ALTER TABLE "public"."teams" OWNER TO "postgres";
-
-CREATE TABLE IF NOT EXISTS "public"."tracker_reports" (
-    "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
-    "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
-    "link_id" "text",
-    "short_link" "text",
-    "team_id" "uuid" DEFAULT "gen_random_uuid"(),
-    "project_id" "uuid" DEFAULT "gen_random_uuid"(),
-    "created_by" "uuid"
-);
-
-ALTER TABLE "public"."tracker_reports" OWNER TO "postgres";
-
-CREATE TABLE IF NOT EXISTS "public"."transaction_attachments" (
-    "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
-    "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
-    "type" "text",
-    "transaction_id" "uuid",
-    "team_id" "uuid",
-    "size" bigint,
-    "name" "text",
-    "path" "text"[]
-);
-
-ALTER TABLE "public"."transaction_attachments" OWNER TO "postgres";
-
-CREATE TABLE IF NOT EXISTS "public"."transaction_categories" (
-    "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
-    "name" "text" NOT NULL,
-    "team_id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
-    "color" "text",
-    "created_at" timestamp with time zone DEFAULT "now"(),
-    "system" boolean DEFAULT false,
-    "slug" "text" NOT NULL,
-    "vat" numeric,
-    "description" "text",
-    "embedding" "extensions"."vector"(384)
-);
-
-ALTER TABLE "public"."transaction_categories" OWNER TO "postgres";
-
-CREATE TABLE IF NOT EXISTS "public"."transaction_enrichments" (
-    "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
-    "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
-    "name" "text",
-    "team_id" "uuid",
-    "category_slug" "text",
-    "system" boolean DEFAULT true
-);
-
-ALTER TABLE "public"."transaction_enrichments" OWNER TO "postgres";
-
-CREATE TABLE IF NOT EXISTS "public"."user_invites" (
-    "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
-    "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
-    "team_id" "uuid",
-    "email" "text",
-    "role" "public"."teamRoles",
-    "code" "text" DEFAULT "public"."nanoid"(24),
-    "invited_by" "uuid"
-);
-
-ALTER TABLE "public"."user_invites" OWNER TO "postgres";
-
-CREATE TABLE IF NOT EXISTS "public"."users" (
-    "id" "uuid" NOT NULL,
-    "full_name" "text",
-    "avatar_url" "text",
-    "email" "text",
-    "team_id" "uuid",
-    "created_at" timestamp with time zone DEFAULT "now"(),
-    "locale" "text" DEFAULT 'en'::"text",
-    "week_starts_on_monday" boolean DEFAULT false
-);
+CREATE OR REPLACE TRIGGER generate_category_slug 
+BEFORE INSERT ON public.transaction_categories 
+FOR EACH ROW 
+EXECUTE FUNCTION public.generate_slug_from_name();
 
-ALTER TABLE "public"."users" OWNER TO "postgres";
+CREATE OR REPLACE TRIGGER insert_system_categories_trigger 
+AFTER INSERT ON public.teams 
+FOR EACH ROW 
+EXECUTE FUNCTION public.insert_system_categories();
 
-CREATE TABLE IF NOT EXISTS "public"."users_on_team" (
-    "user_id" "uuid" NOT NULL,
-    "team_id" "uuid" NOT NULL,
-    "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
-    "role" "public"."teamRoles",
-    "created_at" timestamp with time zone DEFAULT "now"()
-);
+CREATE OR REPLACE TRIGGER match_transaction 
+AFTER INSERT ON public.transactions 
+FOR EACH ROW 
+EXECUTE FUNCTION public.webhook('webhook/inbox/match');
 
-ALTER TABLE "public"."users_on_team" OWNER TO "postgres";
+CREATE OR REPLACE TRIGGER on_updated_transaction_category 
+AFTER UPDATE OF category_slug ON public.transactions 
+FOR EACH ROW 
+EXECUTE FUNCTION public.upsert_transaction_enrichment();
 
-ALTER TABLE ONLY "public"."transaction_attachments"
-    ADD CONSTRAINT "attachments_pkey" PRIMARY KEY ("id");
+CREATE OR REPLACE TRIGGER trigger_update_transactions_category 
+BEFORE DELETE ON public.transaction_categories 
+FOR EACH ROW 
+EXECUTE FUNCTION public.update_transactions_on_category_delete();
 
-ALTER TABLE ONLY "public"."bank_accounts"
-    ADD CONSTRAINT "bank_accounts_pkey" PRIMARY KEY ("id");
+CREATE OR REPLACE TRIGGER update_enrich_transaction_trigger 
+BEFORE INSERT ON public.transactions 
+FOR EACH ROW 
+EXECUTE FUNCTION public.update_enrich_transaction();
 
-ALTER TABLE ONLY "public"."bank_connections"
-    ADD CONSTRAINT "bank_connections_pkey" PRIMARY KEY ("id");
+-- Bank Account Policies
+CREATE POLICY "Bank Accounts can be created by a member of the team" ON public.bank_accounts 
+FOR INSERT WITH CHECK (team_id IN (SELECT private.get_teams_for_authenticated_user()));
 
-ALTER TABLE ONLY "public"."inbox"
-    ADD CONSTRAINT "inbox_pkey" PRIMARY KEY ("id");
+CREATE POLICY "Bank Accounts can be deleted by a member of the team" ON public.bank_accounts 
+FOR DELETE USING (team_id IN (SELECT private.get_teams_for_authenticated_user()));
 
-ALTER TABLE ONLY "public"."inbox"
-    ADD CONSTRAINT "inbox_reference_id_key" UNIQUE ("reference_id");
+CREATE POLICY "Bank Accounts can be selected by a member of the team" ON public.bank_accounts 
+FOR SELECT USING (team_id IN (SELECT private.get_teams_for_authenticated_user()));
 
-ALTER TABLE ONLY "public"."users_on_team"
-    ADD CONSTRAINT "members_pkey" PRIMARY KEY ("user_id", "team_id", "id");
+CREATE POLICY "Bank Accounts can be updated by a member of the team" ON public.bank_accounts 
+FOR UPDATE USING (team_id IN (SELECT private.get_teams_for_authenticated_user()));
 
-ALTER TABLE ONLY "public"."users"
-    ADD CONSTRAINT "profiles_pkey" PRIMARY KEY ("id");
+-- Bank Connection Policies
+CREATE POLICY "Bank Connections can be created by a member of the team" ON public.bank_connections 
+FOR INSERT WITH CHECK (team_id IN (SELECT private.get_teams_for_authenticated_user()));
 
-ALTER TABLE ONLY "public"."tracker_reports"
-    ADD CONSTRAINT "project_reports_pkey" PRIMARY KEY ("id");
+CREATE POLICY "Bank Connections can be deleted by a member of the team" ON public.bank_connections 
+FOR DELETE USING (team_id IN (SELECT private.get_teams_for_authenticated_user()));
 
-ALTER TABLE ONLY "public"."reports"
-    ADD CONSTRAINT "reports_pkey" PRIMARY KEY ("id");
+CREATE POLICY "Bank Connections can be selected by a member of the team" ON public.bank_connections 
+FOR SELECT USING (team_id IN (SELECT private.get_teams_for_authenticated_user()));
 
-ALTER TABLE ONLY "public"."teams"
-    ADD CONSTRAINT "teams_inbox_id_key" UNIQUE ("inbox_id");
+CREATE POLICY "Bank Connections can be updated by a member of the team" ON public.bank_connections 
+FOR UPDATE USING (team_id IN (SELECT private.get_teams_for_authenticated_user()));
 
-ALTER TABLE ONLY "public"."teams"
-    ADD CONSTRAINT "teams_pkey" PRIMARY KEY ("id");
+-- Teams, Users, and Authentication Policies
+CREATE POLICY "Enable insert for authenticated users only" ON public.teams 
+FOR INSERT TO authenticated WITH CHECK (true);
 
-ALTER TABLE ONLY "public"."tracker_projects"
-    ADD CONSTRAINT "tracker_projects_pkey" PRIMARY KEY ("id");
+CREATE POLICY "Enable insert for authenticated users only" ON public.transaction_enrichments 
+FOR INSERT TO authenticated WITH CHECK (true);
 
-ALTER TABLE ONLY "public"."tracker_entries"
-    ADD CONSTRAINT "tracker_records_pkey" PRIMARY KEY ("id");
+CREATE POLICY "Enable insert for authenticated users only" ON public.users_on_team 
+FOR INSERT TO authenticated WITH CHECK (true);
 
-ALTER TABLE ONLY "public"."transaction_categories"
-    ADD CONSTRAINT "transaction_categories_pkey" PRIMARY KEY ("team_id", "slug");
+CREATE POLICY "Enable read access for all users" ON public.users_on_team 
+FOR SELECT USING (true);
 
-ALTER TABLE ONLY "public"."transaction_enrichments"
-    ADD CONSTRAINT "transaction_enrichments_pkey" PRIMARY KEY ("id");
+CREATE POLICY "Enable select for users based on email" ON public.user_invites 
+FOR SELECT USING ((auth.jwt() ->> 'email'::text) = email);
 
-ALTER TABLE ONLY "public"."transactions"
-    ADD CONSTRAINT "transactions_internal_id_key" UNIQUE ("internal_id");
+CREATE POLICY "Enable update for authenticated users only" ON public.transaction_enrichments 
+FOR UPDATE TO authenticated WITH CHECK (true);
 
-ALTER TABLE ONLY "public"."transactions"
-    ADD CONSTRAINT "transactions_pkey" PRIMARY KEY ("id");
+CREATE POLICY "Enable updates for users on team" ON public.users_on_team 
+FOR UPDATE TO authenticated 
+USING (team_id IN (SELECT private.get_teams_for_authenticated_user())) 
+WITH CHECK (team_id IN (SELECT private.get_teams_for_authenticated_user()));
 
-ALTER TABLE ONLY "public"."bank_connections"
-    ADD CONSTRAINT "unique_bank_connections" UNIQUE ("team_id", "institution_id");
+-- Tracker Entries Policies
+CREATE POLICY "Entries can be created by a member of the team" ON public.tracker_entries 
+FOR INSERT TO authenticated WITH CHECK (team_id IN (SELECT private.get_teams_for_authenticated_user()));
 
-ALTER TABLE ONLY "public"."user_invites"
-    ADD CONSTRAINT "unique_team_invite" UNIQUE ("email", "team_id");
+CREATE POLICY "Entries can be deleted by a member of the team" ON public.tracker_entries 
+FOR DELETE TO authenticated USING (team_id IN (SELECT private.get_teams_for_authenticated_user()));
 
-ALTER TABLE ONLY "public"."transaction_enrichments"
-    ADD CONSTRAINT "unique_team_name" UNIQUE ("team_id", "name");
+CREATE POLICY "Entries can be selected by a member of the team" ON public.tracker_entries 
+FOR SELECT TO authenticated USING (team_id IN (SELECT private.get_teams_for_authenticated_user()));
 
-ALTER TABLE ONLY "public"."transaction_categories"
-    ADD CONSTRAINT "unique_team_slug" UNIQUE ("team_id", "slug");
+CREATE POLICY "Entries can be updated by a member of the team" ON public.tracker_entries 
+FOR UPDATE TO authenticated WITH CHECK (team_id IN (SELECT private.get_teams_for_authenticated_user()));
 
-ALTER TABLE ONLY "public"."user_invites"
-    ADD CONSTRAINT "user_invites_code_key" UNIQUE ("code");
+-- Inbox Policies
+CREATE POLICY "Inbox can be deleted by a member of the team" ON public.inbox 
+FOR DELETE USING (team_id IN (SELECT private.get_teams_for_authenticated_user()));
 
-ALTER TABLE ONLY "public"."user_invites"
-    ADD CONSTRAINT "user_invites_pkey" PRIMARY KEY ("id");
+CREATE POLICY "Inbox can be selected by a member of the team" ON public.inbox 
+FOR SELECT USING (team_id IN (SELECT private.get_teams_for_authenticated_user()));
 
-CREATE INDEX "bank_accounts_bank_connection_id_idx" ON "public"."bank_accounts" USING "btree" ("bank_connection_id");
+CREATE POLICY "Inbox can be updated by a member of the team" ON public.inbox 
+FOR UPDATE USING (team_id IN (SELECT private.get_teams_for_authenticated_user()));
 
-CREATE INDEX "bank_accounts_created_by_idx" ON "public"."bank_accounts" USING "btree" ("created_by");
+-- Team Invitation Policies
+CREATE POLICY "Invited users can select team if they are invited." ON public.teams 
+FOR SELECT USING (id IN (SELECT private.get_invites_for_authenticated_user()));
 
-CREATE INDEX "bank_accounts_team_id_idx" ON "public"."bank_accounts" USING "btree" ("team_id");
+-- Projects Policies
+CREATE POLICY "Projects can be created by a member of the team" ON public.tracker_projects 
+FOR INSERT TO authenticated WITH CHECK (team_id IN (SELECT private.get_teams_for_authenticated_user()));
 
-CREATE INDEX "bank_connections_team_id_idx" ON "public"."bank_connections" USING "btree" ("team_id");
+CREATE POLICY "Projects can be deleted by a member of the team" ON public.tracker_projects 
+FOR DELETE TO authenticated USING (team_id IN (SELECT private.get_teams_for_authenticated_user()));
 
-CREATE INDEX "inbox_attachment_id_idx" ON "public"."inbox" USING "btree" ("attachment_id");
+CREATE POLICY "Projects can be selected by a member of the team" ON public.tracker_projects 
+FOR SELECT TO authenticated USING (team_id IN (SELECT private.get_teams_for_authenticated_user()));
 
-CREATE INDEX "inbox_team_id_idx" ON "public"."inbox" USING "btree" ("team_id");
+CREATE POLICY "Projects can be updated by a member of the team" ON public.tracker_projects 
+FOR UPDATE TO authenticated USING (team_id IN (SELECT private.get_teams_for_authenticated_user()));
 
-CREATE INDEX "inbox_transaction_id_idx" ON "public"."inbox" USING "btree" ("transaction_id");
+-- Reports Policies
+CREATE POLICY "Reports can be created by a member of the team" ON public.reports 
+FOR INSERT WITH CHECK (team_id IN (SELECT private.get_teams_for_authenticated_user()));
 
-CREATE INDEX "transaction_attachments_team_id_idx" ON "public"."transaction_attachments" USING "btree" ("team_id");
+CREATE POLICY "Reports can be deleted by a member of the team" ON public.reports 
+FOR DELETE USING (team_id IN (SELECT private.get_teams_for_authenticated_user()));
 
-CREATE INDEX "transaction_attachments_transaction_id_idx" ON "public"."transaction_attachments" USING "btree" ("transaction_id");
+CREATE POLICY "Reports can be handled by a member of the team" ON public.tracker_reports 
+USING (team_id IN (SELECT private.get_teams_for_authenticated_user()));
 
-CREATE INDEX "transactions_category_slug_idx" ON "public"."transactions" USING "btree" ("category_slug");
+CREATE POLICY "Reports can be selected by a member of the team" ON public.reports 
+FOR SELECT USING (team_id IN (SELECT private.get_teams_for_authenticated_user()));
 
-CREATE INDEX "transactions_team_id_date_currency_bank_account_id_category_idx" ON "public"."transactions" USING "btree" ("team_id", "date", "currency", "bank_account_id", "category");
+CREATE POLICY "Reports can be updated by member of team" ON public.reports 
+FOR UPDATE USING (team_id IN (SELECT private.get_teams_for_authenticated_user()));
 
-CREATE INDEX "transactions_team_id_idx" ON "public"."transactions" USING "btree" ("team_id");
+-- Teams Management Policies
+CREATE POLICY "Teams can be deleted by a member of the team" ON public.teams 
+FOR DELETE USING (id IN (SELECT private.get_teams_for_authenticated_user()));
 
-CREATE INDEX "users_on_team_team_id_idx" ON "public"."users_on_team" USING "btree" ("team_id");
+CREATE POLICY "Teams can be selected by a member of the team" ON public.teams 
+FOR SELECT USING (id IN (SELECT private.get_teams_for_authenticated_user()));
 
-CREATE OR REPLACE TRIGGER "embed_category" AFTER INSERT OR UPDATE ON "public"."transaction_categories" FOR EACH ROW EXECUTE FUNCTION "supabase_functions"."http_request"('https://pytddvqiozwrhfbwqazp.supabase.co/functions/v1/generate-category-embedding', 'POST', '{"Content-type":"application/json"}', '{}', '5000');
+CREATE POLICY "Teams can be updated by a member of the team" ON public.teams 
+FOR UPDATE USING (id IN (SELECT private.get_teams_for_authenticated_user()));
 
-CREATE OR REPLACE TRIGGER "generate_category_slug" BEFORE INSERT ON "public"."transaction_categories" FOR EACH ROW EXECUTE FUNCTION "public"."generate_slug_from_name"();
+-- Transaction Attachments Policies
+CREATE POLICY "Transaction Attachments can be created by a member of the team" ON public.transaction_attachments 
+FOR INSERT WITH CHECK (team_id IN (SELECT private.get_teams_for_authenticated_user()));
 
-CREATE OR REPLACE TRIGGER "insert_system_categories_trigger" AFTER INSERT ON "public"."teams" FOR EACH ROW EXECUTE FUNCTION "public"."insert_system_categories"();
+CREATE POLICY "Transaction Attachments can be deleted by a member of the team" ON public.transaction_attachments 
+FOR DELETE USING (team_id IN (SELECT private.get_teams_for_authenticated_user()));
 
-CREATE OR REPLACE TRIGGER "match_transaction" AFTER INSERT ON "public"."transactions" FOR EACH ROW EXECUTE FUNCTION "public"."webhook"('webhook/inbox/match');
+CREATE POLICY "Transaction Attachments can be selected by a member of the team" ON public.transaction_attachments 
+FOR SELECT USING (team_id IN (SELECT private.get_teams_for_authenticated_user()));
 
-CREATE OR REPLACE TRIGGER "on_updated_transaction_category" AFTER UPDATE OF "category_slug" ON "public"."transactions" FOR EACH ROW EXECUTE FUNCTION "public"."upsert_transaction_enrichment"();
+CREATE POLICY "Transaction Attachments can be updated by a member of the team" ON public.transaction_attachments 
+FOR UPDATE USING (team_id IN (SELECT private.get_teams_for_authenticated_user()));
 
-CREATE OR REPLACE TRIGGER "trigger_update_transactions_category" BEFORE DELETE ON "public"."transaction_categories" FOR EACH ROW EXECUTE FUNCTION "public"."update_transactions_on_category_delete"();
+-- Transactions Policies
+CREATE POLICY "Transactions can be created by a member of the team" ON public.transactions 
+FOR INSERT WITH CHECK (team_id IN (SELECT private.get_teams_for_authenticated_user()));
 
-CREATE OR REPLACE TRIGGER "update_enrich_transaction_trigger" BEFORE INSERT ON "public"."transactions" FOR EACH ROW EXECUTE FUNCTION "public"."update_enrich_transaction"();
+CREATE POLICY "Transactions can be deleted by a member of the team" ON public.transactions 
+FOR DELETE USING (team_id IN (SELECT private.get_teams_for_authenticated_user()));
 
-ALTER TABLE ONLY "public"."bank_accounts"
-    ADD CONSTRAINT "bank_accounts_bank_connection_id_fkey" FOREIGN KEY ("bank_connection_id") REFERENCES "public"."bank_connections"("id") ON DELETE SET NULL;
+CREATE POLICY "Transactions can be selected by a member of the team" ON public.transactions 
+FOR SELECT USING (team_id IN (SELECT private.get_teams_for_authenticated_user()));
 
-ALTER TABLE ONLY "public"."bank_accounts"
-    ADD CONSTRAINT "bank_accounts_created_by_fkey" FOREIGN KEY ("created_by") REFERENCES "public"."users"("id") ON DELETE CASCADE;
+CREATE POLICY "Transactions can be updated by a member of the team" ON public.transactions 
+FOR UPDATE USING (team_id IN (SELECT private.get_teams_for_authenticated_user()));
 
-ALTER TABLE ONLY "public"."bank_connections"
-    ADD CONSTRAINT "bank_connections_team_id_fkey" FOREIGN KEY ("team_id") REFERENCES "public"."teams"("id") ON DELETE CASCADE;
+-- User Invites Policies
+CREATE POLICY "User Invites can be created by a member of the team" ON public.user_invites 
+FOR INSERT WITH CHECK (team_id IN (SELECT private.get_teams_for_authenticated_user()));
 
-ALTER TABLE ONLY "public"."inbox"
-    ADD CONSTRAINT "inbox_attachment_id_fkey" FOREIGN KEY ("attachment_id") REFERENCES "public"."transaction_attachments"("id") ON DELETE SET NULL;
+CREATE POLICY "User Invites can be deleted by a member of the team" ON public.user_invites 
+FOR DELETE USING (team_id IN (SELECT private.get_teams_for_authenticated_user()));
 
-ALTER TABLE ONLY "public"."bank_accounts"
-    ADD CONSTRAINT "public_bank_accounts_team_id_fkey" FOREIGN KEY ("team_id") REFERENCES "public"."teams"("id") ON DELETE CASCADE;
+CREATE POLICY "User Invites can be deleted by invited email" ON public.user_invites 
+FOR DELETE USING ((auth.jwt() ->> 'email'::text) = email);
 
-ALTER TABLE ONLY "public"."inbox"
-    ADD CONSTRAINT "public_inbox_team_id_fkey" FOREIGN KEY ("team_id") REFERENCES "public"."teams"("id") ON DELETE CASCADE;
+CREATE POLICY "User Invites can be selected by a member of the team" ON public.user_invites 
+FOR SELECT USING (team_id IN (SELECT private.get_teams_for_authenticated_user()));
 
-ALTER TABLE ONLY "public"."inbox"
-    ADD CONSTRAINT "public_inbox_transaction_id_fkey" FOREIGN KEY ("transaction_id") REFERENCES "public"."transactions"("id") ON DELETE SET NULL;
+CREATE POLICY "User Invites can be updated by a member of the team" ON public.user_invites 
+FOR UPDATE USING (team_id IN (SELECT private.get_teams_for_authenticated_user()));
 
-ALTER TABLE ONLY "public"."reports"
-    ADD CONSTRAINT "public_reports_created_by_fkey" FOREIGN KEY ("created_by") REFERENCES "public"."users"("id") ON DELETE CASCADE;
+-- User Profile Policies
+CREATE POLICY "Users can insert their own profile." ON public.users 
+FOR INSERT WITH CHECK (auth.uid() = id);
 
-ALTER TABLE ONLY "public"."tracker_reports"
-    ADD CONSTRAINT "public_tracker_reports_created_by_fkey" FOREIGN KEY ("created_by") REFERENCES "public"."users"("id") ON DELETE CASCADE;
+CREATE POLICY "Users can select their own profile." ON public.users 
+FOR SELECT USING (auth.uid() = id);
 
-ALTER TABLE ONLY "public"."tracker_reports"
-    ADD CONSTRAINT "public_tracker_reports_project_id_fkey" FOREIGN KEY ("project_id") REFERENCES "public"."tracker_projects"("id") ON UPDATE CASCADE ON DELETE CASCADE;
+CREATE POLICY "Users can select users if they are in the same team" ON public.users 
+FOR SELECT TO authenticated 
+USING (EXISTS (
+    SELECT 1 FROM public.users_on_team
+    WHERE users_on_team.user_id = auth.uid() 
+    AND users_on_team.team_id = users.team_id
+));
 
-ALTER TABLE ONLY "public"."transaction_attachments"
-    ADD CONSTRAINT "public_transaction_attachments_team_id_fkey" FOREIGN KEY ("team_id") REFERENCES "public"."teams"("id") ON DELETE CASCADE;
+CREATE POLICY "Users can update own profile." ON public.users 
+FOR UPDATE USING (auth.uid() = id);
 
-ALTER TABLE ONLY "public"."transaction_attachments"
-    ADD CONSTRAINT "public_transaction_attachments_transaction_id_fkey" FOREIGN KEY ("transaction_id") REFERENCES "public"."transactions"("id") ON DELETE SET NULL;
+CREATE POLICY "Users on team can be deleted by a member of the team" ON public.users_on_team 
+FOR DELETE USING (team_id IN (SELECT private.get_teams_for_authenticated_user()));
 
-ALTER TABLE ONLY "public"."transactions"
-    ADD CONSTRAINT "public_transactions_assigned_id_fkey" FOREIGN KEY ("assigned_id") REFERENCES "public"."users"("id") ON DELETE SET NULL;
+CREATE POLICY "Users on team can manage categories" ON public.transaction_categories 
+USING (team_id IN (SELECT private.get_teams_for_authenticated_user()));
 
-ALTER TABLE ONLY "public"."transactions"
-    ADD CONSTRAINT "public_transactions_team_id_fkey" FOREIGN KEY ("team_id") REFERENCES "public"."teams"("id") ON DELETE CASCADE;
-
-ALTER TABLE ONLY "public"."user_invites"
-    ADD CONSTRAINT "public_user_invites_team_id_fkey" FOREIGN KEY ("team_id") REFERENCES "public"."teams"("id") ON DELETE CASCADE;
-
-ALTER TABLE ONLY "public"."reports"
-    ADD CONSTRAINT "reports_team_id_fkey" FOREIGN KEY ("team_id") REFERENCES "public"."teams"("id") ON UPDATE CASCADE;
-
-ALTER TABLE ONLY "public"."tracker_entries"
-    ADD CONSTRAINT "tracker_entries_assigned_id_fkey" FOREIGN KEY ("assigned_id") REFERENCES "public"."users"("id") ON DELETE SET NULL;
-
-ALTER TABLE ONLY "public"."tracker_entries"
-    ADD CONSTRAINT "tracker_entries_project_id_fkey" FOREIGN KEY ("project_id") REFERENCES "public"."tracker_projects"("id") ON DELETE CASCADE;
-
-ALTER TABLE ONLY "public"."tracker_entries"
-    ADD CONSTRAINT "tracker_entries_team_id_fkey" FOREIGN KEY ("team_id") REFERENCES "public"."teams"("id") ON DELETE CASCADE;
-
-ALTER TABLE ONLY "public"."tracker_projects"
-    ADD CONSTRAINT "tracker_projects_team_id_fkey" FOREIGN KEY ("team_id") REFERENCES "public"."teams"("id") ON DELETE CASCADE;
-
-ALTER TABLE ONLY "public"."tracker_reports"
-    ADD CONSTRAINT "tracker_reports_team_id_fkey" FOREIGN KEY ("team_id") REFERENCES "public"."teams"("id") ON UPDATE CASCADE ON DELETE CASCADE;
-
-ALTER TABLE ONLY "public"."transaction_categories"
-    ADD CONSTRAINT "transaction_categories_team_id_fkey" FOREIGN KEY ("team_id") REFERENCES "public"."teams"("id") ON DELETE CASCADE;
-
-ALTER TABLE ONLY "public"."transaction_enrichments"
-    ADD CONSTRAINT "transaction_enrichments_category_slug_team_id_fkey" FOREIGN KEY ("category_slug", "team_id") REFERENCES "public"."transaction_categories"("slug", "team_id") ON DELETE CASCADE;
-
-ALTER TABLE ONLY "public"."transaction_enrichments"
-    ADD CONSTRAINT "transaction_enrichments_team_id_fkey" FOREIGN KEY ("team_id") REFERENCES "public"."teams"("id") ON DELETE CASCADE;
-
-ALTER TABLE ONLY "public"."transactions"
-    ADD CONSTRAINT "transactions_bank_account_id_fkey" FOREIGN KEY ("bank_account_id") REFERENCES "public"."bank_accounts"("id") ON DELETE CASCADE;
-
-ALTER TABLE ONLY "public"."transactions"
-    ADD CONSTRAINT "transactions_category_slug_team_id_fkey" FOREIGN KEY ("category_slug", "team_id") REFERENCES "public"."transaction_categories"("slug", "team_id");
-
-ALTER TABLE ONLY "public"."user_invites"
-    ADD CONSTRAINT "user_invites_invited_by_fkey" FOREIGN KEY ("invited_by") REFERENCES "public"."users"("id") ON DELETE CASCADE;
-
-ALTER TABLE ONLY "public"."users"
-    ADD CONSTRAINT "users_id_fkey" FOREIGN KEY ("id") REFERENCES "auth"."users"("id") ON DELETE CASCADE;
-
-ALTER TABLE ONLY "public"."users_on_team"
-    ADD CONSTRAINT "users_on_team_team_id_fkey" FOREIGN KEY ("team_id") REFERENCES "public"."teams"("id") ON UPDATE CASCADE ON DELETE CASCADE;
-
-ALTER TABLE ONLY "public"."users_on_team"
-    ADD CONSTRAINT "users_on_team_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE CASCADE;
-
-ALTER TABLE ONLY "public"."users"
-    ADD CONSTRAINT "users_team_id_fkey" FOREIGN KEY ("team_id") REFERENCES "public"."teams"("id") ON DELETE SET NULL;
-
-CREATE POLICY "Bank Accounts can be created by a member of the team" ON "public"."bank_accounts" FOR INSERT WITH CHECK (("team_id" IN ( SELECT "private"."get_teams_for_authenticated_user"() AS "get_teams_for_authenticated_user")));
-
-CREATE POLICY "Bank Accounts can be deleted by a member of the team" ON "public"."bank_accounts" FOR DELETE USING (("team_id" IN ( SELECT "private"."get_teams_for_authenticated_user"() AS "get_teams_for_authenticated_user")));
-
-CREATE POLICY "Bank Accounts can be selected by a member of the team" ON "public"."bank_accounts" FOR SELECT USING (("team_id" IN ( SELECT "private"."get_teams_for_authenticated_user"() AS "get_teams_for_authenticated_user")));
-
-CREATE POLICY "Bank Accounts can be updated by a member of the team" ON "public"."bank_accounts" FOR UPDATE USING (("team_id" IN ( SELECT "private"."get_teams_for_authenticated_user"() AS "get_teams_for_authenticated_user")));
-
-CREATE POLICY "Bank Connections can be created by a member of the team" ON "public"."bank_connections" FOR INSERT WITH CHECK (("team_id" IN ( SELECT "private"."get_teams_for_authenticated_user"() AS "get_teams_for_authenticated_user")));
-
-CREATE POLICY "Bank Connections can be deleted by a member of the team" ON "public"."bank_connections" FOR DELETE USING (("team_id" IN ( SELECT "private"."get_teams_for_authenticated_user"() AS "get_teams_for_authenticated_user")));
-
-CREATE POLICY "Bank Connections can be selected by a member of the team" ON "public"."bank_connections" FOR SELECT USING (("team_id" IN ( SELECT "private"."get_teams_for_authenticated_user"() AS "get_teams_for_authenticated_user")));
-
-CREATE POLICY "Bank Connections can be updated by a member of the team" ON "public"."bank_connections" FOR UPDATE USING (("team_id" IN ( SELECT "private"."get_teams_for_authenticated_user"() AS "get_teams_for_authenticated_user")));
-
-CREATE POLICY "Enable insert for authenticated users only" ON "public"."teams" FOR INSERT TO "authenticated" WITH CHECK (true);
-
-CREATE POLICY "Enable insert for authenticated users only" ON "public"."transaction_enrichments" FOR INSERT TO "authenticated" WITH CHECK (true);
-
-CREATE POLICY "Enable insert for authenticated users only" ON "public"."users_on_team" FOR INSERT TO "authenticated" WITH CHECK (true);
-
-CREATE POLICY "Enable read access for all users" ON "public"."users_on_team" FOR SELECT USING (true);
-
-CREATE POLICY "Enable select for users based on email" ON "public"."user_invites" FOR SELECT USING ((("auth"."jwt"() ->> 'email'::"text") = "email"));
-
-CREATE POLICY "Enable update for authenticated users only" ON "public"."transaction_enrichments" FOR UPDATE TO "authenticated" WITH CHECK (true);
-
-CREATE POLICY "Enable updates for users on team" ON "public"."users_on_team" FOR UPDATE TO "authenticated" USING (("team_id" IN ( SELECT "private"."get_teams_for_authenticated_user"() AS "get_teams_for_authenticated_user"))) WITH CHECK (("team_id" IN ( SELECT "private"."get_teams_for_authenticated_user"() AS "get_teams_for_authenticated_user")));
-
-CREATE POLICY "Entries can be created by a member of the team" ON "public"."tracker_entries" FOR INSERT TO "authenticated" WITH CHECK (("team_id" IN ( SELECT "private"."get_teams_for_authenticated_user"() AS "get_teams_for_authenticated_user")));
-
-CREATE POLICY "Entries can be deleted by a member of the team" ON "public"."tracker_entries" FOR DELETE TO "authenticated" USING (("team_id" IN ( SELECT "private"."get_teams_for_authenticated_user"() AS "get_teams_for_authenticated_user")));
-
-CREATE POLICY "Entries can be selected by a member of the team" ON "public"."tracker_entries" FOR SELECT TO "authenticated" USING (("team_id" IN ( SELECT "private"."get_teams_for_authenticated_user"() AS "get_teams_for_authenticated_user")));
-
-CREATE POLICY "Entries can be updated by a member of the team" ON "public"."tracker_entries" FOR UPDATE TO "authenticated" WITH CHECK (("team_id" IN ( SELECT "private"."get_teams_for_authenticated_user"() AS "get_teams_for_authenticated_user")));
-
-CREATE POLICY "Inbox can be deleted by a member of the team" ON "public"."inbox" FOR DELETE USING (("team_id" IN ( SELECT "private"."get_teams_for_authenticated_user"() AS "get_teams_for_authenticated_user")));
-
-CREATE POLICY "Inbox can be selected by a member of the team" ON "public"."inbox" FOR SELECT USING (("team_id" IN ( SELECT "private"."get_teams_for_authenticated_user"() AS "get_teams_for_authenticated_user")));
-
-CREATE POLICY "Inbox can be updated by a member of the team" ON "public"."inbox" FOR UPDATE USING (("team_id" IN ( SELECT "private"."get_teams_for_authenticated_user"() AS "get_teams_for_authenticated_user")));
-
-CREATE POLICY "Invited users can select team if they are invited." ON "public"."teams" FOR SELECT USING (("id" IN ( SELECT "private"."get_invites_for_authenticated_user"() AS "get_invites_for_authenticated_user")));
-
-CREATE POLICY "Projects can be created by a member of the team" ON "public"."tracker_projects" FOR INSERT TO "authenticated" WITH CHECK (("team_id" IN ( SELECT "private"."get_teams_for_authenticated_user"() AS "get_teams_for_authenticated_user")));
-
-CREATE POLICY "Projects can be deleted by a member of the team" ON "public"."tracker_projects" FOR DELETE TO "authenticated" USING (("team_id" IN ( SELECT "private"."get_teams_for_authenticated_user"() AS "get_teams_for_authenticated_user")));
-
-CREATE POLICY "Projects can be selected by a member of the team" ON "public"."tracker_projects" FOR SELECT TO "authenticated" USING (("team_id" IN ( SELECT "private"."get_teams_for_authenticated_user"() AS "get_teams_for_authenticated_user")));
-
-CREATE POLICY "Projects can be updated by a member of the team" ON "public"."tracker_projects" FOR UPDATE TO "authenticated" USING (("team_id" IN ( SELECT "private"."get_teams_for_authenticated_user"() AS "get_teams_for_authenticated_user")));
-
-CREATE POLICY "Reports can be created by a member of the team" ON "public"."reports" FOR INSERT WITH CHECK (("team_id" IN ( SELECT "private"."get_teams_for_authenticated_user"() AS "get_teams_for_authenticated_user")));
-
-CREATE POLICY "Reports can be deleted by a member of the team" ON "public"."reports" FOR DELETE USING (("team_id" IN ( SELECT "private"."get_teams_for_authenticated_user"() AS "get_teams_for_authenticated_user")));
-
-CREATE POLICY "Reports can be handled by a member of the team" ON "public"."tracker_reports" USING (("team_id" IN ( SELECT "private"."get_teams_for_authenticated_user"() AS "get_teams_for_authenticated_user")));
-
-CREATE POLICY "Reports can be selected by a member of the team" ON "public"."reports" FOR SELECT USING (("team_id" IN ( SELECT "private"."get_teams_for_authenticated_user"() AS "get_teams_for_authenticated_user")));
-
-CREATE POLICY "Reports can be updated by member of team" ON "public"."reports" FOR UPDATE USING (("team_id" IN ( SELECT "private"."get_teams_for_authenticated_user"() AS "get_teams_for_authenticated_user")));
-
-CREATE POLICY "Teams can be deleted by a member of the team" ON "public"."teams" FOR DELETE USING (("id" IN ( SELECT "private"."get_teams_for_authenticated_user"() AS "get_teams_for_authenticated_user")));
-
-CREATE POLICY "Teams can be selected by a member of the team" ON "public"."teams" FOR SELECT USING (("id" IN ( SELECT "private"."get_teams_for_authenticated_user"() AS "get_teams_for_authenticated_user")));
-
-CREATE POLICY "Teams can be updated by a member of the team" ON "public"."teams" FOR UPDATE USING (("id" IN ( SELECT "private"."get_teams_for_authenticated_user"() AS "get_teams_for_authenticated_user")));
-
-CREATE POLICY "Transaction Attachments can be created by a member of the team" ON "public"."transaction_attachments" FOR INSERT WITH CHECK (("team_id" IN ( SELECT "private"."get_teams_for_authenticated_user"() AS "get_teams_for_authenticated_user")));
-
-CREATE POLICY "Transaction Attachments can be deleted by a member of the team" ON "public"."transaction_attachments" FOR DELETE USING (("team_id" IN ( SELECT "private"."get_teams_for_authenticated_user"() AS "get_teams_for_authenticated_user")));
-
-CREATE POLICY "Transaction Attachments can be selected by a member of the team" ON "public"."transaction_attachments" FOR SELECT USING (("team_id" IN ( SELECT "private"."get_teams_for_authenticated_user"() AS "get_teams_for_authenticated_user")));
-
-CREATE POLICY "Transaction Attachments can be updated by a member of the team" ON "public"."transaction_attachments" FOR UPDATE USING (("team_id" IN ( SELECT "private"."get_teams_for_authenticated_user"() AS "get_teams_for_authenticated_user")));
-
-CREATE POLICY "Transactions can be created by a member of the team" ON "public"."transactions" FOR INSERT WITH CHECK (("team_id" IN ( SELECT "private"."get_teams_for_authenticated_user"() AS "get_teams_for_authenticated_user")));
-
-CREATE POLICY "Transactions can be deleted by a member of the team" ON "public"."transactions" FOR DELETE USING (("team_id" IN ( SELECT "private"."get_teams_for_authenticated_user"() AS "get_teams_for_authenticated_user")));
-
-CREATE POLICY "Transactions can be selected by a member of the team" ON "public"."transactions" FOR SELECT USING (("team_id" IN ( SELECT "private"."get_teams_for_authenticated_user"() AS "get_teams_for_authenticated_user")));
-
-CREATE POLICY "Transactions can be updated by a member of the team" ON "public"."transactions" FOR UPDATE USING (("team_id" IN ( SELECT "private"."get_teams_for_authenticated_user"() AS "get_teams_for_authenticated_user")));
-
-CREATE POLICY "User Invites can be created by a member of the team" ON "public"."user_invites" FOR INSERT WITH CHECK (("team_id" IN ( SELECT "private"."get_teams_for_authenticated_user"() AS "get_teams_for_authenticated_user")));
-
-CREATE POLICY "User Invites can be deleted by a member of the team" ON "public"."user_invites" FOR DELETE USING (("team_id" IN ( SELECT "private"."get_teams_for_authenticated_user"() AS "get_teams_for_authenticated_user")));
-
-CREATE POLICY "User Invites can be deleted by invited email" ON "public"."user_invites" FOR DELETE USING ((("auth"."jwt"() ->> 'email'::"text") = "email"));
-
-CREATE POLICY "User Invites can be selected by a member of the team" ON "public"."user_invites" FOR SELECT USING (("team_id" IN ( SELECT "private"."get_teams_for_authenticated_user"() AS "get_teams_for_authenticated_user")));
-
-CREATE POLICY "User Invites can be updated by a member of the team" ON "public"."user_invites" FOR UPDATE USING (("team_id" IN ( SELECT "private"."get_teams_for_authenticated_user"() AS "get_teams_for_authenticated_user")));
-
-CREATE POLICY "Users can insert their own profile." ON "public"."users" FOR INSERT WITH CHECK (("auth"."uid"() = "id"));
-
-CREATE POLICY "Users can select their own profile." ON "public"."users" FOR SELECT USING (("auth"."uid"() = "id"));
-
-CREATE POLICY "Users can select users if they are in the same team" ON "public"."users" FOR SELECT TO "authenticated" USING ((EXISTS ( SELECT 1
-   FROM "public"."users_on_team"
-  WHERE (("users_on_team"."user_id" = ( SELECT "auth"."uid"() AS "uid")) AND ("users_on_team"."team_id" = "users"."team_id")))));
-
-CREATE POLICY "Users can update own profile." ON "public"."users" FOR UPDATE USING (("auth"."uid"() = "id"));
-
-CREATE POLICY "Users on team can be deleted by a member of the team" ON "public"."users_on_team" FOR DELETE USING (("team_id" IN ( SELECT "private"."get_teams_for_authenticated_user"() AS "get_teams_for_authenticated_user")));
-
-CREATE POLICY "Users on team can manage categories" ON "public"."transaction_categories" USING (("team_id" IN ( SELECT "private"."get_teams_for_authenticated_user"() AS "get_teams_for_authenticated_user")));
-
-ALTER TABLE "public"."bank_accounts" ENABLE ROW LEVEL SECURITY;
-
-ALTER TABLE "public"."bank_connections" ENABLE ROW LEVEL SECURITY;
-
-ALTER TABLE "public"."inbox" ENABLE ROW LEVEL SECURITY;
-
-ALTER TABLE "public"."reports" ENABLE ROW LEVEL SECURITY;
-
-ALTER TABLE "public"."teams" ENABLE ROW LEVEL SECURITY;
-
-ALTER TABLE "public"."tracker_entries" ENABLE ROW LEVEL SECURITY;
-
-ALTER TABLE "public"."tracker_projects" ENABLE ROW LEVEL SECURITY;
-
-ALTER TABLE "public"."tracker_reports" ENABLE ROW LEVEL SECURITY;
-
-ALTER TABLE "public"."transaction_attachments" ENABLE ROW LEVEL SECURITY;
-
-ALTER TABLE "public"."transaction_categories" ENABLE ROW LEVEL SECURITY;
-
-ALTER TABLE "public"."transaction_enrichments" ENABLE ROW LEVEL SECURITY;
-
-ALTER TABLE "public"."transactions" ENABLE ROW LEVEL SECURITY;
-
-ALTER TABLE "public"."user_invites" ENABLE ROW LEVEL SECURITY;
-
-ALTER TABLE "public"."users" ENABLE ROW LEVEL SECURITY;
-
-ALTER TABLE "public"."users_on_team" ENABLE ROW LEVEL SECURITY;
-
-ALTER PUBLICATION "supabase_realtime" OWNER TO "postgres";
-
-ALTER PUBLICATION "supabase_realtime" ADD TABLE ONLY "public"."inbox";
+-- Publication Changes
+ALTER PUBLICATION supabase_realtime OWNER TO postgres;
+ALTER PUBLICATION supabase_realtime ADD TABLE ONLY public.inbox;
 
 GRANT USAGE ON SCHEMA "public" TO "postgres";
 GRANT USAGE ON SCHEMA "public" TO "anon";
@@ -1920,5 +4904,256 @@ ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON TAB
 ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON TABLES  TO "anon";
 ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON TABLES  TO "authenticated";
 ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON TABLES  TO "service_role";
+
+
+-- Drop Triggers
+DROP TRIGGER IF EXISTS "match_transaction" ON public.transactions;
+DROP TRIGGER IF EXISTS "enrich_transaction" ON public.transactions;
+DROP POLICY "Entries can be updated by a member of the team" ON public.tracker_entries;
+
+-- Create Indexes
+CREATE UNIQUE INDEX currencies_pkey ON public.exchange_rates USING btree (id);
+CREATE UNIQUE INDEX documents_pkey ON public.documents USING btree (id);
+CREATE INDEX documents_team_id_idx ON public.documents USING btree (team_id);
+CREATE INDEX documents_team_id_parent_id_idx ON public.documents USING btree (team_id, parent_id);
+CREATE INDEX exchange_rates_base_target_idx ON public.exchange_rates USING btree (base, target);
+CREATE INDEX idx_transactions_date ON public.transactions USING btree (date);
+CREATE INDEX idx_transactions_fts ON public.transactions USING gin (fts_vector);
+CREATE INDEX idx_transactions_fts_vector ON public.transactions USING gin (fts_vector);
+CREATE INDEX idx_transactions_id ON public.transactions USING btree (id);
+CREATE INDEX idx_transactions_name ON public.transactions USING btree (name);
+CREATE INDEX idx_transactions_name_trigram ON public.transactions USING gin (name gin_trgm_ops);
+CREATE INDEX idx_transactions_team_id_date_name ON public.transactions USING btree (team_id, date, name);
+CREATE INDEX idx_transactions_team_id_name ON public.transactions USING btree (team_id, name);
+CREATE INDEX idx_trgm_name ON public.transactions USING gist (name gist_trgm_ops);
+CREATE UNIQUE INDEX unique_rate ON public.exchange_rates USING btree (base, target);
+CREATE UNIQUE INDEX integrations_pkey ON public.apps USING btree (id);
+CREATE UNIQUE INDEX unique_app_id_team_id ON public.apps USING btree (app_id, team_id);
+
+-- Create Triggers
+CREATE TRIGGER trigger_calculate_bank_account_base_balance_before_insert 
+BEFORE INSERT ON public.bank_accounts 
+FOR EACH ROW 
+EXECUTE FUNCTION calculate_bank_account_base_balance();
+
+CREATE TRIGGER trigger_calculate_bank_account_base_balance_before_update 
+BEFORE UPDATE OF balance ON public.bank_accounts 
+FOR EACH ROW 
+WHEN (old.balance IS DISTINCT FROM new.balance) 
+EXECUTE FUNCTION calculate_bank_account_base_balance();
+
+CREATE TRIGGER embed_document 
+AFTER INSERT ON public.documents 
+FOR EACH ROW 
+EXECUTE FUNCTION supabase_functions.http_request(
+    'https://hfgtyawqemeozrtjzevl.supabase.co/functions/v1/generate-document-embedding',
+    'POST',
+    '{"Content-type":"application/json"}',
+    '{}',
+    '5000'
+);
+
+CREATE TRIGGER trigger_calculate_inbox_base_amount_before_update 
+BEFORE UPDATE ON public.inbox 
+FOR EACH ROW 
+WHEN (old.amount IS DISTINCT FROM new.amount) 
+EXECUTE FUNCTION calculate_inbox_base_amount();
+
+CREATE TRIGGER check_recurring_transactions 
+AFTER INSERT ON public.transactions 
+FOR EACH ROW 
+EXECUTE FUNCTION detect_recurring_transactions();
+
+CREATE TRIGGER on_update_set_set_updated_at 
+BEFORE UPDATE ON public.transactions 
+FOR EACH ROW 
+EXECUTE FUNCTION set_updated_at();
+
+CREATE TRIGGER trigger_calculate_transaction_base_amount_before_insert 
+BEFORE INSERT ON public.transactions 
+FOR EACH ROW 
+EXECUTE FUNCTION calculate_transaction_base_amount();
+
+CREATE TRIGGER enrich_transaction 
+BEFORE INSERT ON public.transactions 
+FOR EACH ROW 
+EXECUTE FUNCTION update_enrich_transaction();
+
+CREATE TRIGGER on_auth_user_created 
+AFTER INSERT ON auth.users 
+FOR EACH ROW 
+EXECUTE FUNCTION handle_new_user();
+
+CREATE TRIGGER user_registered 
+AFTER INSERT ON auth.users 
+FOR EACH ROW 
+EXECUTE FUNCTION webhook('webhook/registered');
+
+CREATE TRIGGER after_insert_objects 
+AFTER INSERT ON storage.objects 
+FOR EACH ROW 
+WHEN (new.bucket_id = 'vault') 
+EXECUTE FUNCTION insert_into_documents();
+
+CREATE TRIGGER before_delete_objects 
+BEFORE DELETE ON storage.objects 
+FOR EACH ROW 
+WHEN (old.bucket_id = 'vault') 
+EXECUTE FUNCTION delete_from_documents();
+
+CREATE TRIGGER tr_lp225ozlnzx2 
+AFTER INSERT ON storage.objects 
+FOR EACH ROW 
+EXECUTE FUNCTION supabase_functions.http_request(
+    'https://cloud.trigger.dev/api/v1/sources/http/clz0yl7ai6652lp225ozlnzx2',
+    'POST',
+    '{"Content-type":"application/json", "Authorization": "Bearer d8e3de5a468d1af4990e168c27e2b167e6911e93da67a7a8c9cf15b1dc2011dd" }',
+    '{}',
+    '1000'
+);
+
+CREATE TRIGGER vault_upload 
+AFTER INSERT ON storage.objects 
+FOR EACH ROW 
+EXECUTE FUNCTION supabase_functions.http_request(
+    'https://cloud.trigger.dev/api/v1/sources/http/clxhxy07hfixvo93155n4t3bw',
+    'POST',
+    '{"Content-type":"application/json","Authorization":"Bearer 45fe98e53abae5f592f97432da5d3e388b71bbfe3194aa1c82e02ed83af225e1"}',
+    '{}',
+    '3000'
+);
+
+-- Document Policies
+CREATE POLICY "Documents can be deleted by a member of the team"
+ON public.documents
+AS PERMISSIVE FOR ALL TO public
+USING (team_id IN (SELECT private.get_teams_for_authenticated_user()));
+
+CREATE POLICY "Documents can be selected by a member of the team"
+ON public.documents
+AS PERMISSIVE FOR ALL TO public
+USING (team_id IN (SELECT private.get_teams_for_authenticated_user()));
+
+CREATE POLICY "Documents can be updated by a member of the team"
+ON public.documents
+AS PERMISSIVE FOR UPDATE TO public
+USING (team_id IN (SELECT private.get_teams_for_authenticated_user()));
+
+CREATE POLICY "Enable insert for authenticated users only"
+ON public.documents
+AS PERMISSIVE FOR INSERT TO authenticated
+WITH CHECK (true);
+
+-- Exchange Rates Policy
+CREATE POLICY "Enable read access for authenticated users"
+ON public.exchange_rates
+AS PERMISSIVE FOR SELECT TO public
+USING (true);
+
+-- Storage Policies for 'avatars' bucket (team folder access)
+CREATE POLICY "Give members access to team folder 1oj01fe_0" ON storage.objects
+AS PERMISSIVE FOR SELECT TO public
+USING ((bucket_id = 'avatars' AND EXISTS (
+    SELECT 1 FROM users_on_team
+    WHERE users_on_team.user_id = auth.uid() 
+    AND users_on_team.team_id::text = storage.foldername(objects.name)[1]
+)));
+
+CREATE POLICY "Give members access to team folder 1oj01fe_1" ON storage.objects
+AS PERMISSIVE FOR INSERT TO public
+WITH CHECK ((bucket_id = 'avatars' AND EXISTS (
+    SELECT 1 FROM users_on_team
+    WHERE users_on_team.user_id = auth.uid() 
+    AND users_on_team.team_id::text = storage.foldername(objects.name)[1]
+)));
+
+CREATE POLICY "Give members access to team folder 1oj01fe_2" ON storage.objects
+AS PERMISSIVE FOR UPDATE TO public
+USING ((bucket_id = 'avatars' AND EXISTS (
+    SELECT 1 FROM users_on_team
+    WHERE users_on_team.user_id = auth.uid() 
+    AND users_on_team.team_id::text = storage.foldername(objects.name)[1]
+)));
+
+CREATE POLICY "Give members access to team folder 1oj01fe_3" ON storage.objects
+AS PERMISSIVE FOR DELETE TO public
+USING ((bucket_id = 'avatars' AND EXISTS (
+    SELECT 1 FROM users_on_team
+    WHERE users_on_team.user_id = auth.uid() 
+    AND users_on_team.team_id::text = storage.foldername(objects.name)[1]
+)));
+
+-- Storage Policies for 'vault' bucket (team folder access)
+CREATE POLICY "Give members access to team folder 1uo56a_0" ON storage.objects
+AS PERMISSIVE FOR SELECT TO authenticated
+USING ((bucket_id = 'vault' AND EXISTS (
+    SELECT 1 FROM users_on_team
+    WHERE users_on_team.user_id = auth.uid() 
+    AND users_on_team.team_id::text = storage.foldername(objects.name)[1]
+)));
+
+CREATE POLICY "Give members access to team folder 1uo56a_1" ON storage.objects
+AS PERMISSIVE FOR INSERT TO authenticated
+WITH CHECK ((bucket_id = 'vault' AND EXISTS (
+    SELECT 1 FROM users_on_team
+    WHERE users_on_team.user_id = auth.uid() 
+    AND users_on_team.team_id::text = storage.foldername(objects.name)[1]
+)));
+
+CREATE POLICY "Give members access to team folder 1uo56a_2" ON storage.objects
+AS PERMISSIVE FOR UPDATE TO authenticated
+USING ((bucket_id = 'vault' AND EXISTS (
+    SELECT 1 FROM users_on_team
+    WHERE users_on_team.user_id = auth.uid() 
+    AND users_on_team.team_id::text = storage.foldername(objects.name)[1]
+)));
+
+CREATE POLICY "Give members access to team folder 1uo56a_3" ON storage.objects
+AS PERMISSIVE FOR DELETE TO authenticated
+USING ((bucket_id = 'vault' AND EXISTS (
+    SELECT 1 FROM users_on_team
+    WHERE users_on_team.user_id = auth.uid() 
+    AND users_on_team.team_id::text = storage.foldername(objects.name)[1]
+)));
+
+-- Storage Policies for user's own folder access
+CREATE POLICY "Give users access to own folder 1oj01fe_0" ON storage.objects
+AS PERMISSIVE FOR SELECT TO authenticated
+USING ((bucket_id = 'avatars' AND auth.uid()::text = storage.foldername(name)[1]));
+
+CREATE POLICY "Give users access to own folder 1oj01fe_1" ON storage.objects
+AS PERMISSIVE FOR INSERT TO authenticated
+WITH CHECK ((bucket_id = 'avatars' AND auth.uid()::text = storage.foldername(name)[1]));
+
+CREATE POLICY "Give users access to own folder 1oj01fe_2" ON storage.objects
+AS PERMISSIVE FOR UPDATE TO authenticated
+USING ((bucket_id = 'avatars' AND auth.uid()::text = storage.foldername(name)[1]));
+
+CREATE POLICY "Give users access to own folder 1oj01fe_3" ON storage.objects
+AS PERMISSIVE FOR DELETE TO authenticated
+USING ((bucket_id = 'avatars' AND auth.uid()::text = storage.foldername(name)[1]));
+
+-- Apps Policies
+CREATE POLICY "Apps can be deleted by a member of the team" ON public.apps
+AS PERMISSIVE FOR DELETE TO public
+USING (team_id IN (SELECT private.get_teams_for_authenticated_user()));
+
+CREATE POLICY "Apps can be inserted by a member of the team" ON public.apps
+AS PERMISSIVE FOR INSERT TO public
+WITH CHECK (team_id IN (SELECT private.get_teams_for_authenticated_user()));
+
+CREATE POLICY "Apps can be selected by a member of the team" ON public.apps
+AS PERMISSIVE FOR SELECT TO public
+USING (team_id IN (SELECT private.get_teams_for_authenticated_user()));
+
+CREATE POLICY "Apps can be updated by a member of the team" ON public.apps
+AS PERMISSIVE FOR UPDATE TO public
+USING (team_id IN (SELECT private.get_teams_for_authenticated_user()));
+
+-- Tracker Entries Policy
+CREATE POLICY "Entries can be updated by a member of the team" ON public.tracker_entries
+AS PERMISSIVE FOR UPDATE TO authenticated
+USING (team_id IN (SELECT private.get_teams_for_authenticated_user()))
+WITH CHECK (team_id IN (SELECT private.get_teams_for_authenticated_user()));
 
 RESET ALL;
