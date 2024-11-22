@@ -146,7 +146,7 @@ export async function getSpendingQuery(
   supabase: Client,
   params: GetSpendingParams,
 ) {
-  return supabase.rpc("get_spending_v3", {
+  return supabase.rpc("get_spending", {
     team_id: params.teamId,
     date_from: params.from,
     date_to: params.to,
@@ -434,7 +434,7 @@ export async function getRunwayQuery(
   const fromDate = new UTCDate(from);
   const toDate = new UTCDate(to);
 
-  return supabase.rpc("get_runway_v4", {
+  return supabase.rpc("get_runway", {
     team_id: teamId,
     date_from: startOfMonth(fromDate).toDateString(),
     date_to: endOfMonth(toDate).toDateString(),
@@ -456,7 +456,7 @@ export async function getMetricsQuery(
 ) {
   const { teamId, from, to, type = "profit", currency } = params;
 
-  const rpc = type === "profit" ? "get_profit_v3" : "get_revenue_v3";
+  const rpc = type === "profit" ? "get_profit" : "get_revenue";
 
   const fromDate = new UTCDate(from);
   const toDate = new UTCDate(to);
