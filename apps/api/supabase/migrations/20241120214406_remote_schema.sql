@@ -4,7 +4,7 @@ SET idle_in_transaction_session_timeout = 0;
 SET client_encoding = 'UTF8';
 SET standard_conforming_strings = on;
 SELECT pg_catalog.set_config('search_path', '', false);
-SET check_function_bodies = false;
+SET check_function_bodies = off;
 SET xmloption = content;
 SET client_min_messages = warning;
 SET row_security = off;
@@ -212,6 +212,42 @@ CREATE TABLE "public"."apps" (
 
 ALTER TABLE "public"."apps" ENABLE ROW LEVEL SECURITY;
 
+
+CREATE POLICY "Apps can be deleted by a member of the team"
+ON "public"."apps"
+AS permissive
+FOR DELETE
+TO public
+USING ((team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user)));
+
+
+CREATE POLICY "Apps can be inserted by a member of the team"
+ON "public"."apps"
+AS permissive
+FOR INSERT
+TO public
+WITH CHECK (team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user));
+
+
+CREATE POLICY "Apps can be selected by a member of the team"
+ON "public"."apps"
+AS permissive
+FOR SELECT
+TO public
+USING (team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user));
+
+
+CREATE POLICY "Apps can be updated by a member of the team"
+ON "public"."apps"
+AS permissive
+FOR UPDATE
+TO public
+USING (team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user));
+
+GRANT ALL ON TABLE "public"."apps" TO "anon";
+GRANT ALL ON TABLE "public"."apps" TO "authenticated";
+GRANT ALL ON TABLE "public"."apps" TO "service_role";
+
 CREATE TABLE "public"."bank_accounts" (
     "id" uuid NOT NULL DEFAULT gen_random_uuid(),
     "created_at" timestamp with time zone NOT NULL DEFAULT now(),
@@ -254,13 +290,25 @@ CREATE TRIGGER trigger_calculate_bank_account_base_balance_before_insert BEFORE 
 CREATE TRIGGER trigger_calculate_bank_account_base_balance_before_update BEFORE UPDATE OF balance ON bank_accounts FOR EACH ROW WHEN (old.balance IS DISTINCT FROM new.balance)
     EXECUTE FUNCTION calculate_bank_account_base_balance();
 
-CREATE POLICY "Bank Accounts can be created by a member of the team" ON "public"."bank_accounts" FOR INSERT WITH CHECK (("team_id" IN ( SELECT "private"."get_teams_for_authenticated_user"() AS "get_teams_for_authenticated_user")));
+CREATE POLICY "Bank Accounts can be created by a member of the team" 
+ON "public"."bank_accounts" 
+FOR INSERT 
+WITH CHECK (team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user));
 
-CREATE POLICY "Bank Accounts can be deleted by a member of the team" ON "public"."bank_accounts" FOR DELETE USING (("team_id" IN ( SELECT "private"."get_teams_for_authenticated_user"() AS "get_teams_for_authenticated_user")));
+CREATE POLICY "Bank Accounts can be deleted by a member of the team" 
+ON "public"."bank_accounts" 
+FOR DELETE 
+USING (team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user));
 
-CREATE POLICY "Bank Accounts can be selected by a member of the team" ON "public"."bank_accounts" FOR SELECT USING (("team_id" IN ( SELECT "private"."get_teams_for_authenticated_user"() AS "get_teams_for_authenticated_user")));
+CREATE POLICY "Bank Accounts can be selected by a member of the team" 
+ON "public"."bank_accounts" 
+FOR SELECT 
+USING (team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user));
 
-CREATE POLICY "Bank Accounts can be updated by a member of the team" ON "public"."bank_accounts" FOR UPDATE USING (("team_id" IN ( SELECT "private"."get_teams_for_authenticated_user"() AS "get_teams_for_authenticated_user")));
+CREATE POLICY "Bank Accounts can be updated by a member of the team" 
+ON "public"."bank_accounts" 
+FOR UPDATE 
+USING (team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user));
 
 CREATE TABLE "public"."bank_connections" (
     "id" uuid NOT NULL DEFAULT gen_random_uuid(),
@@ -290,13 +338,25 @@ GRANT ALL ON TABLE "public"."bank_connections" TO "service_role";
 
 CREATE INDEX IF NOT EXISTS bank_connections_team_id_idx ON public.bank_connections USING btree (team_id) TABLESPACE pg_default;
 
-CREATE POLICY "Bank Connections can be created by a member of the team" ON "public"."bank_connections" FOR INSERT WITH CHECK (("team_id" IN ( SELECT "private"."get_teams_for_authenticated_user"() AS "get_teams_for_authenticated_user")));
+CREATE POLICY "Bank Connections can be created by a member of the team" 
+ON "public"."bank_connections" 
+FOR INSERT 
+WITH CHECK (team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user));
 
-CREATE POLICY "Bank Connections can be deleted by a member of the team" ON "public"."bank_connections" FOR DELETE USING (("team_id" IN ( SELECT "private"."get_teams_for_authenticated_user"() AS "get_teams_for_authenticated_user")));
+CREATE POLICY "Bank Connections can be deleted by a member of the team" 
+ON "public"."bank_connections" 
+FOR DELETE 
+USING (team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user));
 
-CREATE POLICY "Bank Connections can be selected by a member of the team" ON "public"."bank_connections" FOR SELECT USING (("team_id" IN ( SELECT "private"."get_teams_for_authenticated_user"() AS "get_teams_for_authenticated_user")));
+CREATE POLICY "Bank Connections can be selected by a member of the team" 
+ON "public"."bank_connections" 
+FOR SELECT 
+USING (team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user));
 
-CREATE POLICY "Bank Connections can be updated by a member of the team" ON "public"."bank_connections" FOR UPDATE USING (("team_id" IN ( SELECT "private"."get_teams_for_authenticated_user"() AS "get_teams_for_authenticated_user")));
+CREATE POLICY "Bank Connections can be updated by a member of the team" 
+ON "public"."bank_connections" 
+FOR UPDATE 
+USING (team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user));
 
 CREATE TABLE "public"."documents" (
     "id" uuid NOT NULL DEFAULT gen_random_uuid(),
@@ -329,12 +389,47 @@ CREATE INDEX IF NOT EXISTS documents_team_id_parent_id_idx ON public.documents U
 CREATE TRIGGER embed_document
 AFTER INSERT ON documents FOR EACH ROW
 EXECUTE FUNCTION supabase_functions.http_request (
-  'https://pytddvqiozwrhfbwqazp.supabase.co/functions/v1/generate-document-embedding',
+  'https://hfgtyawqemeozrtjzevl.supabase.co/functions/v1/generate-document-embedding',
   'POST',
   '{"Content-type":"application/json"}',
   '{}',
   '5000'
 );
+
+CREATE POLICY "Documents can be deleted by a member of the team"
+ON "public"."documents"
+AS permissive
+FOR ALL
+TO public
+USING (team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user));
+
+
+CREATE POLICY "Documents can be selected by a member of the team"
+ON "public"."documents"
+AS permissive
+FOR ALL
+TO public
+USING (team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user));
+
+
+CREATE POLICY "Documents can be updated by a member of the team"
+ON "public"."documents"
+AS permissive
+FOR UPDATE
+TO public
+USING (team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user));
+
+
+CREATE POLICY "Enable insert for authenticated users only"
+ON "public"."documents"
+AS permissive
+FOR INSERT
+TO authenticated
+WITH CHECK (true);
+
+GRANT ALL ON TABLE "public"."documents" TO "anon";
+GRANT ALL ON TABLE "public"."documents" TO "authenticated";
+GRANT ALL ON TABLE "public"."documents" TO "service_role";
 
 CREATE TABLE "public"."exchange_rates" (
     "id" uuid NOT NULL DEFAULT gen_random_uuid(),
@@ -349,6 +444,17 @@ CREATE TABLE "public"."exchange_rates" (
 ALTER TABLE "public"."exchange_rates" ENABLE ROW LEVEL SECURITY;
 
 CREATE INDEX IF NOT EXISTS exchange_rates_base_target_idx ON public.exchange_rates USING btree (base, target) TABLESPACE pg_default;
+
+CREATE POLICY "Enable read access for authenticated users"
+ON "public"."exchange_rates"
+AS permissive
+FOR SELECT
+TO public
+USING (true);
+
+GRANT ALL ON TABLE "public"."exchange_rates" TO "anon";
+GRANT ALL ON TABLE "public"."exchange_rates" TO "authenticated";
+GRANT ALL ON TABLE "public"."exchange_rates" TO "service_role";
 
 CREATE TABLE "public"."inbox" (
     "id" uuid NOT NULL DEFAULT gen_random_uuid(),
@@ -404,6 +510,21 @@ CREATE TRIGGER trigger_calculate_inbox_base_amount_before_update BEFORE
 UPDATE ON inbox FOR EACH ROW WHEN (old.amount IS DISTINCT FROM new.amount)
 EXECUTE FUNCTION calculate_inbox_base_amount ();
 
+CREATE POLICY "Inbox can be deleted by a member of the team" 
+ON "public"."inbox" 
+FOR DELETE 
+USING (team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user));
+
+CREATE POLICY "Inbox can be selected by a member of the team" 
+ON "public"."inbox" 
+FOR SELECT 
+USING (team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user));
+
+CREATE POLICY "Inbox can be updated by a member of the team" 
+ON "public"."inbox" 
+FOR UPDATE 
+USING (team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user));
+
 CREATE TABLE "public"."reports" (
     "id" uuid NOT NULL DEFAULT gen_random_uuid(),
     "created_at" timestamp with time zone NOT NULL DEFAULT now(),
@@ -431,6 +552,31 @@ GRANT ALL ON TABLE "public"."reports" TO "service_role";
 
 CREATE INDEX IF NOT EXISTS reports_team_id_idx ON public.reports USING btree (team_id) TABLESPACE pg_default;
 
+CREATE POLICY "Reports can be created by a member of the team" 
+ON "public"."reports" 
+FOR INSERT 
+WITH CHECK (team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user));
+
+CREATE POLICY "Reports can be deleted by a member of the team" 
+ON "public"."reports" 
+FOR DELETE 
+USING (team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user));
+
+CREATE POLICY "Reports can be handled by a member of the team" 
+ON "public"."tracker_reports" 
+USING (team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user));
+
+CREATE POLICY "Reports can be selected by a member of the team" 
+ON "public"."reports" 
+FOR SELECT 
+USING (team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user));
+
+CREATE POLICY "Reports can be updated by member of team" 
+ON "public"."reports" 
+FOR UPDATE 
+USING (team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user));
+
+
 CREATE TABLE "public"."teams" (
     "id" uuid NOT NULL DEFAULT gen_random_uuid(),
     "created_at" timestamp with time zone NOT NULL DEFAULT now(),
@@ -454,9 +600,32 @@ GRANT ALL ON TABLE "public"."teams" TO "anon";
 GRANT ALL ON TABLE "public"."teams" TO "authenticated";
 GRANT ALL ON TABLE "public"."teams" TO "service_role";
 
-CREATE TRIGGER insert_system_categories_trigger
-AFTER INSERT ON teams FOR EACH ROW
-EXECUTE FUNCTION insert_system_categories ();
+CREATE POLICY "Enable insert for authenticated users only" 
+ON "public"."teams" 
+FOR INSERT 
+TO authenticated
+WITH CHECK (true);
+
+CREATE POLICY "Invited users can select team if they are invited." 
+ON "public"."teams" 
+FOR SELECT 
+USING (id IN ( SELECT private.get_invites_for_authenticated_user() AS get_invites_for_authenticated_user));
+
+CREATE POLICY "Teams can be deleted by a member of the team" 
+ON "public"."teams" 
+FOR DELETE 
+USING (id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user));
+
+CREATE POLICY "Teams can be selected by a member of the team" 
+ON "public"."teams" 
+FOR SELECT 
+USING (id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user));
+
+CREATE POLICY "Teams can be updated by a member of the team" 
+ON "public"."teams" 
+FOR UPDATE 
+USING (id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user));
+
 
 CREATE TABLE "public"."tracker_entries" (
     "id" uuid NOT NULL DEFAULT gen_random_uuid(),
@@ -478,6 +647,11 @@ CREATE TABLE "public"."tracker_entries" (
     CONSTRAINT "tracker_entries_team_id_fkey" FOREIGN KEY (team_id) REFERENCES teams (id) ON DELETE CASCADE
 );
 
+COMMENT ON COLUMN "public"."tracker_entries"."duration" IS 'Time entry duration. For running entries should be negative, preferable -1';
+COMMENT ON COLUMN "public"."tracker_entries"."start" IS 'Start time in UTC';
+COMMENT ON COLUMN "public"."tracker_entries"."stop" IS 'Stop time in UTC, can be null if it''s still running or created with duration';
+COMMENT ON COLUMN "public"."tracker_entries"."description" IS 'Time Entry description, null if not provided at creation/update';
+
 ALTER TABLE "public"."tracker_entries" OWNER TO "postgres";
 
 ALTER TABLE "public"."tracker_entries" ENABLE ROW LEVEL SECURITY;
@@ -487,6 +661,31 @@ GRANT ALL ON TABLE "public"."tracker_entries" TO "authenticated";
 GRANT ALL ON TABLE "public"."tracker_entries" TO "service_role";
 
 CREATE INDEX IF NOT EXISTS tracker_entries_team_id_idx ON public.tracker_entries USING btree (team_id) TABLESPACE pg_default;
+
+CREATE POLICY "Entries can be created by a member of the team" 
+ON "public"."tracker_entries" 
+FOR INSERT 
+TO authenticated
+WITH CHECK (team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user));
+
+CREATE POLICY "Entries can be deleted by a member of the team" 
+ON "public"."tracker_entries" 
+FOR DELETE 
+TO authenticated
+USING (team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user));
+
+CREATE POLICY "Entries can be selected by a member of the team" 
+ON "public"."tracker_entries" 
+FOR SELECT 
+USING (team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user));
+
+CREATE POLICY "Entries can be updated by a member of the team"
+ON "public"."tracker_entries"
+AS permissive
+FOR UPDATE
+TO authenticated
+USING (team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user))
+WITH CHECK (team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user));
 
 CREATE TABLE "public"."tracker_projects" (
     "id" uuid NOT NULL DEFAULT gen_random_uuid(),
@@ -513,6 +712,31 @@ GRANT ALL ON TABLE "public"."tracker_projects" TO "service_role";
 
 CREATE INDEX IF NOT EXISTS tracker_projects_team_id_idx ON public.tracker_projects USING btree (team_id) TABLESPACE pg_default;
 
+CREATE POLICY "Projects can be created by a member of the team" 
+ON "public"."tracker_projects" 
+FOR INSERT 
+TO authenticated
+WITH CHECK (team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user));
+
+CREATE POLICY "Projects can be deleted by a member of the team" 
+ON "public"."tracker_projects" 
+FOR DELETE 
+TO authenticated
+USING (team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user));
+
+CREATE POLICY "Projects can be selected by a member of the team" 
+ON "public"."tracker_projects" 
+FOR SELECT 
+TO authenticated
+USING (("team_id" IN ( SELECT "private"."get_teams_for_authenticated_user"() AS "get_teams_for_authenticated_user")));
+
+CREATE POLICY "Projects can be updated by a member of the team" 
+ON "public"."tracker_projects" 
+FOR UPDATE 
+TO authenticated
+USING (team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user))
+WITH CHECK (team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user));
+
 CREATE TABLE "public"."tracker_reports" (
     "id" uuid NOT NULL DEFAULT gen_random_uuid(),
     "created_at" timestamp with time zone NOT NULL DEFAULT now(),
@@ -536,6 +760,10 @@ GRANT ALL ON TABLE "public"."tracker_reports" TO "authenticated";
 GRANT ALL ON TABLE "public"."tracker_reports" TO "service_role";
 
 CREATE INDEX IF NOT EXISTS tracker_reports_team_id_idx ON public.tracker_reports USING btree (team_id) TABLESPACE pg_default;
+
+CREATE POLICY "Reports can be handled by a member of the team" 
+ON "public"."tracker_reports" 
+USING (("team_id" IN ( SELECT "private"."get_teams_for_authenticated_user"() AS "get_teams_for_authenticated_user")));
 
 CREATE TABLE "public"."transaction_attachments" (
     "id" uuid NOT NULL DEFAULT gen_random_uuid(),
@@ -563,6 +791,26 @@ CREATE INDEX IF NOT EXISTS transaction_enrichments_team_id_idx ON public.transac
 
 CREATE INDEX IF NOT EXISTS transaction_attachments_transaction_id_idx ON public.transaction_attachments USING btree (transaction_id) TABLESPACE pg_default;
 
+CREATE POLICY "Transaction Attachments can be created by a member of the team" 
+ON "public"."transaction_attachments" 
+FOR INSERT 
+WITH CHECK (team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user));
+
+CREATE POLICY "Transaction Attachments can be deleted by a member of the team" 
+ON "public"."transaction_attachments" 
+FOR DELETE 
+USING (team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user));
+
+CREATE POLICY "Transaction Attachments can be selected by a member of the team" 
+ON "public"."transaction_attachments" 
+FOR SELECT 
+USING (team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user));
+
+CREATE POLICY "Transaction Attachments can be updated by a member of the team" 
+ON "public"."transaction_attachments" 
+FOR UPDATE 
+USING (team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user));
+
 CREATE TABLE "public"."transaction_categories" (
     "id" uuid NOT NULL DEFAULT gen_random_uuid(),
     "name" text NOT NULL,
@@ -589,12 +837,16 @@ GRANT ALL ON TABLE "public"."transaction_categories" TO "service_role";
 
 CREATE INDEX IF NOT EXISTS transaction_categories_team_id_idx ON public.transaction_categories USING btree (team_id) TABLESPACE pg_default;
 
+CREATE POLICY "Users on team can manage categories" 
+ON "public"."transaction_categories" 
+USING (("team_id" IN ( SELECT "private"."get_teams_for_authenticated_user"() AS "get_teams_for_authenticated_user")));
+
 CREATE TRIGGER embed_category
 AFTER INSERT
 OR UPDATE ON transaction_categories
 FOR EACH ROW
 EXECUTE FUNCTION supabase_functions.http_request (
-  'https://pytddvqiozwrhfbwqazp.supabase.co/functions/v1/generate-category-embedding',
+  'https://hfgtyawqemeozrtjzevl.supabase.co/functions/v1/generate-category-embedding',
   'POST',
   '{"Content-type":"application/json"}',
   '{}',
@@ -632,8 +884,19 @@ GRANT ALL ON TABLE "public"."transaction_enrichments" TO "anon";
 GRANT ALL ON TABLE "public"."transaction_enrichments" TO "authenticated";
 GRANT ALL ON TABLE "public"."transaction_enrichments" TO "service_role";
 
-
 CREATE INDEX IF NOT EXISTS transaction_enrichments_category_slug_team_id_idx ON public.transaction_enrichments USING btree (category_slug, team_id) TABLESPACE pg_default;
+
+CREATE POLICY "Enable insert for authenticated users only" 
+ON "public"."transaction_enrichments" 
+FOR INSERT 
+TO authenticated
+WITH CHECK (true);
+
+CREATE POLICY "Enable update for authenticated users only" 
+ON "public"."transaction_enrichments" 
+FOR UPDATE 
+TO authenticated
+WITH CHECK (true);
 
 CREATE TABLE "public"."transactions" (
     "created_at" timestamp with time zone NOT NULL DEFAULT now(),
@@ -735,6 +998,26 @@ EXECUTE FUNCTION calculate_transaction_base_amount ();
 CREATE TRIGGER enrich_transaction BEFORE INSERT ON transactions FOR EACH ROW
 EXECUTE FUNCTION update_enrich_transaction ();
 
+CREATE POLICY "Transactions can be created by a member of the team" 
+ON "public"."transactions" 
+FOR INSERT 
+WITH CHECK (team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user));
+
+CREATE POLICY "Transactions can be deleted by a member of the team" 
+ON "public"."transactions" 
+FOR DELETE 
+USING (team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user));
+
+CREATE POLICY "Transactions can be selected by a member of the team" 
+ON "public"."transactions" 
+FOR SELECT 
+USING (team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user));
+
+CREATE POLICY "Transactions can be updated by a member of the team" 
+ON "public"."transactions" 
+FOR UPDATE 
+USING (team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user));
+
 CREATE TABLE "public"."user_invites" (
     "id" uuid NOT NULL DEFAULT gen_random_uuid (),
     "created_at" timestamp with time zone NOT NULL DEFAULT now(),
@@ -759,6 +1042,38 @@ GRANT ALL ON TABLE "public"."user_invites" TO "authenticated";
 GRANT ALL ON TABLE "public"."user_invites" TO "service_role";
 
 CREATE INDEX IF NOT EXISTS user_invites_team_id_idx ON public.user_invites USING btree (team_id) TABLESPACE pg_default;
+
+
+CREATE POLICY "Enable select for users based on email" 
+ON "public"."user_invites" 
+FOR SELECT 
+USING ((auth.jwt() ->> 'email'::text) = email);
+
+CREATE POLICY "User Invites can be created by a member of the team" 
+ON "public"."user_invites" 
+FOR INSERT 
+WITH CHECK (team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user));
+
+CREATE POLICY "User Invites can be deleted by a member of the team" 
+ON "public"."user_invites" 
+FOR DELETE 
+USING (team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user));
+
+CREATE POLICY "User Invites can be deleted by invited email" 
+ON "public"."user_invites" 
+FOR DELETE 
+USING ((auth.jwt() ->> 'email'::text) = email);
+
+CREATE POLICY "User Invites can be selected by a member of the team" 
+ON "public"."user_invites" 
+FOR SELECT 
+USING (team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user));
+
+CREATE POLICY "User Invites can be updated by a member of the team" 
+ON "public"."user_invites" 
+FOR UPDATE 
+USING (team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user));
+
 
 CREATE TABLE "public"."users" (
     "id" uuid NOT NULL,
@@ -786,6 +1101,30 @@ GRANT ALL ON TABLE "public"."users" TO "service_role";
 
 CREATE INDEX IF NOT EXISTS users_team_id_idx ON public.users USING btree (team_id) TABLESPACE pg_default;
 
+CREATE POLICY "Users can insert their own profile." 
+ON "public"."users" 
+FOR INSERT 
+WITH CHECK (auth.uid() = id);
+
+CREATE POLICY "Users can select their own profile." 
+ON "public"."users" 
+FOR SELECT 
+USING (auth.uid() = id);
+
+CREATE POLICY "Users can select users if they are in the same team" 
+ON "public"."users" 
+FOR SELECT 
+TO authenticated
+USING ((EXISTS ( SELECT 1
+   FROM "public"."users_on_team"
+  WHERE (("users_on_team"."user_id" = ( SELECT auth.uid() AS uid)) AND ("users_on_team"."team_id" = "users"."team_id")))));
+
+CREATE POLICY "Users can update own profile." 
+ON "public"."users" 
+FOR UPDATE 
+USING (auth.uid() = id);
+
+
 CREATE TABLE "public"."users_on_team" (
     "user_id" uuid NOT NULL,
     "team_id" uuid NOT NULL,
@@ -809,11 +1148,59 @@ CREATE INDEX IF NOT EXISTS users_on_team_team_id_idx ON public.users_on_team USI
 
 CREATE INDEX IF NOT EXISTS users_on_team_user_id_idx ON public.users_on_team USING btree (user_id) TABLESPACE pg_default;
 
+CREATE POLICY "Enable insert for authenticated users only" 
+ON "public"."users_on_team" 
+FOR INSERT 
+TO authenticated
+WITH CHECK (true);
+
+CREATE POLICY "Enable updates for users on team" 
+ON "public"."users_on_team" 
+FOR UPDATE 
+TO authenticated
+USING (team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user))
+WITH CHECK (team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user));
+
+CREATE POLICY "Select for current user teams"
+ON "public"."users_on_team"
+FOR SELECT 
+TO authenticated
+USING ((EXISTS ( SELECT 1
+   FROM private.current_user_teams cut
+  WHERE ((cut.user_id = ( SELECT auth.uid() AS uid)) AND (cut.team_id = users_on_team.team_id)))));
+
+CREATE POLICY "Users on team can be deleted by a member of the team" 
+ON "public"."users_on_team" 
+FOR DELETE 
+USING (team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user));
+
 CREATE OR REPLACE VIEW "private"."current_user_teams" AS 
 SELECT ( SELECT auth.uid() AS uid) AS user_id,
     t.team_id
    FROM users_on_team t
   WHERE (t.user_id = ( SELECT auth.uid() AS uid));
+
+CREATE OR REPLACE FUNCTION "private"."get_invites_for_authenticated_user"() RETURNS SETOF "uuid"
+    LANGUAGE "sql" STABLE SECURITY DEFINER
+    SET "search_path" TO 'public'
+    AS $$
+  SELECT team_id
+  FROM user_invites
+  WHERE email = auth.jwt() ->> 'email'
+$$;
+
+ALTER FUNCTION "private"."get_invites_for_authenticated_user"() OWNER TO "postgres";
+
+CREATE OR REPLACE FUNCTION "private"."get_teams_for_authenticated_user"() RETURNS SETOF "uuid"
+    LANGUAGE "sql" STABLE SECURITY DEFINER
+    SET "search_path" TO 'public'
+    AS $$
+  SELECT team_id
+  FROM users_on_team
+  WHERE user_id = auth.uid()
+$$;
+
+ALTER FUNCTION "private"."get_teams_for_authenticated_user"() OWNER TO "postgres";
 
 CREATE OR REPLACE FUNCTION public.amount_text("public"."transactions") RETURNS "text"
     LANGUAGE "sql"
@@ -2653,7 +3040,9 @@ end$$;
 
 ALTER FUNCTION "public"."insert_system_categories"() OWNER TO "postgres";
 
-CREATE OR REPLACE TRIGGER "insert_system_categories_trigger" AFTER INSERT ON "public"."teams" FOR EACH ROW EXECUTE FUNCTION "public"."insert_system_categories"();
+CREATE OR REPLACE TRIGGER "insert_system_categories_trigger" 
+AFTER INSERT ON "public"."teams" FOR EACH ROW 
+EXECUTE FUNCTION "public"."insert_system_categories"();
 
 GRANT ALL ON FUNCTION "public"."insert_system_categories"() TO "anon";
 GRANT ALL ON FUNCTION "public"."insert_system_categories"() TO "authenticated";
@@ -2694,26 +3083,9 @@ begin
   from transactions t
   where t.id = p_transaction_id;
 
-  -- if p_inbox_id is provided, match only with that specific inbox item
---   if p_inbox_id is not null then
---     select *, abs(amount) as abs_amount, abs(base_amount) as abs_base_amount 
---     into v_inbox 
---     from inbox 
---     where id = p_inbox_id
---       and team_id = v_transaction.team_id
---       and status = 'pending';
-    
---     if v_inbox.id is not null then
---       v_score := calculate_match_score(v_transaction, v_inbox);
-      
---       if v_score >= v_threshold then
---         return query select p_inbox_id, p_transaction_id, v_transaction.name, v_score, v_inbox.file_name;
---       end if;
---     end if;
---   else
--- Find potential matches for the transaction
-    return query
-    select 
+  -- Find potential matches for the transaction
+  return query
+  select 
       i.id as inbox_id, 
       v_transaction.id as transaction_id, 
       v_transaction.name as transaction_name,
@@ -2854,8 +3226,6 @@ begin
 end;
 $function$
 ;
-
-CREATE TRIGGER on_update_set_set_updated_at BEFORE UPDATE ON public.transactions FOR EACH ROW EXECUTE FUNCTION set_updated_at();
 
 GRANT ALL ON FUNCTION "public"."show_limit"() TO "postgres";
 GRANT ALL ON FUNCTION "public"."show_limit"() TO "anon";
@@ -3015,7 +3385,8 @@ GRANT ALL ON FUNCTION "public"."update_enrich_transaction"() TO "anon";
 GRANT ALL ON FUNCTION "public"."update_enrich_transaction"() TO "authenticated";
 GRANT ALL ON FUNCTION "public"."update_enrich_transaction"() TO "service_role";
 
-CREATE TRIGGER enrich_transaction BEFORE INSERT ON public.transactions FOR EACH ROW EXECUTE FUNCTION update_enrich_transaction();
+CREATE TRIGGER enrich_transaction BEFORE INSERT ON public.transactions FOR EACH ROW 
+EXECUTE FUNCTION update_enrich_transaction();
 
 CREATE OR REPLACE FUNCTION public.update_transaction_frequency()
  RETURNS trigger
@@ -3094,8 +3465,6 @@ $$;
 
 ALTER FUNCTION "public"."update_transactions_on_category_delete"() OWNER TO "postgres";
 
-CREATE OR REPLACE TRIGGER "trigger_update_transactions_category" BEFORE DELETE ON "public"."transaction_categories" FOR EACH ROW EXECUTE FUNCTION "public"."update_transactions_on_category_delete"();
-
 GRANT ALL ON FUNCTION "public"."update_transactions_on_category_delete"() TO "anon";
 GRANT ALL ON FUNCTION "public"."update_transactions_on_category_delete"() TO "authenticated";
 GRANT ALL ON FUNCTION "public"."update_transactions_on_category_delete"() TO "service_role";
@@ -3138,8 +3507,6 @@ $function$
 ;
 
 ALTER FUNCTION "public"."upsert_transaction_enrichment"() OWNER TO "postgres";
-
-CREATE OR REPLACE TRIGGER "on_updated_transaction_category" AFTER UPDATE OF "category_slug" ON "public"."transactions" FOR EACH ROW EXECUTE FUNCTION "public"."upsert_transaction_enrichment"();
 
 GRANT ALL ON FUNCTION "public"."upsert_transaction_enrichment"() TO "anon";
 GRANT ALL ON FUNCTION "public"."upsert_transaction_enrichment"() TO "authenticated";
@@ -3208,3 +3575,217 @@ GRANT ALL ON FUNCTION "public"."webhook"() TO "authenticated";
 GRANT ALL ON FUNCTION "public"."webhook"() TO "service_role";
 
 CREATE TRIGGER user_registered AFTER INSERT ON auth.users FOR EACH ROW EXECUTE FUNCTION webhook('webhook/registered');
+
+CREATE OR REPLACE FUNCTION storage.extension(name text)
+ RETURNS text
+ LANGUAGE plpgsql
+AS $function$
+DECLARE
+_parts text[];
+_filename text;
+BEGIN
+    select string_to_array(name, '/') into _parts;
+    select _parts[array_length(_parts,1)] into _filename;
+    -- @todo return the last part instead of 2
+    return split_part(_filename, '.', 2);
+END
+$function$
+;
+
+CREATE OR REPLACE FUNCTION storage.filename(name text)
+ RETURNS text
+ LANGUAGE plpgsql
+AS $function$
+DECLARE
+_parts text[];
+BEGIN
+    select string_to_array(name, '/') into _parts;
+    return _parts[array_length(_parts,1)];
+END
+$function$
+;
+
+CREATE OR REPLACE FUNCTION storage.foldername(name text)
+ RETURNS text[]
+ LANGUAGE plpgsql
+AS $function$
+DECLARE
+_parts text[];
+BEGIN
+    select string_to_array(name, '/') into _parts;
+    return _parts[1:array_length(_parts,1)-1];
+END
+$function$
+;
+
+CREATE POLICY "Give members access to team folder 1oj01fe_0"
+ON "storage"."objects"
+AS permissive
+FOR SELECT
+TO public
+USING (((bucket_id = 'avatars'::text) AND (EXISTS ( SELECT 1
+   FROM users_on_team
+  WHERE ((users_on_team.user_id = auth.uid()) AND ((users_on_team.team_id)::text = (storage.foldername(objects.name))[1]))))));
+
+
+CREATE POLICY "Give members access to team folder 1oj01fe_1"
+ON "storage"."objects"
+AS permissive
+FOR INSERT
+TO public
+WITH CHECK (((bucket_id = 'avatars'::text) AND (EXISTS ( SELECT 1
+   FROM users_on_team
+  WHERE ((users_on_team.user_id = auth.uid()) AND ((users_on_team.team_id)::text = (storage.foldername(objects.name))[1]))))));
+
+
+CREATE POLICY "Give members access to team folder 1oj01fe_2"
+ON "storage"."objects"
+AS permissive
+FOR UPDATE
+TO public
+USING (((bucket_id = 'avatars'::text) AND (EXISTS ( SELECT 1
+   FROM users_on_team
+  WHERE ((users_on_team.user_id = auth.uid()) AND ((users_on_team.team_id)::text = (storage.foldername(objects.name))[1]))))));
+
+
+CREATE POLICY "Give members access to team folder 1oj01fe_3"
+ON "storage"."objects"
+AS permissive
+FOR DELETE
+TO public
+USING (((bucket_id = 'avatars'::text) AND (EXISTS ( SELECT 1
+   FROM users_on_team
+  WHERE ((users_on_team.user_id = auth.uid()) AND ((users_on_team.team_id)::text = (storage.foldername(objects.name))[1]))))));
+
+
+CREATE POLICY "Give members access to team folder 1uo56a_0"
+ON "storage"."objects"
+AS permissive
+FOR SELECT
+TO authenticated
+USING (((bucket_id = 'vault'::text) AND (EXISTS ( SELECT 1
+   FROM users_on_team
+  WHERE ((users_on_team.user_id = auth.uid()) AND ((users_on_team.team_id)::text = (storage.foldername(objects.name))[1]))))));
+
+
+CREATE POLICY "Give members access to team folder 1uo56a_1"
+ON "storage"."objects"
+AS permissive
+FOR INSERT
+TO authenticated
+WITH CHECK (((bucket_id = 'vault'::text) AND (EXISTS ( SELECT 1
+   FROM users_on_team
+  WHERE ((users_on_team.user_id = auth.uid()) AND ((users_on_team.team_id)::text = (storage.foldername(objects.name))[1]))))));
+
+
+CREATE POLICY "Give members access to team folder 1uo56a_2"
+ON "storage"."objects"
+AS permissive
+FOR UPDATE
+TO authenticated
+USING (((bucket_id = 'vault'::text) AND (EXISTS ( SELECT 1
+   FROM users_on_team
+  WHERE ((users_on_team.user_id = auth.uid()) AND ((users_on_team.team_id)::text = (storage.foldername(objects.name))[1]))))));
+
+
+CREATE POLICY "Give members access to team folder 1uo56a_3"
+ON "storage"."objects"
+AS permissive
+FOR DELETE
+TO authenticated
+USING (((bucket_id = 'vault'::text) AND (EXISTS ( SELECT 1
+   FROM users_on_team
+  WHERE ((users_on_team.user_id = auth.uid()) AND ((users_on_team.team_id)::text = (storage.foldername(objects.name))[1]))))));
+
+
+CREATE POLICY "Give users access to own folder 1oj01fe_0"
+ON "storage"."objects"
+AS permissive
+FOR SELECT
+TO authenticated
+USING (((bucket_id = 'avatars'::text) AND ((auth.uid())::text = (storage.foldername(name))[1])));
+
+
+CREATE POLICY "Give users access to own folder 1oj01fe_1"
+ON "storage"."objects"
+AS permissive
+FOR INSERT
+TO authenticated
+WITH CHECK (((bucket_id = 'avatars'::text) AND ((auth.uid())::text = (storage.foldername(name))[1])));
+
+
+CREATE POLICY "Give users access to own folder 1oj01fe_2"
+ON "storage"."objects"
+AS permissive
+FOR UPDATE
+TO authenticated
+USING (((bucket_id = 'avatars'::text) AND ((auth.uid())::text = (storage.foldername(name))[1])));
+
+
+CREATE POLICY "Give users access to own folder 1oj01fe_3"
+ON "storage"."objects"
+AS permissive
+FOR DELETE
+TO authenticated
+USING (((bucket_id = 'avatars'::text) AND ((auth.uid())::text = (storage.foldername(name))[1])));
+
+
+CREATE TRIGGER before_delete_objects BEFORE DELETE ON storage.objects FOR EACH ROW WHEN ((old.bucket_id = 'vault'::text)) EXECUTE FUNCTION delete_from_documents();
+
+CREATE TRIGGER tr_lp225ozlnzx2 AFTER INSERT ON storage.objects FOR EACH ROW EXECUTE FUNCTION supabase_functions.http_request('https://cloud.trigger.dev/api/v1/sources/http/clz0yl7ai6652lp225ozlnzx2', 'POST', '{"Content-type":"application/json", "Authorization": "Bearer d8e3de5a468d1af4990e168c27e2b167e6911e93da67a7a8c9cf15b1dc2011dd" }', '{}', '1000');
+
+CREATE TRIGGER vault_upload AFTER INSERT ON storage.objects FOR EACH ROW EXECUTE FUNCTION supabase_functions.http_request('https://cloud.trigger.dev/api/v1/sources/http/clxhxy07hfixvo93155n4t3bw', 'POST', '{"Content-type":"application/json","Authorization":"Bearer 45fe98e53abae5f592f97432da5d3e388b71bbfe3194aa1c82e02ed83af225e1"}', '{}', '3000');
+
+ALTER PUBLICATION "supabase_realtime" OWNER TO "postgres";
+
+ALTER PUBLICATION "supabase_realtime" ADD TABLE ONLY "public"."inbox";
+
+GRANT USAGE ON SCHEMA "public" TO "postgres";
+GRANT USAGE ON SCHEMA "public" TO "anon";
+GRANT USAGE ON SCHEMA "public" TO "authenticated";
+GRANT USAGE ON SCHEMA "public" TO "service_role";
+
+GRANT ALL ON FUNCTION "public"."set_limit"(real) TO "postgres";
+GRANT ALL ON FUNCTION "public"."set_limit"(real) TO "anon";
+GRANT ALL ON FUNCTION "public"."set_limit"(real) TO "authenticated";
+GRANT ALL ON FUNCTION "public"."set_limit"(real) TO "service_role";
+
+GRANT ALL ON FUNCTION "public"."word_similarity"("text", "text") TO "postgres";
+GRANT ALL ON FUNCTION "public"."word_similarity"("text", "text") TO "anon";
+GRANT ALL ON FUNCTION "public"."word_similarity"("text", "text") TO "authenticated";
+GRANT ALL ON FUNCTION "public"."word_similarity"("text", "text") TO "service_role";
+
+GRANT ALL ON FUNCTION "public"."word_similarity_commutator_op"("text", "text") TO "postgres";
+GRANT ALL ON FUNCTION "public"."word_similarity_commutator_op"("text", "text") TO "anon";
+GRANT ALL ON FUNCTION "public"."word_similarity_commutator_op"("text", "text") TO "authenticated";
+GRANT ALL ON FUNCTION "public"."word_similarity_commutator_op"("text", "text") TO "service_role";
+
+GRANT ALL ON FUNCTION "public"."word_similarity_dist_commutator_op"("text", "text") TO "postgres";
+GRANT ALL ON FUNCTION "public"."word_similarity_dist_commutator_op"("text", "text") TO "anon";
+GRANT ALL ON FUNCTION "public"."word_similarity_dist_commutator_op"("text", "text") TO "authenticated";
+GRANT ALL ON FUNCTION "public"."word_similarity_dist_commutator_op"("text", "text") TO "service_role";
+
+GRANT ALL ON FUNCTION "public"."word_similarity_dist_op"("text", "text") TO "postgres";
+GRANT ALL ON FUNCTION "public"."word_similarity_dist_op"("text", "text") TO "anon";
+GRANT ALL ON FUNCTION "public"."word_similarity_dist_op"("text", "text") TO "authenticated";
+GRANT ALL ON FUNCTION "public"."word_similarity_dist_op"("text", "text") TO "service_role";
+
+GRANT ALL ON FUNCTION "public"."word_similarity_op"("text", "text") TO "postgres";
+GRANT ALL ON FUNCTION "public"."word_similarity_op"("text", "text") TO "anon";
+GRANT ALL ON FUNCTION "public"."word_similarity_op"("text", "text") TO "authenticated";
+GRANT ALL ON FUNCTION "public"."word_similarity_op"("text", "text") TO "service_role";
+
+ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON SEQUENCES  TO "postgres";
+ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON SEQUENCES  TO "anon";
+ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON SEQUENCES  TO "authenticated";
+ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON SEQUENCES  TO "service_role";
+
+ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON FUNCTIONS  TO "postgres";
+ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON FUNCTIONS  TO "anon";
+ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON FUNCTIONS  TO "authenticated";
+ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON FUNCTIONS  TO "service_role";
+
+ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON TABLES  TO "postgres";
+ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON TABLES  TO "anon";
+ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON TABLES  TO "authenticated";
+ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON TABLES  TO "service_role";
