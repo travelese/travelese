@@ -1,4 +1,3 @@
--- 1. Basic Setup
 SET statement_timeout = 0;
 SET lock_timeout = 0;
 SET idle_in_transaction_session_timeout = 0;
@@ -12,8 +11,8 @@ SET row_security = off;
 SET default_tablespace = '';
 SET default_table_access_method = "heap";
 SET check_function_bodies = off;
+SET search_path TO public, extensions;
 
--- 2. Extensions
 CREATE EXTENSION IF NOT EXISTS "pgcrypto" WITH SCHEMA "extensions";
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp" WITH SCHEMA "extensions";
 CREATE EXTENSION IF NOT EXISTS "pg_stat_statements" WITH SCHEMA "extensions";
@@ -25,12 +24,10 @@ CREATE EXTENSION IF NOT EXISTS "unaccent" WITH SCHEMA "public";
 CREATE EXTENSION IF NOT EXISTS "pg_net" WITH SCHEMA "extensions";
 CREATE EXTENSION IF NOT EXISTS "vector" WITH SCHEMA "extensions";
 
--- 3. Schemas
 CREATE SCHEMA IF NOT EXISTS "private";
 ALTER SCHEMA "private" OWNER TO "postgres";
 COMMENT ON SCHEMA "public" IS 'standard public schema';
 
--- 4. ENUMs
 CREATE TYPE "public"."account_type" AS ENUM ('debit', 'credit');
 ALTER TYPE "public"."account_type" OWNER TO "postgres";
 
@@ -64,11 +61,11 @@ ALTER TYPE "public"."report_types" OWNER TO "postgres";
 CREATE TYPE "public"."tracker_status" AS ENUM ('in_progress', 'completed');
 ALTER TYPE "public"."tracker_status" OWNER TO "postgres";
 
-CREATE TYPE "public"."transaction_categories" AS ENUM (
+CREATE TYPE "public"."transaction_category_type" AS ENUM (
     'flights', 'stays', 'tours', 'car_rentals', 'transfers', 'trains',
     'cruises', 'meals', 'activity', 'fees', 'taxes', 'other', 'uncategorized'
 );
-ALTER TYPE "public"."transaction_categories" OWNER TO "postgres";
+ALTER TYPE "public"."transaction_category_type" OWNER TO "postgres";
 
 CREATE TYPE "public"."transaction_methods" AS ENUM (
     'payment', 'card_purchase', 'card_atm', 'transfer', 'ach', 'interest',
@@ -99,8 +96,150 @@ ALTER TYPE "public"."cabin_class" OWNER TO "postgres";
 CREATE TYPE "public"."property_type" AS ENUM ('hotel', 'apartment', 'resort', 'villa');
 ALTER TYPE "public"."property_type" OWNER TO "postgres";
 
+CREATE OR REPLACE FUNCTION public.generate_inbox("size" integer) RETURNS "text"
+    LANGUAGE "plpgsql"
+    AS $$
+DECLARE
+  characters TEXT := 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  bytes BYTEA := extensions.gen_random_bytes(size);
+  l INT := length(characters);
+  i INT := 0;
+  output TEXT := '';
+BEGIN
+  WHILE i < size LOOP
+    output := output || substr(characters, get_byte(bytes, i) % l + 1, 1);
+    i := i + 1;
+  END LOOP;
+  RETURN lower(output);
+END;
+$$;
 
-CREATE TABLE "public"."teams" (
+ALTER FUNCTION public.generate_inbox("size" integer) OWNER TO "postgres";
+
+CREATE OR REPLACE FUNCTION public.generate_id("size" integer) RETURNS "text"
+    LANGUAGE "plpgsql"
+    AS $$
+DECLARE
+  characters TEXT := 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  bytes BYTEA := gen_random_bytes(size);
+  l INT := length(characters);
+  i INT := 0;
+  output TEXT := '';
+BEGIN
+  WHILE i < size LOOP
+    output := output || substr(characters, get_byte(bytes, i) % l + 1, 1);
+    i := i + 1;
+  END LOOP;
+  RETURN lower(output);
+END;
+$$;
+
+ALTER FUNCTION public.generate_id("size" integer) OWNER TO "postgres";
+
+CREATE OR REPLACE FUNCTION public.generate_slug_from_name() RETURNS "trigger"
+    LANGUAGE "plpgsql"
+    AS $$begin
+  if new.system is true then
+    return new;
+  end if;
+
+  new.slug := public.slugify(new.name);
+  return new;
+end$$;
+
+ALTER FUNCTION public.generate_slug_from_name() OWNER TO "postgres";
+
+CREATE OR REPLACE FUNCTION public.slugify("value" "text") RETURNS "text"
+    LANGUAGE "sql" IMMUTABLE STRICT
+    AS $_$
+  -- removes accents (diacritic signs) from a given string --
+  with "unaccented" as (
+    select unaccent("value") as "value"
+  ),
+  -- lowercases the string
+  "lowercase" as (
+    select lower("value") as "value"
+    from "unaccented"
+  ),
+  -- remove single and double quotes
+  "removed_quotes" as (
+    select regexp_replace("value", '[''"]+', '', 'gi') as "value"
+    from "lowercase"
+  ),
+  -- replaces anything that's not a letter, number, hyphen('-'), or underscore('_') with a hyphen('-')
+  "hyphenated" as (
+    select regexp_replace("value", '[^a-z0-9\\-_]+', '-', 'gi') as "value"
+    from "removed_quotes"
+  ),
+  -- trims hyphens('-') if they exist on the head or tail of the string
+  "trimmed" as (
+    select regexp_replace(regexp_replace("value", '\-+$', ''), '^\-', '') as "value"
+    from "hyphenated"
+  )
+  select "value" from "trimmed";
+$_$;
+
+ALTER FUNCTION public.slugify("value" "text") OWNER TO "postgres";
+
+CREATE OR REPLACE FUNCTION public.nanoid("size" integer DEFAULT 21, "alphabet" "text" DEFAULT '_-0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'::"text", "additionalbytesfactor" double precision DEFAULT 1.6) RETURNS "text"
+    LANGUAGE "plpgsql" PARALLEL SAFE
+    AS $$
+DECLARE
+    alphabetArray  text[];
+    alphabetLength int := 64;
+    mask           int := 63;
+    step           int := 34;
+BEGIN
+    IF size IS NULL OR size < 1 THEN
+        RAISE EXCEPTION 'The size must be defined and greater than 0!';
+    END IF;
+
+    IF alphabet IS NULL OR length(alphabet) = 0 OR length(alphabet) > 255 THEN
+        RAISE EXCEPTION 'The alphabet can''t be undefined, zero or bigger than 255 symbols!';
+    END IF;
+
+    IF additionalBytesFactor IS NULL OR additionalBytesFactor < 1 THEN
+        RAISE EXCEPTION 'The additional bytes factor can''t be less than 1!';
+    END IF;
+
+    alphabetArray := regexp_split_to_array(alphabet, '');
+    alphabetLength := array_length(alphabetArray, 1);
+    mask := (2 << cast(floor(log(alphabetLength - 1) / log(2)) as int)) - 1;
+    step := cast(ceil(additionalBytesFactor * mask * size / alphabetLength) AS int);
+
+    IF step > 1024 THEN
+        step := 1024; -- The step size % can''t be bigger then 1024!
+    END IF;
+
+    RETURN nanoid_optimized(size, alphabet, mask, step);
+END
+$$;
+
+ALTER FUNCTION public.nanoid("size" integer, "alphabet" "text", "additionalbytesfactor" double precision) OWNER TO "postgres";
+
+CREATE OR REPLACE FUNCTION private.get_teams_for_authenticated_user() RETURNS SETOF "uuid"
+    LANGUAGE "sql" STABLE SECURITY DEFINER
+    SET "search_path" TO 'public'
+    AS $$
+  SELECT team_id
+  FROM users_on_team
+  WHERE user_id = auth.uid()
+$$;
+
+ALTER FUNCTION private.get_teams_for_authenticated_user() OWNER TO "postgres";
+
+CREATE OR REPLACE FUNCTION private.get_invites_for_authenticated_user() RETURNS SETOF "uuid"
+    LANGUAGE "sql" STABLE SECURITY DEFINER
+    SET "search_path" TO 'public'
+    AS $$
+  SELECT team_id
+  FROM user_invites
+  WHERE email = auth.jwt() ->> 'email'
+$$;
+
+ALTER FUNCTION private.get_invites_for_authenticated_user() OWNER TO "postgres";
+
+CREATE TABLE IF NOT EXISTS "public"."teams" (
     "id" uuid NOT NULL DEFAULT gen_random_uuid(),
     "created_at" timestamp with time zone NOT NULL DEFAULT now(),
     "name" text NULL,
@@ -116,9 +255,9 @@ CREATE TABLE "public"."teams" (
 );
 
 ALTER TABLE "public"."teams" OWNER TO "postgres";
-
 ALTER TABLE "public"."teams" ENABLE ROW LEVEL SECURITY;
 
+-- Teams Policies
 CREATE POLICY "Enable insert for authenticated users only" 
 ON "public"."teams" 
 FOR INSERT 
@@ -145,7 +284,7 @@ ON "public"."teams"
 FOR UPDATE 
 USING (id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user));
 
-CREATE TABLE "public"."users" (
+CREATE TABLE IF NOT EXISTS "public"."users" (
     "id" uuid NOT NULL,
     "full_name" text NULL,
     "avatar_url" text NULL,
@@ -162,11 +301,12 @@ CREATE TABLE "public"."users" (
 );
 
 ALTER TABLE "public"."users" OWNER TO "postgres";
-
 ALTER TABLE "public"."users" ENABLE ROW LEVEL SECURITY;
 
-CREATE INDEX IF NOT EXISTS users_team_id_idx ON public.users USING btree (team_id) TABLESPACE pg_default;
+CREATE INDEX IF NOT EXISTS users_team_id_idx 
+    ON public.users USING btree (team_id) TABLESPACE pg_default;
 
+-- Users Policies
 CREATE POLICY "Users can insert their own profile." 
 ON "public"."users" 
 FOR INSERT 
@@ -177,21 +317,35 @@ ON "public"."users"
 FOR SELECT 
 USING (auth.uid() = id);
 
-CREATE POLICY "Users can select users if they are in the same team" 
-ON "public"."users" 
-FOR SELECT 
-TO authenticated
-USING ((EXISTS ( SELECT 1
-   FROM "public"."users_on_team"
-  WHERE (("users_on_team"."user_id" = ( SELECT auth.uid() AS uid)) AND ("users_on_team"."team_id" = "users"."team_id")))));
-
 CREATE POLICY "Users can update own profile." 
 ON "public"."users" 
 FOR UPDATE 
 USING (auth.uid() = id);
 
+CREATE TABLE IF NOT EXISTS "public"."exchange_rates" (
+    "id" uuid NOT NULL DEFAULT gen_random_uuid(),
+    "base" text NULL,
+    "rate" numeric NULL,
+    "target" text NULL,
+    "updated_at" timestamp with time zone NULL,
+    CONSTRAINT "currencies_pkey" PRIMARY KEY ("id"),
+    CONSTRAINT "unique_rate" UNIQUE ("base", "target")
+);
 
-CREATE TABLE "public"."apps" (
+ALTER TABLE "public"."exchange_rates" ENABLE ROW LEVEL SECURITY;
+
+CREATE INDEX IF NOT EXISTS exchange_rates_base_target_idx 
+    ON public.exchange_rates USING btree (base, target) TABLESPACE pg_default;
+
+-- Exchange Rates Policies
+CREATE POLICY "Enable read access for authenticated users"
+ON "public"."exchange_rates"
+AS permissive
+FOR SELECT
+TO public
+USING (true);
+
+CREATE TABLE IF NOT EXISTS "public"."apps" (
     "id" uuid NOT NULL DEFAULT gen_random_uuid(),
     "team_id" uuid NULL DEFAULT gen_random_uuid(),
     "config" jsonb,
@@ -209,14 +363,13 @@ CREATE TABLE "public"."apps" (
 
 ALTER TABLE "public"."apps" ENABLE ROW LEVEL SECURITY;
 
-
+-- Apps Policies
 CREATE POLICY "Apps can be deleted by a member of the team"
 ON "public"."apps"
 AS permissive
 FOR DELETE
 TO public
 USING ((team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user)));
-
 
 CREATE POLICY "Apps can be inserted by a member of the team"
 ON "public"."apps"
@@ -225,14 +378,12 @@ FOR INSERT
 TO public
 WITH CHECK (team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user));
 
-
 CREATE POLICY "Apps can be selected by a member of the team"
 ON "public"."apps"
 AS permissive
 FOR SELECT
 TO public
 USING (team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user));
-
 
 CREATE POLICY "Apps can be updated by a member of the team"
 ON "public"."apps"
@@ -241,7 +392,226 @@ FOR UPDATE
 TO public
 USING (team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user));
 
-CREATE TABLE "public"."bank_accounts" (
+CREATE TABLE IF NOT EXISTS "public"."bank_connections" (
+    "id" uuid NOT NULL DEFAULT gen_random_uuid(),
+    "created_at" timestamp with time zone NOT NULL DEFAULT now(),
+    "institution_id" text NOT NULL,
+    "expires_at" timestamp with time zone NULL,
+    "team_id" uuid NOT NULL,
+    "name" text NOT NULL,
+    "logo_url" text NULL,
+    "access_token" text NULL,
+    "enrollment_id" text NULL,
+    "provider" public.bank_providers NULL,
+    "error_details" text NULL,
+    "last_accessed" timestamp with time zone NULL,
+    "reference_id" text NULL,
+    "status" public.connection_status NULL DEFAULT 'connected'::connection_status,
+    CONSTRAINT "bank_connections_pkey" PRIMARY KEY ("id"),
+    CONSTRAINT "unique_bank_connections" UNIQUE (team_id, institution_id),
+    CONSTRAINT "bank_connections_team_id_fkey" FOREIGN KEY (team_id) REFERENCES teams(id) ON DELETE CASCADE
+);
+
+ALTER TABLE "public"."bank_connections" ENABLE ROW LEVEL SECURITY;
+
+CREATE INDEX IF NOT EXISTS bank_connections_team_id_idx 
+    ON public.bank_connections USING btree (team_id) TABLESPACE pg_default;
+
+-- Bank Connections Policies
+CREATE POLICY "Bank Connections can be created by a member of the team" 
+ON "public"."bank_connections" 
+FOR INSERT 
+WITH CHECK (team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user));
+
+CREATE POLICY "Bank Connections can be deleted by a member of the team" 
+ON "public"."bank_connections" 
+FOR DELETE 
+USING (team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user));
+
+CREATE POLICY "Bank Connections can be selected by a member of the team" 
+ON "public"."bank_connections" 
+FOR SELECT 
+USING (team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user));
+
+CREATE POLICY "Bank Connections can be updated by a member of the team" 
+ON "public"."bank_connections" 
+FOR UPDATE 
+USING (team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user));
+
+CREATE TABLE IF NOT EXISTS "public"."transaction_categories" (
+    "id" uuid NOT NULL DEFAULT gen_random_uuid(),
+    "name" text NOT NULL,
+    "team_id" uuid NOT NULL DEFAULT gen_random_uuid(),
+    "color" text NULL,
+    "created_at" timestamp with time zone NULL DEFAULT now(),
+    "system" boolean NULL DEFAULT false,
+    "slug" text NOT NULL,
+    "vat" numeric NULL,
+    "description" text NULL,
+    "embedding" extensions.vector NULL,
+    CONSTRAINT "transaction_categories_pkey" PRIMARY KEY ("team_id", "slug"),
+    CONSTRAINT "unique_team_slug" UNIQUE ("team_id", "slug"),
+    CONSTRAINT "transaction_categories_team_id_fkey" FOREIGN KEY (team_id) REFERENCES teams (id) ON DELETE CASCADE  
+);
+
+ALTER TABLE "public"."transaction_categories" OWNER TO "postgres";
+ALTER TABLE "public"."transaction_categories" ENABLE ROW LEVEL SECURITY;
+
+CREATE INDEX IF NOT EXISTS transaction_categories_team_id_idx 
+    ON public.transaction_categories USING btree (team_id) TABLESPACE pg_default;
+
+-- Transaction Categories Policies
+CREATE POLICY "Users on team can manage categories" 
+ON "public"."transaction_categories" 
+USING (("team_id" IN ( SELECT "private"."get_teams_for_authenticated_user"() AS "get_teams_for_authenticated_user")));
+
+CREATE OR REPLACE FUNCTION "public"."update_transactions_on_category_delete"() RETURNS "trigger"
+    LANGUAGE "plpgsql"
+    AS $$
+begin
+    update transactions
+    set category_slug = null
+    where category_slug = old.slug
+    and team_id = old.team_id;
+
+    return old;
+end;
+$$;
+
+ALTER FUNCTION "public"."update_transactions_on_category_delete"() OWNER TO "postgres";
+
+-- Transaction Categories Triggers
+CREATE TRIGGER embed_category
+AFTER INSERT
+OR UPDATE ON transaction_categories
+FOR EACH ROW
+EXECUTE FUNCTION supabase_functions.http_request (
+  'https://hfgtyawqemeozrtjzevl.supabase.co/functions/v1/generate-category-embedding',
+  'POST',
+  '{"Content-type":"application/json"}',
+  '{}',
+  '5000'
+);
+
+CREATE TRIGGER generate_category_slug
+BEFORE INSERT ON transaction_categories
+FOR EACH ROW
+EXECUTE FUNCTION generate_slug_from_name ();
+
+CREATE TRIGGER trigger_update_transactions_category
+BEFORE DELETE ON transaction_categories
+FOR EACH ROW
+EXECUTE FUNCTION update_transactions_on_category_delete ();
+
+CREATE TABLE IF NOT EXISTS "public"."documents" (
+    "id" uuid NOT NULL DEFAULT gen_random_uuid(),
+    "name" text NULL,
+    "created_at" timestamp with time zone NULL DEFAULT now(),
+    "metadata" jsonb NULL,
+    "path_tokens" text[] NULL,
+    "team_id" uuid NULL,
+    "parent_id" text NULL,
+    "object_id" uuid NULL,
+    "owner_id" uuid NULL,
+    "tag" text NULL,
+    "title" text NULL,
+    "body" text NULL,
+    "fts" tsvector GENERATED ALWAYS AS (
+      to_tsvector(
+        'english'::regconfig,
+        ((title || ' '::text) || body)
+      )
+    ) stored null,
+    CONSTRAINT "documents_pkey" PRIMARY KEY ("id"),
+    CONSTRAINT "documents_created_by_fkey" FOREIGN KEY (owner_id) REFERENCES users(id) ON DELETE SET NULL,
+    CONSTRAINT "documents_team_id_fkey" FOREIGN KEY (team_id) REFERENCES teams(id) ON DELETE CASCADE
+);
+
+CREATE INDEX IF NOT EXISTS documents_team_id_idx 
+    ON public.documents USING btree (team_id) TABLESPACE pg_default;
+
+CREATE INDEX IF NOT EXISTS documents_team_id_parent_id_idx 
+    ON public.documents USING btree (team_id, parent_id) TABLESPACE pg_default;
+
+-- Documents Triggers
+CREATE TRIGGER embed_document
+AFTER INSERT ON documents FOR EACH ROW
+EXECUTE FUNCTION supabase_functions.http_request (
+  'https://hfgtyawqemeozrtjzevl.supabase.co/functions/v1/generate-document-embedding',
+  'POST',
+  '{"Content-type":"application/json"}',
+  '{}',
+  '5000'
+);
+
+-- Documents Policies
+CREATE POLICY "Documents can be deleted by a member of the team"
+ON "public"."documents"
+AS permissive
+FOR ALL
+TO public
+USING (team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user));
+
+CREATE POLICY "Documents can be selected by a member of the team"
+ON "public"."documents"
+AS permissive
+FOR ALL
+TO public
+USING (team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user));
+
+CREATE POLICY "Documents can be updated by a member of the team"
+ON "public"."documents"
+AS permissive
+FOR UPDATE
+TO public
+USING (team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user));
+
+CREATE POLICY "Enable insert for authenticated users only"
+ON "public"."documents"
+AS permissive
+FOR INSERT
+TO authenticated
+WITH CHECK (true);
+
+
+CREATE OR REPLACE FUNCTION public.extract_product_names(
+  "products_json" "jsonb"
+) RETURNS "text"
+    LANGUAGE "plpgsql" IMMUTABLE
+    AS $$
+begin
+    return (
+        select string_agg(value, ',') 
+        from json_array_elements_text(products_json) as arr(value)
+    );
+end;
+$$;
+
+ALTER FUNCTION public.extract_product_names(
+  "products_json" jsonb
+) OWNER TO "postgres";
+
+CREATE OR REPLACE FUNCTION public.generate_inbox_fts(
+  "display_name_text" "text", 
+  "product_names" "text", 
+  "amount" numeric, 
+  "due_date" "date"
+) RETURNS "tsvector"
+    LANGUAGE "plpgsql" IMMUTABLE
+    AS $$
+begin
+    return to_tsvector('english', coalesce(display_name_text, '') || ' ' || coalesce(product_names, '') || ' ' || coalesce(amount::text, '') || ' ' || due_date);
+end;
+$$;
+
+ALTER FUNCTION public.generate_inbox_fts(
+  "display_name_text" text, 
+  "product_names" text, 
+  "amount" numeric, 
+  "due_date" date
+) OWNER TO "postgres";
+
+CREATE TABLE IF NOT EXISTS "public"."bank_accounts" (
     "id" uuid NOT NULL DEFAULT gen_random_uuid(),
     "created_at" timestamp with time zone NOT NULL DEFAULT now(),
     "created_by" uuid NOT NULL,
@@ -267,12 +637,16 @@ CREATE TABLE "public"."bank_accounts" (
 
 ALTER TABLE "public"."bank_accounts" ENABLE ROW LEVEL SECURITY;
 
-CREATE INDEX IF NOT EXISTS bank_accounts_bank_connection_id_idx ON public.bank_accounts USING btree (bank_connection_id) TABLESPACE pg_default;
+CREATE INDEX IF NOT EXISTS bank_accounts_bank_connection_id_idx 
+    ON public.bank_accounts USING btree (bank_connection_id) TABLESPACE pg_default;
 
-CREATE INDEX IF NOT EXISTS bank_accounts_created_by_idx ON public.bank_accounts USING btree (created_by) TABLESPACE pg_default;
+CREATE INDEX IF NOT EXISTS bank_accounts_created_by_idx 
+    ON public.bank_accounts USING btree (created_by) TABLESPACE pg_default;
 
-CREATE INDEX IF NOT EXISTS bank_accounts_team_id_idx ON public.bank_accounts USING btree (team_id) TABLESPACE pg_default;
+CREATE INDEX IF NOT EXISTS bank_accounts_team_id_idx 
+    ON public.bank_accounts USING btree (team_id) TABLESPACE pg_default;
         
+-- Bank Accounts Policies
 CREATE POLICY "Bank Accounts can be created by a member of the team" 
 ON "public"."bank_accounts" 
 FOR INSERT 
@@ -293,502 +667,12 @@ ON "public"."bank_accounts"
 FOR UPDATE 
 USING (team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user));
 
-CREATE TABLE "public"."bank_connections" (
-    "id" uuid NOT NULL DEFAULT gen_random_uuid(),
-    "created_at" timestamp with time zone NOT NULL DEFAULT now(),
-    "institution_id" text NOT NULL,
-    "expires_at" timestamp with time zone NULL,
-    "team_id" uuid NOT NULL,
-    "name" text NOT NULL,
-    "logo_url" text NULL,
-    "access_token" text NULL,
-    "enrollment_id" text NULL,
-    "provider" public.bank_providers NULL,
-    "error_details" text NULL,
-    "last_accessed" timestamp with time zone NULL,
-    "reference_id" text NULL,
-    "status" public.connection_status NULL DEFAULT 'connected'::connection_status,
-    CONSTRAINT "bank_connections_pkey" PRIMARY KEY ("id"),
-    CONSTRAINT "unique_bank_connections" UNIQUE (team_id, institution_id),
-    CONSTRAINT "bank_connections_team_id_fkey" FOREIGN KEY (team_id) REFERENCES teams(id) ON DELETE CASCADE
-);
 
-ALTER TABLE "public"."bank_connections" ENABLE ROW LEVEL SECURITY;
-
-CREATE INDEX IF NOT EXISTS bank_connections_team_id_idx ON public.bank_connections USING btree (team_id) TABLESPACE pg_default;
-
-CREATE POLICY "Bank Connections can be created by a member of the team" 
-ON "public"."bank_connections" 
-FOR INSERT 
-WITH CHECK (team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user));
-
-CREATE POLICY "Bank Connections can be deleted by a member of the team" 
-ON "public"."bank_connections" 
-FOR DELETE 
-USING (team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user));
-
-CREATE POLICY "Bank Connections can be selected by a member of the team" 
-ON "public"."bank_connections" 
-FOR SELECT 
-USING (team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user));
-
-CREATE POLICY "Bank Connections can be updated by a member of the team" 
-ON "public"."bank_connections" 
-FOR UPDATE 
-USING (team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user));
-
-CREATE TABLE "public"."documents" (
-    "id" uuid NOT NULL DEFAULT gen_random_uuid(),
-    "name" text NULL,
-    "created_at" timestamp with time zone NULL DEFAULT now(),
-    "metadata" jsonb NULL,
-    "path_tokens" text[] NULL,
-    "team_id" uuid NULL,
-    "parent_id" text NULL,
-    "object_id" uuid NULL,
-    "owner_id" uuid NULL,
-    "tag" text NULL,
-    "title" text NULL,
-    "body" text NULL,
-    "fts" tsvector GENERATED ALWAYS AS (
-      to_tsvector(
-        'english'::regconfig,
-        ((title || ' '::text) || body)
-      )
-    ) stored null,
-    CONSTRAINT "documents_pkey" PRIMARY KEY ("id"),
-    CONSTRAINT "documents_created_by_fkey" FOREIGN KEY (owner_id) REFERENCES users(id) ON DELETE SET NULL,
-    CONSTRAINT "documents_team_id_fkey" FOREIGN KEY (team_id) REFERENCES teams(id) ON DELETE CASCADE
-);
-
-CREATE INDEX IF NOT EXISTS documents_team_id_idx ON public.documents USING btree (team_id) TABLESPACE pg_default;
-
-CREATE INDEX IF NOT EXISTS documents_team_id_parent_id_idx ON public.documents USING btree (team_id, parent_id) TABLESPACE pg_default;
-
-CREATE TRIGGER embed_document
-AFTER INSERT ON documents FOR EACH ROW
-EXECUTE FUNCTION supabase_functions.http_request (
-  'https://hfgtyawqemeozrtjzevl.supabase.co/functions/v1/generate-document-embedding',
-  'POST',
-  '{"Content-type":"application/json"}',
-  '{}',
-  '5000'
-);
-
-CREATE POLICY "Documents can be deleted by a member of the team"
-ON "public"."documents"
-AS permissive
-FOR ALL
-TO public
-USING (team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user));
-
-
-CREATE POLICY "Documents can be selected by a member of the team"
-ON "public"."documents"
-AS permissive
-FOR ALL
-TO public
-USING (team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user));
-
-
-CREATE POLICY "Documents can be updated by a member of the team"
-ON "public"."documents"
-AS permissive
-FOR UPDATE
-TO public
-USING (team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user));
-
-
-CREATE POLICY "Enable insert for authenticated users only"
-ON "public"."documents"
-AS permissive
-FOR INSERT
-TO authenticated
-WITH CHECK (true);
-
-CREATE TABLE "public"."exchange_rates" (
-    "id" uuid NOT NULL DEFAULT gen_random_uuid(),
-    "base" text NULL,
-    "rate" numeric NULL,
-    "target" text NULL,
-    "updated_at" timestamp with time zone NULL,
-    CONSTRAINT "currencies_pkey" PRIMARY KEY ("id"),
-    CONSTRAINT "unique_rate" UNIQUE ("base", "target")
-);
-
-ALTER TABLE "public"."exchange_rates" ENABLE ROW LEVEL SECURITY;
-
-CREATE INDEX IF NOT EXISTS exchange_rates_base_target_idx ON public.exchange_rates USING btree (base, target) TABLESPACE pg_default;
-
-CREATE POLICY "Enable read access for authenticated users"
-ON "public"."exchange_rates"
-AS permissive
-FOR SELECT
-TO public
-USING (true);
-
-CREATE TABLE "public"."inbox" (
-    "id" uuid NOT NULL DEFAULT gen_random_uuid(),
-    "created_at" timestamp with time zone NOT NULL DEFAULT now(),
-    "team_id" uuid NULL,
-    "file_path" text[] NULL,
-    "file_name" text NULL,
-    "transaction_id" uuid NULL,
-    "amount" numeric NULL,
-    "currency" text NULL,
-    "content_type" text NULL,
-    "size" bigint NULL,
-    "attachment_id" uuid NULL,
-    "forwarded_to" text NULL,
-    "reference_id" text NULL,
-    "meta" jsonb NULL,
-    "status" public.inbox_status NULL DEFAULT 'new'::inbox_status,
-    "website" text NULL,
-    "display_name" text NULL,
-    "fts" tsvector GENERATED ALWAYS AS (
-      generate_inbox_fts (
-        display_name,
-        extract_product_names ((meta -> 'products'::text))
-      )
-    ) stored null,
-    "base_amount" numeric NULL,
-    "base_currency" text NULL,
-    "date" date NULL,
-    "description" text NULL,
-    "type" public.inbox_type NULL,
-    CONSTRAINT "inbox_pkey" PRIMARY KEY ("id"),
-    CONSTRAINT "inbox_reference_id_key" UNIQUE ("reference_id"),
-    CONSTRAINT "inbox_attachment_id_fkey" FOREIGN KEY (attachment_id) REFERENCES transaction_attachments (id) ON DELETE SET NULL,
-    CONSTRAINT "public_inbox_team_id_fkey" FOREIGN KEY (team_id) REFERENCES teams (id) ON DELETE CASCADE,
-    CONSTRAINT "public_inbox_transaction_id_fkey" FOREIGN KEY (transaction_id) REFERENCES transactions (id) ON DELETE SET NULL
-);
-
-ALTER TABLE "public"."inbox" ENABLE ROW LEVEL SECURITY;
-
-ALTER TABLE "public"."inbox" OWNER TO "postgres";
-
-CREATE INDEX IF NOT EXISTS inbox_attachment_id_idx ON public.inbox USING btree (attachment_id) TABLESPACE pg_default;
-
-CREATE INDEX IF NOT EXISTS inbox_team_id_idx ON public.inbox USING btree (team_id) TABLESPACE pg_default;
-
-CREATE INDEX IF NOT EXISTS inbox_transaction_id_idx ON public.inbox USING btree (transaction_id) TABLESPACE pg_default;
-
-CREATE POLICY "Inbox can be deleted by a member of the team" 
-ON "public"."inbox" 
-FOR DELETE 
-USING (team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user));
-
-CREATE POLICY "Inbox can be selected by a member of the team" 
-ON "public"."inbox" 
-FOR SELECT 
-USING (team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user));
-
-CREATE POLICY "Inbox can be updated by a member of the team" 
-ON "public"."inbox" 
-FOR UPDATE 
-USING (team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user));
-
-CREATE TABLE "public"."reports" (
-    "id" uuid NOT NULL DEFAULT gen_random_uuid(),
-    "created_at" timestamp with time zone NOT NULL DEFAULT now(),
-    "link_id" text NULL,
-    "team_id" uuid NULL,
-    "short_link" text NULL,
-    "from" timestamp with time zone NULL,
-    "to" timestamp with time zone NULL,
-    "type" public.reportTypes NULL,
-    "expire_at" timestamp with time zone NULL,
-    "currency" text NULL,
-    "created_by" uuid NULL,
-    CONSTRAINT "reports_pkey" PRIMARY KEY ("id"),
-    CONSTRAINT "public_reports_created_by_fkey" FOREIGN KEY (created_by) REFERENCES users (id) ON DELETE CASCADE,
-    CONSTRAINT "reports_team_id_fkey" FOREIGN KEY (team_id) REFERENCES teams (id) ON UPDATE CASCADE
-);
-
-ALTER TABLE "public"."reports" OWNER TO "postgres";
-
-ALTER TABLE "public"."reports" ENABLE ROW LEVEL SECURITY;
-
-CREATE INDEX IF NOT EXISTS reports_team_id_idx ON public.reports USING btree (team_id) TABLESPACE pg_default;
-
-CREATE POLICY "Reports can be created by a member of the team" 
-ON "public"."reports" 
-FOR INSERT 
-WITH CHECK (team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user));
-
-CREATE POLICY "Reports can be deleted by a member of the team" 
-ON "public"."reports" 
-FOR DELETE 
-USING (team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user));
-
-CREATE POLICY "Reports can be handled by a member of the team" 
-ON "public"."tracker_reports" 
-USING (team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user));
-
-CREATE POLICY "Reports can be selected by a member of the team" 
-ON "public"."reports" 
-FOR SELECT 
-USING (team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user));
-
-CREATE POLICY "Reports can be updated by member of team" 
-ON "public"."reports" 
-FOR UPDATE 
-USING (team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user));
-
-
-CREATE TABLE "public"."tracker_entries" (
-    "id" uuid NOT NULL DEFAULT gen_random_uuid(),
-    "created_at" timestamp with time zone NOT NULL DEFAULT now(),
-    "duration" bigint NULL,
-    "project_id" uuid NULL,
-    "start" timestamp with time zone NULL,
-    "stop" timestamp with time zone NULL,
-    "assigned_id" uuid NULL,
-    "team_id" uuid NULL,
-    "description" text NULL,
-    "rate" numeric NULL DEFAULT 0,
-    "currency" text NULL,
-    "billed" boolean NULL DEFAULT false,
-    "date" date NULL DEFAULT now(),
-    CONSTRAINT "tracker_records_pkey" PRIMARY KEY ("id"),
-    CONSTRAINT "tracker_entries_assigned_id_fkey" FOREIGN KEY (assigned_id) REFERENCES users (id) ON DELETE SET NULL,
-    CONSTRAINT "tracker_entries_project_id_fkey" FOREIGN KEY (project_id) REFERENCES tracker_projects (id) ON DELETE CASCADE,
-    CONSTRAINT "tracker_entries_team_id_fkey" FOREIGN KEY (team_id) REFERENCES teams (id) ON DELETE CASCADE
-);
-
-COMMENT ON COLUMN "public"."tracker_entries"."duration" IS 'Time entry duration. For running entries should be negative, preferable -1';
-COMMENT ON COLUMN "public"."tracker_entries"."start" IS 'Start time in UTC';
-COMMENT ON COLUMN "public"."tracker_entries"."stop" IS 'Stop time in UTC, can be null if it''s still running or created with duration';
-COMMENT ON COLUMN "public"."tracker_entries"."description" IS 'Time Entry description, null if not provided at creation/update';
-
-ALTER TABLE "public"."tracker_entries" OWNER TO "postgres";
-
-ALTER TABLE "public"."tracker_entries" ENABLE ROW LEVEL SECURITY;
-
-CREATE INDEX IF NOT EXISTS tracker_entries_team_id_idx ON public.tracker_entries USING btree (team_id) TABLESPACE pg_default;
-
-CREATE POLICY "Entries can be created by a member of the team" 
-ON "public"."tracker_entries" 
-FOR INSERT 
-TO authenticated
-WITH CHECK (team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user));
-
-CREATE POLICY "Entries can be deleted by a member of the team" 
-ON "public"."tracker_entries" 
-FOR DELETE 
-TO authenticated
-USING (team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user));
-
-CREATE POLICY "Entries can be selected by a member of the team" 
-ON "public"."tracker_entries" 
-FOR SELECT 
-USING (team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user));
-
-CREATE POLICY "Entries can be updated by a member of the team"
-ON "public"."tracker_entries"
-AS permissive
-FOR UPDATE
-TO authenticated
-USING (team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user))
-WITH CHECK (team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user));
-
-CREATE TABLE "public"."tracker_projects" (
-    "id" uuid NOT NULL DEFAULT gen_random_uuid(),
-    "created_at" timestamp with time zone NOT NULL DEFAULT now(),
-    "team_id" uuid NULL,
-    "rate" numeric NULL,
-    "currency" text NULL,
-    "status" public.trackerStatus NOT NULL DEFAULT 'in_progress'::trackerStatus,
-    "description" text NULL,
-    "name" text NOT NULL,
-    "billable" boolean NULL DEFAULT false,
-    "estimate" bigint NULL,
-    CONSTRAINT "tracker_projects_pkey" PRIMARY KEY ("id"),
-    CONSTRAINT "tracker_projects_team_id_fkey" FOREIGN KEY (team_id) REFERENCES teams (id) ON DELETE CASCADE
-);
-
-ALTER TABLE "public"."tracker_projects" OWNER TO "postgres";
-
-ALTER TABLE "public"."tracker_projects" ENABLE ROW LEVEL SECURITY;
-
-CREATE INDEX IF NOT EXISTS tracker_projects_team_id_idx ON public.tracker_projects USING btree (team_id) TABLESPACE pg_default;
-
-CREATE POLICY "Projects can be created by a member of the team" 
-ON "public"."tracker_projects" 
-FOR INSERT 
-TO authenticated
-WITH CHECK (team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user));
-
-CREATE POLICY "Projects can be deleted by a member of the team" 
-ON "public"."tracker_projects" 
-FOR DELETE 
-TO authenticated
-USING (team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user));
-
-CREATE POLICY "Projects can be selected by a member of the team" 
-ON "public"."tracker_projects" 
-FOR SELECT 
-TO authenticated
-USING (("team_id" IN ( SELECT "private"."get_teams_for_authenticated_user"() AS "get_teams_for_authenticated_user")));
-
-CREATE POLICY "Projects can be updated by a member of the team" 
-ON "public"."tracker_projects" 
-FOR UPDATE 
-TO authenticated
-USING (team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user))
-WITH CHECK (team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user));
-
-CREATE TABLE "public"."tracker_reports" (
-    "id" uuid NOT NULL DEFAULT gen_random_uuid(),
-    "created_at" timestamp with time zone NOT NULL DEFAULT now(),
-    "link_id" text NULL,
-    "short_link" text NULL,
-    "team_id" uuid NULL DEFAULT gen_random_uuid(),
-    "project_id" uuid NULL DEFAULT gen_random_uuid(),
-    "created_by" uuid NULL,
-    CONSTRAINT "project_reports_pkey" PRIMARY KEY ("id"),
-    CONSTRAINT "public_tracker_reports_created_by_fkey" FOREIGN KEY (created_by) REFERENCES users (id) ON DELETE CASCADE,
-    CONSTRAINT "public_tracker_reports_project_id_fkey" FOREIGN KEY (project_id) REFERENCES tracker_projects (id) ON UPDATE CASCADE ON DELETE CASCADE,
-    CONSTRAINT "tracker_reports_team_id_fkey" FOREIGN KEY (team_id) REFERENCES teams (id) ON UPDATE CASCADE ON DELETE CASCADE
-);
-
-ALTER TABLE "public"."tracker_reports" OWNER TO "postgres";
-
-ALTER TABLE "public"."tracker_reports" ENABLE ROW LEVEL SECURITY;
-
-CREATE INDEX IF NOT EXISTS tracker_reports_team_id_idx ON public.tracker_reports USING btree (team_id) TABLESPACE pg_default;
-
-CREATE POLICY "Reports can be handled by a member of the team" 
-ON "public"."tracker_reports" 
-USING (("team_id" IN ( SELECT "private"."get_teams_for_authenticated_user"() AS "get_teams_for_authenticated_user")));
-
-CREATE TABLE "public"."transaction_attachments" (
-    "id" uuid NOT NULL DEFAULT gen_random_uuid(),
-    "created_at" timestamp with time zone NOT NULL DEFAULT now(),
-    "type" text NULL,
-    "transaction_id" uuid NULL,
-    "team_id" uuid NULL,
-    "size" bigint NULL,
-    "name" text NULL,
-    "path" text[] NULL,
-    CONSTRAINT "attachments_pkey" PRIMARY KEY ("id"),
-    CONSTRAINT "public_transaction_attachments_team_id_fkey" FOREIGN KEY (team_id) REFERENCES teams (id) ON DELETE CASCADE,
-    CONSTRAINT "public_transaction_attachments_transaction_id_fkey" FOREIGN KEY (transaction_id) REFERENCES transactions (id) ON DELETE SET NULL
-);
-
-ALTER TABLE "public"."transaction_attachments" OWNER TO "postgres";
-
-ALTER TABLE "public"."transaction_attachments" ENABLE ROW LEVEL SECURITY;
-
-CREATE INDEX IF NOT EXISTS transaction_enrichments_team_id_idx ON public.transaction_enrichments USING btree (team_id) TABLESPACE pg_default;
-
-CREATE INDEX IF NOT EXISTS transaction_attachments_transaction_id_idx ON public.transaction_attachments USING btree (transaction_id) TABLESPACE pg_default;
-
-CREATE POLICY "Transaction Attachments can be created by a member of the team" 
-ON "public"."transaction_attachments" 
-FOR INSERT 
-WITH CHECK (team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user));
-
-CREATE POLICY "Transaction Attachments can be deleted by a member of the team" 
-ON "public"."transaction_attachments" 
-FOR DELETE 
-USING (team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user));
-
-CREATE POLICY "Transaction Attachments can be selected by a member of the team" 
-ON "public"."transaction_attachments" 
-FOR SELECT 
-USING (team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user));
-
-CREATE POLICY "Transaction Attachments can be updated by a member of the team" 
-ON "public"."transaction_attachments" 
-FOR UPDATE 
-USING (team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user));
-
-CREATE TABLE "public"."transaction_categories" (
-    "id" uuid NOT NULL DEFAULT gen_random_uuid(),
-    "name" text NOT NULL,
-    "team_id" uuid NOT NULL DEFAULT gen_random_uuid(),
-    "color" text NULL,
-    "created_at" timestamp with time zone NULL DEFAULT now(),
-    "system" boolean NULL DEFAULT false,
-    "slug" text NOT NULL,
-    "vat" numeric NULL,
-    "description" text NULL,
-    "embedding" extensions.vector NULL,
-    CONSTRAINT "transaction_categories_pkey" PRIMARY KEY ("team_id", "slug"),
-    CONSTRAINT "unique_team_slug" UNIQUE ("team_id", "slug"),
-    CONSTRAINT "transaction_categories_team_id_fkey" FOREIGN KEY (team_id) REFERENCES teams (id) ON DELETE CASCADE  
-);
-
-ALTER TABLE "public"."transaction_categories" OWNER TO "postgres";
-
-ALTER TABLE "public"."transaction_categories" ENABLE ROW LEVEL SECURITY;
-
-
-CREATE INDEX IF NOT EXISTS transaction_categories_team_id_idx ON public.transaction_categories USING btree (team_id) TABLESPACE pg_default;
-
-CREATE POLICY "Users on team can manage categories" 
-ON "public"."transaction_categories" 
-USING (("team_id" IN ( SELECT "private"."get_teams_for_authenticated_user"() AS "get_teams_for_authenticated_user")));
-
-CREATE TRIGGER embed_category
-AFTER INSERT
-OR UPDATE ON transaction_categories
-FOR EACH ROW
-EXECUTE FUNCTION supabase_functions.http_request (
-  'https://hfgtyawqemeozrtjzevl.supabase.co/functions/v1/generate-category-embedding',
-  'POST',
-  '{"Content-type":"application/json"}',
-  '{}',
-  '5000'
-);
-
-CREATE TRIGGER generate_category_slug
-BEFORE INSERT ON transaction_categories
-FOR EACH ROW
-EXECUTE FUNCTION generate_slug_from_name ();
-
-CREATE TRIGGER trigger_update_transactions_category
-BEFORE DELETE ON transaction_categories
-FOR EACH ROW
-EXECUTE FUNCTION update_transactions_on_category_delete ();
-
-CREATE TABLE "public"."transaction_enrichments" (
-    "id" uuid NOT NULL DEFAULT gen_random_uuid(),
-    "created_at" timestamp with time zone NOT NULL DEFAULT now(),
-    "name" text NULL,
-    "team_id" uuid NULL,
-    "category_slug" text NULL,
-    "system" boolean NULL DEFAULT false,
-    CONSTRAINT "transaction_enrichments_pkey" PRIMARY KEY ("id"),
-    CONSTRAINT "unique_team_name" UNIQUE ("team_id", "name"),
-    CONSTRAINT "transaction_enrichments_category_slug_team_id_fkey" FOREIGN KEY ("category_slug", "team_id") REFERENCES transaction_categories ("slug", "team_id") ON DELETE CASCADE,
-    CONSTRAINT "transaction_enrichments_team_id_fkey" FOREIGN KEY (team_id) REFERENCES teams (id) ON DELETE CASCADE
-);
-
-ALTER TABLE "public"."transaction_enrichments" OWNER TO "postgres";
-
-ALTER TABLE "public"."transaction_enrichments" ENABLE ROW LEVEL SECURITY;
-
-CREATE INDEX IF NOT EXISTS transaction_enrichments_category_slug_team_id_idx ON public.transaction_enrichments USING btree (category_slug, team_id) TABLESPACE pg_default;
-
-CREATE POLICY "Enable insert for authenticated users only" 
-ON "public"."transaction_enrichments" 
-FOR INSERT 
-TO authenticated
-WITH CHECK (true);
-
-CREATE POLICY "Enable update for authenticated users only" 
-ON "public"."transaction_enrichments" 
-FOR UPDATE 
-TO authenticated
-WITH CHECK (true);
-
-CREATE TABLE "public"."transactions" (
+CREATE TABLE IF NOT EXISTS "public"."transactions" (
     "created_at" timestamp with time zone NOT NULL DEFAULT now(),
     "date" date NOT NULL,
     "name" text NOT NULL,
-    "method" public.transactionMethods NOT NULL,
+    "method" public.transaction_methods NOT NULL,
     "amount" numeric NOT NULL,
     "currency" text NOT NULL,
     "team_id" uuid NOT NULL,
@@ -797,8 +681,8 @@ CREATE TABLE "public"."transactions" (
     "bank_account_id" uuid NULL,
     "id" uuid NOT NULL DEFAULT gen_random_uuid(),
     "internal_id" text NOT NULL,
-    "status" public.transactionStatus NULL DEFAULT 'posted'::transactionStatus,
-    "category" public.transactionCategories NULL,
+    "status" public.transaction_status NULL DEFAULT 'posted'::transaction_status,
+    "category" public.transaction_category_type NULL,
     "balance" numeric NULL,
     "manual" boolean NULL DEFAULT false,
     "description" text NULL,
@@ -825,43 +709,57 @@ CREATE TABLE "public"."transactions" (
 );
 
 ALTER TABLE "public"."transactions" OWNER TO "postgres";
-
 ALTER TABLE "public"."transactions" ENABLE ROW LEVEL SECURITY;
 
-CREATE INDEX IF NOT EXISTS transactions_category_slug_idx ON public.transactions USING btree (category_slug) TABLESPACE pg_default;
+CREATE INDEX IF NOT EXISTS transactions_category_slug_idx 
+    ON public.transactions USING btree (category_slug) TABLESPACE pg_default;
 
-CREATE INDEX IF NOT EXISTS transactions_team_id_date_currency_bank_account_id_category_idx ON public.transactions USING btree (
+CREATE INDEX IF NOT EXISTS transactions_team_id_date_currency_bank_account_id_category_idx 
+    ON public.transactions USING btree (
   team_id,
   date,
   currency,
   bank_account_id,
   category
-) tablespace pg_default;
+) TABLESPACE pg_default;
 
-CREATE INDEX IF NOT EXISTS transactions_team_id_idx ON public.transactions USING btree (team_id) TABLESPACE pg_default;
+CREATE INDEX IF NOT EXISTS transactions_team_id_idx 
+    ON public.transactions USING btree (team_id) TABLESPACE pg_default;
 
-CREATE INDEX IF NOT EXISTS transactions_assigned_id_idx ON public.transactions USING btree (assigned_id) TABLESPACE pg_default;
+CREATE INDEX IF NOT EXISTS transactions_assigned_id_idx 
+    ON public.transactions USING btree (assigned_id) TABLESPACE pg_default;
 
-CREATE INDEX IF NOT EXISTS transactions_bank_account_id_idx ON public.transactions USING btree (bank_account_id) TABLESPACE pg_default;
+CREATE INDEX IF NOT EXISTS transactions_bank_account_id_idx 
+    ON public.transactions USING btree (bank_account_id) TABLESPACE pg_default;
 
-CREATE INDEX IF NOT EXISTS idx_transactions_date ON public.transactions USING btree (date) TABLESPACE pg_default;
+CREATE INDEX IF NOT EXISTS idx_transactions_date 
+    ON public.transactions USING btree (date) TABLESPACE pg_default;
 
-CREATE INDEX IF NOT EXISTS idx_transactions_fts ON public.transactions USING gin (fts_vector) TABLESPACE pg_default;
+CREATE INDEX IF NOT EXISTS idx_transactions_fts 
+    ON public.transactions USING gin (fts_vector) TABLESPACE pg_default;
 
-CREATE INDEX IF NOT EXISTS idx_transactions_fts_vector ON public.transactions USING gin (fts_vector) TABLESPACE pg_default;
+CREATE INDEX IF NOT EXISTS idx_transactions_fts_vector 
+    ON public.transactions USING gin (fts_vector) TABLESPACE pg_default;
 
-CREATE INDEX IF NOT EXISTS idx_transactions_id ON public.transactions USING btree (id) TABLESPACE pg_default;
+CREATE INDEX IF NOT EXISTS idx_transactions_id 
+    ON public.transactions USING btree (id) TABLESPACE pg_default;
 
-CREATE INDEX IF NOT EXISTS idx_transactions_name ON public.transactions USING btree (name) TABLESPACE pg_default;
+CREATE INDEX IF NOT EXISTS idx_transactions_name 
+    ON public.transactions USING btree (name) TABLESPACE pg_default;
 
-CREATE INDEX IF NOT EXISTS idx_transactions_name_trigram ON public.transactions USING gin (name gin_trgm_ops) TABLESPACE pg_default;
+CREATE INDEX IF NOT EXISTS idx_transactions_name_trigram 
+    ON public.transactions USING gin (name gin_trgm_ops) TABLESPACE pg_default;
 
-CREATE INDEX IF NOT EXISTS idx_transactions_team_id_date_name ON public.transactions USING btree (team_id, date, name) TABLESPACE pg_default;
+CREATE INDEX IF NOT EXISTS idx_transactions_team_id_date_name 
+    ON public.transactions USING btree (team_id, date, name) TABLESPACE pg_default;
 
-CREATE INDEX IF NOT EXISTS idx_transactions_team_id_name ON public.transactions USING btree (team_id, name) TABLESPACE pg_default;
+CREATE INDEX IF NOT EXISTS idx_transactions_team_id_name 
+    ON public.transactions USING btree (team_id, name) TABLESPACE pg_default;
 
-CREATE INDEX IF NOT EXISTS idx_trgm_name ON public.transactions USING gist (name gist_trgm_ops) TABLESPACE pg_default;
+CREATE INDEX IF NOT EXISTS idx_trgm_name 
+    ON public.transactions USING gist (name gist_trgm_ops) TABLESPACE pg_default;
 
+-- Transactions Policies
 CREATE POLICY "Transactions can be created by a member of the team" 
 ON "public"."transactions" 
 FOR INSERT 
@@ -882,12 +780,335 @@ ON "public"."transactions"
 FOR UPDATE 
 USING (team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user));
 
-CREATE TABLE "public"."user_invites" (
+CREATE OR REPLACE FUNCTION public.amount_text("public"."transactions") RETURNS "text"
+    LANGUAGE "sql"
+    AS $$
+  select ABS($1.amount)::text;
+$$;
+
+ALTER FUNCTION public.amount_text("public"."transactions") OWNER TO "postgres";
+
+CREATE TABLE IF NOT EXISTS "public"."transaction_enrichments" (
+    "id" uuid NOT NULL DEFAULT gen_random_uuid(),
+    "created_at" timestamp with time zone NOT NULL DEFAULT now(),
+    "name" text NULL,
+    "team_id" uuid NULL,
+    "category_slug" text NULL,
+    "system" boolean NULL DEFAULT false,
+    CONSTRAINT "transaction_enrichments_pkey" PRIMARY KEY ("id"),
+    CONSTRAINT "unique_team_name" UNIQUE ("team_id", "name"),
+    CONSTRAINT "transaction_enrichments_category_slug_team_id_fkey" FOREIGN KEY ("category_slug", "team_id") REFERENCES transaction_categories ("slug", "team_id") ON DELETE CASCADE,
+    CONSTRAINT "transaction_enrichments_team_id_fkey" FOREIGN KEY (team_id) REFERENCES teams (id) ON DELETE CASCADE
+);
+
+ALTER TABLE "public"."transaction_enrichments" OWNER TO "postgres";
+ALTER TABLE "public"."transaction_enrichments" ENABLE ROW LEVEL SECURITY;
+
+CREATE INDEX IF NOT EXISTS transaction_enrichments_category_slug_team_id_idx 
+    ON public.transaction_enrichments USING btree (category_slug, team_id) TABLESPACE pg_default;
+
+-- Transaction Enrichments Policies
+CREATE POLICY "Enable insert for authenticated users only" 
+ON "public"."transaction_enrichments" 
+FOR INSERT 
+TO authenticated
+WITH CHECK (true);
+
+CREATE POLICY "Enable update for authenticated users only" 
+ON "public"."transaction_enrichments" 
+FOR UPDATE 
+TO authenticated
+WITH CHECK (true);
+
+CREATE TABLE IF NOT EXISTS "public"."transaction_attachments" (
+    "id" uuid NOT NULL DEFAULT gen_random_uuid(),
+    "created_at" timestamp with time zone NOT NULL DEFAULT now(),
+    "type" text NULL,
+    "transaction_id" uuid NULL,
+    "team_id" uuid NULL,
+    "size" bigint NULL,
+    "name" text NULL,
+    "path" text[] NULL,
+    CONSTRAINT "attachments_pkey" PRIMARY KEY ("id"),
+    CONSTRAINT "public_transaction_attachments_team_id_fkey" FOREIGN KEY (team_id) REFERENCES teams (id) ON DELETE CASCADE,
+    CONSTRAINT "public_transaction_attachments_transaction_id_fkey" FOREIGN KEY (transaction_id) REFERENCES transactions (id) ON DELETE SET NULL
+);
+
+ALTER TABLE "public"."transaction_attachments" OWNER TO "postgres";
+ALTER TABLE "public"."transaction_attachments" ENABLE ROW LEVEL SECURITY;
+
+CREATE INDEX IF NOT EXISTS transaction_enrichments_team_id_idx 
+    ON public.transaction_enrichments USING btree (team_id) TABLESPACE pg_default;
+
+CREATE INDEX IF NOT EXISTS transaction_attachments_transaction_id_idx 
+    ON public.transaction_attachments USING btree (transaction_id) TABLESPACE pg_default;
+
+-- Transaction Attachments Policies
+CREATE POLICY "Transaction Attachments can be created by a member of the team" 
+ON "public"."transaction_attachments" 
+FOR INSERT 
+WITH CHECK (team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user));
+
+CREATE POLICY "Transaction Attachments can be deleted by a member of the team" 
+ON "public"."transaction_attachments" 
+FOR DELETE 
+USING (team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user));
+
+CREATE POLICY "Transaction Attachments can be selected by a member of the team" 
+ON "public"."transaction_attachments" 
+FOR SELECT 
+USING (team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user));
+
+CREATE POLICY "Transaction Attachments can be updated by a member of the team" 
+ON "public"."transaction_attachments" 
+FOR UPDATE 
+USING (team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user));
+
+CREATE TABLE IF NOT EXISTS "public"."inbox" (
+    "id" uuid NOT NULL DEFAULT gen_random_uuid(),
+    "created_at" timestamp with time zone NOT NULL DEFAULT now(),
+    "team_id" uuid NULL,
+    "file_path" text[] NULL,
+    "file_name" text NULL,
+    "transaction_id" uuid NULL,
+    "amount" numeric NULL,
+    "currency" text NULL,
+    "content_type" text NULL,
+    "size" bigint NULL,
+    "attachment_id" uuid NULL,
+    "forwarded_to" text NULL,
+    "reference_id" text NULL,
+    "meta" jsonb NULL,
+    "status" public.inbox_status NULL DEFAULT 'new'::inbox_status,
+    "website" text NULL,
+    "display_name" text NULL,
+    "fts" tsvector GENERATED ALWAYS AS (
+      generate_inbox_fts (
+        display_name,
+        extract_product_names ((meta -> 'products'::text)),
+        amount,
+        date
+      )
+    ) stored null,
+    "base_amount" numeric NULL,
+    "base_currency" text NULL,
+    "date" date NULL,
+    "description" text NULL,
+    "type" public.inbox_type NULL,
+    CONSTRAINT "inbox_pkey" PRIMARY KEY ("id"),
+    CONSTRAINT "inbox_reference_id_key" UNIQUE ("reference_id"),
+    CONSTRAINT "inbox_attachment_id_fkey" FOREIGN KEY (attachment_id) REFERENCES transaction_attachments (id) ON DELETE SET NULL,
+    CONSTRAINT "public_inbox_team_id_fkey" FOREIGN KEY (team_id) REFERENCES teams (id) ON DELETE CASCADE,
+    CONSTRAINT "public_inbox_transaction_id_fkey" FOREIGN KEY (transaction_id) REFERENCES transactions (id) ON DELETE SET NULL
+);
+
+ALTER TABLE "public"."inbox" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "public"."inbox" OWNER TO "postgres";
+
+CREATE INDEX IF NOT EXISTS inbox_attachment_id_idx 
+    ON public.inbox USING btree (attachment_id) TABLESPACE pg_default;
+
+CREATE INDEX IF NOT EXISTS inbox_team_id_idx 
+    ON public.inbox USING btree (team_id) TABLESPACE pg_default;
+
+CREATE INDEX IF NOT EXISTS inbox_transaction_id_idx 
+    ON public.inbox USING btree (transaction_id) TABLESPACE pg_default;
+
+-- Inbox Policies
+CREATE POLICY "Inbox can be deleted by a member of the team" 
+ON "public"."inbox" 
+FOR DELETE 
+USING (team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user));
+
+CREATE POLICY "Inbox can be selected by a member of the team" 
+ON "public"."inbox" 
+FOR SELECT 
+USING (team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user));
+
+CREATE POLICY "Inbox can be updated by a member of the team" 
+ON "public"."inbox" 
+FOR UPDATE 
+USING (team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user));
+
+CREATE TABLE IF NOT EXISTS "public"."reports" (
+    "id" uuid NOT NULL DEFAULT gen_random_uuid(),
+    "created_at" timestamp with time zone NOT NULL DEFAULT now(),
+    "link_id" text NULL,
+    "team_id" uuid NULL,
+    "short_link" text NULL,
+    "from" timestamp with time zone NULL,
+    "to" timestamp with time zone NULL,
+    "type" public.report_types NULL,
+    "expire_at" timestamp with time zone NULL,
+    "currency" text NULL,
+    "created_by" uuid NULL,
+    CONSTRAINT "reports_pkey" PRIMARY KEY ("id"),
+    CONSTRAINT "public_reports_created_by_fkey" FOREIGN KEY (created_by) REFERENCES users (id) ON DELETE CASCADE,
+    CONSTRAINT "reports_team_id_fkey" FOREIGN KEY (team_id) REFERENCES teams (id) ON UPDATE CASCADE
+);
+
+ALTER TABLE "public"."reports" OWNER TO "postgres";
+ALTER TABLE "public"."reports" ENABLE ROW LEVEL SECURITY;
+
+CREATE INDEX IF NOT EXISTS reports_team_id_idx 
+    ON public.reports USING btree (team_id) TABLESPACE pg_default;
+
+-- Reports Policies
+CREATE POLICY "Reports can be created by a member of the team" 
+ON "public"."reports" 
+FOR INSERT 
+WITH CHECK (team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user));
+
+CREATE POLICY "Reports can be deleted by a member of the team" 
+ON "public"."reports" 
+FOR DELETE 
+USING (team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user));
+
+CREATE POLICY "Reports can be selected by a member of the team" 
+ON "public"."reports" 
+FOR SELECT 
+USING (team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user));
+
+CREATE POLICY "Reports can be updated by member of team" 
+ON "public"."reports" 
+FOR UPDATE 
+USING (team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user));
+
+CREATE TABLE IF NOT EXISTS "public"."tracker_projects" (
+    "id" uuid NOT NULL DEFAULT gen_random_uuid(),
+    "created_at" timestamp with time zone NOT NULL DEFAULT now(),
+    "team_id" uuid NULL,
+    "rate" numeric NULL,
+    "currency" text NULL,
+    "status" public.tracker_status NOT NULL DEFAULT 'in_progress'::tracker_status,
+    "description" text NULL,
+    "name" text NOT NULL,
+    "billable" boolean NULL DEFAULT false,
+    "estimate" bigint NULL,
+    CONSTRAINT "tracker_projects_pkey" PRIMARY KEY ("id"),
+    CONSTRAINT "tracker_projects_team_id_fkey" FOREIGN KEY (team_id) REFERENCES teams (id) ON DELETE CASCADE
+);
+
+ALTER TABLE "public"."tracker_projects" OWNER TO "postgres";
+ALTER TABLE "public"."tracker_projects" ENABLE ROW LEVEL SECURITY;
+
+CREATE INDEX IF NOT EXISTS tracker_projects_team_id_idx 
+    ON public.tracker_projects USING btree (team_id) TABLESPACE pg_default;
+
+-- Tracker Projects Policies
+CREATE POLICY "Projects can be created by a member of the team" 
+ON "public"."tracker_projects" 
+FOR INSERT 
+TO authenticated
+WITH CHECK (team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user));
+
+CREATE POLICY "Projects can be deleted by a member of the team" 
+ON "public"."tracker_projects" 
+FOR DELETE 
+TO authenticated
+USING (team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user));
+
+CREATE POLICY "Projects can be selected by a member of the team" 
+ON "public"."tracker_projects" 
+FOR SELECT 
+TO authenticated
+USING (("team_id" IN ( SELECT "private"."get_teams_for_authenticated_user"() AS "get_teams_for_authenticated_user")));
+
+CREATE POLICY "Projects can be updated by a member of the team" 
+ON "public"."tracker_projects" 
+FOR UPDATE 
+TO authenticated
+USING (team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user))
+WITH CHECK (team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user));
+
+CREATE TABLE IF NOT EXISTS "public"."tracker_entries" (
+    "id" uuid NOT NULL DEFAULT gen_random_uuid(),
+    "created_at" timestamp with time zone NOT NULL DEFAULT now(),
+    "duration" bigint NULL,
+    "project_id" uuid NULL,
+    "start" timestamp with time zone NULL,
+    "stop" timestamp with time zone NULL,
+    "assigned_id" uuid NULL,
+    "team_id" uuid NULL,
+    "description" text NULL,
+    "rate" numeric NULL DEFAULT 0,
+    "currency" text NULL,
+    "billed" boolean NULL DEFAULT false,
+    "date" date NULL DEFAULT now(),
+    CONSTRAINT "tracker_records_pkey" PRIMARY KEY ("id"),
+    CONSTRAINT "tracker_entries_assigned_id_fkey" FOREIGN KEY (assigned_id) REFERENCES users (id) ON DELETE SET NULL,
+    CONSTRAINT "tracker_entries_project_id_fkey" FOREIGN KEY (project_id) REFERENCES tracker_projects (id) ON DELETE CASCADE,
+    CONSTRAINT "tracker_entries_team_id_fkey" FOREIGN KEY (team_id) REFERENCES teams (id) ON DELETE CASCADE
+);
+
+COMMENT ON COLUMN "public"."tracker_entries"."duration" IS 'Time entry duration. For running entries should be negative, preferable -1';
+COMMENT ON COLUMN "public"."tracker_entries"."start" IS 'Start time in UTC';
+COMMENT ON COLUMN "public"."tracker_entries"."stop" IS 'Stop time in UTC, can be null if it''s still running or created with duration';
+COMMENT ON COLUMN "public"."tracker_entries"."description" IS 'Time Entry description, null if not provided at creation/update';
+
+ALTER TABLE "public"."tracker_entries" OWNER TO "postgres";
+ALTER TABLE "public"."tracker_entries" ENABLE ROW LEVEL SECURITY;
+
+CREATE INDEX IF NOT EXISTS tracker_entries_team_id_idx 
+    ON public.tracker_entries USING btree (team_id) TABLESPACE pg_default;
+
+-- Tracker Entries Policies
+CREATE POLICY "Entries can be created by a member of the team" 
+ON "public"."tracker_entries" 
+FOR INSERT 
+TO authenticated
+WITH CHECK (team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user));
+
+CREATE POLICY "Entries can be deleted by a member of the team" 
+ON "public"."tracker_entries" 
+FOR DELETE 
+TO authenticated
+USING (team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user));
+
+CREATE POLICY "Entries can be selected by a member of the team" 
+ON "public"."tracker_entries" 
+FOR SELECT 
+USING (team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user));
+
+CREATE POLICY "Entries can be updated by a member of the team"
+ON "public"."tracker_entries"
+AS permissive
+FOR UPDATE
+TO authenticated
+USING (team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user))
+WITH CHECK (team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user));
+
+CREATE TABLE IF NOT EXISTS "public"."tracker_reports" (
+    "id" uuid NOT NULL DEFAULT gen_random_uuid(),
+    "created_at" timestamp with time zone NOT NULL DEFAULT now(),
+    "link_id" text NULL,
+    "short_link" text NULL,
+    "team_id" uuid NULL DEFAULT gen_random_uuid(),
+    "project_id" uuid NULL DEFAULT gen_random_uuid(),
+    "created_by" uuid NULL,
+    CONSTRAINT "project_reports_pkey" PRIMARY KEY ("id"),
+    CONSTRAINT "public_tracker_reports_created_by_fkey" FOREIGN KEY (created_by) REFERENCES users (id) ON DELETE CASCADE,
+    CONSTRAINT "public_tracker_reports_project_id_fkey" FOREIGN KEY (project_id) REFERENCES tracker_projects (id) ON UPDATE CASCADE ON DELETE CASCADE,
+    CONSTRAINT "tracker_reports_team_id_fkey" FOREIGN KEY (team_id) REFERENCES teams (id) ON UPDATE CASCADE ON DELETE CASCADE
+);
+
+ALTER TABLE "public"."tracker_reports" OWNER TO "postgres";
+ALTER TABLE "public"."tracker_reports" ENABLE ROW LEVEL SECURITY;
+
+CREATE INDEX IF NOT EXISTS tracker_reports_team_id_idx 
+    ON public.tracker_reports USING btree (team_id) TABLESPACE pg_default;
+
+-- Tracker Reports Policies
+CREATE POLICY "Reports can be handled by a member of the team" 
+ON "public"."tracker_reports" 
+USING (team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user));
+
+CREATE TABLE IF NOT EXISTS "public"."user_invites" (
     "id" uuid NOT NULL DEFAULT gen_random_uuid (),
     "created_at" timestamp with time zone NOT NULL DEFAULT now(),
     "team_id" uuid NULL,
     "email" text NULL,
-    "role" public.teamRoles NULL,
+    "role" public.team_roles NULL,
     "code" text NULL DEFAULT nanoid (24),
     "invited_by" uuid NULL,
     CONSTRAINT "user_invites_pkey" PRIMARY KEY ("id"),
@@ -898,11 +1119,12 @@ CREATE TABLE "public"."user_invites" (
 );
 
 ALTER TABLE "public"."user_invites" OWNER TO "postgres";
-
 ALTER TABLE "public"."user_invites" ENABLE ROW LEVEL SECURITY;
 
-CREATE INDEX IF NOT EXISTS user_invites_team_id_idx ON public.user_invites USING btree (team_id) TABLESPACE pg_default;
+CREATE INDEX IF NOT EXISTS user_invites_team_id_idx 
+    ON public.user_invites USING btree (team_id) TABLESPACE pg_default;
 
+-- User Invites Policies
 CREATE POLICY "Enable select for users based on email" 
 ON "public"."user_invites" 
 FOR SELECT 
@@ -933,13 +1155,11 @@ ON "public"."user_invites"
 FOR UPDATE 
 USING (team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user));
 
-
-
-CREATE TABLE "public"."users_on_team" (
+CREATE TABLE IF NOT EXISTS "public"."users_on_team" (
     "user_id" uuid NOT NULL,
     "team_id" uuid NOT NULL,
     "id" uuid NOT NULL DEFAULT gen_random_uuid (),
-    "role" public.teamRoles NULL,
+    "role" public.team_roles NULL,
     "created_at" timestamp with time zone NULL DEFAULT now(),
     CONSTRAINT "members_pkey" PRIMARY KEY ("user_id", "team_id", "id"),
     CONSTRAINT "users_on_team_team_id_fkey" FOREIGN KEY ("team_id") REFERENCES teams (id) ON UPDATE CASCADE ON DELETE CASCADE,
@@ -947,13 +1167,15 @@ CREATE TABLE "public"."users_on_team" (
 );
 
 ALTER TABLE "public"."users_on_team" OWNER TO "postgres";
-
 ALTER TABLE "public"."users_on_team" ENABLE ROW LEVEL SECURITY;
 
-CREATE INDEX IF NOT EXISTS users_on_team_team_id_idx ON public.users_on_team USING btree (team_id) TABLESPACE pg_default;
+CREATE INDEX IF NOT EXISTS users_on_team_team_id_idx 
+    ON public.users_on_team USING btree (team_id) TABLESPACE pg_default;
 
-CREATE INDEX IF NOT EXISTS users_on_team_user_id_idx ON public.users_on_team USING btree (user_id) TABLESPACE pg_default;
+CREATE INDEX IF NOT EXISTS users_on_team_user_id_idx 
+    ON public.users_on_team USING btree (user_id) TABLESPACE pg_default;
 
+-- Users on Team Policies
 CREATE POLICY "Enable insert for authenticated users only" 
 ON "public"."users_on_team" 
 FOR INSERT 
@@ -966,6 +1188,12 @@ FOR UPDATE
 TO authenticated
 USING (team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user))
 WITH CHECK (team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user));
+
+CREATE OR REPLACE VIEW "private"."current_user_teams" AS 
+SELECT ( SELECT auth.uid() AS uid) AS user_id,
+    t.team_id
+   FROM users_on_team t
+  WHERE (t.user_id = ( SELECT auth.uid() AS uid));
 
 CREATE POLICY "Select for current user teams"
 ON "public"."users_on_team"
@@ -980,41 +1208,13 @@ ON "public"."users_on_team"
 FOR DELETE 
 USING (team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user));
 
-CREATE OR REPLACE VIEW "private"."current_user_teams" AS 
-SELECT ( SELECT auth.uid() AS uid) AS user_id,
-    t.team_id
-   FROM users_on_team t
-  WHERE (t.user_id = ( SELECT auth.uid() AS uid));
-
-CREATE OR REPLACE FUNCTION "private"."get_invites_for_authenticated_user"() RETURNS SETOF "uuid"
-    LANGUAGE "sql" STABLE SECURITY DEFINER
-    SET "search_path" TO 'public'
-    AS $$
-  SELECT team_id
-  FROM user_invites
-  WHERE email = auth.jwt() ->> 'email'
-$$;
-
-ALTER FUNCTION "private"."get_invites_for_authenticated_user"() OWNER TO "postgres";
-
-CREATE OR REPLACE FUNCTION "private"."get_teams_for_authenticated_user"() RETURNS SETOF "uuid"
-    LANGUAGE "sql" STABLE SECURITY DEFINER
-    SET "search_path" TO 'public'
-    AS $$
-  SELECT team_id
-  FROM users_on_team
-  WHERE user_id = auth.uid()
-$$;
-
-ALTER FUNCTION "private"."get_teams_for_authenticated_user"() OWNER TO "postgres";
-
-CREATE OR REPLACE FUNCTION public.amount_text("public"."transactions") RETURNS "text"
-    LANGUAGE "sql"
-    AS $$
-  select ABS($1.amount)::text;
-$$;
-
-ALTER FUNCTION public.amount_text("public"."transactions") OWNER TO "postgres";
+CREATE POLICY "Users can select users if they are in the same team" 
+ON "public"."users" 
+FOR SELECT 
+TO authenticated
+USING ((EXISTS ( SELECT 1
+   FROM "public"."users_on_team"
+  WHERE (("users_on_team"."user_id" = ( SELECT auth.uid() AS uid)) AND ("users_on_team"."team_id" = "users"."team_id")))));
 
 CREATE OR REPLACE FUNCTION public.calculate_amount_similarity(transaction_currency text, inbox_currency text, transaction_amount numeric, inbox_amount numeric)
  RETURNS numeric
@@ -1098,10 +1298,14 @@ end;
 $$
 ;
 
-CREATE TRIGGER trigger_calculate_bank_account_base_balance_before_insert BEFORE INSERT ON bank_accounts FOR EACH ROW
-    EXECUTE FUNCTION calculate_bank_account_base_balance ();
+CREATE TRIGGER trigger_calculate_bank_account_base_balance_before_insert 
+BEFORE INSERT ON bank_accounts 
+FOR EACH ROW
+EXECUTE FUNCTION calculate_bank_account_base_balance ();
 
-CREATE TRIGGER trigger_calculate_bank_account_base_balance_before_update BEFORE UPDATE OF balance ON bank_accounts FOR EACH ROW WHEN (old.balance IS DISTINCT FROM new.balance)
+CREATE TRIGGER trigger_calculate_bank_account_base_balance_before_update 
+BEFORE UPDATE OF balance ON bank_accounts 
+FOR EACH ROW WHEN (old.balance IS DISTINCT FROM new.balance)
     EXECUTE FUNCTION calculate_bank_account_base_balance ();
 
 CREATE OR REPLACE FUNCTION public.calculate_base_amount_score(transaction_base_currency text, inbox_base_currency text, transaction_base_amount numeric, inbox_base_amount numeric)
@@ -1804,18 +2008,6 @@ end;
 $$
 ;
 
-CREATE OR REPLACE FUNCTION public.extract_product_names("products_json" "json") RETURNS "text"
-    LANGUAGE "plpgsql" IMMUTABLE
-    AS $$
-begin
-    return (
-        select string_agg(value, ',') 
-        from json_array_elements_text(products_json) as arr(value)
-    );
-end;
-$$;
-
-ALTER FUNCTION public.extract_product_names("products_json" json) OWNER TO "postgres";
 
 CREATE OR REPLACE FUNCTION public.find_matching_inbox_item(input_transaction_id uuid, specific_inbox_id uuid DEFAULT NULL::uuid)
  RETURNS TABLE(inbox_id uuid, transaction_id uuid, transaction_name text, similarity_score numeric, file_name text)
@@ -1884,71 +2076,6 @@ END;
 $$;
 
 ALTER FUNCTION public.generate_hmac("secret_key" text, "message" text) OWNER TO "postgres";
-
-CREATE OR REPLACE FUNCTION public.generate_id("size" integer) RETURNS "text"
-    LANGUAGE "plpgsql"
-    AS $$
-DECLARE
-  characters TEXT := 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  bytes BYTEA := gen_random_bytes(size);
-  l INT := length(characters);
-  i INT := 0;
-  output TEXT := '';
-BEGIN
-  WHILE i < size LOOP
-    output := output || substr(characters, get_byte(bytes, i) % l + 1, 1);
-    i := i + 1;
-  END LOOP;
-  RETURN lower(output);
-END;
-$$;
-
-ALTER FUNCTION public.generate_id("size" integer) OWNER TO "postgres";
-
-
-CREATE OR REPLACE FUNCTION public.generate_inbox("size" integer) RETURNS "text"
-    LANGUAGE "plpgsql"
-    AS $$
-DECLARE
-  characters TEXT := 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  bytes BYTEA := extensions.gen_random_bytes(size);
-  l INT := length(characters);
-  i INT := 0;
-  output TEXT := '';
-BEGIN
-  WHILE i < size LOOP
-    output := output || substr(characters, get_byte(bytes, i) % l + 1, 1);
-    i := i + 1;
-  END LOOP;
-  RETURN lower(output);
-END;
-$$;
-
-ALTER FUNCTION public.generate_inbox("size" integer) OWNER TO "postgres";
-
-CREATE OR REPLACE FUNCTION public.generate_inbox_fts("display_name_text" "text", "product_names" "text", "amount" numeric, "due_date" "date") RETURNS "tsvector"
-    LANGUAGE "plpgsql" IMMUTABLE
-    AS $$
-begin
-    return to_tsvector('english', coalesce(display_name_text, '') || ' ' || coalesce(product_names, '') || ' ' || coalesce(amount::text, '') || ' ' || due_date);
-end;
-$$;
-
-ALTER FUNCTION public.generate_inbox_fts("display_name_text" "text", "product_names" "text", "amount" numeric, "due_date" "date") OWNER TO "postgres";
-
-CREATE OR REPLACE FUNCTION public.generate_slug_from_name() RETURNS "trigger"
-    LANGUAGE "plpgsql"
-    AS $$begin
-  if new.system is true then
-    return new;
-  end if;
-
-  new.slug := public.slugify(new.name);
-  return new;
-end$$;
-
-ALTER FUNCTION public.generate_slug_from_name() OWNER TO "postgres";
-
 
 CREATE OR REPLACE FUNCTION public.get_all_transactions_by_account(account_id uuid)
  RETURNS SETOF transactions
@@ -2279,7 +2406,7 @@ $$
 
 ALTER FUNCTION public.get_revenue("team_id" "uuid", "date_from" "date", "date_to" "date", "currency" "text") OWNER TO "postgres";
 
-CREATE OR REPLACE FUNCTION public.get_runway(team_id text, date_from date, date_to date, base_currency text DEFAULT NULL::text)
+CREATE OR REPLACE FUNCTION public.get_runway(team_id uuid, date_from date, date_to date, base_currency text DEFAULT NULL::text)
  RETURNS numeric
  LANGUAGE plpgsql
 AS $$
@@ -2289,18 +2416,18 @@ declare
     avg_burn_rate numeric;
     number_of_months numeric;
 begin
-    if get_runway_v4.base_currency is not null then
-        target_currency := get_runway_v4.base_currency;
+    if get_runway.base_currency is not null then
+        target_currency := get_runway.base_currency;
     else
         select teams.base_currency into target_currency
         from teams
-        where teams.id = get_runway_v4.team_id;
+        where teams.id = get_runway.team_id;
     end if;
 
     select * from get_total_balance(team_id, target_currency) into total_balance;
     
-    select (extract(year FROM date_to) - extract(year FROM date_from)) * 12 +
-           extract(month FROM date_to) - extract(month FROM date_from) 
+    select (EXTRACT(year FROM date_to) - EXTRACT(year FROM date_from)) * 12 +
+           EXTRACT(month FROM date_to) - EXTRACT(month FROM date_from) 
     into number_of_months;
     
     select round(avg(value)) 
@@ -2316,7 +2443,7 @@ end;
 $$
 ;
 
-ALTER FUNCTION public.get_runway("team_id" "uuid", "date_from" "date", "date_to" "date", "currency" "text") OWNER TO "postgres";
+ALTER FUNCTION public.get_runway("team_id" uuid, "date_from" date, "date_to" date, "currency" text) OWNER TO "postgres";
 
 CREATE OR REPLACE FUNCTION public.get_spending(team_id uuid, date_from date, date_to date, base_currency text DEFAULT NULL::text)
  RETURNS TABLE(name text, slug text, amount numeric, currency text, color text, percentage numeric)
@@ -2416,7 +2543,7 @@ end;
 $$
 ;
 
-ALTER FUNCTION public.get_total_balanc("team_id" "uuid", "currency" "text") OWNER TO "postgres";
+ALTER FUNCTION public.get_total_balance("team_id" "uuid", "currency" "text") OWNER TO "postgres";
 
 CREATE OR REPLACE FUNCTION public.group_transactions(p_team_id uuid)
  RETURNS TABLE(transaction_group text, date date, team_id uuid, recurring boolean, frequency transaction_frequency)
@@ -2777,41 +2904,6 @@ end;
 $$
 ;
 
-CREATE OR REPLACE FUNCTION "public"."nanoid"("size" integer DEFAULT 21, "alphabet" "text" DEFAULT '_-0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'::"text", "additionalbytesfactor" double precision DEFAULT 1.6) RETURNS "text"
-    LANGUAGE "plpgsql" PARALLEL SAFE
-    AS $$
-DECLARE
-    alphabetArray  text[];
-    alphabetLength int := 64;
-    mask           int := 63;
-    step           int := 34;
-BEGIN
-    IF size IS NULL OR size < 1 THEN
-        RAISE EXCEPTION 'The size must be defined and greater than 0!';
-    END IF;
-
-    IF alphabet IS NULL OR length(alphabet) = 0 OR length(alphabet) > 255 THEN
-        RAISE EXCEPTION 'The alphabet can''t be undefined, zero or bigger than 255 symbols!';
-    END IF;
-
-    IF additionalBytesFactor IS NULL OR additionalBytesFactor < 1 THEN
-        RAISE EXCEPTION 'The additional bytes factor can''t be less than 1!';
-    END IF;
-
-    alphabetArray := regexp_split_to_array(alphabet, '');
-    alphabetLength := array_length(alphabetArray, 1);
-    mask := (2 << cast(floor(log(alphabetLength - 1) / log(2)) as int)) - 1;
-    step := cast(ceil(additionalBytesFactor * mask * size / alphabetLength) AS int);
-
-    IF step > 1024 THEN
-        step := 1024; -- The step size % can''t be bigger then 1024!
-    END IF;
-
-    RETURN nanoid_optimized(size, alphabet, mask, step);
-END
-$$;
-
-ALTER FUNCTION "public"."nanoid"("size" integer, "alphabet" "text", "additionalbytesfactor" double precision) OWNER TO "postgres";
 
 CREATE OR REPLACE FUNCTION "public"."nanoid_optimized"("size" integer, "alphabet" "text", "mask" integer, "step" integer) RETURNS "text"
     LANGUAGE "plpgsql" PARALLEL SAFE
@@ -2881,38 +2973,6 @@ $$
 CREATE TRIGGER on_update_set_set_updated_at BEFORE
 UPDATE ON transactions FOR EACH ROW
 EXECUTE FUNCTION set_updated_at ();
-
-CREATE OR REPLACE FUNCTION "public"."slugify"("value" "text") RETURNS "text"
-    LANGUAGE "sql" IMMUTABLE STRICT
-    AS $_$
-  -- removes accents (diacritic signs) from a given string --
-  with "unaccented" as (
-    select unaccent("value") as "value"
-  ),
-  -- lowercases the string
-  "lowercase" as (
-    select lower("value") as "value"
-    from "unaccented"
-  ),
-  -- remove single and double quotes
-  "removed_quotes" as (
-    select regexp_replace("value", '[''"]+', '', 'gi') as "value"
-    from "lowercase"
-  ),
-  -- replaces anything that's not a letter, number, hyphen('-'), or underscore('_') with a hyphen('-')
-  "hyphenated" as (
-    select regexp_replace("value", '[^a-z0-9\\-_]+', '-', 'gi') as "value"
-    from "removed_quotes"
-  ),
-  -- trims hyphens('-') if they exist on the head or tail of the string
-  "trimmed" as (
-    select regexp_replace(regexp_replace("value", '\-+$', ''), '^\-', '') as "value"
-    from "hyphenated"
-  )
-  select "value" from "trimmed";
-$_$;
-
-ALTER FUNCTION "public"."slugify"("value" "text") OWNER TO "postgres";
 
 CREATE OR REPLACE FUNCTION "public"."total_duration"("public"."tracker_projects") RETURNS integer
     LANGUAGE "sql"
@@ -3024,21 +3084,6 @@ end;
 $$
 ;
 
-CREATE OR REPLACE FUNCTION "public"."update_transactions_on_category_delete"() RETURNS "trigger"
-    LANGUAGE "plpgsql"
-    AS $$
-begin
-    update transactions
-    set category_slug = null
-    where category_slug = old.slug
-    and team_id = old.team_id;
-
-    return old;
-end;
-$$;
-
-ALTER FUNCTION "public"."update_transactions_on_category_delete"() OWNER TO "postgres";
-
 CREATE OR REPLACE FUNCTION public.upsert_transaction_enrichment()
  RETURNS trigger
  LANGUAGE plpgsql
@@ -3138,9 +3183,13 @@ $$;
 
 ALTER FUNCTION "public"."webhook"() OWNER TO "postgres";
 
-CREATE OR REPLACE TRIGGER "match_transaction" AFTER INSERT ON "public"."transactions" FOR EACH ROW EXECUTE FUNCTION "public"."webhook"('webhook/inbox/match');
+CREATE OR REPLACE TRIGGER "match_transaction" AFTER INSERT 
+ON "public"."transactions" FOR EACH ROW 
+EXECUTE FUNCTION "public"."webhook"('webhook/inbox/match');
 
-CREATE TRIGGER user_registered AFTER INSERT ON auth.users FOR EACH ROW EXECUTE FUNCTION webhook('webhook/registered');
+CREATE TRIGGER user_registered AFTER INSERT 
+ON auth.users FOR EACH ROW 
+EXECUTE FUNCTION webhook('webhook/registered');
 
 CREATE OR REPLACE FUNCTION storage.extension(name text)
  RETURNS text
@@ -3295,12 +3344,17 @@ FOR DELETE
 TO authenticated
 USING (((bucket_id = 'avatars'::text) AND ((auth.uid())::text = (storage.foldername(name))[1])));
 
-CREATE TRIGGER tr_lp225ozlnzx2 AFTER INSERT ON storage.objects FOR EACH ROW EXECUTE FUNCTION supabase_functions.http_request('https://cloud.trigger.dev/api/v1/sources/http/clz0yl7ai6652lp225ozlnzx2', 'POST', '{"Content-type":"application/json", "Authorization": "Bearer d8e3de5a468d1af4990e168c27e2b167e6911e93da67a7a8c9cf15b1dc2011dd" }', '{}', '1000');
+CREATE TRIGGER tr_lp225ozlnzx2 AFTER INSERT 
+ON storage.objects 
+FOR EACH ROW 
+EXECUTE FUNCTION supabase_functions.http_request('https://cloud.trigger.dev/api/v1/sources/http/clz0yl7ai6652lp225ozlnzx2', 'POST', '{"Content-type":"application/json", "Authorization": "Bearer d8e3de5a468d1af4990e168c27e2b167e6911e93da67a7a8c9cf15b1dc2011dd" }', '{}', '1000');
 
-CREATE TRIGGER vault_upload AFTER INSERT ON storage.objects FOR EACH ROW EXECUTE FUNCTION supabase_functions.http_request('https://cloud.trigger.dev/api/v1/sources/http/clxhxy07hfixvo93155n4t3bw', 'POST', '{"Content-type":"application/json","Authorization":"Bearer 45fe98e53abae5f592f97432da5d3e388b71bbfe3194aa1c82e02ed83af225e1"}', '{}', '3000');
+CREATE TRIGGER vault_upload AFTER INSERT 
+ON storage.objects 
+FOR EACH ROW 
+EXECUTE FUNCTION supabase_functions.http_request('https://cloud.trigger.dev/api/v1/sources/http/clxhxy07hfixvo93155n4t3bw', 'POST', '{"Content-type":"application/json","Authorization":"Bearer 45fe98e53abae5f592f97432da5d3e388b71bbfe3194aa1c82e02ed83af225e1"}', '{}', '3000');
 
 ALTER PUBLICATION "supabase_realtime" OWNER TO "postgres";
-
 ALTER PUBLICATION "supabase_realtime" ADD TABLE ONLY "public"."inbox";
 
 GRANT USAGE ON SCHEMA "public" TO "postgres";
@@ -3412,9 +3466,9 @@ GRANT ALL ON FUNCTION public.create_team("name" character varying) TO "anon";
 GRANT ALL ON FUNCTION public.create_team("name" character varying) TO "authenticated";
 GRANT ALL ON FUNCTION public.create_team("name" character varying) TO "service_role";
 
-GRANT ALL ON FUNCTION public.extract_product_names("products_json" "json") TO "anon";
-GRANT ALL ON FUNCTION public.extract_product_names("products_json" json) TO "authenticated";
-GRANT ALL ON FUNCTION public.extract_product_names("products_json" json) TO "service_role";
+GRANT ALL ON FUNCTION public.extract_product_names("products_json" "jsonb") TO "anon";
+GRANT ALL ON FUNCTION public.extract_product_names("products_json" "jsonb") TO "authenticated";
+GRANT ALL ON FUNCTION public.extract_product_names("products_json" "jsonb") TO "service_role";
 
 GRANT ALL ON FUNCTION public.generate_hmac("secret_key" "text", "message" "text") TO "anon";
 GRANT ALL ON FUNCTION public.generate_hmac("secret_key" text, "message" text) TO "authenticated";
