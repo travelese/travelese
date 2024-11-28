@@ -1,14 +1,18 @@
 {
-  "folders": [
-    {
-      "path": "."
-    }
-  ],
-  "settings": {
-    "files.exclude": {
-      "packages/supabase/functions/": true
-    },
-    "github-actions.workflows.pinned.workflows": [],
-    "deno.enable": false
-  }
+	"folders": [
+		{
+			"name": "project-root",
+			"path": "./"
+		},
+		{
+			"name": "supabase-functions",
+			"path": "./apps/api/supabase/functions"
+		}
+	],
+	"settings": {
+		"files.exclude": {
+			"./apps/api/supabase/functions/": true
+		},
+		"deno.importMap": "./apps/api/supabase/functions/import_map.json"
+	}
 }

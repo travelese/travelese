@@ -1,6 +1,5 @@
-/// <reference types="https://esm.sh/@supabase/functions-js/src/edge-runtime.d.ts" />
 
-import { createClient } from "npm:@supabase/supabase-js@2.45.2";
+import { createClient } from "jsr:@supabase/supabase-js@2";
 import type { Database, Tables } from "../../src/types";
 
 type TransactionCategoriesRecord = Tables<"transaction_categories">;
