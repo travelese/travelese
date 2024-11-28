@@ -94,7 +94,7 @@ export const WelcomeEmail = ({ fullName = "Armin Babaei" }: WelcomeProps) => {
               Should you have any questions, please don't hesitate to reply
               directly to this email or to{" "}
               <Link
-                href="https://cal.com/itsarminbabaei/15min"
+                href="https://cal.com/itsarminbabaei/30min"
                 className="text-[#121212] underline"
               >
                 schedule a call with me
