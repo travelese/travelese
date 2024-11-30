@@ -67,28 +67,7 @@ export const WelcomeEmail = ({ fullName = "Armin Babaei" }: WelcomeProps) => {
 
             <span className="font-medium">Hi {firstName},</span>
             <Text className="text-[#121212]">
-              I'm Armin. Founder of Travelese.
-              <br />
-              <br />
-              My goal with Travelese is to revolutionize the traveler
-              experience, creating authentic and personalized journeys that
-              connect you with real humans and local communities.
-              <br />
-              <br />I believe that travel should be about more than just booking
-              flights and hotels - it should be about immersing yourself in
-              local cultures, trying new foods, and experiencing the beauty of
-              our world.
-              <br />
-              <br />I believe we deserve better - rockets instead of cheap
-              flights, Concordes instead of low-cost carriers, good food instead
-              of tourist traps, and authentic experiences instead of overcrowded
-              destinations. Travelese is built to promote abundance and love,
-              not scarcity.
-              <br />
-              <br />
-              And, we're not stopping at Earth. I'm gearing up for space travel,
-              and I want Travelese to help humanity explore the stars and other
-              planets.
+              I'm Armin. Co-Founder of Travelese.
               <br />
               <br />
               Should you have any questions, please don't hesitate to reply
@@ -110,7 +89,7 @@ export const WelcomeEmail = ({ fullName = "Armin Babaei" }: WelcomeProps) => {
               className="my-0 mx-auto block w-full"
             /> */}
 
-            <Text className="text-[#707070]">With love, Armin</Text>
+            <Text className="text-[#707070]">Armin</Text>
 
             {/* <Img
               src={`${baseUrl}/signature.png`}
