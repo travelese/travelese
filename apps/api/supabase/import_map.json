@@ -6,6 +6,12 @@
     "puppeteer": "https://deno.land/x/puppeteer@16.2.0/mod.ts",
     "React": "https://esm.sh/react@18.2.0?deno-std=0.177.0",
     "upstash_redis": "https://deno.land/x/upstash_redis@v1.19.3/mod.ts",
-    "zod": "https://esm.sh/zod@3.21.4"
+    "zod": "https://esm.sh/zod@3.21.4",
+    "openai": "https://esm.sh/@ai-sdk/openai@0.0.54",
+    "CSVLoader": "https://esm.sh/@langchain/community@0.2.31/document_loaders/fs/csv",
+    "DocxLoader": "https://esm.sh/@langchain/community@0.2.31/document_loaders/fs/docx",
+    "generateObject": "https://esm.sh/ai@3.3.20",
+    "TextLoader": "https://esm.sh/langchain@0.2.17/document_loaders/fs/text",
+    "extractText, getDocumentProxy": "https://esm.sh/unpdf@0.11.0"
   }
 }

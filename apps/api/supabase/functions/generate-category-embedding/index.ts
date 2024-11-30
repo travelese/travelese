@@ -1,6 +1,6 @@
 
-import { createClient } from "jsr:@supabase/supabase-js@2";
-import type { Database, Tables } from "../../src/types";
+import { createClient } from "jsr:@supabase/supabase-js@2.46.2";
+import type { Database, Tables } from "/src/types";
 
 type TransactionCategoriesRecord = Tables<"transaction_categories">;
 interface WebhookPayload {

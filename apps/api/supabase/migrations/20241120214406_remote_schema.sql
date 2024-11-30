@@ -480,19 +480,6 @@ $$;
 
 ALTER FUNCTION "public"."update_transactions_on_category_delete"() OWNER TO "postgres";
 
--- Transaction Categories Triggers
-CREATE TRIGGER embed_category
-AFTER INSERT
-OR UPDATE ON transaction_categories
-FOR EACH ROW
-EXECUTE FUNCTION supabase_functions.http_request (
-  'https://hfgtyawqemeozrtjzevl.supabase.co/functions/v1/generate-category-embedding',
-  'POST',
-  '{"Content-type":"application/json"}',
-  '{}',
-  '5000'
-);
-
 CREATE TRIGGER generate_category_slug
 BEFORE INSERT ON transaction_categories
 FOR EACH ROW
@@ -532,17 +519,6 @@ CREATE INDEX IF NOT EXISTS documents_team_id_idx
 
 CREATE INDEX IF NOT EXISTS documents_team_id_parent_id_idx 
     ON public.documents USING btree (team_id, parent_id) TABLESPACE pg_default;
-
--- Documents Triggers
-CREATE TRIGGER embed_document
-AFTER INSERT ON documents FOR EACH ROW
-EXECUTE FUNCTION supabase_functions.http_request (
-  'https://hfgtyawqemeozrtjzevl.supabase.co/functions/v1/generate-document-embedding',
-  'POST',
-  '{"Content-type":"application/json"}',
-  '{}',
-  '5000'
-);
 
 -- Documents Policies
 CREATE POLICY "Documents can be deleted by a member of the team"
@@ -3344,16 +3320,6 @@ FOR DELETE
 TO authenticated
 USING (((bucket_id = 'avatars'::text) AND ((auth.uid())::text = (storage.foldername(name))[1])));
 
-CREATE TRIGGER tr_lp225ozlnzx2 AFTER INSERT 
-ON storage.objects 
-FOR EACH ROW 
-EXECUTE FUNCTION supabase_functions.http_request('https://cloud.trigger.dev/api/v1/sources/http/clz0yl7ai6652lp225ozlnzx2', 'POST', '{"Content-type":"application/json", "Authorization": "Bearer d8e3de5a468d1af4990e168c27e2b167e6911e93da67a7a8c9cf15b1dc2011dd" }', '{}', '1000');
-
-CREATE TRIGGER vault_upload AFTER INSERT 
-ON storage.objects 
-FOR EACH ROW 
-EXECUTE FUNCTION supabase_functions.http_request('https://cloud.trigger.dev/api/v1/sources/http/clxhxy07hfixvo93155n4t3bw', 'POST', '{"Content-type":"application/json","Authorization":"Bearer 45fe98e53abae5f592f97432da5d3e388b71bbfe3194aa1c82e02ed83af225e1"}', '{}', '3000');
-
 ALTER PUBLICATION "supabase_realtime" OWNER TO "postgres";
 ALTER PUBLICATION "supabase_realtime" ADD TABLE ONLY "public"."inbox";
 
@@ -3446,13 +3412,13 @@ GRANT ALL ON FUNCTION public.get_spending("team_id" "uuid", "date_from" "date", 
 GRANT ALL ON FUNCTION public.get_spending("team_id" "uuid", "date_from" "date", "date_to" "date", "currency_target" "text") TO "authenticated";
 GRANT ALL ON FUNCTION public.get_spending("team_id" "uuid", "date_from" "date", "date_to" "date", "currency_target" "text") TO "service_role";
 
-GRANT ALL ON FUNCTION "public"."insert_system_categories"() TO "anon";
-GRANT ALL ON FUNCTION "public"."insert_system_categories"() TO "authenticated";
-GRANT ALL ON FUNCTION "public"."insert_system_categories"() TO "service_role";
+GRANT ALL ON FUNCTION public.insert_system_categories() TO "anon";
+GRANT ALL ON FUNCTION public.insert_system_categories() TO "authenticated";
+GRANT ALL ON FUNCTION public.insert_system_categories() TO "service_role";
 
-GRANT ALL ON FUNCTION "public"."is_fulfilled"("public"."transactions") TO "anon";
-GRANT ALL ON FUNCTION "public"."is_fulfilled"("public"."transactions") TO "authenticated";
-GRANT ALL ON FUNCTION "public"."is_fulfilled"("public"."transactions") TO "service_role";
+GRANT ALL ON FUNCTION public.is_fulfilled("public"."transactions") TO "anon";
+GRANT ALL ON FUNCTION public.is_fulfilled("public"."transactions") TO "authenticated";
+GRANT ALL ON FUNCTION public.is_fulfilled("public"."transactions") TO "service_role";
 
 GRANT ALL ON FUNCTION public.amount_text("public"."transactions") TO "anon";
 GRANT ALL ON FUNCTION public.amount_text("public"."transactions") TO "authenticated";
@@ -3506,13 +3472,13 @@ GRANT ALL ON FUNCTION public.get_revenue("team_id" "uuid", "date_from" "date", "
 GRANT ALL ON FUNCTION public.get_revenue("team_id" "uuid", "date_from" "date", "date_to" "date", "currency" "text") TO "authenticated";
 GRANT ALL ON FUNCTION public.get_revenue("team_id" "uuid", "date_from" "date", "date_to" "date", "currency" "text") TO "service_role";
 
-GRANT ALL ON FUNCTION "public"."nanoid"("size" integer, "alphabet" "text", "additionalbytesfactor" double precision) TO "anon";
-GRANT ALL ON FUNCTION "public"."nanoid"("size" integer, "alphabet" "text", "additionalbytesfactor" double precision) TO "authenticated";
-GRANT ALL ON FUNCTION "public"."nanoid"("size" integer, "alphabet" "text", "additionalbytesfactor" double precision) TO "service_role";
+GRANT ALL ON FUNCTION public.nanoid("size" integer, "alphabet" "text", "additionalbytesfactor" double precision) TO "anon";
+GRANT ALL ON FUNCTION public.nanoid("size" integer, "alphabet" "text", "additionalbytesfactor" double precision) TO "authenticated";
+GRANT ALL ON FUNCTION public.nanoid("size" integer, "alphabet" "text", "additionalbytesfactor" double precision) TO "service_role";
 
-GRANT ALL ON FUNCTION "public"."nanoid_optimized"("size" integer, "alphabet" "text", "mask" integer, "step" integer) TO "anon";
-GRANT ALL ON FUNCTION "public"."nanoid_optimized"("size" integer, "alphabet" "text", "mask" integer, "step" integer) TO "authenticated";
-GRANT ALL ON FUNCTION "public"."nanoid_optimized"("size" integer, "alphabet" "text", "mask" integer, "step" integer) TO "service_role";
+GRANT ALL ON FUNCTION public.nanoid_optimized("size" integer, "alphabet" "text", "mask" integer, "step" integer) TO "anon";
+GRANT ALL ON FUNCTION public.nanoid_optimized("size" integer, "alphabet" "text", "mask" integer, "step" integer) TO "authenticated";
+GRANT ALL ON FUNCTION public.nanoid_optimized("size" integer, "alphabet" "text", "mask" integer, "step" integer) TO "service_role";
 
 GRANT ALL ON FUNCTION public.get_total_balance("team_id" "uuid", "currency" "text") TO "anon";
 GRANT ALL ON FUNCTION public.get_total_balance("team_id" "uuid", "currency" "text") TO "authenticated";
@@ -3593,150 +3559,227 @@ GRANT ALL ON FUNCTION public.gtrgm_union("internal", "internal") TO "anon";
 GRANT ALL ON FUNCTION public.gtrgm_union("internal", "internal") TO "authenticated";
 GRANT ALL ON FUNCTION public.gtrgm_union("internal", "internal") TO "service_role";
 
-GRANT ALL ON FUNCTION "public"."handle_new_user"() TO "anon";
-GRANT ALL ON FUNCTION "public"."handle_new_user"() TO "authenticated";
-GRANT ALL ON FUNCTION "public"."handle_new_user"() TO "service_role";
+GRANT ALL ON FUNCTION public.handle_new_user() TO "anon";
+GRANT ALL ON FUNCTION public.handle_new_user() TO "authenticated";
+GRANT ALL ON FUNCTION public.handle_new_user() TO "service_role";
 
 GRANT ALL ON FUNCTION public.inbox_amount_text("public"."inbox") TO "anon";
 GRANT ALL ON FUNCTION public.inbox_amount_text("public"."inbox") TO "authenticated";
 GRANT ALL ON FUNCTION public.inbox_amount_text("public"."inbox") TO "service_role";
 
-GRANT ALL ON FUNCTION "public"."slugify"("value" "text") TO "anon";
-GRANT ALL ON FUNCTION "public"."slugify"("value" "text") TO "authenticated";
-GRANT ALL ON FUNCTION "public"."slugify"("value" "text") TO "service_role";
+GRANT ALL ON FUNCTION public.slugify("value" "text") TO "anon";
+GRANT ALL ON FUNCTION public.slugify("value" "text") TO "authenticated";
+GRANT ALL ON FUNCTION public.slugify("value" "text") TO "service_role";
 
-GRANT ALL ON FUNCTION "public"."strict_word_similarity"("text", "text") TO "postgres";
-GRANT ALL ON FUNCTION "public"."strict_word_similarity"("text", "text") TO "anon";
-GRANT ALL ON FUNCTION "public"."strict_word_similarity"("text", "text") TO "authenticated";
-GRANT ALL ON FUNCTION "public"."strict_word_similarity"("text", "text") TO "service_role";
+GRANT ALL ON FUNCTION public.strict_word_similarity("text", "text") TO "postgres";
+GRANT ALL ON FUNCTION public.strict_word_similarity("text", "text") TO "anon";
+GRANT ALL ON FUNCTION public.strict_word_similarity("text", "text") TO "authenticated";
+GRANT ALL ON FUNCTION public.strict_word_similarity("text", "text") TO "service_role";
 
-GRANT ALL ON FUNCTION "public"."strict_word_similarity_commutator_op"("text", "text") TO "postgres";
-GRANT ALL ON FUNCTION "public"."strict_word_similarity_commutator_op"("text", "text") TO "anon";
-GRANT ALL ON FUNCTION "public"."strict_word_similarity_commutator_op"("text", "text") TO "authenticated";
-GRANT ALL ON FUNCTION "public"."strict_word_similarity_commutator_op"("text", "text") TO "service_role";
+GRANT ALL ON FUNCTION public.strict_word_similarity_commutator_op("text", "text") TO "postgres";
+GRANT ALL ON FUNCTION public.strict_word_similarity_commutator_op("text", "text") TO "anon";
+GRANT ALL ON FUNCTION public.strict_word_similarity_commutator_op("text", "text") TO "authenticated";
+GRANT ALL ON FUNCTION public.strict_word_similarity_commutator_op("text", "text") TO "service_role";
 
-GRANT ALL ON FUNCTION "public"."strict_word_similarity_dist_commutator_op"("text", "text") TO "postgres";
-GRANT ALL ON FUNCTION "public"."strict_word_similarity_dist_commutator_op"("text", "text") TO "anon";
-GRANT ALL ON FUNCTION "public"."strict_word_similarity_dist_commutator_op"("text", "text") TO "authenticated";
-GRANT ALL ON FUNCTION "public"."strict_word_similarity_dist_commutator_op"("text", "text") TO "service_role";
+GRANT ALL ON FUNCTION public.strict_word_similarity_dist_commutator_op("text", "text") TO "postgres";
+GRANT ALL ON FUNCTION public.strict_word_similarity_dist_commutator_op("text", "text") TO "anon";
+GRANT ALL ON FUNCTION public.strict_word_similarity_dist_commutator_op("text", "text") TO "authenticated";
+GRANT ALL ON FUNCTION public.strict_word_similarity_dist_commutator_op("text", "text") TO "service_role";
 
-GRANT ALL ON FUNCTION "public"."strict_word_similarity_dist_op"("text", "text") TO "postgres";
-GRANT ALL ON FUNCTION "public"."strict_word_similarity_dist_op"("text", "text") TO "anon";
-GRANT ALL ON FUNCTION "public"."strict_word_similarity_dist_op"("text", "text") TO "authenticated";
-GRANT ALL ON FUNCTION "public"."strict_word_similarity_dist_op"("text", "text") TO "service_role";
+GRANT ALL ON FUNCTION public.strict_word_similarity_dist_op("text", "text") TO "postgres";
+GRANT ALL ON FUNCTION public.strict_word_similarity_dist_op("text", "text") TO "anon";
+GRANT ALL ON FUNCTION public.strict_word_similarity_dist_op("text", "text") TO "authenticated";
+GRANT ALL ON FUNCTION public.strict_word_similarity_dist_op("text", "text") TO "service_role";
 
-GRANT ALL ON FUNCTION "public"."strict_word_similarity_op"("text", "text") TO "postgres";
-GRANT ALL ON FUNCTION "public"."strict_word_similarity_op"("text", "text") TO "anon";
-GRANT ALL ON FUNCTION "public"."strict_word_similarity_op"("text", "text") TO "authenticated";
-GRANT ALL ON FUNCTION "public"."strict_word_similarity_op"("text", "text") TO "service_role";
+GRANT ALL ON FUNCTION public.strict_word_similarity_op("text", "text") TO "postgres";
+GRANT ALL ON FUNCTION public.strict_word_similarity_op("text", "text") TO "anon";
+GRANT ALL ON FUNCTION public.strict_word_similarity_op("text", "text") TO "authenticated";
+GRANT ALL ON FUNCTION public.strict_word_similarity_op("text", "text") TO "service_role";
 
-GRANT ALL ON FUNCTION "public"."total_duration"("public"."tracker_projects") TO "anon";
-GRANT ALL ON FUNCTION "public"."total_duration"("public"."tracker_projects") TO "authenticated";
-GRANT ALL ON FUNCTION "public"."total_duration"("public"."tracker_projects") TO "service_role";
+GRANT ALL ON FUNCTION public.total_duration("public"."tracker_projects") TO "anon";
+GRANT ALL ON FUNCTION public.total_duration("public"."tracker_projects") TO "authenticated";
+GRANT ALL ON FUNCTION public.total_duration("public"."tracker_projects") TO "service_role";
 
-GRANT ALL ON FUNCTION "public"."unaccent"("text") TO "postgres";
-GRANT ALL ON FUNCTION "public"."unaccent"("text") TO "anon";
-GRANT ALL ON FUNCTION "public"."unaccent"("text") TO "authenticated";
-GRANT ALL ON FUNCTION "public"."unaccent"("text") TO "service_role";
+GRANT ALL ON FUNCTION public.unaccent("text") TO "postgres";
+GRANT ALL ON FUNCTION public.unaccent("text") TO "anon";
+GRANT ALL ON FUNCTION public.unaccent("text") TO "authenticated";
+GRANT ALL ON FUNCTION public.unaccent("text") TO "service_role";
 
-GRANT ALL ON FUNCTION "public"."unaccent"("regdictionary", "text") TO "postgres";
-GRANT ALL ON FUNCTION "public"."unaccent"("regdictionary", "text") TO "anon";
-GRANT ALL ON FUNCTION "public"."unaccent"("regdictionary", "text") TO "authenticated";
-GRANT ALL ON FUNCTION "public"."unaccent"("regdictionary", "text") TO "service_role";
+GRANT ALL ON FUNCTION public.unaccent("regdictionary", "text") TO "postgres";
+GRANT ALL ON FUNCTION public.unaccent("regdictionary", "text") TO "anon";
+GRANT ALL ON FUNCTION public.unaccent("regdictionary", "text") TO "authenticated";
+GRANT ALL ON FUNCTION public.unaccent("regdictionary", "text") TO "service_role";
 
-GRANT ALL ON FUNCTION "public"."unaccent_init"("internal") TO "postgres";
-GRANT ALL ON FUNCTION "public"."unaccent_init"("internal") TO "anon";
-GRANT ALL ON FUNCTION "public"."unaccent_init"("internal") TO "authenticated";
-GRANT ALL ON FUNCTION "public"."unaccent_init"("internal") TO "service_role";
+GRANT ALL ON FUNCTION public.unaccent_init("internal") TO "postgres";
+GRANT ALL ON FUNCTION public.unaccent_init("internal") TO "anon";
+GRANT ALL ON FUNCTION public.unaccent_init("internal") TO "authenticated";
+GRANT ALL ON FUNCTION public.unaccent_init("internal") TO "service_role";
 
-GRANT ALL ON FUNCTION "public"."unaccent_lexize"("internal", "internal", "internal", "internal") TO "postgres";
-GRANT ALL ON FUNCTION "public"."unaccent_lexize"("internal", "internal", "internal", "internal") TO "anon";
-GRANT ALL ON FUNCTION "public"."unaccent_lexize"("internal", "internal", "internal", "internal") TO "authenticated";
-GRANT ALL ON FUNCTION "public"."unaccent_lexize"("internal", "internal", "internal", "internal") TO "service_role";
+GRANT ALL ON FUNCTION public.unaccent_lexize("internal", "internal", "internal", "internal") TO "postgres";
+GRANT ALL ON FUNCTION public.unaccent_lexize("internal", "internal", "internal", "internal") TO "anon";
+GRANT ALL ON FUNCTION public.unaccent_lexize("internal", "internal", "internal", "internal") TO "authenticated";
+GRANT ALL ON FUNCTION public.unaccent_lexize("internal", "internal", "internal", "internal") TO "service_role";
 
-GRANT ALL ON FUNCTION "public"."update_enrich_transaction"() TO "anon";
-GRANT ALL ON FUNCTION "public"."update_enrich_transaction"() TO "authenticated";
-GRANT ALL ON FUNCTION "public"."update_enrich_transaction"() TO "service_role";
+GRANT ALL ON FUNCTION public.update_enrich_transaction() TO "anon";
+GRANT ALL ON FUNCTION public.update_enrich_transaction() TO "authenticated";
+GRANT ALL ON FUNCTION public.update_enrich_transaction() TO "service_role";
 
-GRANT ALL ON FUNCTION "public"."upsert_transaction_enrichment"() TO "anon";
-GRANT ALL ON FUNCTION "public"."upsert_transaction_enrichment"() TO "authenticated";
-GRANT ALL ON FUNCTION "public"."upsert_transaction_enrichment"() TO "service_role";
+GRANT ALL ON FUNCTION public.upsert_transaction_enrichment() TO "anon";
+GRANT ALL ON FUNCTION public.upsert_transaction_enrichment() TO "authenticated";
+GRANT ALL ON FUNCTION public.upsert_transaction_enrichment() TO "service_role";
 
-GRANT ALL ON FUNCTION "public"."webhook"() TO "anon";
-GRANT ALL ON FUNCTION "public"."webhook"() TO "authenticated";
-GRANT ALL ON FUNCTION "public"."webhook"() TO "service_role";
+GRANT ALL ON FUNCTION public.webhook() TO "anon";
+GRANT ALL ON FUNCTION public.webhook() TO "authenticated";
+GRANT ALL ON FUNCTION public.webhook() TO "service_role";
 
-GRANT ALL ON FUNCTION "public"."update_transactions_on_category_delete"() TO "anon";
-GRANT ALL ON FUNCTION "public"."update_transactions_on_category_delete"() TO "authenticated";
-GRANT ALL ON FUNCTION "public"."update_transactions_on_category_delete"() TO "service_role";
+GRANT ALL ON FUNCTION public.update_transactions_on_category_delete() TO "anon";
+GRANT ALL ON FUNCTION public.update_transactions_on_category_delete() TO "authenticated";
+GRANT ALL ON FUNCTION public.update_transactions_on_category_delete() TO "service_role";
 
-GRANT ALL ON FUNCTION "public"."project_members"("public"."tracker_entries") TO "anon";
-GRANT ALL ON FUNCTION "public"."project_members"("public"."tracker_entries") TO "authenticated";
-GRANT ALL ON FUNCTION "public"."project_members"("public"."tracker_entries") TO "service_role";
+GRANT ALL ON FUNCTION public.project_members("public"."tracker_entries") TO "anon";
+GRANT ALL ON FUNCTION public.project_members("public"."tracker_entries") TO "authenticated";
+GRANT ALL ON FUNCTION public.project_members("public"."tracker_entries") TO "service_role";
 
-GRANT ALL ON FUNCTION "public"."project_members"("public"."tracker_projects") TO "anon";
-GRANT ALL ON FUNCTION "public"."project_members"("public"."tracker_projects") TO "authenticated";
-GRANT ALL ON FUNCTION "public"."project_members"("public"."tracker_projects") TO "service_role";
+GRANT ALL ON FUNCTION public.project_members("public"."tracker_projects") TO "anon";
+GRANT ALL ON FUNCTION public.project_members("public"."tracker_projects") TO "authenticated";
+GRANT ALL ON FUNCTION public.project_members("public"."tracker_projects") TO "service_role";
 
-GRANT ALL ON FUNCTION "public"."set_limit"(real) TO "postgres";
-GRANT ALL ON FUNCTION "public"."set_limit"(real) TO "anon";
-GRANT ALL ON FUNCTION "public"."set_limit"(real) TO "authenticated";
-GRANT ALL ON FUNCTION "public"."set_limit"(real) TO "service_role";
+GRANT ALL ON FUNCTION public.set_limit(real) TO "postgres";
+GRANT ALL ON FUNCTION public.set_limit(real) TO "anon";
+GRANT ALL ON FUNCTION public.set_limit(real) TO "authenticated";
+GRANT ALL ON FUNCTION public.set_limit(real) TO "service_role";
 
-GRANT ALL ON FUNCTION "public"."show_limit"() TO "postgres";
-GRANT ALL ON FUNCTION "public"."show_limit"() TO "anon";
-GRANT ALL ON FUNCTION "public"."show_limit"() TO "authenticated";
-GRANT ALL ON FUNCTION "public"."show_limit"() TO "service_role";
+GRANT ALL ON FUNCTION public.show_limit() TO "postgres";
+GRANT ALL ON FUNCTION public.show_limit() TO "anon";
+GRANT ALL ON FUNCTION public.show_limit() TO "authenticated";
+GRANT ALL ON FUNCTION public.show_limit() TO "service_role";
 
-GRANT ALL ON FUNCTION "public"."show_trgm"("text") TO "postgres";
-GRANT ALL ON FUNCTION "public"."show_trgm"("text") TO "anon";
-GRANT ALL ON FUNCTION "public"."show_trgm"("text") TO "authenticated";
-GRANT ALL ON FUNCTION "public"."show_trgm"("text") TO "service_role";
+GRANT ALL ON FUNCTION public.show_trgm("text") TO "postgres";
+GRANT ALL ON FUNCTION public.show_trgm("text") TO "anon";
+GRANT ALL ON FUNCTION public.show_trgm("text") TO "authenticated";
+GRANT ALL ON FUNCTION public.show_trgm("text") TO "service_role";
 
-GRANT ALL ON FUNCTION "public"."similarity"("text", "text") TO "postgres";
-GRANT ALL ON FUNCTION "public"."similarity"("text", "text") TO "anon";
-GRANT ALL ON FUNCTION "public"."similarity"("text", "text") TO "authenticated";
-GRANT ALL ON FUNCTION "public"."similarity"("text", "text") TO "service_role";
+GRANT ALL ON FUNCTION public.similarity("text", "text") TO "postgres";
+GRANT ALL ON FUNCTION public.similarity("text", "text") TO "anon";
+GRANT ALL ON FUNCTION public.similarity("text", "text") TO "authenticated";
+GRANT ALL ON FUNCTION public.similarity("text", "text") TO "service_role";
 
-GRANT ALL ON FUNCTION "public"."similarity_dist"("text", "text") TO "postgres";
-GRANT ALL ON FUNCTION "public"."similarity_dist"("text", "text") TO "anon";
-GRANT ALL ON FUNCTION "public"."similarity_dist"("text", "text") TO "authenticated";
-GRANT ALL ON FUNCTION "public"."similarity_dist"("text", "text") TO "service_role";
+GRANT ALL ON FUNCTION public.similarity_dist("text", "text") TO "postgres";
+GRANT ALL ON FUNCTION public.similarity_dist("text", "text") TO "anon";
+GRANT ALL ON FUNCTION public.similarity_dist("text", "text") TO "authenticated";
+GRANT ALL ON FUNCTION public.similarity_dist("text", "text") TO "service_role";
 
-GRANT ALL ON FUNCTION "public"."similarity_op"("text", "text") TO "postgres";
-GRANT ALL ON FUNCTION "public"."similarity_op"("text", "text") TO "anon";
-GRANT ALL ON FUNCTION "public"."similarity_op"("text", "text") TO "authenticated";
-GRANT ALL ON FUNCTION "public"."similarity_op"("text", "text") TO "service_role";
+GRANT ALL ON FUNCTION public.similarity_op("text", "text") TO "postgres";
+GRANT ALL ON FUNCTION public.similarity_op("text", "text") TO "anon";
+GRANT ALL ON FUNCTION public.similarity_op("text", "text") TO "authenticated";
+GRANT ALL ON FUNCTION public.similarity_op("text", "text") TO "service_role";
 
-GRANT ALL ON FUNCTION "public"."set_limit"(real) TO "postgres";
-GRANT ALL ON FUNCTION "public"."set_limit"(real) TO "anon";
-GRANT ALL ON FUNCTION "public"."set_limit"(real) TO "authenticated";
-GRANT ALL ON FUNCTION "public"."set_limit"(real) TO "service_role";
+GRANT ALL ON FUNCTION public.set_limit(real) TO "postgres";
+GRANT ALL ON FUNCTION public.set_limit(real) TO "anon";
+GRANT ALL ON FUNCTION public.set_limit(real) TO "authenticated";
+GRANT ALL ON FUNCTION public.set_limit(real) TO "service_role";
 
-GRANT ALL ON FUNCTION "public"."word_similarity"("text", "text") TO "postgres";
-GRANT ALL ON FUNCTION "public"."word_similarity"("text", "text") TO "anon";
-GRANT ALL ON FUNCTION "public"."word_similarity"("text", "text") TO "authenticated";
-GRANT ALL ON FUNCTION "public"."word_similarity"("text", "text") TO "service_role";
+GRANT ALL ON FUNCTION public.word_similarity("text", "text") TO "postgres";
+GRANT ALL ON FUNCTION public.word_similarity("text", "text") TO "anon";
+GRANT ALL ON FUNCTION public.word_similarity("text", "text") TO "authenticated";
+GRANT ALL ON FUNCTION public.word_similarity("text", "text") TO "service_role";
 
-GRANT ALL ON FUNCTION "public"."word_similarity_commutator_op"("text", "text") TO "postgres";
-GRANT ALL ON FUNCTION "public"."word_similarity_commutator_op"("text", "text") TO "anon";
-GRANT ALL ON FUNCTION "public"."word_similarity_commutator_op"("text", "text") TO "authenticated";
-GRANT ALL ON FUNCTION "public"."word_similarity_commutator_op"("text", "text") TO "service_role";
+GRANT ALL ON FUNCTION public.word_similarity_commutator_op("text", "text") TO "postgres";
+GRANT ALL ON FUNCTION public.word_similarity_commutator_op("text", "text") TO "anon";
+GRANT ALL ON FUNCTION public.word_similarity_commutator_op("text", "text") TO "authenticated";
+GRANT ALL ON FUNCTION public.word_similarity_commutator_op("text", "text") TO "service_role";
 
-GRANT ALL ON FUNCTION "public"."word_similarity_dist_commutator_op"("text", "text") TO "postgres";
-GRANT ALL ON FUNCTION "public"."word_similarity_dist_commutator_op"("text", "text") TO "anon";
-GRANT ALL ON FUNCTION "public"."word_similarity_dist_commutator_op"("text", "text") TO "authenticated";
-GRANT ALL ON FUNCTION "public"."word_similarity_dist_commutator_op"("text", "text") TO "service_role";
+GRANT ALL ON FUNCTION public.word_similarity_dist_commutator_op("text", "text") TO "postgres";
+GRANT ALL ON FUNCTION public.word_similarity_dist_commutator_op("text", "text") TO "anon";
+GRANT ALL ON FUNCTION public.word_similarity_dist_commutator_op("text", "text") TO "authenticated";
+GRANT ALL ON FUNCTION public.word_similarity_dist_commutator_op("text", "text") TO "service_role";
 
-GRANT ALL ON FUNCTION "public"."word_similarity_dist_op"("text", "text") TO "postgres";
-GRANT ALL ON FUNCTION "public"."word_similarity_dist_op"("text", "text") TO "anon";
-GRANT ALL ON FUNCTION "public"."word_similarity_dist_op"("text", "text") TO "authenticated";
-GRANT ALL ON FUNCTION "public"."word_similarity_dist_op"("text", "text") TO "service_role";
+GRANT ALL ON FUNCTION public.word_similarity_dist_op("text", "text") TO "postgres";
+GRANT ALL ON FUNCTION public.word_similarity_dist_op("text", "text") TO "anon";
+GRANT ALL ON FUNCTION public.word_similarity_dist_op("text", "text") TO "authenticated";
+GRANT ALL ON FUNCTION public.word_similarity_dist_op("text", "text") TO "service_role";
 
-GRANT ALL ON FUNCTION "public"."word_similarity_op"("text", "text") TO "postgres";
-GRANT ALL ON FUNCTION "public"."word_similarity_op"("text", "text") TO "anon";
-GRANT ALL ON FUNCTION "public"."word_similarity_op"("text", "text") TO "authenticated";
-GRANT ALL ON FUNCTION "public"."word_similarity_op"("text", "text") TO "service_role";
+GRANT ALL ON FUNCTION public.word_similarity_op("text", "text") TO "postgres";
+GRANT ALL ON FUNCTION public.word_similarity_op("text", "text") TO "anon";
+GRANT ALL ON FUNCTION public.word_similarity_op("text", "text") TO "authenticated";
+GRANT ALL ON FUNCTION public.word_similarity_op("text", "text") TO "service_role";
+
+GRANT ALL ON FUNCTION public.slugify("value" "text") TO "anon";
+GRANT ALL ON FUNCTION public.slugify("value" "text") TO "authenticated";
+GRANT ALL ON FUNCTION public.slugify("value" "text") TO "service_role";
+
+GRANT ALL ON FUNCTION public.strict_word_similarity("text", "text") TO "postgres";
+GRANT ALL ON FUNCTION public.strict_word_similarity("text", "text") TO "anon";
+GRANT ALL ON FUNCTION public.strict_word_similarity("text", "text") TO "authenticated";
+GRANT ALL ON FUNCTION public.strict_word_similarity("text", "text") TO "service_role";
+
+GRANT ALL ON FUNCTION public.strict_word_similarity_commutator_op("text", "text") TO "postgres";
+GRANT ALL ON FUNCTION public.strict_word_similarity_commutator_op("text", "text") TO "anon";
+GRANT ALL ON FUNCTION public.strict_word_similarity_commutator_op("text", "text") TO "authenticated";
+GRANT ALL ON FUNCTION public.strict_word_similarity_commutator_op("text", "text") TO "service_role";
+
+GRANT ALL ON FUNCTION public.strict_word_similarity_dist_commutator_op("text", "text") TO "postgres";
+GRANT ALL ON FUNCTION public.strict_word_similarity_dist_commutator_op("text", "text") TO "anon";
+GRANT ALL ON FUNCTION public.strict_word_similarity_dist_commutator_op("text", "text") TO "authenticated";
+GRANT ALL ON FUNCTION public.strict_word_similarity_dist_commutator_op("text", "text") TO "service_role";
+
+GRANT ALL ON FUNCTION public.strict_word_similarity_dist_op("text", "text") TO "postgres";
+GRANT ALL ON FUNCTION public.strict_word_similarity_dist_op("text", "text") TO "anon";
+GRANT ALL ON FUNCTION public.strict_word_similarity_dist_op("text", "text") TO "authenticated";
+GRANT ALL ON FUNCTION public.strict_word_similarity_dist_op("text", "text") TO "service_role";
+
+GRANT ALL ON FUNCTION public.strict_word_similarity_op("text", "text") TO "postgres";
+GRANT ALL ON FUNCTION public.strict_word_similarity_op("text", "text") TO "anon";
+GRANT ALL ON FUNCTION public.strict_word_similarity_op("text", "text") TO "authenticated";
+GRANT ALL ON FUNCTION public.strict_word_similarity_op("text", "text") TO "service_role";
+
+GRANT ALL ON FUNCTION public.total_duration("public"."tracker_projects") TO "anon";
+GRANT ALL ON FUNCTION public.total_duration("public"."tracker_projects") TO "authenticated";
+GRANT ALL ON FUNCTION public.total_duration("public"."tracker_projects") TO "service_role";
+
+GRANT ALL ON FUNCTION public.unaccent("text") TO "postgres";
+GRANT ALL ON FUNCTION public.unaccent("text") TO "anon";
+GRANT ALL ON FUNCTION public.unaccent("text") TO "authenticated";
+GRANT ALL ON FUNCTION public.unaccent("text") TO "service_role";
+
+GRANT ALL ON FUNCTION public.unaccent("regdictionary", "text") TO "postgres";
+GRANT ALL ON FUNCTION public.unaccent("regdictionary", "text") TO "anon";
+GRANT ALL ON FUNCTION public.unaccent("regdictionary", "text") TO "authenticated";
+GRANT ALL ON FUNCTION public.unaccent("regdictionary", "text") TO "service_role";
+
+GRANT ALL ON FUNCTION public.unaccent_init("internal") TO "postgres";
+GRANT ALL ON FUNCTION public.unaccent_init("internal") TO "anon";
+GRANT ALL ON FUNCTION public.unaccent_init("internal") TO "authenticated";
+GRANT ALL ON FUNCTION public.unaccent_init("internal") TO "service_role";
+
+GRANT ALL ON FUNCTION public.unaccent_lexize("internal", "internal", "internal", "internal") TO "postgres";
+GRANT ALL ON FUNCTION public.unaccent_lexize("internal", "internal", "internal", "internal") TO "anon";
+GRANT ALL ON FUNCTION public.unaccent_lexize("internal", "internal", "internal", "internal") TO "authenticated";
+GRANT ALL ON FUNCTION public.unaccent_lexize("internal", "internal", "internal", "internal") TO "service_role";
+
+GRANT ALL ON FUNCTION public.update_enrich_transaction() TO "anon";
+GRANT ALL ON FUNCTION public.update_enrich_transaction() TO "authenticated";
+GRANT ALL ON FUNCTION public.update_enrich_transaction() TO "service_role";
+
+GRANT ALL ON FUNCTION public.upsert_transaction_enrichment() TO "anon";
+GRANT ALL ON FUNCTION public.upsert_transaction_enrichment() TO "authenticated";
+GRANT ALL ON FUNCTION public.upsert_transaction_enrichment() TO "service_role";
+
+GRANT ALL ON FUNCTION public.webhook() TO "anon";
+GRANT ALL ON FUNCTION public.webhook() TO "authenticated";
+GRANT ALL ON FUNCTION public.webhook() TO "service_role";
+
+GRANT ALL ON FUNCTION public.update_transactions_on_category_delete() TO "anon";
+GRANT ALL ON FUNCTION public.update_transactions_on_category_delete() TO "authenticated";
+GRANT ALL ON FUNCTION public.update_transactions_on_category_delete() TO "service_role";
+
+GRANT ALL ON FUNCTION public.project_members("public"."tracker_entries") TO "anon";
+GRANT ALL ON FUNCTION public.project_members("public"."tracker_entries") TO "authenticated";
+GRANT ALL ON FUNCTION public.project_members("public"."tracker_entries") TO "service_role";
+
+GRANT ALL ON FUNCTION public.project_members("public"."tracker_projects") TO "anon";
+GRANT ALL ON FUNCTION public.project_members("public"."tracker_projects") TO "authenticated";
+GRANT ALL ON FUNCTION public.project_members("public"."tracker_projects") TO "service_role";
 
 ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON SEQUENCES  TO "postgres";
 ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON SEQUENCES  TO "anon";

@@ -1,7 +1,5 @@
-/// <reference types="https://esm.sh/@supabase/functions-js/src/edge-runtime.d.ts" />
-
-import { createClient } from "npm:@supabase/supabase-js@2.45.2";
-import { openai } from "https://esm.sh/@ai-sdk/openai@0.0.54";
+import { createClient } from "jsr:@supabase/supabase-js@2.46.2";
+import { openai } from "https://esm.sh/@ai-sdk/openai@1.0.5";
 import { CSVLoader } from "https://esm.sh/@langchain/community@0.2.31/document_loaders/fs/csv";
 import { DocxLoader } from "https://esm.sh/@langchain/community@0.2.31/document_loaders/fs/docx";
 import { generateObject } from "https://esm.sh/ai@3.3.20";
