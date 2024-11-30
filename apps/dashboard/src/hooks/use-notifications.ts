@@ -94,7 +94,7 @@ export function useNotifications() {
 
       const { data: userData } = await getUserQuery(
         supabase,
-        session?.user?.id,
+        session?.user?.id ?? "",
       );
 
       if (userData) {

@@ -1,6 +1,7 @@
 "use client";
 
 import { useTravelParams } from "@/hooks/use-travel-params";
+import { useUserContext } from "@/store/user/hook";
 import { formatAmount, secondsToHoursAndMinutes } from "@/utils/format";
 import { TZDate } from "@date-fns/tz";
 import NumberFlow from "@number-flow/react";
@@ -29,7 +30,6 @@ import { useCallback, useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 import { TravelEvents } from "./travel-events";
 import { TravelMonthSelect } from "./travel-month-select";
-import { TravelSettings } from "./travel-settings";
 
 type Props = {
   weekStartsOnMonday?: boolean;
@@ -177,9 +177,7 @@ function handleMonthChange(
 
 type CalendarHeaderProps = {
   meta: { totalDuration?: number };
-  data: Record<string, TravelEvent[]>;
-  timeFormat: number;
-  weekStartsOnMonday: boolean;
+  data: Record<string, TrackerEvent[]>;
 };
 
 function CalendarHeader({
@@ -188,7 +186,9 @@ function CalendarHeader({
   timeFormat,
   weekStartsOnMonday,
 }: CalendarHeaderProps) {
-  const bookingTotals = Object.entries(data).reduce(
+  const { locale } = useUserContext((state) => state.data);
+
+  const bookingTotals = Object.entries(data || {}).reduce(
     (acc, [_, events]) => {
       for (const event of events) {
         const bookingName = event.booking?.name;
@@ -249,7 +249,7 @@ function CalendarHeader({
               meta?.totalDuration ? Math.round(meta.totalDuration / 3600) : 0
             }
           />
-          <span className="relative top-[3px]">h</span>
+          <span className="relative">h</span>
         </h1>
 
         <div className="text-sm text-[#606060] flex items-center space-x-2">
@@ -260,13 +260,14 @@ function CalendarHeader({
                   amount: meta?.totalAmount,
                   minimumFractionDigits: 0,
                   maximumFractionDigits: 0,
+                  locale,
                 })} this month`
-              : "Nothing booked yet"}
+              : "Nothing billable yet"}
           </p>
           <TooltipProvider delayDuration={100}>
             <Tooltip>
               <TooltipTrigger>
-                <Icons.Info className="size-4 mt-1" />
+                <Icons.Info className="h-4 w-4 mt-1" />
               </TooltipTrigger>
               <TooltipContent
                 className="text-xs text-[#878787] w-[250px] p-0 dark:bg-background"
@@ -279,7 +280,7 @@ function CalendarHeader({
                   </div>
                   <ul className="space-y-2 flex flex-col p-4">
                     {!Object.keys(bookingTotals).length && (
-                      <span>No traveled time.</span>
+                      <span>No tracked time.</span>
                     )}
                     {sortedBookings.map((booking) => (
                       <li key={booking.name} className="flex justify-between">
@@ -295,6 +296,7 @@ function CalendarHeader({
                               amount: booking.amount,
                               minimumFractionDigits: 0,
                               maximumFractionDigits: 0,
+                              locale,
                             })}
                           </span>
                         </div>
@@ -309,10 +311,6 @@ function CalendarHeader({
       </div>
       <div className="flex space-x-2">
         <TravelMonthSelect dateFormat="MMMM" />
-        <TravelSettings
-          timeFormat={timeFormat}
-          weekStartsOnMonday={weekStartsOnMonday}
-        />
       </div>
     </div>
   );
@@ -431,7 +429,7 @@ function CalendarDay({
           ? "bg-[#f0f0f0] dark:bg-[#202020]"
           : "bg-background",
         !isCurrentMonth &&
-          "bg-[repeating-linear-gradient(-60deg,#DBDBDB,#DBDBDB_1px,background_1px,background_5px)] dark:bg-[repeating-linear-gradient(-60deg,#2C2C2C,#2C2C2C_1px,background_1px,background_5px)]",
+          "bg-[repeating-linear-gradient(-60deg,#DBDBDB,#DBDBDB_1px,transparent_1px,transparent_5px)] dark:bg-[repeating-linear-gradient(-60deg,#2C2C2C,#2C2C2C_1px,transparent_1px,transparent_5px)]",
         selectedDate === formattedDate && "ring-1 ring-primary",
         isInRange(date) && "ring-1 ring-primary bg-opacity-50",
         isFirstSelectedDate(date) && "ring-1 ring-primary bg-opacity-50",
@@ -439,7 +437,10 @@ function CalendarDay({
       )}
     >
       <div>{format(date, "d")}</div>
-      <TravelEvents data={data[formattedDate]} isToday={isToday(date)} />
+      <TravelEvents
+        data={(data || {})[formattedDate]}
+        isToday={isToday(date)}
+      />
     </div>
   );
 }
