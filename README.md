@@ -4,7 +4,7 @@
 [![Production Website](https://github.com/travelese/travelese/actions/workflows/production-website.yml/badge.svg)](https://github.com/travelese/travelese/actions/workflows/production-website.yml)
 [![Production Engine](https://github.com/travelese/travelese/actions/workflows/production-engine.yml/badge.svg)](https://github.com/travelese/travelese/actions/workflows/production-engine.yml)
 [![Production Email](https://github.com/travelese/travelese/actions/workflows/production-email.yml/badge.svg)](https://github.com/travelese/travelese/actions/workflows/production-email.yml)
-[![Production UI](https://github.com/travelese/travelese/actions/workflows/production-ui.yml/badge.svg)](https://github.com/travelese/travelese/actions/workflows/production-ui.yml)
+
 [![Preview Dashboard](https://github.com/travelese/travelese/actions/workflows/preview-dashboard.yaml/badge.svg)](https://github.com/travelese/travelese/actions/workflows/preview-dashboard.yaml)
 [![Preview Website](https://github.com/travelese/travelese/actions/workflows/preview-website.yml/badge.svg)](https://github.com/travelese/travelese/actions/workflows/preview-website.yml)
 [![Preview Engine](https://github.com/travelese/travelese/actions/workflows/preview-engine.yml/badge.svg)](https://github.com/travelese/travelese/actions/workflows/preview-engine.yml)
