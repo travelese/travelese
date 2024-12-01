@@ -13,7 +13,7 @@ export const changeTravelBaggageAction = authActionClient
     name: "change-travel-baggage",
   })
   .action(async ({ parsedInput: value, ctx: { user } }) => {
-    cookies().set({
+    (await cookies()).set({
       name: Cookies.TravelBaggage,
       value,
       expires: addYears(new Date(), 1),

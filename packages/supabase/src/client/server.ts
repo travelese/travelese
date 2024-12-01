@@ -1,5 +1,5 @@
 import { type CookieOptions, createServerClient } from "@supabase/ssr";
-import { cookies, headers } from "next/headers";
+import { cookies, headers, type UnsafeUnwrappedCookies, type UnsafeUnwrappedHeaders } from "next/headers";
 import type { Database } from "../types";
 
 const conWarn = console.warn;
@@ -39,7 +39,7 @@ type CreateClientOptions = {
 export const createClient = (options?: CreateClientOptions) => {
   const { admin = false, ...rest } = options ?? {};
 
-  const cookieStore = cookies();
+  const cookieStore = (cookies() as unknown as UnsafeUnwrappedCookies);
 
   const key = admin
     ? process.env.SUPABASE_SERVICE_KEY!
@@ -77,7 +77,7 @@ export const createClient = (options?: CreateClientOptions) => {
       global: {
         headers: {
           // Pass user agent from browser
-          "user-agent": headers().get("user-agent") as string,
+          "user-agent": (headers() as unknown as UnsafeUnwrappedHeaders).get("user-agent") as string,
         },
       },
     },

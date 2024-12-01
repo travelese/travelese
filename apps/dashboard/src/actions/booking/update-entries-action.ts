@@ -45,7 +45,7 @@ export const updateEntriesAction = authActionClient
     }
 
     if (payload.booking_id) {
-      cookies().set({
+      (await cookies()).set({
         name: Cookies.LastBooking,
         value: payload.booking_id,
         expires: addYears(new Date(), 1),

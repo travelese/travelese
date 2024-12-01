@@ -14,11 +14,12 @@ export async function generateStaticParams() {
   }));
 }
 
-export async function generateMetadata({
-  params,
-}: {
-  params: { slug: string };
-}): Promise<Metadata | undefined> {
+export async function generateMetadata(
+  props: {
+    params: Promise<{ slug: string }>;
+  }
+): Promise<Metadata | undefined> {
+  const params = await props.params;
   const post = getBlogPosts().find((post) => post.slug === params.slug);
   if (!post) {
     return;
@@ -55,11 +56,17 @@ export async function generateMetadata({
   };
 }
 
-export default async function Page({
-  params: { slug },
-}: {
-  params: { slug: string };
-}) {
+export default async function Page(
+  props: {
+    params: Promise<{ slug: string }>;
+  }
+) {
+  const params = await props.params;
+
+  const {
+    slug
+  } = params;
+
   const post = getBlogPosts().find((post) => post.slug === slug);
 
   if (!post) {

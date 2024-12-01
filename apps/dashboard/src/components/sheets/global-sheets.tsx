@@ -16,7 +16,7 @@ type Props = {
 
 export async function GlobalSheets({ defaultCurrency }: Props) {
   const { data: userData } = await getUser();
-  const bookingId = cookies().get(Cookies.LastBooking)?.value;
+  const bookingId = (await cookies()).get(Cookies.LastBooking)?.value;
 
   return (
     <>

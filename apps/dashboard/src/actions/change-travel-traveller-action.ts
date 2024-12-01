@@ -13,7 +13,7 @@ export const changeTravelTravellerAction = authActionClient
     name: "change-travel-traveller",
   })
   .action(async ({ parsedInput: value, ctx: { user } }) => {
-    cookies().set({
+    (await cookies()).set({
       name: Cookies.TravelTraveller,
       value,
       expires: addYears(new Date(), 1),

@@ -1,4 +1,4 @@
-import { headers } from "next/headers";
+import { headers, type UnsafeUnwrappedHeaders } from "next/headers";
 import countries from "./countries.json";
 import flags from "./country-flags";
 import { currencies } from "./currencies";
@@ -6,15 +6,15 @@ import { EU_COUNTRY_CODES } from "./eu-countries";
 import timezones from "./timezones.json";
 
 export function getCountryCode() {
-  return headers().get("x-vercel-ip-country") || "SE";
+  return (headers() as unknown as UnsafeUnwrappedHeaders).get("x-vercel-ip-country") || "SE";
 }
 
 export function getTimezone() {
-  return headers().get("x-vercel-ip-timezone") || "Europe/Berlin";
+  return (headers() as unknown as UnsafeUnwrappedHeaders).get("x-vercel-ip-timezone") || "Europe/Berlin";
 }
 
 export function getLocale() {
-  return headers().get("x-vercel-ip-locale") || "en-US";
+  return (headers() as unknown as UnsafeUnwrappedHeaders).get("x-vercel-ip-locale") || "en-US";
 }
 
 export function getTimezones() {
@@ -66,7 +66,7 @@ export function getCountryInfo() {
 }
 
 export function isEU() {
-  const countryCode = headers().get("x-vercel-ip-country");
+  const countryCode = (headers() as unknown as UnsafeUnwrappedHeaders).get("x-vercel-ip-country");
 
   if (countryCode && EU_COUNTRY_CODES.includes(countryCode)) {
     return true;

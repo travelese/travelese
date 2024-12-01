@@ -39,7 +39,7 @@ export async function submitUserMessage(
   content: string,
 ): Promise<ClientMessage> {
   "use server";
-  const ip = headers().get("x-forwarded-for");
+  const ip = (await headers()).get("x-forwarded-for");
   const { success } = await ratelimit.limit(ip ?? "");
 
   logger("Submitting user message", { content, ip });
