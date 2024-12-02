@@ -19,7 +19,7 @@ export async function PlaneDetails({
         <div className="absolute left-0 top-0 w-full h-full">
           <Image
             className="absolute inset-0 object-cover"
-            src={BackgroundGlow}
+            src="/assets/background-glow.svg"
             alt=""
             fill
             priority
@@ -27,14 +27,14 @@ export async function PlaneDetails({
           <div className="stars-container absolute inset-0 mix-blend-lighten opacity-60">
             <Image
               className="absolute inset-0 object-contain"
-              src={Stars}
+              src="/assets/stars.svg"
               alt="starts"
               fill
               priority
             />
             <Image
               className="absolute inset-0 object-contain -translate-x-full"
-              src={Stars}
+              src="/assets/stars.svg"
               alt="starts"
               fill
             />
@@ -42,7 +42,7 @@ export async function PlaneDetails({
           <div className="absolute inset-4">
             <Image
               className="absolute inset-0 object-contain"
-              src={Plane}
+              src="/assets/plane.svg"
               alt="plane"
               fill
               priority
