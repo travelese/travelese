@@ -127,7 +127,7 @@ export function Planes({
             <Image
               width={80}
               height={80}
-              src={NyanCat}
+              src="/assets/nyan.gif"
               alt="Nyan Cat"
               className="-rotate-90"
             />
