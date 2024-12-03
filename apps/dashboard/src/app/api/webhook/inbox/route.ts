@@ -4,9 +4,9 @@ import { getAllowedAttachments, prepareDocument } from "@travelese/documents";
 import { LogEvents } from "@travelese/events/events";
 import { setupAnalytics } from "@travelese/events/server";
 import { getInboxIdFromEmail, inboxWebhookPostSchema } from "@travelese/inbox";
-import { client as BackgroundClient, Events } from "@travelese/jobs";
 import { client as RedisClient } from "@travelese/kv";
 import { createClient } from "@travelese/supabase/server";
+import { tasks } from "@trigger.dev/sdk/v3";
 import { nanoid } from "nanoid";
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
@@ -206,12 +206,9 @@ export async function POST(req: Request) {
 
     await Promise.all(
       inboxData?.map((inbox) =>
-        BackgroundClient.sendEvent({
-          name: Events.INBOX_DOCUMENT,
-          payload: {
-            recordId: inbox.id,
-            teamId,
-          },
+        tasks.trigger("inbox-document", {
+          recordId: inbox.id,
+          teamId,
         }),
       ),
     );

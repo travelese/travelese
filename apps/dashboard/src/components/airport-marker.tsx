@@ -38,7 +38,13 @@ export function AirportMarker() {
         <div className="marker-pulse-container">
           <div className="marker-pulse"></div>
         </div>
-        <Image className="relative" src={CircleMarker} alt="Circle Marker" />
+        <Image
+          className="relative"
+          src="/assets/circle-marker.svg"
+          alt="Circle Marker"
+          width={23}
+          height={23}
+        />
       </div>
     </div>
   );
