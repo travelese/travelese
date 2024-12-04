@@ -1,82 +1,38 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+# Learn more https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files
 
 # dependencies
-/node_modules
-/.pnp
-.pnp.js
+node_modules/
 
-# testing
-/coverage
+# Expo
+.expo/
+dist/
+web-build/
+expo-env.d.ts
 
-# next.js
-/.next/
-/out/
+# Native
+*.orig.*
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
 
-# production
-/build
+# Metro
+.metro-health-check*
 
-# misc
+# debug
+npm-debug.*
+yarn-debug.*
+yarn-error.*
+
+# macOS
 .DS_Store
 *.pem
 
-# debug
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-
 # local env files
 .env*.local
-.dev.vars
-
-# vercel
-.vercel
 
 # typescript
 *.tsbuildinfo
-next-env.d.ts
 
-# Sentry Config File
-.env.sentry-build-plugin
-
-# Bun
-bun.lockb
-
-# IDE
-.vscode/
-.idea/
-
-# Logs
-logs
-*.log
-
-# OS generated files
-.DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
-Thumbs.db
-
-# Build output
-/dist
-
-# Yarn
-.yarn/*
-!.yarn/patches
-!.yarn/plugins
-!.yarn/releases
-!.yarn/sdks
-!.yarn/versions
-.pnp.*
-
-# Turborepo
-.turbo
-
-# wrangler
-.wrangler
-
-# Supabase
-.branches
-.temp
-.env
+app-example
