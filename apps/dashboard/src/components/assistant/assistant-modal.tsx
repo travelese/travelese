@@ -6,7 +6,7 @@ import { useHotkeys } from "react-hotkeys-hook";
 import { Assistant } from ".";
 
 export function AssistantModal() {
-  const { isOpen, setOpen } = useAssistantStore();
+  const { isOpen, setOpen, isMaximized } = useAssistantStore();
 
   useHotkeys("meta+t", () => setOpen(), {
     enableOnFormTags: true,
@@ -15,7 +15,11 @@ export function AssistantModal() {
   return (
     <Dialog open={isOpen} onOpenChange={setOpen}>
       <DialogContent
-        className="overflow-hidden p-0 max-w-full w-full h-full md:max-w-[740px] md:h-[480px] m-0 select-text"
+        className={`overflow-hidden p-0 select-text ${
+          isMaximized
+            ? "w-screen h-screen max-w-none m-0"
+            : "max-w-full w-full h-full md:max-w-[740px] md:h-[480px] m-0"
+        }`}
         hideClose
       >
         <Assistant />
