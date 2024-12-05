@@ -4,6 +4,7 @@ import type { AI } from "@/actions/ai/chat";
 import { getUIStateFromAIState } from "@/actions/ai/chat/utils";
 import { getChat } from "@/actions/ai/storage";
 import { Chat } from "@/components/chat";
+import { useAssistantStore } from "@/store/assistant";
 import { useAIState, useUIState } from "ai/rsc";
 import { nanoid } from "nanoid";
 import { useEffect, useState } from "react";
@@ -14,6 +15,7 @@ import { SidebarList } from "./sidebar-list";
 
 export function Assistant() {
   const [isExpanded, setExpanded] = useState(false);
+  const { isMaximized } = useAssistantStore();
   const [showFeedback, setShowFeedback] = useState(false);
   const [chatId, setChatId] = useState();
   const [messages, setMessages] = useUIState<typeof AI>();
@@ -54,7 +56,13 @@ export function Assistant() {
   }, [chatId]);
 
   return (
-    <div className="overflow-hidden p-0 h-full w-full todesktop:max-w-[760px] md:max-w-[760px] md:h-[480px] todesktop:h-[480px]">
+    <div
+      className={`overflow-hidden p-0 h-full w-full ${
+        isMaximized
+          ? "w-screen"
+          : "todesktop:max-w-[760px] md:max-w-[760px] md:h-[480px] todesktop:h-[480px]"
+      }`}
+    >
       {showFeedback && (
         <AssistantFeedback onClose={() => setShowFeedback(false)} />
       )}

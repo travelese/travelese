@@ -16,9 +16,9 @@ import {
 } from "@kiwicom/orbit-components/icons";
 import { ArchiveIcon } from "@radix-ui/react-icons";
 import { CloudFogIcon } from "lucide-react";
-import { CiDumbbell } from "react-icons/ci";
+import { CiDumbbell, CiMaximize1, CiMinimize1 } from "react-icons/ci";
 import { FaXTwitter } from "react-icons/fa6";
-import { FiGithub, FiLoader } from "react-icons/fi";
+import { FiGithub, FiLoader, FiMaximize2, FiMinimize2 } from "react-icons/fi";
 import { GrLounge } from "react-icons/gr";
 import {
   LuBedDouble,
@@ -134,6 +134,8 @@ import {
   MdOutlineLocalLaundryService,
   MdOutlineLocationOn,
   MdOutlineLuggage,
+  MdOutlineMaximize,
+  MdOutlineMinimize,
   MdOutlineMoreTime,
   MdOutlineMoreVert,
   MdOutlineMoveToInbox,
@@ -811,4 +813,6 @@ export const Icons = {
   CurrencyOutline: MdOutlineAttachMoney,
   SnippetFolder: MdSnippetFolder,
   QrCode: MdOutlineQrCode2,
+  Minimize: FiMinimize2,
+  Maximize: FiMaximize2,
 };

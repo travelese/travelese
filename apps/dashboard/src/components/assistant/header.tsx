@@ -9,10 +9,14 @@ type Props = {
 };
 
 export function Header({ toggleSidebar, isExpanded }: Props) {
-  const { setOpen } = useAssistantStore();
+  const { setOpen, isMaximized, setMaximized } = useAssistantStore();
 
   return (
-    <div className="px-4 py-3 flex justify-between items-center border-border border-b-[1px]">
+    <div
+      className={`px-4 py-3 flex justify-between items-center border-border border-b-[1px] ${
+        isMaximized ? "w-screen" : ""
+      }`}
+    >
       <div className="flex items-center space-x-3">
         <Button
           variant="outline"
@@ -27,6 +31,14 @@ export function Header({ toggleSidebar, isExpanded }: Props) {
           )}
         </Button>
 
+        <Button
+          size="icon"
+          variant="outline"
+          className="size-8 z-50 p-0"
+          onClick={() => setMaximized(!isMaximized)}
+        >
+          {isMaximized ? <Icons.Minimize /> : <Icons.Maximize />}
+        </Button>
         <h2>Assistant</h2>
       </div>
 
