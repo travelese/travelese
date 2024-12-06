@@ -1,6 +1,7 @@
 import {
   OpenTravelBookSheet,
   OpenTravelChangeSheet,
+  OpenTravelExploreSheet,
   OpenTravelSearchSheet,
 } from "@/components/open-travel-sheet";
 import { Table } from "@/components/tables/travel";
@@ -63,6 +64,7 @@ export default async function Travel({ searchParams }: Props) {
         <div className="flex space-x-2">
           <TravelSearchFilter />
           <OpenTravelSearchSheet />
+          <OpenTravelExploreSheet />
           <OpenTravelChangeSheet />
           <OpenTravelBookSheet />
         </div>
