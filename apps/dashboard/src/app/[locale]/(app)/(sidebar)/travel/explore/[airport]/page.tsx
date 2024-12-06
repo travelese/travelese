@@ -2,7 +2,8 @@ import { Map } from "@/components/map";
 import { Planes } from "@/components/planes";
 import { getFlights } from "@/utils/get-flights";
 
-export default async function Page({ params }) {
+export default async function Page(props) {
+  const params = await props.params;
   const flights = await getFlights(params);
 
   return (

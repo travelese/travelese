@@ -13,9 +13,8 @@ export const metadata: Metadata = {
   title: "Join team | Travelese",
 };
 
-export default async function InviteCode({
-  params,
-}: { params: { code: string } }) {
+export default async function InviteCode(props: { params: Promise<{ code: string }> }) {
+  const params = await props.params;
   const supabase = createClient();
   const { code } = params;
 

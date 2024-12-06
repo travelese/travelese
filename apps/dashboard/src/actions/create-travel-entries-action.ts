@@ -25,7 +25,7 @@ export const createTravelEntriesAction = authActionClient
   })
   .action(
     async ({ parsedInput: { dates, ...params }, ctx: { supabase, user } }) => {
-      cookies().set(Cookies.LastBooking, params.booking_id);
+      (await cookies()).set(Cookies.LastBooking, params.booking_id);
 
       const entries = dates.map((date) => ({
         ...params,

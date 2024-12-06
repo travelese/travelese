@@ -1,7 +1,11 @@
 {
   "name": "travelese",
   "private": true,
-  "workspaces": ["packages/*", "apps/*", "packages/email/*"],
+  "workspaces": [
+    "packages/*",
+    "apps/*",
+    "packages/email/*"
+  ],
   "scripts": {
     "build": "turbo build",
     "clean": "git clean -xdf node_modules",
@@ -25,7 +29,10 @@
     "@biomejs/biome": "1.9.4",
     "@manypkg/cli": "^0.22.0",
     "turbo": "^2.3.3",
-    "typescript": "^5.6.3"
+    "typescript": "^5.6.3",
+    "next": "15.0.3",
+    "react": "18.3.1",
+    "react-dom": "18.3.1"
   },
   "packageManager": "bun@1.1.27",
   "resolutions": {

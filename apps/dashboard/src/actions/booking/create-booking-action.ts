@@ -28,7 +28,7 @@ export const createBookingAction = authActionClient
       throw new Error("Failed to create booking");
     }
 
-    cookies().set({
+    (await cookies()).set({
       name: Cookies.LastBooking,
       value: data.id,
       expires: addYears(new Date(), 1),

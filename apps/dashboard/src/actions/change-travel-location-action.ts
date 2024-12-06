@@ -16,7 +16,7 @@ export const changeTravelLocationAction = authActionClient
     const cookieName =
       type === "origin" ? Cookies.TravelOrigin : Cookies.TravelDestination;
 
-    cookies().set({
+    (await cookies()).set({
       name: cookieName,
       value,
       expires: addYears(new Date(), 1),

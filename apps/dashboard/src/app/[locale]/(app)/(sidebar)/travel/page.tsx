@@ -20,16 +20,17 @@ export const metadata: Metadata = {
 };
 
 type Props = {
-  searchParams: {
+  searchParams: Promise<{
     statuses: string;
     sort: string;
     q: string;
     start?: string;
     end?: string;
-  };
+  }>;
 };
 
-export default async function Travel({ searchParams }: Props) {
+export default async function Travel(props: Props) {
+  const searchParams = await props.searchParams;
   const status = searchParams?.statuses;
   const sort = searchParams?.sort?.split(":") ?? ["status", "asc"];
 

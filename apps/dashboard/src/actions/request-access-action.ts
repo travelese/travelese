@@ -9,7 +9,7 @@ export const requestAccessAction = authActionClient
     name: "request-access",
   })
   .action(async () => {
-    cookies().set(Cookies.RequestAccess, "true");
+    (await cookies()).set(Cookies.RequestAccess, "true");
 
     return true;
   });
