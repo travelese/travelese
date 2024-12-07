@@ -7,6 +7,7 @@ import {
 import { Table } from "@/components/tables/travel";
 import { Loading } from "@/components/tables/travel/loading";
 import { TravelCalendar } from "@/components/travel-calendar";
+import TravelExplore from "@/components/travel-explore";
 import { TravelSearchFilter } from "@/components/travel-search-filters";
 import {
   getTravelRecordsByRange,
@@ -27,12 +28,14 @@ type Props = {
     q: string;
     start?: string;
     end?: string;
+    explore?: string;
   };
 };
 
 export default async function Travel({ searchParams }: Props) {
   const status = searchParams?.statuses;
   const sort = searchParams?.sort?.split(":") ?? ["status", "asc"];
+  const explore = searchParams?.explore;
 
   const currentDate =
     searchParams?.date ?? formatISO(new Date(), { representation: "date" });
@@ -51,12 +54,16 @@ export default async function Travel({ searchParams }: Props) {
 
   return (
     <div>
-      <TravelCalendar
-        weekStartsOnMonday={userData?.week_starts_on_monday}
-        timeFormat={userData?.time_format}
-        data={data}
-        meta={meta}
-      />
+      {explore ? (
+        <TravelExplore params={{ explore }} />
+      ) : (
+        <TravelCalendar
+          weekStartsOnMonday={userData?.week_starts_on_monday}
+          timeFormat={userData?.time_format}
+          data={data}
+          meta={meta}
+        />
+      )}
 
       <div className="mt-14 mb-6 flex items-center justify-between space-x-4">
         <h2 className="text-md font-medium">Bookings</h2>

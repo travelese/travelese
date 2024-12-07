@@ -211,4 +211,8 @@ export const LogEvents = {
     name: "Get Loyalty Programme",
     channel: "travel",
   },
+  ExploreTravel: {
+    name: "Explore Travel",
+    channel: "travel",
+  },
 };
