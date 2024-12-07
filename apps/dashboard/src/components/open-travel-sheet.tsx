@@ -10,6 +10,27 @@ import {
   TooltipTrigger,
 } from "@travelese/ui/tooltip";
 
+export function OpenTravelExploreSheet() {
+  const { setParams } = useTravelParams();
+
+  return (
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => setParams({ explore: true })}
+          >
+            <Icons.Explore />
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent>Explore destinations</TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  );
+}
+
 export function OpenTravelSearchSheet() {
   const { setParams } = useTravelParams();
 

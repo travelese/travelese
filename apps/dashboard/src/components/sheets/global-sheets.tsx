@@ -8,6 +8,7 @@ import { InvoiceCommentsSheet } from "./invoice-comments";
 import { InvoiceCreateSheetServer } from "./invoice-create-sheet.server";
 import { BookTravelSheet } from "./travel-book-sheet";
 import { ChangeTravelSheet } from "./travel-change-sheet";
+import { ExploreTravelSheet } from "./travel-explore-sheet";
 import { SearchTravelSheet } from "./travel-search-sheet";
 
 type Props = {
@@ -21,6 +22,7 @@ export async function GlobalSheets({ defaultCurrency }: Props) {
   return (
     <>
       <SearchTravelSheet userId={userData?.id} currency={defaultCurrency} />
+      <ExploreTravelSheet userId={userData?.id} currency={defaultCurrency} />
       <BookTravelSheet userId={userData?.id} currency={defaultCurrency} />
       <ChangeTravelSheet userId={userData?.id} currency={defaultCurrency} />
 

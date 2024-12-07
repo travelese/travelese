@@ -16,6 +16,7 @@ export function useTravelParams() {
     search: parseAsBoolean.withDefault(false), // Controls search sheet
     book: parseAsBoolean.withDefault(false), // Controls book sheet
     change: parseAsBoolean.withDefault(false), // Controls change sheet
+    explore: parseAsBoolean.withDefault(false), // Controls explore sheet
     date: parseAsString.withDefault(
       formatISO(new Date(), { representation: "date" }),
     ),
@@ -25,6 +26,15 @@ export function useTravelParams() {
     ...params,
     setParams,
   };
+}
+
+// Explore params
+export function useTravelExploreParams() {
+  const [params, setParams] = useQueryStates({
+    explore: parseAsString,
+  });
+
+  return { ...params, setParams };
 }
 
 // Search params for both flights and stays
