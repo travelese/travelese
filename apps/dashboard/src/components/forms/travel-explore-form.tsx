@@ -1,7 +1,7 @@
 "use client";
 
+import type { exploreTravelSchema } from "@/actions/schema";
 import { TravelLocation } from "@/components/travel-location";
-import { Button } from "@travelese/ui/button";
 import {
   Form,
   FormControl,
@@ -9,22 +9,23 @@ import {
   FormItem,
   FormMessage,
 } from "@travelese/ui/form";
-import { Icons } from "@travelese/ui/icons";
 import { SubmitButton } from "@travelese/ui/submit-button";
 import type { UseFormReturn } from "react-hook-form";
 import type { z } from "zod";
 
 interface Props {
-  form: UseFormReturn;
-  onSubmit: () => void;
+  form: UseFormReturn<z.infer<typeof exploreTravelSchema>>;
+  onSubmit: (data: z.infer<typeof exploreTravelSchema>) => void;
   isSubmitting: boolean;
-  onQueryParamsChange: (updates: Partial<Record<string, string>>) => void;
+  defaultValues?: z.infer<typeof exploreTravelSchema>;
+  onQueryParamsChange: (updates: z.infer<typeof exploreTravelSchema>) => void;
 }
 
 export function ExploreTravelForm({
   form,
   onSubmit,
   isSubmitting,
+  defaultValues,
   onQueryParamsChange,
 }: Props) {
   return (
@@ -38,14 +39,26 @@ export function ExploreTravelForm({
               <FormItem>
                 <FormControl>
                   <TravelLocation
-                    type="destination"
+                    type="explore"
                     placeholder="Destination"
-                    value={field.value}
-                    onChange={(value, iataCode) => {
-                      field.onChange(iataCode);
-                      onQueryParamsChange({
-                        explore: iataCode,
-                      });
+                    value={
+                      field.value?.latitude && field.value?.longitude
+                        ? `${field.value.latitude},${field.value.longitude}`
+                        : ""
+                    }
+                    onChange={(value, iataCode, geoCode) => {
+                      if (geoCode) {
+                        field.onChange({
+                          latitude: geoCode.latitude,
+                          longitude: geoCode.longitude,
+                        });
+                        onQueryParamsChange({
+                          explore: {
+                            latitude: geoCode.latitude,
+                            longitude: geoCode.longitude,
+                          },
+                        });
+                      }
                     }}
                   />
                 </FormControl>

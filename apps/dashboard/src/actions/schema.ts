@@ -572,6 +572,16 @@ export const changeTravelPeriodSchema = z.object({
   to: z.string().optional(),
 });
 
+export const exploreTravelSchema = z.object({
+  user_id: z.string(),
+  explore: z.object({
+    latitude: z.number(),
+    longitude: z.number(),
+  }),
+});
+
+export type ExploreTravelFormValues = z.infer<typeof exploreTravelSchema>;
+
 export const searchTravelSchema = z.object({
   search_type: z.enum(["flights", "stays"]),
 
