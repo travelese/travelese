@@ -4,6 +4,7 @@ export const Cookies = {
   TravelCabin: "travel-cabin",
   TravelTraveller: "travel-traveller",
   TravelBaggage: "travel-baggage",
+  TravelRooms: "travel-rooms",
   TravelOrigin: "travel-origin",
   TravelDestination: "travel-destination",
   TravelPeriod: "travel-period",

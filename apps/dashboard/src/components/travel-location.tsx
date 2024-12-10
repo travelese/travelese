@@ -12,12 +12,8 @@ import { useMemo, useState } from "react";
 interface LocationSelectorProps {
   placeholder: string;
   value: string;
-  onChange: (
-    value: string,
-    iataCode: string,
-    geoCode?: { latitude: number; longitude: number }, // Renamed from coordinates
-  ) => void;
-  type: "origin" | "destination" | "explore";
+  onChange: (value: string, place: Places) => void;
+  type: "origin" | "destination";
 }
 
 export function TravelLocation({
@@ -44,15 +40,7 @@ export function TravelLocation({
         ? `${place.name} (${place.iata_code})`
         : `${place.city_name} (${place.iata_code})`;
 
-    const iataCode =
-      place.type === "city" ? place.iata_city_code : place.iata_code;
-
-    const geoCode =
-      place.type === "airport"
-        ? { latitude: place.latitude, longitude: place.longitude }
-        : undefined;
-
-    onChange(selectedValue, iataCode, geoCode);
+    onChange(selectedValue, place);
     setIsOpen(false);
   };
 

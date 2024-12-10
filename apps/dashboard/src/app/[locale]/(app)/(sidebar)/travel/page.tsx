@@ -28,14 +28,14 @@ type Props = {
     q: string;
     start?: string;
     end?: string;
-    explore?: string;
+    geocode?: string;
   };
 };
 
 export default async function Travel({ searchParams }: Props) {
   const status = searchParams?.statuses;
   const sort = searchParams?.sort?.split(":") ?? ["status", "asc"];
-  const explore = searchParams?.explore;
+  const geocode = searchParams?.geocode;
 
   const currentDate =
     searchParams?.date ?? formatISO(new Date(), { representation: "date" });
@@ -54,8 +54,8 @@ export default async function Travel({ searchParams }: Props) {
 
   return (
     <div>
-      {explore ? (
-        <TravelExplore params={{ explore }} />
+      {geocode ? (
+        <TravelExplore />
       ) : (
         <TravelCalendar
           weekStartsOnMonday={userData?.week_starts_on_monday}
