@@ -18,7 +18,7 @@ import { ScrollArea } from "@travelese/ui/scroll-area";
 import { Sheet, SheetContent, SheetHeader } from "@travelese/ui/sheet";
 import { useToast } from "@travelese/ui/use-toast";
 import { useAction } from "next-safe-action/hooks";
-import { parseAsString, useQueryStates } from "nuqs";
+import { parseAsJson, parseAsString, useQueryStates } from "nuqs";
 import React from "react";
 import { useForm } from "react-hook-form";
 import type { z } from "zod";
@@ -34,7 +34,13 @@ export function ExploreTravelSheet({ userId, currency }: Props) {
   const { explore, setParams } = useTravelParams();
 
   const [queryParams, setQueryParams] = useQueryStates({
-    explore: parseAsString.withDefault(""),
+    explore: parseAsJson<{
+      latitude: number;
+      longitude: number;
+    }>().withDefault({
+      latitude: 0,
+      longitude: 0,
+    }),
   });
 
   const form = useForm<z.infer<typeof exploreTravelSchema>>({
@@ -49,10 +55,14 @@ export function ExploreTravelSheet({ userId, currency }: Props) {
     onSuccess: ({ data }) => {
       toast({
         title: "Explore Found",
-        description: "Found 10 options",
+        description: `Found ${data?.data.length} flights`,
         variant: "success",
       });
       setParams({ explore: false });
+      setQueryParams((prev) => ({
+        ...prev,
+        explore: form.getValues().explore,
+      }));
       form.reset();
     },
     onError: () => {
@@ -68,7 +78,11 @@ export function ExploreTravelSheet({ userId, currency }: Props) {
     return (
       <Sheet
         open={explore}
-        onOpenChange={(open) => setParams({ explore: open })}
+        onOpenChange={(open) => {
+          if (!open) {
+            setParams({ explore: false });
+          }
+        }}
       >
         <SheetContent>
           <SheetHeader className="mb-8 flex justify-between items-center flex-row">
@@ -91,11 +105,10 @@ export function ExploreTravelSheet({ userId, currency }: Props) {
             <ExploreTravelForm
               form={form}
               isSubmitting={exploreAction.status === "executing"}
-              onSubmit={exploreAction.execute}
+              onSubmit={() => exploreAction.execute(form.getValues())}
               onQueryParamsChange={(updates) =>
                 setQueryParams((prev) => ({ ...prev, ...updates }))
               }
-              defaultValues={form.getValues()}
             />
           </ScrollArea>
         </SheetContent>
@@ -132,11 +145,10 @@ export function ExploreTravelSheet({ userId, currency }: Props) {
         <ExploreTravelForm
           form={form}
           isSubmitting={exploreAction.status === "executing"}
-          onSubmit={exploreAction.execute}
+          onSubmit={() => exploreAction.execute(form.getValues())}
           onQueryParamsChange={(updates) =>
             setQueryParams((prev) => ({ ...prev, ...updates }))
           }
-          defaultValues={form.getValues()}
         />
       </DrawerContent>
     </Drawer>
