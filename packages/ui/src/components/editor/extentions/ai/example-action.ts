@@ -1,6 +1,6 @@
 "use server";
 
-import { openai } from "@ai-sdk/openai";
+import { xai } from "@ai-sdk/xai";
 import { streamText } from "ai";
 import { createStreamableValue } from "ai/rsc";
 
@@ -14,7 +14,7 @@ export async function generateEditorContent({ input, context }: Params) {
 
   (async () => {
     const { textStream } = await streamText({
-      model: openai("gpt-4o-mini"),
+      model: xai("grok-beta"),
       prompt: input,
       temperature: 0.8,
       system: `
