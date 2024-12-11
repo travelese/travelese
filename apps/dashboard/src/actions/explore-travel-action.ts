@@ -1,38 +1,22 @@
 "use server";
 
 import { authActionClient } from "@/actions/safe-action";
-import { exploreTravelSchema } from "@/actions/schema";
+import {
+  type FlightPosition,
+  flightPositionsRequestSchema,
+} from "@/actions/schema";
 import { logger } from "@/utils/logger";
 import { LogEvents } from "@travelese/events/events";
 import { getBoundsOfDistance } from "geolib";
 
-type Flight = {
-  fr24_id: string;
-  flight: string;
-  callsign: string;
-  lat: number;
-  lon: number;
-  track: number;
-  alt: number;
-  gspeed: number;
-  vspeed: number;
-  squawk: string;
-  timestamp: string;
-  source: string;
-  hex: string;
-  type: string;
-  reg: string;
-  painted_as: string;
-  operating_as: string;
-  orig_iata: string;
-  orig_icao: string;
-  dest_iata: string;
-  dest_icao: string;
-  eta: string;
-};
-
-async function getFlights({ explore }: { explore: string }) {
-  const [latitude, longitude] = explore.split(",").map(Number);
+async function getFlights({
+  geo_code,
+  iata_code,
+}: {
+  geo_code: { latitude: number; longitude: number };
+  iata_code: string;
+}) {
+  const { latitude, longitude } = geo_code;
 
   const baseUrl =
     "https://fr24api.flightradar24.com/api/live/flight-positions/full";
@@ -57,7 +41,7 @@ async function getFlights({ explore }: { explore: string }) {
   }
 
   const data = await response.json();
-  return data.data as Flight[];
+  return data.data as FlightPosition[];
 }
 
 function getBounds(latitude: number, longitude: number) {
@@ -69,8 +53,8 @@ function getBounds(latitude: number, longitude: number) {
   return `${northEast?.latitude},${southWest?.latitude},${southWest?.longitude},${northEast?.longitude}`;
 }
 
-export const exploreTravelAction = authActionClient
-  .schema(exploreTravelSchema)
+export const flightPositionsAction = authActionClient
+  .schema(flightPositionsRequestSchema)
   .metadata({
     name: "explore-travel",
     track: {
@@ -79,16 +63,16 @@ export const exploreTravelAction = authActionClient
     },
   })
   .action(async ({ parsedInput }) => {
-    console.log("Action received:", parsedInput);
     try {
-      const flights = await getFlights({ explore: parsedInput.explore });
+      const flights = await getFlights({
+        geo_code: parsedInput.geo_code,
+        iata_code: parsedInput.iata_code,
+      });
       return { data: flights };
     } catch (error) {
       logger("Unexpected Error", error);
       throw new Error(
-        `Failed to get flights: ${
-          error instanceof Error ? error.message : "Unknown error"
-        }`,
+        `Failed to get flights: ${error instanceof Error ? error.message : "Unknown error"}`,
       );
     }
   });
