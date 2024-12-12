@@ -224,16 +224,17 @@ export function SearchTravelForm({
                             type="origin"
                             placeholder="Origin"
                             value={field.value}
-                            onChange={(value, iataCode) => {
-                              field.onChange(iataCode || "");
+                            onChange={(value, place) => {
+                              field.onChange(value, place);
                               onQueryParamsChange({
-                                slices: form
-                                  .getValues("slices")
-                                  ?.map((s, i) =>
-                                    i === index
-                                      ? { ...s, origin: iataCode }
-                                      : s,
-                                  ),
+                                slices: form.getValues("slices")?.map((s, i) =>
+                                  i === index
+                                    ? {
+                                        ...s,
+                                        origin: place.iata_code,
+                                      }
+                                    : s,
+                                ),
                               });
                             }}
                           />
@@ -253,16 +254,17 @@ export function SearchTravelForm({
                             type="destination"
                             placeholder="Destination"
                             value={field.value}
-                            onChange={(value, iataCode) => {
-                              field.onChange(iataCode);
+                            onChange={(value, place) => {
+                              field.onChange(value);
                               onQueryParamsChange({
-                                slices: form
-                                  .getValues("slices")
-                                  ?.map((s, i) =>
-                                    i === index
-                                      ? { ...s, destination: iataCode }
-                                      : s,
-                                  ),
+                                slices: form.getValues("slices")?.map((s, i) =>
+                                  i === index
+                                    ? {
+                                        ...s,
+                                        destination: place.iata_code,
+                                      }
+                                    : s,
+                                ),
                               });
                             }}
                           />

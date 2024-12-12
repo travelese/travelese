@@ -1,6 +1,6 @@
 "use client";
 
-import type { exploreTravelSchema } from "@/actions/schema";
+import type { FlightPositionsRequest } from "@/actions/schema";
 import { TravelLocation } from "@/components/travel-location";
 import {
   Form,
@@ -11,17 +11,16 @@ import {
 } from "@travelese/ui/form";
 import { SubmitButton } from "@travelese/ui/submit-button";
 import type { UseFormReturn } from "react-hook-form";
-import type { z } from "zod";
 
 interface Props {
-  form: UseFormReturn<z.infer<typeof exploreTravelSchema>>;
-  onSubmit: (data: z.infer<typeof exploreTravelSchema>) => void;
+  form: UseFormReturn<FlightPositionsRequest>;
+  onSubmit: (data: FlightPositionsRequest) => void;
   isSubmitting: boolean;
-  defaultValues?: z.infer<typeof exploreTravelSchema>;
-  onQueryParamsChange: (updates: z.infer<typeof exploreTravelSchema>) => void;
+  defaultValues?: FlightPositionsRequest;
+  onQueryParamsChange: (updates: FlightPositionsRequest) => void;
 }
 
-export function ExploreTravelForm({
+export function FlightPositionsForm({
   form,
   onSubmit,
   isSubmitting,
@@ -34,31 +33,23 @@ export function ExploreTravelForm({
         <div className="grid grid-cols-1 gap-2 mb-3 mx-auto max-w-4xl">
           <FormField
             control={form.control}
-            name="explore"
+            name="geo_code"
             render={({ field }) => (
               <FormItem>
                 <FormControl>
                   <TravelLocation
-                    type="explore"
+                    type="destination"
                     placeholder="Destination"
-                    value={
-                      field.value?.latitude && field.value?.longitude
-                        ? `${field.value.latitude},${field.value.longitude}`
-                        : ""
-                    }
-                    onChange={(value, iataCode, geoCode) => {
-                      if (geoCode) {
-                        field.onChange({
-                          latitude: geoCode.latitude,
-                          longitude: geoCode.longitude,
-                        });
-                        onQueryParamsChange({
-                          explore: {
-                            latitude: geoCode.latitude,
-                            longitude: geoCode.longitude,
-                          },
-                        });
-                      }
+                    value={field.value}
+                    onChange={(value, place) => {
+                      field.onChange(value);
+                      onQueryParamsChange({
+                        geo_code: {
+                          latitude: place.latitude || 0,
+                          longitude: place.longitude || 0,
+                        },
+                        iata_code: place.iata_code || "",
+                      });
                     }}
                   />
                 </FormControl>
