@@ -12,7 +12,7 @@ import { useMemo, useState } from "react";
 interface LocationSelectorProps {
   placeholder: string;
   value: string;
-  onChange: (value: string, place: Places) => void;
+  onChange: (value: string, place: Places | null) => void;
   type: "origin" | "destination";
 }
 
@@ -40,7 +40,7 @@ export function TravelLocation({
         ? `${place.name} (${place.iata_code})`
         : `${place.city_name} (${place.iata_code})`;
 
-    onChange(selectedValue, place);
+    onChange(place.iata_code, place);
     setIsOpen(false);
   };
 
@@ -50,11 +50,11 @@ export function TravelLocation({
     if (newQuery.length >= 1) {
       fetchPlaces({ query: newQuery });
     }
-    onChange(newQuery, "");
+    onChange(newQuery, null);
   };
 
   const clearSelection = () => {
-    onChange("", "");
+    onChange("", null);
     setSearchQuery("");
   };
 

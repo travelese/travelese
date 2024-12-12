@@ -123,6 +123,10 @@ export default {
     child: "Child",
     infant_without_seat: "Infant",
   },
+  travel_guest: {
+    adult: "Adult",
+    child: "Child",
+  },
   travel_baggage: {
     cabin: "Cabin",
     carry_on: "Carry on",

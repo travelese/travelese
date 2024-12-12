@@ -96,7 +96,7 @@ export function SearchTravelSheet({ userId, currency }: Props) {
     onSuccess: ({ data }) => {
       toast({
         title: `${data?.type === "flights" ? "Flights" : "Stays"} Found`,
-        description: `Found ${data?.data?.length} options`,
+        description: `Found ${data?.offersId?.length} options`,
         variant: "success",
       });
       setParams({ search: false });

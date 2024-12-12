@@ -231,7 +231,7 @@ export function SearchTravelForm({
                                   i === index
                                     ? {
                                         ...s,
-                                        origin: place.iata_code,
+                                        origin: place?.iata_code,
                                       }
                                     : s,
                                 ),
@@ -261,7 +261,7 @@ export function SearchTravelForm({
                                   i === index
                                     ? {
                                         ...s,
-                                        destination: place.iata_code,
+                                        destination: place?.iata_code,
                                       }
                                     : s,
                                 ),
