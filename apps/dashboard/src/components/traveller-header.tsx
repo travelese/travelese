@@ -7,7 +7,7 @@ type Props = {
   status: "overdue" | "paid" | "unpaid" | "draft" | "canceled";
 };
 
-export default function CustomerHeader({ name, website, status }: Props) {
+export default function TravellerHeader({ name, website, status }: Props) {
   return (
     <div className="flex justify-between items-center mb-4">
       <div className="flex items-center space-x-2">

@@ -4,22 +4,22 @@ import { LogEvents } from "@travelese/events/events";
 import { generateToken } from "@travelese/invoice/token";
 import { revalidateTag } from "next/cache";
 import { authActionClient } from "./safe-action";
-import { createCustomerSchema } from "./schema";
+import { createTravellerSchema } from "./schema";
 
-export const createCustomerAction = authActionClient
-  .schema(createCustomerSchema)
+export const createTravellerAction = authActionClient
+  .schema(createTravellerSchema)
   .metadata({
-    name: "create-customer",
+    name: "create-traveller",
     track: {
-      event: LogEvents.CreateCustomer.name,
-      channel: LogEvents.CreateCustomer.channel,
+      event: LogEvents.CreateTraveller.name,
+      channel: LogEvents.CreateTraveller.channel,
     },
   })
   .action(async ({ parsedInput: input, ctx: { user, supabase } }) => {
     const token = await generateToken(user.id);
 
     const { data } = await supabase
-      .from("customers")
+      .from("travellers")
       .upsert(
         {
           ...input,
@@ -33,7 +33,7 @@ export const createCustomerAction = authActionClient
       .select("id, name")
       .single();
 
-    revalidateTag(`customers_${user.team_id}`);
+    revalidateTag(`travellers_${user.team_id}`);
 
     return data;
   });

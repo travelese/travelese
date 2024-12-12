@@ -1,8 +1,8 @@
 "use client";
 
-import { exploreTravelAction } from "@/actions/explore-travel-action";
-import { exploreTravelSchema } from "@/actions/schema";
-import { ExploreTravelForm } from "@/components/forms/travel-explore-form";
+import { flightPositionsAction } from "@/actions/explore-travel-action";
+import { flightPositionsRequestSchema } from "@/actions/schema";
+import { FlightPositionsForm } from "@/components/forms/travel-explore-form";
 import { useTravelParams } from "@/hooks/use-travel-params";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Drawer, DrawerContent, DrawerHeader } from "@travelese/ui/drawer";
@@ -34,35 +34,40 @@ export function ExploreTravelSheet({ userId, currency }: Props) {
   const { explore, setParams } = useTravelParams();
 
   const [queryParams, setQueryParams] = useQueryStates({
-    explore: parseAsJson<{
+    geo_code: parseAsJson<{
       latitude: number;
       longitude: number;
     }>().withDefault({
       latitude: 0,
       longitude: 0,
     }),
+    iata_code: parseAsString.withDefault(""),
   });
 
-  const form = useForm<z.infer<typeof exploreTravelSchema>>({
-    resolver: zodResolver(exploreTravelSchema),
+  const form = useForm<z.infer<typeof flightPositionsRequestSchema>>({
+    resolver: zodResolver(flightPositionsRequestSchema),
     defaultValues: {
-      user_id: userId,
-      explore: queryParams.explore,
+      geo_code: queryParams.geo_code,
+      iata_code: queryParams.iata_code,
     },
   });
 
-  const exploreAction = useAction(exploreTravelAction, {
+  const exploreAction = useAction(flightPositionsAction, {
     onSuccess: ({ data }) => {
       toast({
         title: "Explore Found",
         description: `Found ${data?.data.length} flights`,
         variant: "success",
       });
-      setParams({ explore: false });
+
       setQueryParams((prev) => ({
         ...prev,
-        explore: form.getValues().explore,
+        geo_code: form.getValues().geo_code,
+        iata_code: form.getValues().iata_code,
       }));
+
+      setParams({ explore: false });
+
       form.reset();
     },
     onError: () => {
@@ -102,7 +107,7 @@ export function ExploreTravelSheet({ userId, currency }: Props) {
           </SheetHeader>
 
           <ScrollArea className="h-full p-0 pb-28" hideScrollbar>
-            <ExploreTravelForm
+            <FlightPositionsForm
               form={form}
               isSubmitting={exploreAction.status === "executing"}
               onSubmit={() => exploreAction.execute(form.getValues())}
@@ -142,7 +147,7 @@ export function ExploreTravelSheet({ userId, currency }: Props) {
           </DropdownMenu>
         </DrawerHeader>
 
-        <ExploreTravelForm
+        <FlightPositionsForm
           form={form}
           isSubmitting={exploreAction.status === "executing"}
           onSubmit={() => exploreAction.execute(form.getValues())}

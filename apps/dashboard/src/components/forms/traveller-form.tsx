@@ -1,7 +1,7 @@
 "use client";
 
-import { createCustomerAction } from "@/actions/create-customer-action";
-import { useCustomerParams } from "@/hooks/use-customer-params";
+import { createTravellerAction } from "@/actions/create-traveller-action";
+import { useTravellerParams } from "@/hooks/use-traveller-params";
 import { useInvoiceParams } from "@/hooks/use-invoice-params";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -27,7 +27,7 @@ import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { CountrySelector } from "../country-selector";
-import type { Customer } from "../invoice/customer-details";
+import type { Customer } from "../invoice/traveller-details";
 import {
   type AddressDetails,
   SearchAddressInput,
@@ -80,16 +80,16 @@ type Props = {
   data?: Customer;
 };
 
-export function CustomerForm({ data }: Props) {
+export function TravellerForm({ data }: Props) {
   const [sections, setSections] = useState<string[]>(["general"]);
-  const { setParams: setCustomerParams } = useCustomerParams();
+  const { setParams: setTravellerParams } = useTravellerParams();
   const { setParams: setInvoiceParams } = useInvoiceParams();
 
-  const createCustomer = useAction(createCustomerAction, {
+  const createTraveller = useAction(createTravellerAction, {
     onSuccess: ({ data }) => {
       if (data) {
-        setInvoiceParams({ selectedCustomerId: data.id });
-        setCustomerParams(null);
+        setInvoiceParams({ selectedTravellerId: data.id });
+        setTravellerParams(null);
       }
     },
   });
@@ -142,7 +142,7 @@ export function CustomerForm({ data }: Props) {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(createCustomer.execute)}>
+      <form onSubmit={form.handleSubmit(createTraveller.execute)}>
         <div className="h-[calc(100vh-180px)] scrollbar-hide overflow-auto">
           <div>
             <Accordion
@@ -421,15 +421,15 @@ export function CustomerForm({ data }: Props) {
           <div className="flex justify-end mt-auto space-x-4">
             <Button
               variant="outline"
-              onClick={() => setCustomerParams(null)}
+              onClick={() => setTravellerParams(null)}
               type="button"
             >
               Cancel
             </Button>
 
             <SubmitButton
-              isSubmitting={createCustomer.isExecuting}
-              disabled={createCustomer.isExecuting || !form.formState.isValid}
+              isSubmitting={createTraveller.isExecuting}
+              disabled={createTraveller.isExecuting || !form.formState.isValid}
             >
               {data ? "Update" : "Create"}
             </SubmitButton>

@@ -27,18 +27,18 @@ import { FilterList } from "./filter-list";
 const allowedStatuses = ["draft", "overdue", "paid", "unpaid", "canceled"];
 
 type Props = {
-  customers?: {
+  travellers?: {
     id: string | null;
     name: string | null;
   }[];
 };
 
-export function InvoiceSearchFilter({ customers: customersData }: Props) {
+export function InvoiceSearchFilter({ travellers: travellersData }: Props) {
   const [prompt, setPrompt] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
   const [streaming, setStreaming] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
-  const { setParams, statuses, start, end, q, customers } = useInvoiceParams({
+  const { setParams, statuses, start, end, q, travellers } = useInvoiceParams({
     shallow: false,
   });
 
@@ -87,8 +87,16 @@ export function InvoiceSearchFilter({ customers: customersData }: Props) {
 
     const { object } = await generateInvoiceFilters(
       prompt,
-      `Invoice payment statuses: ${statusFilters.map((filter) => filter.name).join(", ")}
-       Customers: ${customersData?.map((customer) => customer.name).join(", ")}
+      `Invoice payment statuses: ${
+        statusFilters
+          .map((filter) => filter.name)
+          .join(", ")
+      }
+       Travellers: ${
+        travellersData
+          ?.map((traveller) => traveller.name)
+          .join(", ")
+      }
       `,
     );
 
@@ -101,13 +109,13 @@ export function InvoiceSearchFilter({ customers: customersData }: Props) {
           statuses: Array.isArray(partialObject?.statuses)
             ? partialObject?.statuses
             : partialObject?.statuses
-              ? [partialObject.statuses]
-              : null,
-          customers:
-            partialObject?.customers?.map(
-              (name: string) =>
-                customersData?.find((customer) => customer.name === name)?.id,
-            ) ?? null,
+            ? [partialObject.statuses]
+            : null,
+          travellers: partialObject?.travellers?.map(
+            (name: string) =>
+              travellersData?.find((traveller) => traveller.name === name)
+                ?.id,
+          ) ?? null,
           q: partialObject?.name ?? null,
           start: partialObject?.start ?? null,
           end: partialObject?.end ?? null,
@@ -128,7 +136,7 @@ export function InvoiceSearchFilter({ customers: customersData }: Props) {
     end,
     start,
     statuses,
-    customers,
+    travellers,
   };
 
   const hasValidFilters = Object.values(filters).some(
@@ -178,7 +186,7 @@ export function InvoiceSearchFilter({ customers: customersData }: Props) {
           loading={streaming}
           onRemove={setParams}
           statusFilters={statusFilters}
-          members={customersData}
+          members={travellersData}
         />
       </div>
 
@@ -229,7 +237,7 @@ export function InvoiceSearchFilter({ customers: customersData }: Props) {
           <DropdownMenuSub>
             <DropdownMenuSubTrigger>
               <Icons.Face className="mr-2 h-4 w-4" />
-              <span>Customer</span>
+              <span>Traveller</span>
             </DropdownMenuSubTrigger>
             <DropdownMenuPortal>
               <DropdownMenuSubContent
@@ -237,18 +245,18 @@ export function InvoiceSearchFilter({ customers: customersData }: Props) {
                 alignOffset={-4}
                 className="p-0"
               >
-                {customersData?.map((customer) => (
+                {travellersData?.map((traveller) => (
                   <DropdownMenuCheckboxItem
-                    key={customer.id}
+                    key={traveller.id}
                     onCheckedChange={() => {
                       setParams({
-                        customers: filters?.customers?.includes(customer.id)
-                          ? filters.customers.filter((s) => s !== customer.id)
-                          : [...(filters?.customers ?? []), customer.id],
+                        customers: filters?.travellers?.includes(traveller.id)
+                          ? filters.travellers.filter((s) => s !== traveller.id)
+                          : [...(filters?.travellers ?? []), traveller.id],
                       });
                     }}
                   >
-                    {customer.name}
+                    {traveller.name}
                   </DropdownMenuCheckboxItem>
                 ))}
               </DropdownMenuSubContent>

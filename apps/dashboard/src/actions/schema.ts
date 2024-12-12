@@ -525,7 +525,7 @@ export const createTransactionSchema = z.object({
 
 export type CreateTransactionSchema = z.infer<typeof createTransactionSchema>;
 
-export const createCustomerSchema = z.object({
+export const createTravellerSchema = z.object({
   id: z.string().uuid().optional(),
   name: z.string(),
   email: z.string().email(),
@@ -571,16 +571,6 @@ export const changeTravelPeriodSchema = z.object({
   from: z.string(),
   to: z.string().optional(),
 });
-
-export const exploreTravelSchema = z.object({
-  user_id: z.string(),
-  explore: z.object({
-    latitude: z.number(),
-    longitude: z.number(),
-  }),
-});
-
-export type ExploreTravelFormValues = z.infer<typeof exploreTravelSchema>;
 
 export const searchTravelSchema = z.object({
   search_type: z.enum(["flights", "stays"]),
@@ -1313,3 +1303,43 @@ export const placeSchema = z.object({
 export const listPlacesSuggestionsResponseSchema = z.object({
   data: z.array(placeSchema),
 });
+
+// Flight Radar 24
+export const flightPositionSchema = z.object({
+  fr24_id: z.string(),
+  flight: z.string(),
+  callsign: z.string(),
+  lat: z.number(),
+  lon: z.number(),
+  track: z.number(),
+  alt: z.number(),
+  gspeed: z.number(),
+  vspeed: z.number(),
+  squawk: z.string(),
+  timestamp: z.string(),
+  source: z.string(),
+  hex: z.string(),
+  type: z.string(),
+  reg: z.string(),
+  painted_as: z.string(),
+  operating_as: z.string(),
+  orig_iata: z.string(),
+  orig_icao: z.string(),
+  dest_iata: z.string(),
+  dest_icao: z.string(),
+  eta: z.string(),
+});
+
+// Schema for the input parameters
+export const flightPositionsRequestSchema = z.object({
+  geo_code: z.object({
+    latitude: z.number(),
+    longitude: z.number(),
+  }),
+  iata_code: z.string(),
+});
+
+export type FlightPosition = z.infer<typeof flightPositionSchema>;
+export type FlightPositionsRequest = z.infer<
+  typeof flightPositionsRequestSchema
+>;

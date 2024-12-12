@@ -9,7 +9,7 @@ import { useAction } from "next-safe-action/hooks";
 import { useEffect, useState } from "react";
 import { useFormContext, useWatch } from "react-hook-form";
 import { OpenURL } from "../open-url";
-import { type Customer, CustomerDetails } from "./customer-details";
+import { type Customer, CustomerDetails } from "./traveller-details";
 import { FromDetails } from "./from-details";
 import { LineItems } from "./line-items";
 import { Logo } from "./logo";

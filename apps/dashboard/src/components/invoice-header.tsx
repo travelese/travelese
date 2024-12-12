@@ -1,13 +1,13 @@
 import { InvoiceSearchFilter } from "@/components/invoice-search-filter";
-import { getCustomers } from "@travelese/supabase/cached-queries";
+import { getTravellers } from "@travelese/supabase/cached-queries";
 import { OpenInvoiceSheet } from "./open-invoice-sheet";
 
 export async function InvoiceHeader() {
-  const customers = await getCustomers();
+  const travellers = await getTravellers();
 
   return (
     <div className="flex items-center justify-between">
-      <InvoiceSearchFilter customers={customers?.data ?? []} />
+      <InvoiceSearchFilter travellers={travellers?.data ?? []} />
 
       <div className="hidden sm:block">
         <OpenInvoiceSheet />
