@@ -51,6 +51,7 @@ export function FlightPositionsForm({
                         iata_code: place.iata_code || "",
                       });
                     }}
+                    searchType="flights"
                   />
                 </FormControl>
                 <FormMessage />

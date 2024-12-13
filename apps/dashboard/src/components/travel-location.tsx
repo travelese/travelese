@@ -12,8 +12,9 @@ import { useMemo, useState } from "react";
 interface LocationSelectorProps {
   placeholder: string;
   value: string;
-  onChange: (value: string, place: Places) => void;
+  onChange: (value: string, place: Places | null) => void;
   type: "origin" | "destination";
+  searchType: "flights" | "stays";
 }
 
 export function TravelLocation({
@@ -21,9 +22,11 @@ export function TravelLocation({
   value,
   onChange,
   type,
+  searchType,
 }: LocationSelectorProps) {
   const t = useI18n();
   const [isOpen, setIsOpen] = useState(false);
+  const isFlights = searchType === "flights";
   const [searchQuery, setSearchQuery] = useState("");
 
   const { execute: fetchPlaces, result } = useAction(
@@ -34,13 +37,15 @@ export function TravelLocation({
   const cities = places.filter((place) => place.type === "city");
   const airports = places.filter((place) => place.type === "airport");
 
+  const displayPlaces = isFlights ? [...cities, ...airports] : airports;
+
   const selectLocation = (place: Places) => {
     const selectedValue =
       place.type === "city"
         ? `${place.name} (${place.iata_code})`
         : `${place.city_name} (${place.iata_code})`;
 
-    onChange(selectedValue, place);
+    onChange(place.iata_code, place);
     setIsOpen(false);
   };
 
@@ -50,11 +55,11 @@ export function TravelLocation({
     if (newQuery.length >= 1) {
       fetchPlaces({ query: newQuery });
     }
-    onChange(newQuery, "");
+    onChange(newQuery, null);
   };
 
   const clearSelection = () => {
-    onChange("", "");
+    onChange("", null);
     setSearchQuery("");
   };
 
@@ -155,9 +160,15 @@ export function TravelLocation({
           </div>
         </div>
         <div className="w-[350px] overflow-auto">
-          {cities.length > 0 && renderPlaceList(cities, t("Cities"))}
-          {airports.length > 0 && renderPlaceList(airports, t("Airports"))}
-          {places.length === 0 && searchQuery.length > 0 && (
+          {isFlights ? (
+            <>
+              {cities.length > 0 && renderPlaceList(cities, t("Cities"))}
+              {airports.length > 0 && renderPlaceList(airports, t("Airports"))}
+            </>
+          ) : (
+            airports.length > 0 && renderPlaceList(airports, t("Airports"))
+          )}
+          {displayPlaces.length === 0 && searchQuery.length > 0 && (
             <div className="p-4 text-center text-sm">
               {t("No locations found")}
             </div>

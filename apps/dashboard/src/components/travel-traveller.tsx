@@ -6,10 +6,24 @@ import { useI18n } from "@/locales/client";
 import { Icons } from "@travelese/ui/icons";
 import { useOptimisticAction } from "next-safe-action/hooks";
 
+type TravellerType = "adult" | "child" | "infant_without_seat";
+
 type Props = {
-  value: Array<{ type: string }>;
+  value: Array<{
+    type: TravellerType;
+    given_name?: string;
+    family_name?: string;
+    age?: number;
+  }>;
   disabled?: boolean;
-  onChange: (value: Array<{ type: string }>) => void;
+  onChange: (
+    value: Array<{
+      type: TravellerType;
+      given_name?: string;
+      family_name?: string;
+      age?: number;
+    }>,
+  ) => void;
   searchType: "flights" | "stays";
 };
 
@@ -66,9 +80,16 @@ export function TravelTraveller({
     },
   );
 
-  const currentPassengers = Array.isArray(optimisticState)
-    ? optimisticState
-    : value;
+  const currentCounts = (
+    Array.isArray(optimisticState)
+      ? optimisticState
+      : Array.isArray(value)
+        ? value
+        : []
+  ).reduce((acc: Record<string, number>, traveller) => {
+    acc[traveller.type] = (acc[traveller.type] || 0) + 1;
+    return acc;
+  }, {});
 
   const handleTravellerChange = (newCounts: Record<string, number>) => {
     const newTravellers = [];
@@ -90,13 +111,7 @@ export function TravelTraveller({
   return (
     <ItemCounter
       items={travellerTypes}
-      value={currentPassengers.reduce(
-        (acc: Record<string, number>, traveller) => {
-          acc[traveller.type] = (acc[traveller.type] || 0) + 1;
-          return acc;
-        },
-        {},
-      )}
+      value={currentCounts}
       onChange={handleTravellerChange}
       disabled={disabled}
     />
