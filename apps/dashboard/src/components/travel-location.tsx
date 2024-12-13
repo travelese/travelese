@@ -14,6 +14,7 @@ interface LocationSelectorProps {
   value: string;
   onChange: (value: string, place: Places | null) => void;
   type: "origin" | "destination";
+  searchType: "flights" | "stays";
 }
 
 export function TravelLocation({
@@ -21,9 +22,11 @@ export function TravelLocation({
   value,
   onChange,
   type,
+  searchType,
 }: LocationSelectorProps) {
   const t = useI18n();
   const [isOpen, setIsOpen] = useState(false);
+  const isFlights = searchType === "flights";
   const [searchQuery, setSearchQuery] = useState("");
 
   const { execute: fetchPlaces, result } = useAction(
@@ -33,6 +36,8 @@ export function TravelLocation({
   const places = result?.data || [];
   const cities = places.filter((place) => place.type === "city");
   const airports = places.filter((place) => place.type === "airport");
+
+  const displayPlaces = isFlights ? [...cities, ...airports] : airports;
 
   const selectLocation = (place: Places) => {
     const selectedValue =
@@ -155,9 +160,15 @@ export function TravelLocation({
           </div>
         </div>
         <div className="w-[350px] overflow-auto">
-          {cities.length > 0 && renderPlaceList(cities, t("Cities"))}
-          {airports.length > 0 && renderPlaceList(airports, t("Airports"))}
-          {places.length === 0 && searchQuery.length > 0 && (
+          {isFlights ? (
+            <>
+              {cities.length > 0 && renderPlaceList(cities, t("Cities"))}
+              {airports.length > 0 && renderPlaceList(airports, t("Airports"))}
+            </>
+          ) : (
+            airports.length > 0 && renderPlaceList(airports, t("Airports"))
+          )}
+          {displayPlaces.length === 0 && searchQuery.length > 0 && (
             <div className="p-4 text-center text-sm">
               {t("No locations found")}
             </div>

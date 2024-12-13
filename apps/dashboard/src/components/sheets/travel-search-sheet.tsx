@@ -33,40 +33,71 @@ type Props = {
   currency: string;
 };
 
+function SearchTypeDropdown({
+  onSearchTypeChange,
+}: {
+  onSearchTypeChange: (type: "flights" | "stays") => void;
+}) {
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger>
+        <Icons.MoreVertical className="w-5 h-5" />
+      </DropdownMenuTrigger>
+
+      <DropdownMenuContent className="w-42" sideOffset={10} align="end">
+        <DropdownMenuItem onClick={() => onSearchTypeChange("flights")}>
+          Search Flights
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => onSearchTypeChange("stays")}>
+          Search Stays
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
+
 export function SearchTravelSheet({ userId, currency }: Props) {
   const { toast } = useToast();
   const isDesktop = useMediaQuery("(min-width: 768px)");
   const { search, setParams } = useTravelParams();
   const [searchType, setSearchType] = useState<"flights" | "stays">("flights");
 
-  const [queryParams, setQueryParams] = useQueryStates({
-    search_type: parseAsString.withDefault("flights"),
-    // Flights params
-    travel_type: parseAsString.withDefault("return"),
-    cabin_class: parseAsString.withDefault("economy"),
-    passengers: parseAsJson<Array<{ type: string }>>().withDefault([
-      { type: "adult" },
-    ]),
-    slices: parseAsJson<
-      Array<{ origin: string; destination: string; departure_date: string }>
-    >().withDefault([
-      { origin: "", destination: "", departure_date: "" },
-      { origin: "", destination: "", departure_date: "" },
-    ]),
-    bags: parseAsJson<{
-      carry_on: number;
-      cabin: number;
-      checked: number;
-    }>().withDefault({ carry_on: 0, cabin: 0, checked: 0 }),
-    // Stays params
-    check_in_date: parseAsString.withDefault(""),
-    check_out_date: parseAsString.withDefault(""),
-    location: parseAsString.withDefault(""),
-    rooms: parseAsInteger.withDefault(1),
-    guests: parseAsJson<Array<{ type: string; age?: number }>>().withDefault([
-      { type: "adult" },
-    ]),
-  });
+  const [queryParams, setQueryParams] = useQueryStates(
+    searchType === "flights"
+      ? {
+          search_type: parseAsString.withDefault("flights"),
+          travel_type: parseAsString.withDefault("return"),
+          cabin_class: parseAsString.withDefault("economy"),
+          passengers: parseAsJson<Array<{ type: string }>>().withDefault([
+            { type: "adult" },
+          ]),
+          slices: parseAsJson<
+            Array<{
+              origin: string;
+              destination: string;
+              departure_date: string;
+            }>
+          >().withDefault([
+            { origin: "", destination: "", departure_date: "" },
+            { origin: "", destination: "", departure_date: "" },
+          ]),
+          bags: parseAsJson<{
+            carry_on: number;
+            cabin: number;
+            checked: number;
+          }>().withDefault({ carry_on: 0, cabin: 0, checked: 0 }),
+        }
+      : {
+          search_type: parseAsString.withDefault("stays"),
+          check_in_date: parseAsString.withDefault(""),
+          check_out_date: parseAsString.withDefault(""),
+          location: parseAsString.withDefault(""),
+          rooms: parseAsInteger.withDefault(1),
+          guests: parseAsJson<Array<{ type: string }>>().withDefault([
+            { type: "adult" },
+          ]),
+        },
+  );
 
   const form = useForm<z.infer<typeof searchTravelSchema>>({
     resolver: zodResolver(searchTravelSchema),
@@ -111,6 +142,32 @@ export function SearchTravelSheet({ userId, currency }: Props) {
     },
   });
 
+  const handleSearchTypeChange = async (newType: "flights" | "stays") => {
+    if (newType === "flights") {
+      await setQueryParams({
+        search_type: "flights",
+        travel_type: "return",
+        cabin_class: "economy",
+        passengers: [{ type: "adult" }],
+        slices: [
+          { origin: "", destination: "", departure_date: "" },
+          { origin: "", destination: "", departure_date: "" },
+        ],
+        bags: { carry_on: 0, cabin: 0, checked: 0 },
+      });
+    } else {
+      await setQueryParams({
+        search_type: "stays",
+        check_in_date: "",
+        check_out_date: "",
+        location: "",
+        rooms: 1,
+        guests: [{ type: "adult" }],
+      });
+    }
+    setSearchType(newType);
+  };
+
   if (isDesktop) {
     return (
       <Sheet open={search} onOpenChange={(open) => setParams({ search: open })}>
@@ -119,21 +176,7 @@ export function SearchTravelSheet({ userId, currency }: Props) {
             <h2 className="text-xl">
               Search {searchType === "flights" ? "Flights" : "Stays"}
             </h2>
-
-            <DropdownMenu>
-              <DropdownMenuTrigger>
-                <Icons.MoreVertical className="w-5 h-5" />
-              </DropdownMenuTrigger>
-
-              <DropdownMenuContent className="w-42" sideOffset={10} align="end">
-                <DropdownMenuItem onClick={() => setSearchType("flights")}>
-                  Search Flights
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setSearchType("stays")}>
-                  Search Stays
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <SearchTypeDropdown onSearchTypeChange={handleSearchTypeChange} />
           </SheetHeader>
 
           <ScrollArea className="h-full p-0 pb-28" hideScrollbar>
@@ -141,9 +184,29 @@ export function SearchTravelSheet({ userId, currency }: Props) {
               form={form}
               isSubmitting={searchAction.status === "executing"}
               onSubmit={searchAction.execute}
-              onQueryParamsChange={(updates) =>
-                setQueryParams((prev) => ({ ...prev, ...updates }))
-              }
+              onQueryParamsChange={(updates) => {
+                const isFlights = searchType === "flights";
+                setQueryParams((prev) => ({
+                  ...prev,
+                  ...(isFlights
+                    ? {
+                        travel_type: updates.travel_type ?? prev.travel_type,
+                        cabin_class: updates.cabin_class ?? prev.cabin_class,
+                        passengers: updates.passengers ?? prev.passengers,
+                        slices: updates.slices ?? prev.slices,
+                        bags: updates.bags ?? prev.bags,
+                      }
+                    : {
+                        check_in_date:
+                          updates.check_in_date ?? prev.check_in_date,
+                        check_out_date:
+                          updates.check_out_date ?? prev.check_out_date,
+                        location: updates.location ?? prev.location,
+                        rooms: updates.rooms ?? prev.rooms,
+                        guests: updates.guests ?? prev.guests,
+                      }),
+                }));
+              }}
               searchType={searchType}
               defaultValues={form.getValues()}
             />
@@ -167,30 +230,35 @@ export function SearchTravelSheet({ userId, currency }: Props) {
           <h2 className="text-xl">
             Search {searchType === "flights" ? "Flights" : "Stays"}
           </h2>
-
-          <DropdownMenu>
-            <DropdownMenuTrigger>
-              <Icons.MoreVertical className="w-5 h-5" />
-            </DropdownMenuTrigger>
-
-            <DropdownMenuContent className="w-42" sideOffset={10} align="end">
-              <DropdownMenuItem onClick={() => setSearchType("flights")}>
-                Search Flights
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setSearchType("stays")}>
-                Search Stays
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <SearchTypeDropdown onSearchTypeChange={handleSearchTypeChange} />
         </DrawerHeader>
 
         <SearchTravelForm
           form={form}
           isSubmitting={searchAction.status === "executing"}
           onSubmit={searchAction.execute}
-          onQueryParamsChange={(updates) =>
-            setQueryParams((prev) => ({ ...prev, ...updates }))
-          }
+          onQueryParamsChange={(updates) => {
+            const isFlights = searchType === "flights";
+            setQueryParams((prev) => ({
+              ...prev,
+              ...(isFlights
+                ? {
+                    travel_type: updates.travel_type ?? prev.travel_type,
+                    cabin_class: updates.cabin_class ?? prev.cabin_class,
+                    passengers: updates.passengers ?? prev.passengers,
+                    slices: updates.slices ?? prev.slices,
+                    bags: updates.bags ?? prev.bags,
+                  }
+                : {
+                    check_in_date: updates.check_in_date ?? prev.check_in_date,
+                    check_out_date:
+                      updates.check_out_date ?? prev.check_out_date,
+                    location: updates.location ?? prev.location,
+                    rooms: updates.rooms ?? prev.rooms,
+                    guests: updates.guests ?? prev.guests,
+                  }),
+            }));
+          }}
           searchType={searchType}
           defaultValues={form.getValues()}
         />

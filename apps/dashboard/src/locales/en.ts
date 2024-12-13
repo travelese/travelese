@@ -127,6 +127,9 @@ export default {
     adult: "Adult",
     child: "Child",
   },
+  travel_rooms: {
+    room: "Room",
+  },
   travel_baggage: {
     cabin: "Cabin",
     carry_on: "Carry on",
