@@ -45,10 +45,10 @@ export function FlightPositionsForm({
                       field.onChange(value);
                       onQueryParamsChange({
                         geo_code: {
-                          latitude: place.latitude || 0,
-                          longitude: place.longitude || 0,
+                          latitude: place?.latitude || 0,
+                          longitude: place?.longitude || 0,
                         },
-                        iata_code: place.iata_code || "",
+                        iata_code: place?.iata_code || "",
                       });
                     }}
                     searchType="flights"
