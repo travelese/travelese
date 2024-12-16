@@ -4,40 +4,40 @@ import { unstable_cache } from "next/cache";
 import { cache } from "react";
 import { createClient } from "../client/server";
 import {
-  type GetBurnRateQueryParams,
-  type GetCategoriesParams,
-  type GetExpensesQueryParams,
-  type GetInvoiceSummaryParams,
-  type GetInvoicesQueryParams,
-  type GetMetricsParams,
-  type GetRunwayQueryParams,
-  type GetSpendingParams,
-  type GetTeamBankAccountsParams,
-  type GetTransactionsParams,
-  type GetTravelBookingsQueryParams,
-  type GetTravelRecordsByRangeParams,
   getBankAccountsCurrenciesQuery,
   getBankConnectionsByTeamIdQuery,
   getBurnRateQuery,
+  type GetBurnRateQueryParams,
+  type GetCategoriesParams,
   getCategoriesQuery,
   getCustomersQuery,
   getExpensesQuery,
+  type GetExpensesQueryParams,
   getInvoiceNumberQuery,
+  getInvoicesQuery,
+  type GetInvoicesQueryParams,
+  type GetInvoiceSummaryParams,
   getInvoiceSummaryQuery,
   getInvoiceTemplatesQuery,
-  getInvoicesQuery,
+  type GetMetricsParams,
   getMetricsQuery,
   getPaymentStatusQuery,
   getRunwayQuery,
+  type GetRunwayQueryParams,
+  type GetSpendingParams,
   getSpendingQuery,
+  type GetTeamBankAccountsParams,
   getTeamBankAccountsQuery,
   getTeamInvitesQuery,
   getTeamMembersQuery,
+  getTeamsByUserIdQuery,
   getTeamSettingsQuery,
   getTeamUserQuery,
-  getTeamsByUserIdQuery,
+  type GetTransactionsParams,
   getTransactionsQuery,
   getTravelBookingsQuery,
+  type GetTravelBookingsQueryParams,
+  type GetTravelRecordsByRangeParams,
   getTravelRecordsByRangeQuery,
   getUserInvitesQuery,
   getUserQuery,
@@ -491,7 +491,7 @@ export const getPaymentStatus = async () => {
   )();
 };
 
-export const getCustomers = async () => {
+export const getTravellers = async () => {
   const supabase = createClient();
   const user = await getUser();
   const teamId = user?.data?.team_id;
@@ -502,9 +502,9 @@ export const getCustomers = async () => {
     async () => {
       return getCustomersQuery(supabase, teamId);
     },
-    ["customers", teamId],
+    ["travellers", teamId],
     {
-      tags: [`customers_${teamId}`],
+      tags: [`travellers_${teamId}`],
       revalidate: 3600,
     },
   )();

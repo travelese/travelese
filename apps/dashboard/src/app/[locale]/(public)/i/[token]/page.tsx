@@ -1,4 +1,4 @@
-import CustomerHeader from "@/components/customer-header";
+import TravellerHeader from "@/components/traveller-header";
 import InvoiceToolbar from "@/components/invoice-toolbar";
 import { InvoiceCommentsSheet } from "@/components/sheets/invoice-comments";
 import { UTCDate } from "@date-fns/utc";
@@ -30,7 +30,7 @@ export async function generateMetadata({
     }
 
     const title = `Invoice ${invoice.invoice_number} | ${invoice.team?.name}`;
-    const description = `Invoice for ${invoice.customer?.name || "Customer"}`;
+    const description = `Invoice for ${invoice.traveller?.name || "Traveller"}`;
 
     return {
       title,
@@ -103,9 +103,9 @@ export default async function Page({ params }: Props) {
         className="flex flex-col w-full max-w-full py-6"
         style={{ maxWidth: width }}
       >
-        <CustomerHeader
-          name={invoice.customer_name || invoice.customer?.name}
-          website={invoice.customer?.website}
+        <TravellerHeader
+          name={invoice.traveller_name || invoice.traveller?.name}
+          website={invoice.traveller?.website}
           status={invoice.status}
         />
         <div className="pb-24 md:pb-0">
@@ -118,7 +118,7 @@ export default async function Page({ params }: Props) {
       <InvoiceToolbar
         id={invoice.id}
         size={invoice.template.size}
-        customer={invoice.customer}
+        traveller={invoice.traveller}
         viewedAt={invoice.viewed_at}
       />
 

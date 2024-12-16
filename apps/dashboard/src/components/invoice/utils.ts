@@ -1,67 +1,67 @@
 import type { InvoiceFormValues } from "@/actions/invoice/schema";
-import type { Customer } from "./customer-details";
+import type { Traveller } from "./traveller-details";
 
-export const transformCustomerToContent = (customer?: Customer) => {
-  if (!customer) return null;
+export const transformTravellerToContent = (traveller?: Traveller) => {
+  if (!traveller) return null;
 
   const content = [];
 
-  if (customer.name) {
+  if (traveller.name) {
     content.push({
       type: "paragraph",
       content: [
         {
-          text: customer.name,
+          text: traveller.name,
           type: "text",
         },
       ],
     });
   }
 
-  if (customer.address_line_1) {
+  if (traveller.address_line_1) {
     content.push({
       type: "paragraph",
-      content: [{ text: customer.address_line_1, type: "text" }],
+      content: [{ text: traveller.address_line_1, type: "text" }],
     });
   }
 
-  if (customer.zip || customer.city) {
+  if (traveller.zip || traveller.city) {
     content.push({
       type: "paragraph",
       content: [
         {
-          text: `${customer.zip || ""} ${customer.city || ""}`.trim(),
+          text: `${traveller.zip || ""} ${traveller.city || ""}`.trim(),
           type: "text",
         },
       ],
     });
   }
 
-  if (customer.country) {
+  if (traveller.country) {
     content.push({
       type: "paragraph",
-      content: [{ text: customer.country, type: "text" }],
+      content: [{ text: traveller.country, type: "text" }],
     });
   }
 
-  if (customer.email) {
+  if (traveller.email) {
     content.push({
       type: "paragraph",
-      content: [{ text: customer.email, type: "text" }],
+      content: [{ text: traveller.email, type: "text" }],
     });
   }
 
-  if (customer.phone) {
+  if (traveller.phone) {
     content.push({
       type: "paragraph",
-      content: [{ text: customer.phone, type: "text" }],
+      content: [{ text: traveller.phone, type: "text" }],
     });
   }
 
-  if (customer.vat) {
+  if (traveller.vat) {
     content.push({
       type: "paragraph",
-      content: [{ text: `VAT: ${customer.vat}`, type: "text" }],
+      content: [{ text: `VAT: ${traveller.vat}`, type: "text" }],
     });
   }
 
@@ -89,8 +89,8 @@ export const transformFormValuesToDraft = (values: InvoiceFormValues) => {
     ...(values.from_details && {
       from_details: JSON.stringify(values.from_details),
     }),
-    ...(values.customer_details && {
-      customer_details: JSON.stringify(values.customer_details),
+    ...(values.traveller_details && {
+      traveller_details: JSON.stringify(values.traveller_details),
     }),
     ...(values.note_details && {
       note_details: JSON.stringify(values.note_details),

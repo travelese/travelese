@@ -7,9 +7,9 @@ import { authActionClient } from "./safe-action";
 import { createTravellerSchema } from "./schema";
 
 export const createTravellerAction = authActionClient
-  .schema(createCustomerSchema)
+  .schema(createTravellerSchema)
   .metadata({
-    name: "create-customer",
+    name: "create-traveller",
     track: {
       event: LogEvents.CreateTraveller.name,
       channel: LogEvents.CreateTraveller.channel,

@@ -1,16 +1,16 @@
 import { getDefaultSettings } from "@travelese/invoice/default";
 import {
-  getCustomers,
   getInvoiceNumber,
   getInvoiceTemplates,
+  getTravellers,
 } from "@travelese/supabase/cached-queries";
 import { InvoiceCreateSheet } from "./invoice-create-sheet";
 
 export async function InvoiceCreateSheetServer({ teamId }: { teamId: string }) {
-  const [{ data: templatesData }, { data: customersData }, invoiceNumber] =
+  const [{ data: templatesData }, { data: travellersData }, invoiceNumber] =
     await Promise.all([
       getInvoiceTemplates(),
-      getCustomers(),
+      getTravellers(),
       getInvoiceNumber(),
     ]);
 
@@ -19,14 +19,14 @@ export async function InvoiceCreateSheetServer({ teamId }: { teamId: string }) {
   // Filter out null values
   const template = templatesData
     ? Object.fromEntries(
-        Object.entries(templatesData).filter(([_, value]) => value !== null),
-      )
+      Object.entries(templatesData).filter(([_, value]) => value !== null),
+    )
     : {};
 
   return (
     <InvoiceCreateSheet
       teamId={teamId}
-      customers={customersData}
+      travellers={travellersData}
       template={template}
       invoiceNumber={invoiceNumber}
       defaultSettings={defaultSettings}

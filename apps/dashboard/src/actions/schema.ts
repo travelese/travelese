@@ -525,7 +525,7 @@ export const createTransactionSchema = z.object({
 
 export type CreateTransactionSchema = z.infer<typeof createTransactionSchema>;
 
-export const createCustomerSchema = z.object({
+export const createTravellerSchema = z.object({
   id: z.string().uuid().optional(),
   name: z.string(),
   email: z.string().email(),

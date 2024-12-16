@@ -12,7 +12,7 @@ import {
   TooltipTrigger,
 } from "@travelese/ui/tooltip";
 import { useClickAway } from "@uidotdev/usehooks";
-import { Reorder, motion, useMotionValue } from "framer-motion";
+import { motion, Reorder, useMotionValue } from "framer-motion";
 import { useAction } from "next-safe-action/hooks";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -22,9 +22,11 @@ import { useLongPress } from "use-long-press";
 const icons = {
   "/": () => <Icons.Overview size={22} />,
   "/travel": () => <Icons.Travel size={22} />,
+  "/travellers": () => <Icons.Travellers size={22} />,
   "/transactions": () => <Icons.Transactions size={22} />,
   "/invoices": () => <Icons.Invoice size={22} />,
   "/settings": () => <Icons.Settings size={22} />,
+  "/apps": () => <Icons.Apps size={22} />,
   "/inbox": () => <Icons.Inbox2 size={22} />,
   "/vault": () => <Icons.Files size={22} />,
 };
@@ -37,6 +39,10 @@ const defaultItems = [
   {
     path: "/travel",
     name: "Travel",
+  },
+  {
+    path: "/travellers",
+    name: "Travellers",
   },
   {
     path: "/invoices",
@@ -53,6 +59,10 @@ const defaultItems = [
   {
     path: "/vault",
     name: "Vault",
+  },
+  {
+    path: "/apps",
+    name: "Apps",
   },
   {
     path: "/settings",
@@ -234,8 +244,7 @@ export function MainMenu({ initialItems, onSelect }: Props) {
           className="flex flex-col gap-1.5"
         >
           {items.map((item) => {
-            const isActive =
-              (pathname === "/" && item.path === "/") ||
+            const isActive = (pathname === "/" && item.path === "/") ||
               (pathname !== "/" && item.path.startsWith(`/${part}`));
 
             return (
