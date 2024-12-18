@@ -8,7 +8,7 @@ import {
 export function useTravellerParams(options?: { shallow: boolean }) {
   const [params, setParams] = useQueryStates(
     {
-      customerId: parseAsString,
+      travellerId: parseAsString,
       createTraveller: parseAsBoolean,
       sort: parseAsArrayOf(parseAsString),
       name: parseAsString,
