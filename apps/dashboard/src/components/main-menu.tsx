@@ -28,7 +28,7 @@ const icons = {
   "/settings": () => <Icons.Settings size={22} />,
   "/apps": () => <Icons.Apps size={22} />,
   "/inbox": () => <Icons.Inbox2 size={22} />,
-  "/vault": () => <Icons.Files size={22} />,
+  "/vault": () => <Icons.Vault size={22} />,
 };
 
 const defaultItems = [

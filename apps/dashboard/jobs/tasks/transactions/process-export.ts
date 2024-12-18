@@ -51,10 +51,9 @@ export const processTransactions = schemaTask({
                 const filename = attachment.name?.split(".").at(0);
                 const extension = attachment.name?.split(".").at(-1);
 
-                const name =
-                  idx2 > 0
-                    ? `${filename}-${rowId}_${idx2}.${extension}`
-                    : `${filename}-${rowId}.${extension}`;
+                const name = idx2 > 0
+                  ? `${filename}-${rowId}_${idx2}.${extension}`
+                  : `${filename}-${rowId}.${extension}`;
 
                 const { data } = await download(supabase, {
                   bucket: "vault",
@@ -89,9 +88,9 @@ export const processTransactions = schemaTask({
         }).format(transaction.amount),
         transaction?.vat
           ? Intl.NumberFormat(locale, {
-              style: "currency",
-              currency: transaction.currency,
-            }).format(transaction?.vat)
+            style: "currency",
+            currency: transaction.currency,
+          }).format(transaction?.vat)
           : "",
         transaction?.category?.name ?? "",
         transaction?.category?.description ?? "",

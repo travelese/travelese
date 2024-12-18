@@ -5,7 +5,7 @@ import { BlobReader, BlobWriter, TextReader, ZipWriter } from "@zip.js/zip.js";
 import { serializableToBlob } from "jobs/utils/blob";
 import { revalidateCache } from "jobs/utils/revalidate-cache";
 import { z } from "zod";
-import { processTransactions } from "./process";
+import { processTransactions } from "./process-export";
 
 // Process transactions in batches of 100
 const BATCH_SIZE = 100;
@@ -62,7 +62,7 @@ export const exportTransactions = schemaTask({
       );
 
     const attachments = results.flatMap((r) =>
-      r.ok ? r.output.attachments : [],
+      r.ok ? r.output.attachments : []
     );
 
     const csv = await writeToString(rows, {

@@ -1,6 +1,6 @@
 import { createClient } from "@travelese/supabase/job";
 import { logger, schedules } from "@trigger.dev/sdk/v3";
-import { checkInvoiceStatus } from "./check-status";
+import { checkInvoiceStatus } from "../operations/check-status";
 
 export const invoiceScheduler = schedules.task({
   id: "invoice-scheduler",
