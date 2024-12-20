@@ -1,7 +1,9 @@
 "use client";
 
-import { createTravellerAction } from "@/actions/create-traveller-action";
-import { useTravellerParams } from "@/hooks/use-traveller-params";
+import { createCustomerAction } from "@/actions/create-customer-action";
+import { createCustomerTagAction } from "@/actions/customer/create-customer-tag-action";
+import { deleteCustomerTagAction } from "@/actions/customer/delete-customer-tag-action";
+import { useCustomerParams } from "@/hooks/use-customer-params";
 import { useInvoiceParams } from "@/hooks/use-invoice-params";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -14,12 +16,14 @@ import { Button } from "@travelese/ui/button";
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
 } from "@travelese/ui/form";
 import { Input } from "@travelese/ui/input";
+import { Label } from "@travelese/ui/label";
 import { SubmitButton } from "@travelese/ui/submit-button";
 import { Textarea } from "@travelese/ui/textarea";
 import { useAction } from "next-safe-action/hooks";
@@ -32,6 +36,7 @@ import {
   type AddressDetails,
   SearchAddressInput,
 } from "../search-address-input";
+import { SelectTags } from "../select-tags";
 import { VatNumberInput } from "../vat-number-input";
 
 const formSchema = z.object({
@@ -48,6 +53,7 @@ const formSchema = z.object({
     .nullable()
     .optional()
     .transform((url) => url?.replace(/^https?:\/\//, "")),
+  contact: z.string().nullable().optional(),
   address_line_1: z.string().nullable().optional(),
   address_line_2: z.string().nullable().optional(),
   city: z.string().nullable().optional(),
@@ -57,6 +63,15 @@ const formSchema = z.object({
   zip: z.string().nullable().optional(),
   vat_number: z.string().nullable().optional(),
   note: z.string().nullable().optional(),
+  tags: z
+    .array(
+      z.object({
+        id: z.string().uuid(),
+        value: z.string(),
+      }),
+    )
+    .optional()
+    .nullable(),
 });
 
 const excludedDomains = [
@@ -82,10 +97,15 @@ type Props = {
 
 export function TravellerForm({ data }: Props) {
   const [sections, setSections] = useState<string[]>(["general"]);
-  const { setParams: setTravellerParams } = useTravellerParams();
+  const { setParams: setCustomerParams, name } = useCustomerParams();
   const { setParams: setInvoiceParams } = useInvoiceParams();
 
-  const createTraveller = useAction(createTravellerAction, {
+  const deleteCustomerTag = useAction(deleteCustomerTagAction);
+  const createCustomerTag = useAction(createCustomerTagAction);
+
+  const isEdit = !!data;
+
+  const createCustomer = useAction(createCustomerAction, {
     onSuccess: ({ data }) => {
       if (data) {
         setInvoiceParams({ selectedTravellerId: data.id });
@@ -98,7 +118,7 @@ export function TravellerForm({ data }: Props) {
     resolver: zodResolver(formSchema),
     defaultValues: {
       id: undefined,
-      name: undefined,
+      name: name ?? undefined,
       email: undefined,
       website: undefined,
       address_line_1: undefined,
@@ -110,13 +130,22 @@ export function TravellerForm({ data }: Props) {
       vat_number: undefined,
       note: undefined,
       phone: undefined,
+      contact: undefined,
+      tags: undefined,
     },
   });
 
   useEffect(() => {
     if (data) {
       setSections(["general", "details"]);
-      form.reset(data);
+      form.reset({
+        ...data,
+        tags: data.tags?.map((tag) => ({
+          id: tag.tag?.id ?? "",
+          value: tag.tag?.name ?? "",
+          label: tag.tag?.name ?? "",
+        })) ?? undefined,
+      });
     }
   }, [data]);
 
@@ -130,7 +159,7 @@ export function TravellerForm({ data }: Props) {
   };
 
   const handleEmailBlur = (e: React.FocusEvent<HTMLInputElement>) => {
-    const email = e.target.value;
+    const email = e.target.value.trim();
     const domain = email.split("@").at(1);
     if (domain && !excludedDomains.includes(domain)) {
       const currentWebsite = form.getValues("website");
@@ -231,6 +260,25 @@ export function TravellerForm({ data }: Props) {
                             <Input
                               {...field}
                               placeholder="acme.com"
+                              autoComplete="off"
+                            />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="contact"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-xs text-[#878787] font-normal">
+                            Contact person
+                          </FormLabel>
+                          <FormControl>
+                            <Input
+                              {...field}
+                              placeholder="John Doe"
                               autoComplete="off"
                             />
                           </FormControl>
@@ -371,6 +419,72 @@ export function TravellerForm({ data }: Props) {
                       />
                     </div>
 
+                    <div className="mt-6">
+                      <Label
+                        htmlFor="tags"
+                        className="mb-2 text-xs text-[#878787] font-normal block"
+                      >
+                        Expense Tags
+                      </Label>
+
+                      <SelectTags
+                        tags={form.getValues("tags")}
+                        onRemove={(tag) => {
+                          deleteCustomerTag.execute({
+                            tagId: tag.id,
+                            customerId: form.getValues("id")!,
+                          });
+                        }}
+                        // Only for create customers
+                        onCreate={(tag) => {
+                          if (!isEdit) {
+                            form.setValue(
+                              "tags",
+                              [
+                                ...(form.getValues("tags") ?? []),
+                                {
+                                  value: tag.value ?? "",
+                                  id: tag.id ?? "",
+                                },
+                              ],
+                              {
+                                shouldDirty: true,
+                                shouldValidate: true,
+                              },
+                            );
+                          }
+                        }}
+                        // Only for edit customers
+                        onSelect={(tag) => {
+                          if (isEdit) {
+                            createCustomerTag.execute({
+                              tagId: tag.id,
+                              customerId: form.getValues("id")!,
+                            });
+                          } else {
+                            form.setValue(
+                              "tags",
+                              [
+                                ...(form.getValues("tags") ?? []),
+                                {
+                                  value: tag.value ?? "",
+                                  id: tag.id ?? "",
+                                },
+                              ],
+                              {
+                                shouldDirty: true,
+                                shouldValidate: true,
+                              },
+                            );
+                          }
+                        }}
+                      />
+
+                      <FormDescription className="mt-2">
+                        Tags help categorize and track customer expenses.
+                      </FormDescription>
+                    </div>
+
                     <div>
                       <FormField
                         control={form.control}
@@ -431,7 +545,7 @@ export function TravellerForm({ data }: Props) {
               isSubmitting={createTraveller.isExecuting}
               disabled={createTraveller.isExecuting || !form.formState.isValid}
             >
-              {data ? "Update" : "Create"}
+              {isEdit ? "Update" : "Create"}
             </SubmitButton>
           </div>
         </div>
@@ -439,3 +553,4 @@ export function TravellerForm({ data }: Props) {
     </Form>
   );
 }
+

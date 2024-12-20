@@ -1,6 +1,6 @@
 "use client";
 
-import { useTravellerParams } from "@/hooks/use-traveller-params";
+import { useCustomerParams } from "@/hooks/use-customer-params";
 import { Avatar, AvatarFallback, AvatarImageNext } from "@travelese/ui/avatar";
 import { Badge } from "@travelese/ui/badge";
 import { Button } from "@travelese/ui/button";
@@ -16,10 +16,10 @@ import type { ColumnDef } from "@tanstack/react-table";
 import Link from "next/link";
 import * as React from "react";
 
-export type Traveller = {
+export type Customer = {
   id: string;
   name: string;
-  traveller_name?: string;
+  customer_name?: string;
   website: string;
   contact?: string;
   email: string;
@@ -28,12 +28,12 @@ export type Traveller = {
   tags: { tag: { id: string; name: string } }[];
 };
 
-export const columns: ColumnDef<Traveller>[] = [
+export const columns: ColumnDef<Customer>[] = [
   {
     header: "Name",
     accessorKey: "name",
     cell: ({ row }) => {
-      const name = row.original.name ?? row.original.traveller_name;
+      const name = row.original.name ?? row.original.customer_name;
 
       if (!name) return "-";
 
@@ -74,7 +74,7 @@ export const columns: ColumnDef<Traveller>[] = [
     cell: ({ row }) => {
       if (row.original.invoices.length > 0) {
         return (
-          <Link href={`/invoices?travellers=${row.original.id}`}>
+          <Link href={`/invoices?customers=${row.original.id}`}>
             {row.original.invoices.length}
           </Link>
         );
@@ -89,7 +89,7 @@ export const columns: ColumnDef<Traveller>[] = [
     cell: ({ row }) => {
       if (row.original.bookings.length > 0) {
         return (
-          <Link href={`/tracker?bookings=${row.original.id}`}>
+          <Link href={`/travel?customers=${row.original.id}`}>
             {row.original.bookings.length}
           </Link>
         );
@@ -125,7 +125,7 @@ export const columns: ColumnDef<Traveller>[] = [
     id: "actions",
     header: "Actions",
     cell: ({ row, table }) => {
-      const { setParams } = useTravellerParams();
+      const { setParams } = useCustomerParams();
 
       return (
         <div>
@@ -141,16 +141,14 @@ export const columns: ColumnDef<Traveller>[] = [
                 onClick={() =>
                   setParams({
                     customerId: row.original.id,
-                  })
-                }
+                  })}
               >
-                Edit traveller
+                Edit customer
               </DropdownMenuItem>
 
               <DropdownMenuItem
                 onClick={() =>
-                  table.options.meta?.deleteTraveller(row.original.id)
-                }
+                  table.options.meta?.deleteCustomer(row.original.id)}
                 className="text-[#FF3638]"
               >
                 Delete

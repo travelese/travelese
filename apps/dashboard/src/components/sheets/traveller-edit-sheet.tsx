@@ -96,8 +96,7 @@ export function TravellerEditSheet() {
                       <AlertDialogCancel>Cancel</AlertDialogCancel>
                       <AlertDialogAction
                         onClick={() =>
-                          deleteTraveller.execute({ id: travellerId })
-                        }
+                          deleteCustomer.execute({ id: customerId })}
                       >
                         Delete
                       </AlertDialogAction>

@@ -544,10 +544,9 @@ export async function getExpensesQuery(
     base_currency: currency,
   });
 
-  const averageExpense =
-    data && data.length > 0
-      ? data.reduce((sum, item) => sum + (item.value || 0), 0) / data.length
-      : 0;
+  const averageExpense = data && data.length > 0
+    ? data.reduce((sum, item) => sum + (item.value || 0), 0) / data.length
+    : 0;
 
   return {
     summary: {
@@ -585,11 +584,10 @@ export async function getVaultQuery(supabase: Client, params: GetVaultParams) {
 
   const { start, end, owners, tags } = filter || {};
 
-  const isSearch =
-    (filter !== undefined &&
-      Object.values(filter).some(
-        (value) => value !== undefined && value !== null,
-      )) ||
+  const isSearch = (filter !== undefined &&
+    Object.values(filter).some(
+      (value) => value !== undefined && value !== null,
+    )) ||
     Boolean(searchQuery);
 
   const query = supabase
@@ -631,23 +629,19 @@ export async function getVaultQuery(supabase: Client, params: GetVaultParams) {
 
   const { data } = await query;
 
-  const defaultFolders =
-    parentId || isSearch
-      ? []
-      : [
-          { name: "exports", isFolder: true },
-          { name: "inbox", isFolder: true },
-          { name: "imports", isFolder: true },
-          { name: "transactions", isFolder: true },
-          { name: "invoices", isFolder: true },
-        ];
+  const defaultFolders = parentId || isSearch ? [] : [
+    { name: "exports", isFolder: true },
+    { name: "inbox", isFolder: true },
+    { name: "imports", isFolder: true },
+    { name: "transactions", isFolder: true },
+    { name: "invoices", isFolder: true },
+  ];
 
   const filteredData = (data ?? []).map((item) => ({
     ...item,
-    name:
-      item.path_tokens?.at(-1) === ".folderPlaceholder"
-        ? item.path_tokens?.at(-2)
-        : item.path_tokens?.at(-1),
+    name: item.path_tokens?.at(-1) === ".folderPlaceholder"
+      ? item.path_tokens?.at(-2)
+      : item.path_tokens?.at(-1),
     isFolder: item.path_tokens?.at(-1) === ".folderPlaceholder",
   }));
 
@@ -719,7 +713,7 @@ export async function getVaultRecursiveQuery(
       getVaultRecursiveQuery(supabase, {
         ...params,
         folder: decodeURIComponent(folder.name),
-      }),
+      })
     ),
   );
 
@@ -1313,4 +1307,21 @@ export async function searchInvoiceNumberQuery(
     .select("invoice_number")
     .eq("team_id", params.teamId)
     .ilike("invoice_number", `%${params.query}`);
+}
+
+export async function getTagsQuery(supabase: Client, teamId: string) {
+  return supabase
+    .from("tags")
+    .select("*")
+    .eq("team_id", teamId)
+    .order("created_at", { ascending: false });
+}
+
+export async function getBankAccountsBalancesQuery(
+  supabase: Client,
+  teamId: string,
+) {
+  return supabase.rpc("get_team_bank_accounts_balances", {
+    team_id: teamId,
+  });
 }

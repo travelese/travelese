@@ -1,6 +1,6 @@
 "use client";
 
-import { useTravellerParams } from "@/hooks/use-traveller-params";
+import { useCustomerParams } from "@/hooks/use-customer-params";
 import { Button } from "@travelese/ui/button";
 import {
   TableHead,
@@ -10,7 +10,7 @@ import {
 import { ArrowDown, ArrowUp } from "lucide-react";
 
 export function TableHeader() {
-  const { setParams, sort } = useTravellerParams({ shallow: false });
+  const { setParams, sort } = useCustomerParams({ shallow: false });
   const [column, value] = sort || [];
 
   const createSortQuery = (name: string) => {
@@ -72,9 +72,9 @@ export function TableHeader() {
             // onClick={() => createSortQuery("customer")}
           >
             <span>Invoices</span>
-            {"invoices" === column && value === "asc" && (
-              <ArrowDown size={16} />
-            )}
+            {"invoices" === column && value === "asc" && <ArrowDown
+              size={16}
+            />}
             {"invoices" === column && value === "desc" && <ArrowUp size={16} />}
           </Button>
         </TableHead>
@@ -84,11 +84,11 @@ export function TableHeader() {
             variant="ghost"
             // onClick={() => createSortQuery("projects")}
           >
-            <span>Projects</span>
-            {"projects" === column && value === "asc" && (
-              <ArrowDown size={16} />
-            )}
-            {"projects" === column && value === "desc" && <ArrowUp size={16} />}
+            <span>Bookings</span>
+            {"bookings" === column && value === "asc" && <ArrowDown
+              size={16}
+            />}
+            {"bookings" === column && value === "desc" && <ArrowUp size={16} />}
           </Button>
         </TableHead>
 

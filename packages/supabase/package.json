@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "@date-fns/utc": "^2.1.0",
-    "@supabase/postgrest-js": "^1.17.2",
+    "@supabase/postgrest-js": "^1.17.3",
     "@supabase/ssr": "^0.5.1",
     "date-fns": "^4.1.0",
     "react": "18.3.1",

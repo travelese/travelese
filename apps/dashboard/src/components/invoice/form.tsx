@@ -4,12 +4,12 @@ import { formatRelativeTime } from "@/utils/format";
 import { Icons } from "@travelese/ui/icons";
 import { ScrollArea } from "@travelese/ui/scroll-area";
 import { useDebounce } from "@uidotdev/usehooks";
-import { motion } from "framer-motion";
 import { useAction } from "next-safe-action/hooks";
 import { useEffect, useState } from "react";
 import { useFormContext, useWatch } from "react-hook-form";
 import { OpenURL } from "../open-url";
-import { type Customer, CustomerDetails } from "./traveller-details";
+import { type Customer, CustomerDetails } from "./customer-details";
+import { EditBlock } from "./edit-block";
 import { FromDetails } from "./from-details";
 import { LineItems } from "./line-items";
 import { Logo } from "./logo";
@@ -34,9 +34,7 @@ export function Form({ teamId, customers, onSubmit, isSubmitting }: Props) {
 
   const form = useFormContext<InvoiceFormValues>();
 
-  const size = form.watch("template.size") === "a4" ? 650 : 816;
   const token = form.watch("token");
-  const canUpdate = form.watch("status") !== "draft";
 
   const draftInvoice = useAction(draftInvoiceAction, {
     onSuccess: ({ data }) => {
@@ -62,22 +60,24 @@ export function Form({ teamId, customers, onSubmit, isSubmitting }: Props) {
       "note_details",
       "payment_details",
       "from_details",
+      "invoice_number",
+      "top_block",
+      "bottom_block",
     ],
   });
 
   const isDirty = form.formState.isDirty;
+  const invoiceNumberValid = !form.getFieldState("invoice_number").error;
   const debouncedValues = useDebounce(formValues, 500);
 
   useEffect(() => {
-    // Skip auto-save for non-draft invoices
-    if (canUpdate) return;
-
     const currentFormValues = form.getValues();
 
-    if (isDirty && form.watch("customer_id")) {
+    // Only draft the invoice if the customer is selected and the invoice number is valid
+    if (isDirty && form.watch("customer_id") && invoiceNumberValid) {
       draftInvoice.execute(transformFormValuesToDraft(currentFormValues));
     }
-  }, [debouncedValues, isDirty, canUpdate]);
+  }, [debouncedValues, isDirty, invoiceNumberValid]);
 
   useEffect(() => {
     const updateLastEditedText = () => {
@@ -115,20 +115,14 @@ export function Form({ teamId, customers, onSubmit, isSubmitting }: Props) {
       className="relative h-full"
       onKeyDown={handleKeyDown}
     >
-      <ScrollArea
-        className={`w-[${size - 20}px] h-[calc(100vh-200px)] bg-background`}
-        hideScrollbar
-      >
-        <div className="p-8 h-full flex flex-col">
-          <div className="flex flex-col">
+      <ScrollArea className="h-[calc(100vh-200px)] bg-background" hideScrollbar>
+        <div className="p-8 pb-4 h-full flex flex-col">
+          <div className="flex justify-between">
+            <Meta teamId={teamId} />
             <Logo teamId={teamId} />
           </div>
 
-          <div className="mt-8">
-            <Meta teamId={teamId} />
-          </div>
-
-          <div className="grid grid-cols-2 gap-6 mt-8">
+          <div className="grid grid-cols-2 gap-6 mt-8 mb-4">
             <div>
               <FromDetails />
             </div>
@@ -137,7 +131,9 @@ export function Form({ teamId, customers, onSubmit, isSubmitting }: Props) {
             </div>
           </div>
 
-          <div className="mt-8">
+          <EditBlock name="top_block" />
+
+          <div className="mt-4">
             <LineItems />
           </div>
 
@@ -145,41 +141,34 @@ export function Form({ teamId, customers, onSubmit, isSubmitting }: Props) {
             <Summary />
           </div>
 
-          <div className="flex flex-col space-y-8 mt-auto">
-            <div className="grid grid-cols-2 gap-6">
+          <div className="flex flex-col mt-auto">
+            <div className="grid grid-cols-2 gap-6 mb-4 overflow-hidden">
               <PaymentDetails />
               <NoteDetails />
             </div>
+
+            <EditBlock name="bottom_block" />
           </div>
         </div>
       </ScrollArea>
 
       <div className="absolute bottom-14 w-full h-9">
         <div className="flex justify-between items-center mt-auto">
-          <div className="flex space-x-2 items-center">
-            {token && (
-              <OpenURL
-                href={`/i/${token}`}
-                className="text-xs text-[#808080] flex items-center gap-1"
-              >
-                <Icons.ExternalLink className="size-3" />
-                <span>Preview invoice</span>
-              </OpenURL>
-            )}
-
+          <div className="flex space-x-2 items-center text-xs text-[#808080]">
             {(draftInvoice.isPending || lastEditedText) && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.5 }}
-                className="text-xs text-[#808080] flex items-center gap-1"
-              >
-                <span>-</span>
-                <span>
-                  {draftInvoice.isPending ? "Saving" : lastEditedText}
-                </span>
-              </motion.div>
+              <span>{draftInvoice.isPending ? "Saving" : lastEditedText}</span>
+            )}
+            {token && (
+              <>
+                {(draftInvoice.isPending || lastEditedText) && <span>-</span>}
+                <OpenURL
+                  href={`${window.location.origin}/i/${token}`}
+                  className="flex items-center gap-1"
+                >
+                  <Icons.ExternalLink className="size-3" />
+                  <span>Preview invoice</span>
+                </OpenURL>
+              </>
             )}
           </div>
 
@@ -192,3 +181,4 @@ export function Form({ teamId, customers, onSubmit, isSubmitting }: Props) {
     </form>
   );
 }
+

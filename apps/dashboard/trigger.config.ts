@@ -1,12 +1,11 @@
 import { defineConfig } from "@trigger.dev/sdk/v3";
 
 export default defineConfig({
-  //project: process.env.TRIGGER_PROJECT_ID!,
-  project: "proj_dzlhkdgrzrlbbhwbceog",
+  project: process.env.TRIGGER_PROJECT_ID!,
   runtime: "node",
   logLevel: "log",
   retries: {
-    enabledInDev: true,
+    enabledInDev: false,
     default: {
       maxAttempts: 3,
       minTimeoutInMs: 1000,
@@ -14,6 +13,9 @@ export default defineConfig({
       factor: 2,
       randomize: true,
     },
+  },
+  build: {
+    external: ["sharp"],
   },
   dirs: ["./jobs/tasks"],
 });

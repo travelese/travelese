@@ -11,6 +11,36 @@ export const updateUserSchema = z.object({
   revalidatePath: z.string().optional(),
 });
 
+export const createTagSchema = z.object({ name: z.string() });
+export const createTransactionTagSchema = z.object({
+  tagId: z.string(),
+  transactionId: z.string(),
+});
+
+export const deleteTagSchema = z.object({
+  id: z.string(),
+});
+
+export const updateTagSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+});
+
+export const deleteTransactionTagSchema = z.object({
+  tagId: z.string(),
+  transactionId: z.string(),
+});
+
+export const deleteProjectTagSchema = z.object({
+  tagId: z.string(),
+  projectId: z.string(),
+});
+
+export const createProjectTagSchema = z.object({
+  tagId: z.string(),
+  projectId: z.string(),
+});
+
 export type UpdateUserFormValues = z.infer<typeof updateUserSchema>;
 
 export const trackingConsentSchema = z.boolean();

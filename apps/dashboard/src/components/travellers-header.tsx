@@ -1,4 +1,4 @@
-import { OpenTravellerSheet } from "./open-traveller-sheet";
+import { OpenCustomerSheet } from "./open-traveller-sheet";
 import { SearchField } from "./search-field";
 
 export async function TravellersHeader() {
@@ -7,7 +7,7 @@ export async function TravellersHeader() {
       <SearchField placeholder="Search customers" />
 
       <div className="hidden sm:block">
-        <OpenTravellerSheet />
+        <OpenCustomerSheet />
       </div>
     </div>
   );

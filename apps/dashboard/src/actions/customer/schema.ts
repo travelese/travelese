@@ -1,11 +1,11 @@
 import { z } from "zod";
 
-export const deleteTravellerTagSchema = z.object({
+export const deleteCustomerTagSchema = z.object({
   tagId: z.string(),
-  travellerId: z.string(),
+  customerId: z.string(),
 });
 
-export const createTravellerTagSchema = z.object({
+export const createCustomerTagSchema = z.object({
   tagId: z.string(),
-  travellerId: z.string(),
+  customerId: z.string(),
 });

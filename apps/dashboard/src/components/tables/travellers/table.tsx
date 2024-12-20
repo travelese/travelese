@@ -1,7 +1,7 @@
 "use client";
 
-import { deleteTravellerAction } from "@/actions/delete-traveller-action";
-import { useTravellerParams } from "@/hooks/use-traveller-params";
+import { deleteCustomerAction } from "@/actions/delete-customer-action";
+import { useCustomerParams } from "@/hooks/use-customer-params";
 import { Spinner } from "@travelese/ui/spinner";
 import { Table, TableBody } from "@travelese/ui/table";
 import {
@@ -12,19 +12,19 @@ import {
 import { useAction } from "next-safe-action/hooks";
 import React, { useEffect, useState } from "react";
 import { useInView } from "react-intersection-observer";
-import { columns, type Traveller } from "./columns";
-import { TravellerRow } from "./row";
+import { columns, type Customer } from "./columns";
+import { CustomerRow } from "./row";
 import { TableHeader } from "./table-header";
 
 type Props = {
-  data: Traveller[];
+  data: Customer[];
   loadMore: ({
     from,
     to,
   }: {
     from: number;
     to: number;
-  }) => Promise<{ data: Traveller[]; meta: { count: number } }>;
+  }) => Promise<{ data: Customer[]; meta: { count: number } }>;
   pageSize: number;
   hasNextPage: boolean;
 };
@@ -39,9 +39,9 @@ export function DataTable({
   const [from, setFrom] = useState(pageSize);
   const { ref, inView } = useInView();
   const [hasNextPage, setHasNextPage] = useState(initialHasNextPage);
-  const { setParams } = useTravellerParams();
+  const { setParams } = useCustomerParams();
 
-  const deleteTraveller = useAction(deleteTravellerAction);
+  const deleteCustomer = useAction(deleteCustomerAction);
 
   const setOpen = (id?: string) => {
     if (id) {
@@ -51,12 +51,12 @@ export function DataTable({
     }
   };
 
-  const handleDeleteTraveller = (id: string) => {
+  const handleDeleteCustomer = (id: string) => {
     setData((prev) => {
       return prev.filter((item) => item.id !== id);
     });
 
-    deleteTraveller.execute({ id });
+    deleteCustomer.execute({ id });
   };
 
   const table = useReactTable({
@@ -66,7 +66,7 @@ export function DataTable({
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     meta: {
-      deleteTraveller: handleDeleteTraveller,
+      deleteCustomer: handleDeleteCustomer,
     },
   });
 
@@ -105,7 +105,7 @@ export function DataTable({
 
         <TableBody>
           {table.getRowModel().rows.map((row) => (
-            <TravellerRow key={row.id} row={row} setOpen={setOpen} />
+            <CustomerRow key={row.id} row={row} setOpen={setOpen} />
           ))}
         </TableBody>
       </Table>
