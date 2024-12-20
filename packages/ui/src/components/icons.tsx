@@ -657,8 +657,33 @@ export const Icons = {
       />
     </svg>
   ),
+  Vault: (props: any) => (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width={24}
+      height={24}
+      fill="none"
+      {...props}
+    >
+      <g
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={2}
+        clipPath="url(#a)"
+      >
+        <path d="M18 18.75V21M6 18.75V21M20.25 4.5H3.75a.75.75 0 0 0-.75.75V18c0 .414.336.75.75.75h16.5A.75.75 0 0 0 21 18V5.25a.75.75 0 0 0-.75-.75ZM16.875 12H21" />
+        <path d="M13.875 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" />
+      </g>
+      <defs>
+        <clipPath id="a">
+          <path fill="currentColor" d="M0 0h24v24H0z" />
+        </clipPath>
+      </defs>
+    </svg>
+  ),
   Overview: MdBarChart,
-  Apps: MdOutlineIntegrationInstructions,
+  Apps: MdOutlineApps,
   Transactions: MdOutlineListAlt,
   Invoice: MdOutlineDescription,
   Files: MdOutlineInventory2,
