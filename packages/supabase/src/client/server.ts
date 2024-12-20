@@ -13,7 +13,7 @@ console.warn = (...args) => {
   const match = args.find((arg) =>
     typeof arg === "string"
       ? IGNORE_WARNINGS.find((warning) => arg.includes(warning))
-      : false,
+      : false
   );
   if (!match) {
     conWarn(...args);
@@ -24,7 +24,7 @@ console.log = (...args) => {
   const match = args.find((arg) =>
     typeof arg === "string"
       ? IGNORE_WARNINGS.find((warning) => arg.includes(warning))
-      : false,
+      : false
   );
   if (!match) {
     conLog(...args);
@@ -47,10 +47,10 @@ export const createClient = (options?: CreateClientOptions) => {
 
   const auth = admin
     ? {
-        persistSession: false,
-        autoRefreshToken: false,
-        detectSessionInUrl: false,
-      }
+      persistSession: false,
+      autoRefreshToken: false,
+      detectSessionInUrl: false,
+    }
     : {};
 
   return createServerClient<Database>(
@@ -78,8 +78,11 @@ export const createClient = (options?: CreateClientOptions) => {
         headers: {
           // Pass user agent from browser
           "user-agent": headers().get("user-agent") as string,
+          // https://supabase.com/docs/guides/platform/read-replicas#experimental-routing
+          "sb-lb-routing-mode": "alpha-all-services",
         },
       },
     },
   );
 };
+

@@ -5,7 +5,7 @@ import { useInvoiceParams } from "@/hooks/use-invoice-params";
 import type { Settings } from "@travelese/invoice/default";
 import { Sheet } from "@travelese/ui/sheet";
 import React from "react";
-import type { Customer } from "../invoice/customer-details";
+import type { Customer } from "../invoice/traveller-details";
 import { FormContext } from "../invoice/form-context";
 import { InvoiceSheetContent } from "./invoice-sheet-content";
 

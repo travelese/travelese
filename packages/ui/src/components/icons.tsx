@@ -658,7 +658,7 @@ export const Icons = {
     </svg>
   ),
   Overview: MdBarChart,
-  Apps: MdOutlineIntegrationInstructions,
+  Apps: MdOutlineApps,
   Transactions: MdOutlineListAlt,
   Invoice: MdOutlineDescription,
   Files: MdOutlineInventory2,
