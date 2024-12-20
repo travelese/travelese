@@ -32,7 +32,7 @@ const config = {
   },
   logging: {
     fetches: {
-      fullUrl: true,
+      fullUrl: process.env.LOG_FETCHES === "true",
     },
   },
   typescript: {
@@ -40,6 +40,7 @@ const config = {
   },
   experimental: {
     instrumentationHook: process.env.NODE_ENV === "production",
+    serverComponentsExternalPackages: ["@trigger.dev/sdk"],
   },
   async headers() {
     return [
@@ -63,4 +64,7 @@ export default withSentryConfig(withBundleAnalyzer(config), {
   hideSourceMaps: true,
   disableLogger: true,
   tunnelRoute: "/monitoring",
+  sourcemaps: {
+    disable: true,
+  },
 });
