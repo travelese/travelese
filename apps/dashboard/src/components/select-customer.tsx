@@ -1,6 +1,4 @@
-"use client";
-
-import { useTravellerParams } from "@/hooks/use-traveller-params";
+import { useCustomerParams } from "@/hooks/use-customer-params";
 import { useInvoiceParams } from "@/hooks/use-invoice-params";
 import { Button } from "@travelese/ui/button";
 import {
@@ -21,8 +19,8 @@ type Props = {
   }[];
 };
 
-export function SelectTraveller({ data }: Props) {
-  const { setParams: setTravellerParams } = useTravellerParams();
+export function SelectCustomer({ data }: Props) {
+  const { setParams: setCustomerParams } = useCustomerParams();
   const { setParams: setInvoiceParams } = useInvoiceParams();
   const [open, setOpen] = React.useState(false);
   const [value, setValue] = React.useState("");
@@ -34,14 +32,27 @@ export function SelectTraveller({ data }: Props) {
   }));
 
   const handleSelect = (id: string) => {
-    if (id === "create-traveller") {
-      setTravellerParams({ createTraveller: true, name: value });
+    if (id === "create-customer") {
+      setCustomerParams({ createCustomer: true, name: value });
     } else {
-      setInvoiceParams({ selectedTravellerId: id });
+      setInvoiceParams({ selectedCustomerId: id });
     }
 
     setOpen(false);
   };
+
+  if (!data.length) {
+    return (
+      <Button
+        type="button"
+        variant="ghost"
+        onClick={() => setCustomerParams({ createCustomer: true })}
+        className="font-mono text-[#434343] p-0 text-[11px] h-auto hover:bg-transparent"
+      >
+        Select customer
+      </Button>
+    );
+  }
 
   return (
     <Popover open={open} onOpenChange={setOpen} modal>
@@ -74,9 +85,10 @@ export function SelectTraveller({ data }: Props) {
               <button
                 type="button"
                 onClick={() =>
-                  setTravellerParams({ createTraveller: true, name: value })}
+                  setCustomerParams({ createCustomer: true, name: value })
+                }
               >
-                Create traveller
+                Create customer
               </button>
             </CommandEmpty>
             <CommandGroup>
@@ -92,7 +104,7 @@ export function SelectTraveller({ data }: Props) {
                     type="button"
                     onClick={(e) => {
                       e.stopPropagation();
-                      setTravellerParams({ travellerId: item.id });
+                      setCustomerParams({ customerId: item.id });
                     }}
                     className="ml-auto text-xs opacity-0 group-hover:opacity-50 hover:opacity-100"
                   >
@@ -105,7 +117,7 @@ export function SelectTraveller({ data }: Props) {
                 onSelect={handleSelect}
                 className="text-xs border-t-[1px] border-border pt-2 mt-2"
               >
-                Create traveller
+                Create customer
               </CommandItem>
             </CommandGroup>
           </CommandList>

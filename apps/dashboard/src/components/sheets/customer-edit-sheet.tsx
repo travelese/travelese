@@ -1,9 +1,9 @@
 "use client";
 
-import { deleteTravellerAction } from "@/actions/delete-traveller-action";
-import { useTravellerParams } from "@/hooks/use-traveller-params";
+import { deleteCustomerAction } from "@/actions/delete-customer-action";
+import { useCustomerParams } from "@/hooks/use-customer-params";
 import { createClient } from "@travelese/supabase/client";
-import { getTravellerQuery } from "@travelese/supabase/queries";
+import { getCustomerQuery } from "@travelese/supabase/queries";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -25,46 +25,46 @@ import { Icons } from "@travelese/ui/icons";
 import { Sheet, SheetContent, SheetHeader } from "@travelese/ui/sheet";
 import { useAction } from "next-safe-action/hooks";
 import React, { useEffect, useState } from "react";
-import { TravellerForm } from "../forms/traveller-form";
-import type { Traveller } from "../invoice/taveller-details";
+import { CustomerForm } from "../forms/customer-form";
+import type { Customer } from "../invoice/customer-details";
 
-export function TravellerEditSheet() {
-  const [traveller, setTraveller] = useState<Traveller | null>(null);
-  const { setParams, travellerId } = useTravellerParams();
+export function CustomerEditSheet() {
+  const [customer, setCustomer] = useState<Customer | null>(null);
+  const { setParams, customerId } = useCustomerParams();
 
-  const isOpen = Boolean(travellerId);
+  const isOpen = Boolean(customerId);
   const supabase = createClient();
 
-  const deleteTraveller = useAction(deleteTravellerAction, {
+  const deleteCustomer = useAction(deleteCustomerAction, {
     onSuccess: () => {
       setParams({
-        travellerId: null,
+        customerId: null,
       });
     },
   });
 
   useEffect(() => {
-    async function fetchTraveller() {
-      if (travellerId) {
-        const { data } = await getTravellerQuery(supabase, travellerId);
+    async function fetchCustomer() {
+      if (customerId) {
+        const { data } = await getCustomerQuery(supabase, customerId);
         if (data) {
-          setTraveller(data as Traveller);
+          setCustomer(data as Customer);
         }
       }
     }
 
-    if (travellerId) {
-      fetchTraveller();
+    if (customerId) {
+      fetchCustomer();
     }
-  }, [travellerId, supabase]);
+  }, [customerId, supabase]);
 
   return (
     <Sheet open={isOpen} onOpenChange={() => setParams(null)}>
       <SheetContent stack>
         <SheetHeader className="mb-6 flex justify-between items-center flex-row">
-          <h2 className="text-xl">Edit Traveller</h2>
+          <h2 className="text-xl">Edit Customer</h2>
 
-          {travellerId && (
+          {customerId && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <button type="button">
@@ -88,7 +88,7 @@ export function TravellerEditSheet() {
                       </AlertDialogTitle>
                       <AlertDialogDescription>
                         This action cannot be undone. This will permanently
-                        delete the traveller and remove their data from our
+                        delete the customer and remove their data from our
                         servers.
                       </AlertDialogDescription>
                     </AlertDialogHeader>
@@ -96,8 +96,7 @@ export function TravellerEditSheet() {
                       <AlertDialogCancel>Cancel</AlertDialogCancel>
                       <AlertDialogAction
                         onClick={() =>
-                          deleteTraveller.execute({ id: travellerId })
-                        }
+                          deleteCustomer.execute({ id: customerId })}
                       >
                         Delete
                       </AlertDialogAction>
@@ -109,7 +108,7 @@ export function TravellerEditSheet() {
           )}
         </SheetHeader>
 
-        <TravellerForm data={traveller} />
+        <CustomerForm data={customer} />
       </SheetContent>
     </Sheet>
   );

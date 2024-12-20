@@ -8,7 +8,7 @@ import { useAction } from "next-safe-action/hooks";
 import { useEffect, useState } from "react";
 import { useFormContext } from "react-hook-form";
 import { InvoiceSuccessful } from "../invoice-successful";
-import type { Customer } from "../invoice/traveller-details";
+import type { Customer } from "../invoice/customer-details";
 import { Form } from "../invoice/form";
 import { SettingsMenu } from "../invoice/settings-menu";
 import { OpenURL } from "../open-url";

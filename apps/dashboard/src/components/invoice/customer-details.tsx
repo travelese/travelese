@@ -7,11 +7,11 @@ import type { JSONContent } from "@tiptap/react";
 import { useAction } from "next-safe-action/hooks";
 import { useEffect } from "react";
 import { Controller, useFormContext } from "react-hook-form";
-import { SelectTraveller } from "../select-traveller";
+import { SelectCustomer } from "../select-customer";
 import { LabelInput } from "./label-input";
-import { transformTravellerToContent } from "./utils";
+import { transformCustomerToContent } from "./utils";
 
-export interface Traveller {
+export interface Customer {
   id: string;
   name: string;
   email: string;
@@ -24,78 +24,85 @@ export interface Traveller {
   zip?: string;
   country?: string;
   vat?: string;
+  contact?: string;
+  website?: string;
+  tags?: { tag: { id: string; name: string } }[];
 }
 
-interface TravellerDetailsProps {
-  travellers: Traveller[];
+interface CustomerDetailsProps {
+  customers: Customer[];
 }
 
-export function TravellerDetails({ travellers }: TravellerDetailsProps) {
+export function CustomerDetails({ customers }: CustomerDetailsProps) {
   const { control, setValue, watch } = useFormContext();
-  const { setParams, selectedTravellerId } = useInvoiceParams();
+  const { setParams, selectedCustomerId } = useInvoiceParams();
   const updateInvoiceTemplate = useAction(updateInvoiceTemplateAction);
 
-  const content = watch("traveller_details");
+  const content = watch("customer_details");
+  const id = watch("id");
 
   const handleLabelSave = (value: string) => {
-    updateInvoiceTemplate.execute({ traveller_label: value });
+    updateInvoiceTemplate.execute({ customer_label: value });
   };
 
   const handleOnChange = (content?: JSONContent | null) => {
     // Reset the selected customer id when the content is changed
-    setParams({ selectedTravellerId: null });
+    setParams({ selectedCustomerId: null });
 
-    setValue("traveller_details", content, {
+    setValue("customer_details", content, {
       shouldValidate: true,
       shouldDirty: true,
     });
 
     if (!content) {
-      setValue("traveller_name", null, { shouldValidate: true });
-      setValue("traveller_id", null, { shouldValidate: true });
+      setValue("customer_name", null, { shouldValidate: true });
+      setValue("customer_id", null, { shouldValidate: true });
     }
   };
 
   useEffect(() => {
-    const traveller = travellers.find((c) => c.id === selectedTravellerId);
+    const customer = customers.find((c) => c.id === selectedCustomerId);
 
-    if (traveller) {
-      const travellerContent = transformTravellerToContent(traveller);
+    if (customer) {
+      const customerContent = transformCustomerToContent(customer);
 
       // Remove the selected customer id from the url so we don't introduce a race condition
-      setParams({ selectedTravellerId: null });
+      setParams({ selectedCustomerId: null });
 
-      setValue("traveller_name", traveller.name, { shouldValidate: true });
-      setValue("traveller_id", traveller.id, { shouldValidate: true });
-      setValue("traveller_details", travellerContent, {
+      setValue("customer_name", customer.name, { shouldValidate: true });
+      setValue("customer_id", customer.id, { shouldValidate: true });
+      setValue("customer_details", customerContent, {
         shouldValidate: true,
         shouldDirty: true,
       });
     }
-  }, [selectedTravellerId, travellers]);
+  }, [selectedCustomerId, customers]);
 
   return (
     <div>
       <LabelInput
-        name="template.traveller_label"
+        name="template.customer_label"
         className="mb-2 block"
         onSave={handleLabelSave}
       />
       {content
         ? (
           <Controller
-            name="traveller_details"
+            name="customer_details"
             control={control}
             render={({ field }) => (
               <Editor
+                // NOTE: This is a workaround to get the new content to render
+                key={id}
                 initialContent={field.value}
                 onChange={handleOnChange}
-                className="h-[115px]"
+                className="min-h-[90px]"
               />
             )}
           />
         )
-        : <SelectTraveller data={travellers} />}
+        : <SelectCustomer data={customers} />}
     </div>
   );
 }
+

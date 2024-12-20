@@ -1,22 +1,22 @@
 "use client";
 
-import { useTravellerParams } from "@/hooks/use-traveller-params";
+import { useCustomerParams } from "@/hooks/use-customer-params";
 import { Button } from "@travelese/ui/button";
 import { Icons } from "@travelese/ui/icons";
 import { Sheet, SheetContent, SheetHeader } from "@travelese/ui/sheet";
 import React from "react";
-import { TravellerForm } from "../forms/traveller-form";
+import { CustomerForm } from "../forms/customer-form";
 
-export function TravellerCreateSheet() {
-  const { setParams, createTraveller } = useTravellerParams();
+export function CustomerCreateSheet() {
+  const { setParams, createCustomer } = useCustomerParams();
 
-  const isOpen = Boolean(createTraveller);
+  const isOpen = Boolean(createCustomer);
 
   return (
     <Sheet open={isOpen} onOpenChange={() => setParams(null)}>
       <SheetContent stack>
         <SheetHeader className="mb-6 flex justify-between items-center flex-row">
-          <h2 className="text-xl">Create Traveller</h2>
+          <h2 className="text-xl">Create Customer</h2>
           <Button
             size="icon"
             variant="ghost"
@@ -27,7 +27,7 @@ export function TravellerCreateSheet() {
           </Button>
         </SheetHeader>
 
-        <TravellerForm />
+        <CustomerForm />
       </SheetContent>
     </Sheet>
   );

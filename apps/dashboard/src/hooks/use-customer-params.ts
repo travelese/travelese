@@ -5,11 +5,11 @@ import {
   useQueryStates,
 } from "nuqs";
 
-export function useTravellerParams(options?: { shallow: boolean }) {
+export function useCustomerParams(options?: { shallow: boolean }) {
   const [params, setParams] = useQueryStates(
     {
-      travellerId: parseAsString,
-      createTraveller: parseAsBoolean,
+      customerId: parseAsString,
+      createCustomer: parseAsBoolean,
       sort: parseAsArrayOf(parseAsString),
       name: parseAsString,
       q: parseAsString,
@@ -22,3 +22,4 @@ export function useTravellerParams(options?: { shallow: boolean }) {
     setParams,
   };
 }
+
