@@ -40,9 +40,16 @@ export function FlightPositionsForm({
                   <TravelLocation
                     type="destination"
                     placeholder="Destination"
-                    value={field.value}
+                    value={
+                      field.value
+                        ? `${field.value.latitude}, ${field.value.longitude}`
+                        : ""
+                    }
                     onChange={(value, place) => {
-                      field.onChange(value);
+                      field.onChange({
+                        latitude: place?.latitude || 0,
+                        longitude: place?.longitude || 0,
+                      });
                       onQueryParamsChange({
                         geo_code: {
                           latitude: place?.latitude || 0,
