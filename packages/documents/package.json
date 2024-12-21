@@ -12,9 +12,10 @@
   },
   "dependencies": {
     "@ai-sdk/openai": "^0.0.66",
+    "@ai-sdk/xai": "^1.0.10",
     "@azure-rest/ai-document-intelligence": "^1.0.0-beta.3",
     "@travelese/utils": "workspace:*",
-    "ai": "3.4.9",
+    "ai": "^4.0.21",
     "base64-arraybuffer": "^1.0.2",
     "change-case": "^5.4.4",
     "heic-convert": "1.2.4",

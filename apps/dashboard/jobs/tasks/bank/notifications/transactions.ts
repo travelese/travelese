@@ -36,7 +36,7 @@ export const transactionNotifications = schemaTask({
         .eq("role", "owner")
         .throwOnError();
 
-      if (transactionsData && transactionsData.length > 0) {
+      if (usersData && transactionsData && transactionsData.length > 0) {
         await handleTransactionNotifications(usersData, transactionsData);
         await handleTransactionEmails(usersData, transactionsData);
         await handleTransactionSlackNotifications(teamId, transactionsData);

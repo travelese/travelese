@@ -38,7 +38,7 @@ exports[`Transform type transfer 1`] = `
 {
   "amount": -31.53,
   "balance": null,
-  "category": "transfer",
+  "category": "travel",
   "currency": "CAD",
   "currency_rate": null,
   "currency_source": null,
@@ -62,11 +62,12 @@ exports[`Transform accounts 1`] = `
   "id": "kKZWQnoZVqcBeN71qdyoh8mVoErgb7tL7gmBL",
   "institution": {
     "id": "ins_100546",
-    "logo": "https://cdn-engine.travelese.ai/ins_100546.jpg",
+    "logo": "https://cdn-engine.midday.ai/ins_100546.jpg",
     "name": "American Funds Retirement Solutions",
     "provider": "plaid",
   },
   "name": "Plaid Mortgage",
+  "resource_id": null,
   "type": "other_asset",
 }
 `;

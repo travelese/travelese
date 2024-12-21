@@ -3,8 +3,10 @@ import { withRetry } from "@/utils/retry";
 import { PlaidProvider } from "./plaid/plaid-provider";
 import type {
   DeleteAccountsRequest,
+  DeleteConnectionRequest,
   GetAccountBalanceRequest,
   GetAccountsRequest,
+  GetConnectionStatusRequest,
   GetHealthCheckResponse,
   GetInstitutionsRequest,
   GetTransactionsRequest,
@@ -45,25 +47,10 @@ export class Provider {
     }
   }
 
-  async getTransactions(params: GetTransactionsRequest) {
-    logger(
-      "getTransactions:",
-      `provider: ${this.#name} id: ${params.accountId}`,
-    );
-
-    const data = await withRetry(() => this.#provider?.getTransactions(params));
-
-    if (data) {
-      return data;
-    }
-
-    return [];
-  }
-
   async getAccounts(params: GetAccountsRequest) {
     logger("getAccounts:", `provider: ${this.#name}`);
 
-    const data = await withRetry(() => this.#provider?.getAccounts(params));
+    const data = await this.#provider?.getAccounts(params);
 
     if (data) {
       return data;
@@ -78,15 +65,28 @@ export class Provider {
       `provider: ${this.#name} id: ${params.accountId}`,
     );
 
-    const data = await withRetry(() =>
-      this.#provider?.getAccountBalance(params),
-    );
+    const data = await this.#provider?.getAccountBalance(params);
 
     if (data) {
       return data;
     }
 
     return null;
+  }
+
+  async getTransactions(params: GetTransactionsRequest) {
+    logger(
+      "getTransactions:",
+      `provider: ${this.#name} id: ${params.accountId}`,
+    );
+
+    const data = await withRetry(() => this.#provider?.getTransactions(params));
+
+    if (data) {
+      return data;
+    }
+
+    return [];
   }
 
   async getInstitutions(params: GetInstitutionsRequest) {
@@ -104,6 +104,24 @@ export class Provider {
   async deleteAccounts(params: DeleteAccountsRequest) {
     logger("delete:", `provider: ${this.#name}`);
 
-    return withRetry(() => this.#provider?.deleteAccounts(params));
+    return this.#provider?.deleteAccounts(params);
+  }
+
+  async getConnectionStatus(params: GetConnectionStatusRequest) {
+    logger("getConnectionStatus:", `provider: ${this.#name}`);
+
+    const data = await this.#provider?.getConnectionStatus(params);
+
+    if (data) {
+      return data;
+    }
+
+    return { status: "connected" };
+  }
+
+  async deleteConnection(params: DeleteConnectionRequest) {
+    logger("deleteConnection:", `provider: ${this.#name}`);
+
+    return this.#provider?.deleteConnection(params);
   }
 }

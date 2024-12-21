@@ -1,6 +1,5 @@
 import { createClient } from "@travelese/supabase/job";
 import { logger, schedules } from "@trigger.dev/sdk/v3";
-import { syncConnection } from "../sync/connection";
 
 // This is a fan-out pattern. We want to trigger a job for each bank connection
 // Then in sync connection we check if the connection is connected and if not we update the status (Connected, Disconnected)
@@ -38,8 +37,6 @@ export const bankSyncScheduler = schedules.task({
         logger.info("No bank connections to sync");
         return;
       }
-
-      await syncConnection.batchTrigger(formattedConnections);
     } catch (error) {
       logger.error("Failed to sync bank connections", { error });
 

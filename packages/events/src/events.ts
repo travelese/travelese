@@ -215,4 +215,9 @@ export const LogEvents = {
     name: "Explore Travel",
     channel: "travel",
   },
+  UpdateAppSettings: {
+    name: "Update App Settings",
+    channel: "app",
+  },
+  DisconnectApp: { name: "Disconnect App", channel: "app" },
 };

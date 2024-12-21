@@ -15,6 +15,7 @@
   },
   "dependencies": {
     "@ai-sdk/openai": "^0.0.66",
+    "@ai-sdk/xai": "^1.0.10",
     "@date-fns/tz": "^1.1.2",
     "@duffel/api": "^3.1.0",
     "@fast-csv/format": "5.0.0",
