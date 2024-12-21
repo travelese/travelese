@@ -53,7 +53,7 @@ function getBounds(latitude: number, longitude: number) {
   return `${northEast?.latitude},${southWest?.latitude},${southWest?.longitude},${northEast?.longitude}`;
 }
 
-export const flightPositionsAction = authActionClient
+export const exploreTravelAction = authActionClient
   .schema(flightPositionsRequestSchema)
   .metadata({
     name: "explore-travel",

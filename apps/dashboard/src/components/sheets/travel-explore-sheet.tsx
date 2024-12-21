@@ -1,9 +1,7 @@
 "use client";
 
-import { flightPositionsAction } from "@/actions/explore-travel-action";
-import { flightPositionsRequestSchema } from "@/actions/schema";
-import { FlightPositionsForm } from "@/components/forms/travel-explore-form";
-import { useTravelParams } from "@/hooks/use-travel-params";
+import React from "react";
+import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Drawer, DrawerContent, DrawerHeader } from "@travelese/ui/drawer";
 import {
@@ -19,8 +17,10 @@ import { Sheet, SheetContent, SheetHeader } from "@travelese/ui/sheet";
 import { useToast } from "@travelese/ui/use-toast";
 import { useAction } from "next-safe-action/hooks";
 import { parseAsJson, parseAsString, useQueryStates } from "nuqs";
-import React from "react";
-import { useForm } from "react-hook-form";
+import { exploreTravelAction } from "@/actions/explore-travel-action";
+import { flightPositionsRequestSchema } from "@/actions/schema";
+import { FlightPositionsForm } from "@/components/forms/travel-explore-form";
+import { useTravelParams } from "@/hooks/use-travel-params";
 import type { z } from "zod";
 
 type Props = {
@@ -52,7 +52,7 @@ export function ExploreTravelSheet({ userId, currency }: Props) {
     },
   });
 
-  const exploreAction = useAction(flightPositionsAction, {
+  const exploreAction = useAction(exploreTravelAction, {
     onSuccess: ({ data }) => {
       toast({
         title: "Explore Found",
@@ -62,7 +62,7 @@ export function ExploreTravelSheet({ userId, currency }: Props) {
 
       setQueryParams((prev) => ({
         ...prev,
-        geo_code: form.getValues().geo_code,
+        geo_code: form.getValues().geo_code, // Set as object
         iata_code: form.getValues().iata_code,
       }));
 
@@ -78,6 +78,10 @@ export function ExploreTravelSheet({ userId, currency }: Props) {
       });
     },
   });
+
+  console.log("ExploreTravelSheet rendered");
+  console.log("explore state:", explore);
+  console.log("queryParams:", queryParams);
 
   if (isDesktop) {
     return (
@@ -112,7 +116,11 @@ export function ExploreTravelSheet({ userId, currency }: Props) {
               isSubmitting={exploreAction.status === "executing"}
               onSubmit={() => exploreAction.execute(form.getValues())}
               onQueryParamsChange={(updates) =>
-                setQueryParams((prev) => ({ ...prev, ...updates }))
+                setQueryParams((prev) => ({
+                  ...prev,
+                  geo_code: updates.geo_code, // Set as object
+                  iata_code: updates.iata_code,
+                }))
               }
             />
           </ScrollArea>
@@ -152,7 +160,11 @@ export function ExploreTravelSheet({ userId, currency }: Props) {
           isSubmitting={exploreAction.status === "executing"}
           onSubmit={() => exploreAction.execute(form.getValues())}
           onQueryParamsChange={(updates) =>
-            setQueryParams((prev) => ({ ...prev, ...updates }))
+            setQueryParams((prev) => ({
+              ...prev,
+              geo_code: updates.geo_code, // Set as object
+              iata_code: updates.iata_code,
+            }))
           }
         />
       </DrawerContent>

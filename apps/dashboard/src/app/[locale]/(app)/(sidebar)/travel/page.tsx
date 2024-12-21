@@ -35,7 +35,9 @@ type Props = {
 export default async function Travel({ searchParams }: Props) {
   const status = searchParams?.statuses;
   const sort = searchParams?.sort?.split(":") ?? ["status", "asc"];
-  const geocode = searchParams?.geocode;
+  const geocode = searchParams?.geocode
+    ? JSON.parse(searchParams.geocode)
+    : null;
 
   const currentDate =
     searchParams?.date ?? formatISO(new Date(), { representation: "date" });
