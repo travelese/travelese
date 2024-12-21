@@ -1,8 +1,7 @@
 import { schedules, schemaTask } from "@trigger.dev/sdk/v3";
 import { generateCronTag } from "jobs/utils/generate-cron-tag";
 import { z } from "zod";
-import { bankSyncScheduler } from "../scheduler/bank-sync";
-import { syncConnection } from "../sync/connection";
+import { bankSyncScheduler } from "../scheduler/bank-scheduler";
 
 // This task sets up the bank sync for a new team on a daily schedule and
 // runs the initial sync for transactions and balance
@@ -31,22 +30,9 @@ export const initialBankSetup = schemaTask({
     });
 
     // Run initial sync for transactions and balance for the connection
-    await syncConnection.triggerAndWait({
-      connectionId,
-      manualSync: true,
-    });
 
     // And run once more to ensure all transactions are fetched on the providers side
     // GoCardLess, Teller and Plaid can take up to 3 minutes to fetch all transactions
     // For Teller and Plaid we also listen on the webhook to fetch any new transactions
-    await syncConnection.trigger(
-      {
-        connectionId,
-        manualSync: true,
-      },
-      {
-        delay: "5m",
-      },
-    );
   },
 });

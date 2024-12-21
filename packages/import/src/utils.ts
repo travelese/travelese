@@ -1,22 +1,22 @@
-import { addDays, isValid, parse, subDays } from "date-fns";
-import { formatInTimeZone } from "date-fns-tz";
+import { isValid, parse, parseISO } from "date-fns";
 
-function getAdjustedDate(date: string, dateAdjustment?: number) {
-  const adjustedDate = dateAdjustment
-    ? dateAdjustment > 0
-      ? addDays(date, Math.abs(dateAdjustment)).toISOString()
-      : subDays(date, Math.abs(dateAdjustment)).toISOString()
-    : date;
+function ensureValidYear(dateString: string | undefined): string | undefined {
+  if (!dateString) return undefined;
 
-  return adjustedDate;
+  const [year, month, day] = dateString.split("-");
+  const correctedYear =
+    year?.length === 4
+      ? year.startsWith("20")
+        ? year
+        : `20${year.slice(2)}`
+      : `20${year}`;
+
+  return `${correctedYear}-${month}-${day}`;
 }
 
-export function formatDate(
-  date: string,
-  timezone = "America/New_York",
-  dateAdjustment?: number,
-) {
+export function formatDate(date: string) {
   const formats = [
+    "dd/MMM/yyyy",
     "dd/MM/yyyy",
     "yyyy-MM-dd",
     "MM/dd/yyyy",
@@ -37,28 +37,35 @@ export function formatDate(
     "dd-MM-yyyy HH:mm:ss",
     "yyyy-MM-dd'T'HH:mm:ss.SSSZ",
     "yyyy-MM-dd'T'HH:mm:ss",
+    "d/M/yy",
   ];
 
   for (const format of formats) {
     const parsedDate = parse(date, format, new Date());
     if (isValid(parsedDate)) {
-      const date = formatInTimeZone(parsedDate, timezone, "yyyy-MM-dd");
-
-      return getAdjustedDate(date, dateAdjustment);
+      return ensureValidYear(parsedDate.toISOString().split("T")[0]);
     }
   }
 
-  if (isValid(new Date(date))) {
-    return formatInTimeZone(new Date(date), timezone, "yyyy-MM-dd");
+  try {
+    const parsedDate = parseISO(date);
+    if (isValid(parsedDate)) {
+      return ensureValidYear(parsedDate.toISOString().split("T")[0]);
+    }
+  } catch {
+    // Continue if parseISO fails
   }
 
   // If the date includes a time, we don't need to remove the time.
   const value = date.includes("T") ? date : date.replace(/[^0-9-\.\/]/g, "");
 
-  if (isValid(new Date(value))) {
-    const date = formatInTimeZone(new Date(value), timezone, "yyyy-MM-dd");
-
-    return getAdjustedDate(date, dateAdjustment);
+  try {
+    const parsedDate = parseISO(value);
+    if (isValid(parsedDate)) {
+      return ensureValidYear(parsedDate.toISOString().split("T")[0]);
+    }
+  } catch {
+    // Continue if parseISO fails
   }
 
   // If all parsing attempts fail, return undefined
@@ -71,15 +78,18 @@ export function formatAmountValue({
 }: { amount: string; inverted?: boolean }) {
   let value: number;
 
-  if (amount.includes(",")) {
+  // Handle special minus sign (−) by replacing with standard minus (-)
+  const normalizedAmount = amount.replace(/−/g, "-");
+
+  if (normalizedAmount.includes(",")) {
     // Remove thousands separators and replace the comma with a period.
-    value = +amount.replace(/\./g, "").replace(",", ".");
-  } else if (amount.match(/\.\d{2}$/)) {
+    value = +normalizedAmount.replace(/\./g, "").replace(",", ".");
+  } else if (normalizedAmount.match(/\.\d{2}$/)) {
     // If it ends with .XX, it's likely a decimal; remove internal periods.
-    value = +amount.replace(/\.(?=\d{3})/g, "");
+    value = +normalizedAmount.replace(/\.(?=\d{3})/g, "");
   } else {
     // If neither condition is met, convert the amount directly to a number
-    value = +amount;
+    value = +normalizedAmount;
   }
 
   if (inverted) {

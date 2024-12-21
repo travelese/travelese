@@ -43,6 +43,10 @@ export type Account = {
   balance: Balance;
 };
 
+export type ConnectionStatus = {
+  status: "connected" | "disconnected";
+};
+
 export type Balance = {
   amount: number;
   currency: string;
@@ -74,6 +78,11 @@ export type DeleteAccountsRequest = {
   accessToken?: string; // Plaid
 };
 
+export type GetConnectionStatusRequest = {
+  id?: string;
+  accessToken?: string; // Plaid
+};
+
 export type GetTransactionsResponse = Transaction[];
 
 export type GetAccountsResponse = Account[];
@@ -95,4 +104,11 @@ export type HealthCheckResponse = {
 
 export type GetHealthCheckResponse = {
   plaid: HealthCheckResponse;
+};
+
+export type GetConnectionStatusResponse = ConnectionStatus;
+
+export type DeleteConnectionRequest = {
+  accountId: string;
+  accessToken?: string; // Plaid
 };

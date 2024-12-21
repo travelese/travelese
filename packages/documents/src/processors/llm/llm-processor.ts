@@ -1,4 +1,4 @@
-import { xai } from "@/utils/xai";
+import { xai } from "@ai-sdk/xai";
 import { generateObject } from "ai";
 import { z } from "zod";
 

@@ -5,8 +5,8 @@ import { getSession } from "@travelese/supabase/cached-queries";
 import { createClient } from "@travelese/supabase/server";
 import { addYears } from "date-fns";
 import { cookies } from "next/headers";
-import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
 
 export const preferredRegion = ["fra1", "sfo1", "iad1"];
 
@@ -42,7 +42,7 @@ export async function GET(req: NextRequest) {
 
       const analytics = await setupAnalytics({
         userId,
-        fullName: session?.user?.user_metadata?.full_name,
+        fullName: session.user.user_metadata?.full_name,
       });
 
       await analytics.track({
