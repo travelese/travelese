@@ -1,14 +1,14 @@
-"use server"
+"use server";
 
 export async function getFlightTracks(id: string) {
-  const baseUrl = 'https://fr24api.flightradar24.com/api/flight-tracks';
+  const baseUrl = "https://fr24api.flightradar24.com/api/flight-tracks";
 
   const query = new URLSearchParams({ flight_id: id });
 
   const response = await fetch(`${baseUrl}?${query}`, {
     headers: {
-      Accept: 'application/json',
-      'Accept-Version': 'v1',
+      Accept: "application/json",
+      "Accept-Version": "v1",
       Authorization: `Bearer ${process.env.FLIGHT_RADAR_TOKEN}`,
     },
   });

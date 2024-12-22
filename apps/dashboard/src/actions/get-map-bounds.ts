@@ -1,5 +1,5 @@
 import { getBoundsOfDistance } from "geolib";
-import { MAP_RADIUS } from "./constants";
+import { MAP_RADIUS } from "../utils/constants";
 
 export function getMapBounds(
   latitude: number,

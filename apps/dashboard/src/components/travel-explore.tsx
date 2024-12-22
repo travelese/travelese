@@ -1,7 +1,7 @@
 "use client";
 
 import { exploreTravelAction } from "@/actions/explore-travel-action";
-import { Map } from "@/components/map";
+import { TravelMap } from "@/components/travel-map";
 import { Planes } from "@/components/planes";
 import { parseAsJson, useQueryStates } from "nuqs";
 import { useEffect, useState } from "react";
@@ -37,8 +37,8 @@ export default function TravelExplore() {
   }, [queryParams.geocode]);
 
   return (
-    <Map params={queryParams.geocode}>
+    <TravelMap params={queryParams.geocode}>
       <Planes color="blue" flights={flights} />
-    </Map>
+    </TravelMap>
   );
 }

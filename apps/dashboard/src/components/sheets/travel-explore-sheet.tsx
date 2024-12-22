@@ -79,10 +79,6 @@ export function ExploreTravelSheet({ userId, currency }: Props) {
     },
   });
 
-  console.log("ExploreTravelSheet rendered");
-  console.log("explore state:", explore);
-  console.log("queryParams:", queryParams);
-
   if (isDesktop) {
     return (
       <Sheet
