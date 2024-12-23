@@ -19,7 +19,7 @@ import { useAction } from "next-safe-action/hooks";
 import { parseAsJson, parseAsString, useQueryStates } from "nuqs";
 import { exploreTravelAction } from "@/actions/explore-travel-action";
 import { flightPositionsRequestSchema } from "@/actions/schema";
-import { FlightPositionsForm } from "@/components/forms/travel-explore-form";
+import { ExploreTravelForm } from "@/components/forms/travel-explore-form";
 import { useTravelParams } from "@/hooks/use-travel-params";
 import type { z } from "zod";
 
@@ -62,7 +62,7 @@ export function ExploreTravelSheet({ userId, currency }: Props) {
 
       setQueryParams((prev) => ({
         ...prev,
-        geo_code: form.getValues().geo_code, // Set as object
+        geo_code: form.getValues().geo_code,
         iata_code: form.getValues().iata_code,
       }));
 
@@ -107,14 +107,14 @@ export function ExploreTravelSheet({ userId, currency }: Props) {
           </SheetHeader>
 
           <ScrollArea className="h-full p-0 pb-28" hideScrollbar>
-            <FlightPositionsForm
+            <ExploreTravelForm
               form={form}
               isSubmitting={exploreAction.status === "executing"}
               onSubmit={() => exploreAction.execute(form.getValues())}
               onQueryParamsChange={(updates) =>
                 setQueryParams((prev) => ({
                   ...prev,
-                  geo_code: updates.geo_code, // Set as object
+                  geo_code: updates.geo_code,
                   iata_code: updates.iata_code,
                 }))
               }
@@ -151,14 +151,14 @@ export function ExploreTravelSheet({ userId, currency }: Props) {
           </DropdownMenu>
         </DrawerHeader>
 
-        <FlightPositionsForm
+        <ExploreTravelForm
           form={form}
           isSubmitting={exploreAction.status === "executing"}
           onSubmit={() => exploreAction.execute(form.getValues())}
           onQueryParamsChange={(updates) =>
             setQueryParams((prev) => ({
               ...prev,
-              geo_code: updates.geo_code, // Set as object
+              geo_code: updates.geo_code,
               iata_code: updates.iata_code,
             }))
           }

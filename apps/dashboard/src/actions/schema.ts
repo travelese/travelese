@@ -1335,7 +1335,7 @@ export const listPlacesSuggestionsResponseSchema = z.object({
 });
 
 // Flight Radar 24
-export const flightPositionSchema = z.object({
+export const travelExploreSchema = z.object({
   fr24_id: z.string(),
   flight: z.string(),
   callsign: z.string(),
@@ -1360,8 +1360,6 @@ export const flightPositionSchema = z.object({
   eta: z.string(),
 });
 
-export type Flight = z.infer<typeof flightPositionSchema>;
-
 // Schema for the input parameters
 export const flightPositionsRequestSchema = z.object({
   geo_code: z.object({
@@ -1371,7 +1369,7 @@ export const flightPositionsRequestSchema = z.object({
   iata_code: z.string(),
 });
 
-export type FlightPosition = z.infer<typeof flightPositionSchema>;
+export type FlightPosition = z.infer<typeof travelExploreSchema>;
 export type FlightPositionsRequest = z.infer<
   typeof flightPositionsRequestSchema
 >;
