@@ -3,7 +3,6 @@
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { MapContext } from "@/hooks/use-map";
-import { geocode } from "@/utils/geocode";
 import { subscribable } from "@/utils/subscribable";
 import type { MapType } from "@/utils/types";
 import { useParams } from "next/navigation";
@@ -17,6 +16,7 @@ import {
   useState,
 } from "react";
 import { AirportMarker } from "./airport-marker";
+import { parseAsJson, useQueryStates } from "nuqs";
 
 const mapboxToken = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN as string;
 
@@ -37,13 +37,23 @@ export function MapProvider({ children, mapContainerRef }: MapProviderProps) {
   const [isMapReady, setIsMapReady] = useState(false);
   const { airport } = useParams<{ airport: string }>();
 
+  const [queryParams] = useQueryStates({
+    geo_code: parseAsJson<{
+      latitude: number;
+      longitude: number;
+    }>().withDefault({
+      latitude: 0,
+      longitude: 0,
+    }),
+  });
+
   useEffect(() => {
     if (!mapContainerRef.current) return;
-    const center = geocode(airport.toLocaleUpperCase());
+    const { latitude, longitude } = queryParams.geo_code;
     mapboxgl.accessToken = mapboxToken;
     const map = new mapboxgl.Map({
       container: mapContainerRef.current,
-      center: [center.longitude, center.latitude],
+      center: [longitude, latitude],
       zoom: INITIAL_ZOOM,
       attributionControl: false,
       logoPosition: "bottom-right",
@@ -56,7 +66,7 @@ export function MapProvider({ children, mapContainerRef }: MapProviderProps) {
     return () => {
       if (map) map.remove();
     };
-  }, []);
+  }, [queryParams.geo_code]);
 
   if (!isMapReady) return null;
 
@@ -73,7 +83,7 @@ interface MapProps {
   params: Promise<{ airport: string }>;
 }
 
-export function Map({ children }: PropsWithChildren<MapProps>) {
+export function TravelMap({ children }: PropsWithChildren<MapProps>) {
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
 
   const handleClick = useCallback((e: MouseEvent<HTMLDivElement>) => {

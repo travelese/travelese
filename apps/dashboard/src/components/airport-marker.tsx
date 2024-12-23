@@ -1,36 +1,41 @@
 "use client";
 
-import CircleMarker from "@/assets/circle-marker.svg";
 import { useMap } from "@/hooks/use-map";
-import { geocode } from "@/utils/geocode";
 import { Marker } from "mapbox-gl";
 import Image from "next/image";
-import { useParams } from "next/navigation";
 import { useEffect, useRef } from "react";
+import { parseAsJson, useQueryStates } from "nuqs";
 
 export function AirportMarker() {
   const circleMarkerRef = useRef<HTMLDivElement | null>(null);
-
   const map = useMap();
 
-  const { airport } = useParams<{ airport: string }>();
+  const [queryParams] = useQueryStates({
+    geocode: parseAsJson<{
+      latitude: number;
+      longitude: number;
+    }>().withDefault({
+      latitude: 0,
+      longitude: 0,
+    }),
+  });
 
   useEffect(() => {
     const circleMarkerEl = circleMarkerRef.current;
     if (!circleMarkerEl) return;
 
-    const airportGeo = geocode(airport.toLocaleUpperCase());
+    const { latitude, longitude } = queryParams.geocode;
 
     const marker = new Marker({
       element: circleMarkerEl.cloneNode(true) as HTMLElement,
-    }).setLngLat([airportGeo.longitude, airportGeo.latitude]);
+    }).setLngLat([longitude, latitude]);
 
     marker.addTo(map.map);
 
     return () => {
       marker.remove();
     };
-  }, [airport]);
+  }, [queryParams.geocode, map.map]);
 
   return (
     <div className="hidden">
