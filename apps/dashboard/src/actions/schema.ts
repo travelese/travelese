@@ -1360,6 +1360,8 @@ export const travelExploreSchema = z.object({
   eta: z.string(),
 });
 
+export type Flight = z.infer<typeof flightPositionSchema>;
+
 // Schema for the input parameters
 export const flightPositionsRequestSchema = z.object({
   geo_code: z.object({
