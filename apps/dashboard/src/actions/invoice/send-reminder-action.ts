@@ -3,9 +3,9 @@
 import { authActionClient } from "@/actions/safe-action";
 import { resend } from "@/utils/resend";
 import { UTCDate } from "@date-fns/utc";
-import { render } from "@react-email/render";
 import { InvoiceReminderEmail } from "@travelese/email/emails/invoice-reminder";
 import { getAppUrl } from "@travelese/utils/envs";
+import { render } from "@react-email/render";
 import { nanoid } from "nanoid";
 import { z } from "zod";
 
@@ -28,7 +28,7 @@ export const sendReminderAction = authActionClient
     }
 
     await resend.emails.send({
-      from: "Travelese <travelesebot@travelese.ai>",
+      from: "Midday <middaybot@midday.ai>",
       to: invoice.customer.email,
       reply_to: email,
       subject: `Reminder: Payment for ${invoice.invoice_number}`,
