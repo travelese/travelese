@@ -1,86 +1,52 @@
 "use server";
 
 import { authActionClient } from "@/actions/safe-action";
-import { resend } from "@/utils/resend";
-import { UTCDate } from "@date-fns/utc";
-import { render } from "@react-email/render";
-import InvoiceEmail from "@travelese/email/emails/invoice";
-import { getAppUrl } from "@travelese/utils/envs";
 import { tasks } from "@trigger.dev/sdk/v3";
-import { nanoid } from "nanoid";
 import { revalidateTag } from "next/cache";
-import { type InvoiceTemplate, createInvoiceSchema } from "./schema";
+import { createInvoiceSchema } from "./schema";
 
 export const createInvoiceAction = authActionClient
   .metadata({
     name: "create-invoice",
   })
   .schema(createInvoiceSchema)
-  .action(async ({ parsedInput: { id }, ctx: { supabase, user } }) => {
-    const teamId = user.team_id;
+  .action(
+    async ({ parsedInput: { id, deliveryType }, ctx: { supabase, user } }) => {
+      const teamId = user.team_id;
 
-    const { data: draft } = await supabase
-      .from("invoices")
-      .select(
-        "id, sent_to, customer:customer_id(name, website, email), template",
-      )
-      .eq("id", id)
-      .single();
+      const { data: draft } = await supabase
+        .from("invoices")
+        .select("id, template")
+        .eq("id", id)
+        .single();
 
-    if (!draft) {
-      throw new Error("Draft not found");
-    }
-
-    const deliveryType =
-      (draft.template as InvoiceTemplate).delivery_type ?? "create";
-
-    const { data } = await supabase
-      .from("invoices")
-      .update({
-        id,
-        status: "unpaid",
-        sent_to:
-          deliveryType === "create_and_send" ? draft.customer.email : null,
-      })
-      .eq("id", id)
-      .select("*")
-      .single();
-
-    // Send email of delivery type is create_and_send and the invoice is not sent to the customer
-    if (deliveryType === "create_and_send" && !draft.sent_to) {
-      try {
-        await resend.emails.send({
-          from: "Travelese <travelesebot@travelese.ai>",
-          to: draft.customer.email,
-          reply_to: user.team.email,
-          subject: `${user.team.name} sent you an invoice`,
-          headers: {
-            "X-Entity-Ref-ID": nanoid(),
-          },
-          html: await render(
-            InvoiceEmail({
-              companyName: draft.customer.name,
-              teamName: user.team.name,
-              link: `${getAppUrl()}/i/${data?.token}`,
-            }),
-          ),
-        });
-      } catch (error) {
-        console.error(error);
+      if (!draft) {
+        throw new Error("Draft not found");
       }
-    }
 
-    try {
+      // Update the invoice status to unpaid
+      const { data: invoice } = await supabase
+        .from("invoices")
+        .update({ status: "unpaid" })
+        .eq("id", id)
+        .select("*")
+        .single();
+
+      // Only send the email if the delivery type is create_and_send
+      if (deliveryType === "create_and_send") {
+        await tasks.trigger("send-invoice-email", {
+          invoiceId: invoice?.id,
+        });
+      }
+
       await tasks.trigger("generate-invoice", {
-        invoiceId: data?.id,
+        invoiceId: invoice?.id,
       });
-    } catch (error) {
-      console.error(error);
-    }
 
-    revalidateTag(`invoice_summary_${teamId}`);
-    revalidateTag(`invoices_${teamId}`);
-    revalidateTag(`invoice_number_${teamId}`);
+      revalidateTag(`invoice_summary_${teamId}`);
+      revalidateTag(`invoices_${teamId}`);
+      revalidateTag(`invoice_number_${teamId}`);
 
-    return data;
-  });
+      return invoice;
+    },
+  );
