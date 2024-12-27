@@ -4,7 +4,6 @@ import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { MapContext } from "@/hooks/use-map";
 import { subscribable } from "@/utils/subscribable";
-import type { MapType } from "@/utils/types";
 import {
   type MouseEvent,
   type PropsWithChildren,
@@ -16,6 +15,8 @@ import {
 } from "react";
 import { AirportMarker } from "./airport-marker";
 import { parseAsJson, parseAsString, useQueryStates } from "nuqs";
+
+type MapType = mapboxgl.Map;
 
 const mapboxToken = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN as string;
 

@@ -68,7 +68,7 @@ export default async function Page({
 
   return (
     <div>
-      {geo_code ? (
+      {geo_code.latitude && geo_code.longitude ? (
         <TravelExplore />
       ) : (
         <TravelCalendar

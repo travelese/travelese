@@ -1,7 +1,7 @@
 "use client";
 
 import { useMap } from "@/hooks/use-map";
-import type { Flight } from "@/actions/schema";
+import type { PlaneDetails } from "@/actions/schema";
 import { Marker } from "mapbox-gl";
 import Image from "next/image";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -41,7 +41,7 @@ class ClickableMarker extends Marker {
 
 interface PlanesProps {
   color?: string | "nyan";
-  flights: Flight[];
+  flights: PlaneDetails[];
 }
 
 const colors = {

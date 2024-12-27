@@ -5,6 +5,7 @@ import { TravelMap } from "@/components/travel-map";
 import { Planes } from "@/components/planes";
 import { parseAsJson, parseAsString, useQueryStates } from "nuqs";
 import { useEffect, useState } from "react";
+import { cn } from "@travelese/ui/cn";
 
 export default function TravelExplore() {
   const [flights, setFlights] = useState([]);
@@ -37,9 +38,19 @@ export default function TravelExplore() {
     }
   }, [queryParams.geo_code, queryParams.iata_code]);
 
+  console.log("flights: ", flights);
+
   return (
-    <TravelMap params={queryParams}>
-      <Planes color="blue" flights={flights} />
-    </TravelMap>
+    <div
+      className={cn(
+        "mt-8",
+        "border border-border bg-background",
+        "overflow-hidden",
+      )}
+    >
+      <TravelMap params={queryParams}>
+        <Planes color="blue" flights={flights} />
+      </TravelMap>
+    </div>
   );
 }
