@@ -1,3 +1,4 @@
+import { getEmailUrl } from "@travelese/utils/envs";
 import {
   Body,
   Container,
@@ -10,20 +11,19 @@ import {
   Tailwind,
   Text,
 } from "@react-email/components";
-import { getEmailUrl } from "@travelese/utils/envs";
 import { Footer } from "../components/footer";
 import { GetStarted } from "../components/get-started";
 import { Logo } from "../components/logo";
 
-const baseUrl = getEmailUrl();
-
-interface WelcomeProps {
+interface Props {
   fullName: string;
 }
 
-export const WelcomeEmail = ({ fullName = "Armin Babaei" }: WelcomeProps) => {
+const baseUrl = getEmailUrl();
+
+export const WelcomeEmail = ({ fullName = "Armin Babaei" }: Props) => {
   const firstName = fullName.split(" ").at(0);
-  const text = `Hi ${firstName}, Welcome to Travelese! I'm Armin, the founder. It's really important to us that you have a great experience ramping up.`;
+  const text = `Hi ${firstName}, Welcome to Travelese! I'm Armin, one of the founders. It's really important to us that you have a great experience ramping up.`;
 
   return (
     <Html>
@@ -67,13 +67,23 @@ export const WelcomeEmail = ({ fullName = "Armin Babaei" }: WelcomeProps) => {
 
             <span className="font-medium">Hi {firstName},</span>
             <Text className="text-[#121212]">
-              I'm Armin. Co-Founder of Travelese.
+              Welcome to Midday! I'm Armin, one of the founders.
+              <br />
+              <br />
+              We've been working on Travelese for the past months, and during
+              this time, we've implemented the basic functionality to get
+              started. However, with your feedback, we can make the right
+              decisions to help run your business smarter.
+              <br />
+              <br />
+              During our beta phase, you may encounter some bugs, but we
+              genuinely want all your feedback.
               <br />
               <br />
               Should you have any questions, please don't hesitate to reply
               directly to this email or to{" "}
               <Link
-                href="https://cal.com/itsarminbabaei/30min"
+                href="https://cal.com/itsarminbabaei/talk-to-us"
                 className="text-[#121212] underline"
               >
                 schedule a call with me
@@ -83,16 +93,16 @@ export const WelcomeEmail = ({ fullName = "Armin Babaei" }: WelcomeProps) => {
 
             <br />
 
-            {/* <Img
-              src={`${baseUrl}/founder.jpeg`}
-              alt="Founder"
+            <Img
+              src={`${baseUrl}/email/founders.png`}
+              alt="Founders"
               className="my-0 mx-auto block w-full"
-            /> */}
+            />
 
-            <Text className="text-[#707070]">Armin</Text>
+            <Text className="text-[#707070]">Best regards, founders</Text>
 
             {/* <Img
-              src={`${baseUrl}/signature.png`}
+              src={`${baseUrl}/email/signature.png`}
               alt="Signature"
               className="block w-full w-[143px] h-[20px]"
             /> */}

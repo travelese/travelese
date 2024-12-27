@@ -1,8 +1,10 @@
+import { getAppUrl } from "@travelese/utils/envs";
 import {
   Body,
   Button,
   Container,
   Font,
+  Head,
   Heading,
   Html,
   Link,
@@ -11,7 +13,6 @@ import {
   Tailwind,
   Text,
 } from "@react-email/components";
-import { getAppUrl } from "@travelese/utils/envs";
 import { Footer } from "../components/footer";
 import { Logo } from "../components/logo";
 import { getI18n } from "../locales";
@@ -26,16 +27,17 @@ interface Props {
   location?: string;
   locale: string;
 }
+
 const baseAppUrl = getAppUrl();
 
 export const InviteEmail = ({
   invitedByEmail = "bukinoshita@example.com",
   invitedByName = "Armin Babaei",
-  email = "armin@travelese.ai",
-  teamName = "Travelese",
+  email = "armin@lostisland.co",
+  teamName = "Acme Co",
   inviteCode = "jnwe9203frnwefl239jweflasn1230oqef",
   ip = "204.13.186.218",
-  location = "Toronto, Canada",
+  location = "São Paulo, Brazil",
   locale = "en",
 }: Props) => {
   const { t } = getI18n({ locale });
@@ -77,7 +79,7 @@ export const InviteEmail = ({
             <Logo />
             <Heading className="mx-0 my-[30px] p-0 text-[24px] font-normal text-[#121212] text-center">
               {t("invite.title1")} <strong>{teamName}</strong>{" "}
-              {t("invite.title2")} <strong>Travelese</strong>
+              {t("invite.title2")} <strong>Midday</strong>
             </Heading>
 
             <Text className="text-[14px] leading-[24px] text-[#121212]">
@@ -89,11 +91,11 @@ export const InviteEmail = ({
                 {invitedByEmail}
               </Link>
               ) {t("invite.link1")} <strong>{teamName}</strong>{" "}
-              {t("invite.link2")} <strong>Travelese</strong>.
+              {t("invite.link2")} <strong>Midday</strong>.
             </Text>
             <Section className="mb-[42px] mt-[32px] text-center">
               <Button
-                className="bg-transparent rounded-md text-primary text-[14px] text-[#121212] font-medium no-underline text-center px-6 py-3 border border-solid border-[#121212]"
+                className="bg-transparent text-primary text-[14px] text-[#121212] font-medium no-underline text-center px-6 py-3 border border-solid border-[#121212]"
                 href={inviteLink}
               >
                 {t("invite.join")}
