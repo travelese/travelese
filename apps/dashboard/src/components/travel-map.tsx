@@ -4,8 +4,6 @@ import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { MapContext } from "@/hooks/use-map";
 import { subscribable } from "@/utils/subscribable";
-import type { MapType } from "@/utils/types";
-import { useParams } from "next/navigation";
 import {
   type MouseEvent,
   type PropsWithChildren,
@@ -16,7 +14,9 @@ import {
   useState,
 } from "react";
 import { AirportMarker } from "./airport-marker";
-import { parseAsJson, useQueryStates } from "nuqs";
+import { parseAsJson, parseAsString, useQueryStates } from "nuqs";
+
+type MapType = mapboxgl.Map;
 
 const mapboxToken = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN as string;
 
@@ -35,7 +35,6 @@ interface MapProviderProps {
 export function MapProvider({ children, mapContainerRef }: MapProviderProps) {
   const mapRef = useRef<MapType | null>(null);
   const [isMapReady, setIsMapReady] = useState(false);
-  const { airport } = useParams<{ airport: string }>();
 
   const [queryParams] = useQueryStates({
     geo_code: parseAsJson<{
@@ -66,7 +65,7 @@ export function MapProvider({ children, mapContainerRef }: MapProviderProps) {
     return () => {
       if (map) map.remove();
     };
-  }, [queryParams.geo_code]);
+  }, []);
 
   if (!isMapReady) return null;
 
@@ -80,7 +79,13 @@ export function MapProvider({ children, mapContainerRef }: MapProviderProps) {
 }
 
 interface MapProps {
-  params: Promise<{ airport: string }>;
+  params: {
+    geo_code: {
+      latitude: number;
+      longitude: number;
+    };
+    iata_code: string;
+  };
 }
 
 export function TravelMap({ children }: PropsWithChildren<MapProps>) {

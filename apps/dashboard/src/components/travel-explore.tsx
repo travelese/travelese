@@ -3,27 +3,29 @@
 import { exploreTravelAction } from "@/actions/explore-travel-action";
 import { TravelMap } from "@/components/travel-map";
 import { Planes } from "@/components/planes";
-import { parseAsJson, useQueryStates } from "nuqs";
+import { parseAsJson, parseAsString, useQueryStates } from "nuqs";
 import { useEffect, useState } from "react";
+import { cn } from "@travelese/ui/cn";
 
 export default function TravelExplore() {
   const [flights, setFlights] = useState([]);
   const [queryParams] = useQueryStates({
-    geocode: parseAsJson<{
+    geo_code: parseAsJson<{
       latitude: number;
       longitude: number;
     }>().withDefault({
       latitude: 0,
       longitude: 0,
     }),
+    iata_code: parseAsString.withDefault(""),
   });
 
   useEffect(() => {
     async function fetchFlights() {
       try {
         const data = await exploreTravelAction({
-          geocode: queryParams.geocode,
-          user_id: user?.id,
+          geo_code: queryParams.geo_code,
+          iata_code: queryParams.iata_code,
         });
         setFlights(data?.data);
       } catch (error) {
@@ -31,14 +33,24 @@ export default function TravelExplore() {
       }
     }
 
-    if (queryParams.geocode.latitude && queryParams.geocode.longitude) {
+    if (queryParams.geo_code.latitude && queryParams.geo_code.longitude) {
       fetchFlights();
     }
-  }, [queryParams.geocode]);
+  }, [queryParams.geo_code, queryParams.iata_code]);
+
+  console.log("flights: ", flights);
 
   return (
-    <TravelMap params={queryParams.geocode}>
-      <Planes color="blue" flights={flights} />
-    </TravelMap>
+    <div
+      className={cn(
+        "mt-8",
+        "border border-border bg-background",
+        "overflow-hidden",
+      )}
+    >
+      <TravelMap params={queryParams}>
+        <Planes color="blue" flights={flights} />
+      </TravelMap>
+    </div>
   );
 }

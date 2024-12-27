@@ -5,16 +5,25 @@ import { EmptyState, NoResults } from "./empty-states";
 const pageSize = 20;
 
 type Props = {
-  status?: string;
+  statuses?: string[];
   sort?: string;
   q?: string;
   start?: string;
   end?: string;
   userId: string;
+  customerIds?: string[];
 };
 
-export async function Table({ status, sort, q, start, end, userId }: Props) {
-  const hasFilters = Boolean(status || q);
+export async function TravelTable({
+  statuses,
+  sort,
+  q,
+  start,
+  end,
+  userId,
+  customerIds,
+}: Props) {
+  const hasFilters = Boolean(statuses || q);
 
   const { data, meta } = await getTravelBookings({
     from: 0,
@@ -22,7 +31,7 @@ export async function Table({ status, sort, q, start, end, userId }: Props) {
     sort,
     start,
     end,
-    filter: { status },
+    filter: { statuses, customers: customerIds },
     search: {
       query: q,
       fuzzy: true,
@@ -37,7 +46,8 @@ export async function Table({ status, sort, q, start, end, userId }: Props) {
       from: from + 1,
       sort,
       filter: {
-        status,
+        statuses,
+        customers: customerIds,
       },
       search: {
         query: q,

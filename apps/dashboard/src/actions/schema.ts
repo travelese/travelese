@@ -1335,7 +1335,7 @@ export const listPlacesSuggestionsResponseSchema = z.object({
 });
 
 // Flight Radar 24
-export const flightPositionSchema = z.object({
+export const travelExploreSchema = z.object({
   fr24_id: z.string(),
   flight: z.string(),
   callsign: z.string(),
@@ -1371,7 +1371,7 @@ export const flightPositionsRequestSchema = z.object({
   iata_code: z.string(),
 });
 
-export type FlightPosition = z.infer<typeof flightPositionSchema>;
+export type FlightPosition = z.infer<typeof travelExploreSchema>;
 export type FlightPositionsRequest = z.infer<
   typeof flightPositionsRequestSchema
 >;
