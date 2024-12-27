@@ -14,13 +14,13 @@ import { Footer } from "../components/footer";
 import { Logo } from "../components/logo";
 
 interface Props {
-  companyName: string;
+  customerName: string;
   teamName: string;
   link: string;
 }
 
 export const InvoiceEmail = ({
-  companyName = "Customer",
+  customerName = "Customer",
   teamName = "Travelese",
   link = "https://app.travelese.ai/i/1234567890",
 }: Props) => {
@@ -66,11 +66,10 @@ export const InvoiceEmail = ({
 
             <br />
 
-            <span className="font-medium">Hi {companyName},</span>
+            <span className="font-medium">Hi {customerName},</span>
             <Text className="text-[#121212]">
-              Please review your invoice and make sure to pay it on time. If
-              anything is unclear, feel free to add a comment by viewing the
-              invoice.
+              Please review your invoice and make sure to pay it on time. If you
+              have any questions, feel free to reply to this email.
             </Text>
 
             <Section className="text-center mt-[50px] mb-[50px]">

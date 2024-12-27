@@ -134,16 +134,6 @@ export function Footer() {
                 Privacy policy
               </Link>
             </Row>
-
-            {/* <Row className="mb-1.5">
-              <Link
-                className="text-[#707070] text-[14px]"
-                href="https://go.travelese.ai/wXccEF50"
-              >
-                Branding
-              </Link>
-            </Row> */}
-
             <Row className="mb-1.5">
               <Link
                 className="text-[#707070] text-[14px]"
@@ -203,35 +193,13 @@ export function Footer() {
             />
           </Link>
         </Column>
-        {/* <Column className="align-middle w-[40px]">
-          <Link href="https://go.travelese.ai/">
-            <Img
-              src={`${baseUrl}/producthunt.png`}
-              width="22"
-              height="22"
-              alt="Travelese on Producthunt"
-            />
-          </Link>
-        </Column> */}
-
-        <Column className="align-middle w-[40px]">
+        <Column className="align-middle">
           <Link href="https://go.travelese.ai/XTxOfuy">
             <Img
               src={`${baseUrl}/email/discord.png`}
               width="22"
               height="22"
               alt="Travelese on Discord"
-            />
-          </Link>
-        </Column>
-
-        <Column className="align-middle">
-          <Link href="https://go.travelese.ai/oP5xRyx">
-            <Img
-              src={`${baseUrl}/email/linkedin.png`}
-              width="22"
-              height="22"
-              alt="Travelese on LinkedIn"
             />
           </Link>
         </Column>
@@ -242,7 +210,7 @@ export function Footer() {
 
       <Row>
         <Text className="text-[#B8B8B8] text-xs">
-          Armin Babaei Studio Inc (Travelese) - Toronto, Canada
+          Travelese Inc - Toronto, Canada
         </Text>
       </Row>
 
