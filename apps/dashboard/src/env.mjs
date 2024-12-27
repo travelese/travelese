@@ -14,23 +14,15 @@ export const env = createEnv({
    * built with invalid env vars.
    */
   server: {
-    ENGINE_API_KEY: z.string(),
-    XAI_API_KEY: z.string(),
-    TRIGGER_SECRET_KEY: z.string(),
-    TRIGGER_PROJECT_ID: z.string(),
-    LOOPS_ENDPOINT: z.string(),
-    LOOPS_API_KEY: z.string(),
-    NOVU_SECRET_KEY: z.string(),
-    DUFFEL_TRAVELESE_PRO_ACCESS_TOKEN: z.string(),
-    DUFFEL_TRAVELESE_PRO_WEBHOOK_SECRET: z.string(),
     PLAIN_API_KEY: z.string(),
     OPENAI_API_KEY: z.string(),
+    XAI_API_KEY: z.string(),
     SUPABASE_SERVICE_KEY: z.string(),
     UPSTASH_REDIS_REST_TOKEN: z.string(),
     UPSTASH_REDIS_REST_URL: z.string(),
     GOCARDLESS_SECRET_ID: z.string(),
     GOCARDLESS_SECRET_KEY: z.string(),
-    NOVU_API_KEY: z.string(),
+    NOVU_SECRET_KEY: z.string(),
     RESEND_API_KEY: z.string(),
     RESEND_AUDIENCE_ID: z.string(),
     OPENPANEL_SECRET_KEY: z.string(),
@@ -40,6 +32,8 @@ export const env = createEnv({
     AZURE_DOCUMENT_INTELLIGENCE_ENDPOINT: z.string(),
     AZURE_DOCUMENT_INTELLIGENCE_KEY: z.string(),
     TELLER_SIGNING_SECRET: z.string(),
+    DUFFEL_TRAVELESE_PRO_ACCESS_TOKEN: z.string(),
+    DUFFEL_TRAVELESE_PRO_WEBHOOK_SECRET: z.string(),
   },
   /**
    * Specify your client-side environment variables schema here.
@@ -59,17 +53,6 @@ export const env = createEnv({
    * Destructure all variables from `process.env` to make sure they aren't tree-shaken away.
    */
   runtimeEnv: {
-    ENGINE_API_KEY: process.env.ENGINE_API_KEY,
-    LOOPS_ENDPOINT: process.env.LOOPS_ENDPOINT,
-    LOOPS_API_KEY: process.env.LOOPS_API_KEY,
-    NOVU_SECRET_KEY: process.env.NOVU_SECRET_KEY,
-    TRIGGER_SECRET_KEY: process.env.TRIGGER_SECRET_KEY,
-    TRIGGER_PROJECT_ID: process.env.TRIGGER_PROJECT_ID,
-    XAI_API_KEY: process.env.XAI_API_KEY,
-    DUFFEL_TRAVELESE_PRO_ACCESS_TOKEN:
-      process.env.DUFFEL_TRAVELESE_PRO_ACCESS_TOKEN,
-    DUFFEL_TRAVELESE_PRO_WEBHOOK_SECRET:
-      process.env.DUFFEL_TRAVELESE_PRO_WEBHOOK_SECRET,
     VERCEL_URL: process.env.VERCEL_URL,
     NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
     NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
@@ -84,7 +67,7 @@ export const env = createEnv({
     PORT: process.env.PORT,
     GOCARDLESS_SECRET_ID: process.env.GOCARDLESS_SECRET_ID,
     GOCARDLESS_SECRET_KEY: process.env.GOCARDLESS_SECRET_KEY,
-    NOVU_API_KEY: process.env.NOVU_API_KEY,
+    NOVU_SECRET_KEY: process.env.NOVU_API_KEY,
     UPSTASH_REDIS_REST_URL: process.env.UPSTASH_REDIS_REST_URL,
     UPSTASH_REDIS_REST_TOKEN: process.env.UPSTASH_REDIS_REST_TOKEN,
     NEXT_PUBLIC_NOVU_APPLICATION_IDENTIFIER:
@@ -95,6 +78,8 @@ export const env = createEnv({
     NEXT_PUBLIC_OPENPANEL_CLIENT_ID:
       process.env.NEXT_PUBLIC_OPENPANEL_CLIENT_ID,
     OPENPANEL_SECRET_KEY: process.env.OPENPANEL_SECRET_KEY,
+    XAI_API_KEY: process.env.XAI_API_KEY,
+    ENGINE_API_KEY: process.env.ENGINE_API_KEY,
     MIDDAY_ENGINE_API_KEY: process.env.MIDDAY_ENGINE_API_KEY,
     MIDDAY_CACHE_API_SECRET: process.env.MIDDAY_CACHE_API_SECRET,
     WEBHOOK_SECRET_KEY: process.env.WEBHOOK_SECRET_KEY,
@@ -103,6 +88,10 @@ export const env = createEnv({
     AZURE_DOCUMENT_INTELLIGENCE_KEY:
       process.env.AZURE_DOCUMENT_INTELLIGENCE_KEY,
     TELLER_SIGNING_SECRET: process.env.TELLER_SIGNING_SECRET,
+    DUFFEL_TRAVELESE_PRO_ACCESS_TOKEN:
+      process.env.DUFFEL_TRAVELESE_PRO_ACCESS_TOKEN,
+    DUFFEL_TRAVELESE_PRO_WEBHOOK_SECRET:
+      process.env.DUFFEL_TRAVELESE_PRO_WEBHOOK_SECRET,
   },
   skipValidation: !!process.env.CI || !!process.env.SKIP_ENV_VALIDATION,
 });

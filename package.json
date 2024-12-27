@@ -6,7 +6,7 @@
     "build": "turbo build",
     "clean": "git clean -xdf node_modules",
     "clean:workspaces": "turbo clean",
-    "dev": "turbo dev --parallel",
+    "dev": "NODE_ENV=development turbo dev --parallel",
     "test": "turbo test --parallel",
     "start:dashboard": "turbo start --filter=@travelese/dashboard",
     "start:website": "turbo start --filter=@travelese/website",

@@ -12,5 +12,8 @@
   "dependencies": {
     "@upstash/redis": "^1.34.2",
     "server-only": "^0.0.1"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.2"
   }
 }
