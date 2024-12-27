@@ -33,7 +33,7 @@ export const sendInvoiceEmail = schemaTask({
     }
 
     await resend.emails.send({
-      from: "Travelese <travelesebot@midday.ai>",
+      from: "Travelesebot <travelesebot@travelese.ai>",
       to: invoice?.customer.email,
       reply_to: invoice?.team.email,
       subject: `${invoice?.team.name} sent you an invoice`,
