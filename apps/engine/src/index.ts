@@ -9,6 +9,8 @@ import {
 } from "./middleware";
 import accountRoutes from "./routes/accounts";
 import authRoutes from "./routes/auth";
+import connectionRoutes from "./routes/connections";
+import enrichRoutes from "./routes/enrich";
 import healthRoutes from "./routes/health";
 import institutionRoutes from "./routes/institutions";
 import ratesRoutes from "./routes/rates";
@@ -26,30 +28,32 @@ app.use("*", requestId());
 app.use(authMiddleware);
 app.use(securityMiddleware);
 app.use(loggingMiddleware);
-
 app.get("/institutions", cacheMiddleware);
 app.get("/rates", cacheMiddleware);
 
-// Register security scheme for OpenAPI docs
 app.openAPIRegistry.registerComponent("securitySchemes", "Bearer", {
   type: "http",
   scheme: "bearer",
 });
 
-app
+app.doc("/openapi", {
+  openapi: "3.1.0",
+  info: {
+    version: "1.0.0",
+    title: "Midday Engine API",
+  },
+});
+
+const appRoutes = app
   .route("/transactions", transactionsRoutes)
   .route("/accounts", accountRoutes)
   .route("/institutions", institutionRoutes)
   .route("/rates", ratesRoutes)
   .route("/auth", authRoutes)
-  .route("/health", healthRoutes);
+  .route("/connections", connectionRoutes)
+  .route("/health", healthRoutes)
+  .route("/enrich", enrichRoutes);
 
-app.doc("/openapi", {
-  openapi: "3.1.0",
-  info: {
-    version: "1.0.0",
-    title: "Travelese Engine API",
-  },
-});
+export type AppType = typeof appRoutes;
 
 export default app;

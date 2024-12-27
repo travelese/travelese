@@ -8,7 +8,7 @@ export const TransactionsParamsSchema = z
         name: "provider",
         in: "query",
       },
-      example: Providers.Enum.plaid,
+      example: Providers.Enum.teller,
     }),
     accountId: z.string().openapi({
       description: "Get transactions by accountId",
@@ -31,7 +31,7 @@ export const TransactionsParamsSchema = z
       .string()
       .optional()
       .openapi({
-        description: "Used for Plaid",
+        description: "Used for Teller and Plaid",
         param: {
           name: "accessToken",
           in: "query",
@@ -39,9 +39,7 @@ export const TransactionsParamsSchema = z
         example: "token-123",
       }),
     latest: z
-      .enum(["true", "false"])
-      .transform((value) => value === "true")
-      .optional()
+      .preprocess((val) => val === "true", z.boolean().default(false))
       .openapi({
         description: "Get latest transactions",
         param: {

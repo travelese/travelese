@@ -1,6 +1,7 @@
 import { logger } from "@/utils/logger";
-import { withRetry } from "@/utils/retry";
+import { GoCardLessProvider } from "./gocardless/gocardless-provider";
 import { PlaidProvider } from "./plaid/plaid-provider";
+import { TellerProvider } from "./teller/teller-provider";
 import type {
   DeleteAccountsRequest,
   DeleteConnectionRequest,
@@ -16,12 +17,18 @@ import type {
 export class Provider {
   #name?: string;
 
-  #provider: PlaidProvider | null = null;
+  #provider: PlaidProvider | TellerProvider | GoCardLessProvider | null = null;
 
   constructor(params?: ProviderParams) {
     this.#name = params?.provider;
 
     switch (params?.provider) {
+      case "gocardless":
+        this.#provider = new GoCardLessProvider(params);
+        break;
+      case "teller":
+        this.#provider = new TellerProvider(params);
+        break;
       case "plaid":
         this.#provider = new PlaidProvider(params);
         break;
@@ -32,19 +39,47 @@ export class Provider {
   async getHealthCheck(
     params: Omit<ProviderParams, "provider">,
   ): Promise<GetHealthCheckResponse> {
+    const teller = new TellerProvider(params);
     const plaid = new PlaidProvider(params);
+    const gocardless = new GoCardLessProvider(params);
 
     try {
-      const [isPlaidHealthy] = await Promise.all([plaid.getHealthCheck()]);
+      const [isPlaidHealthy, isGocardlessHealthy, isTellerHealthy] =
+        await Promise.all([
+          plaid.getHealthCheck(),
+          gocardless.getHealthCheck(),
+          teller.getHealthCheck(),
+        ]);
 
       return {
         plaid: {
           healthy: isPlaidHealthy,
         },
+        gocardless: {
+          healthy: isGocardlessHealthy,
+        },
+        teller: {
+          healthy: isTellerHealthy,
+        },
       };
     } catch {
       throw Error("Something went wrong");
     }
+  }
+
+  async getTransactions(params: GetTransactionsRequest) {
+    logger(
+      "getTransactions:",
+      `provider: ${this.#name} id: ${params.accountId}`,
+    );
+
+    const data = await this.#provider?.getTransactions(params);
+
+    if (data) {
+      return data;
+    }
+
+    return [];
   }
 
   async getAccounts(params: GetAccountsRequest) {
@@ -74,25 +109,10 @@ export class Provider {
     return null;
   }
 
-  async getTransactions(params: GetTransactionsRequest) {
-    logger(
-      "getTransactions:",
-      `provider: ${this.#name} id: ${params.accountId}`,
-    );
-
-    const data = await withRetry(() => this.#provider?.getTransactions(params));
-
-    if (data) {
-      return data;
-    }
-
-    return [];
-  }
-
   async getInstitutions(params: GetInstitutionsRequest) {
     logger("getInstitutions:", `provider: ${this.#name}`);
 
-    const data = await withRetry(() => this.#provider?.getInstitutions(params));
+    const data = await this.#provider?.getInstitutions(params);
 
     if (data) {
       return data;
