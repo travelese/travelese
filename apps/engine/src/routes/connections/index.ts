@@ -1,6 +1,7 @@
 import type { Bindings } from "@/common/bindings";
 import { ErrorSchema, Providers } from "@/common/schema";
 import { Provider } from "@/providers";
+import { GoCardLessApi } from "@/providers/gocardless/gocardless-api";
 import { createErrorResponse } from "@/utils/error";
 import { createRoute } from "@hono/zod-openapi";
 import { OpenAPIHono } from "@hono/zod-openapi";
@@ -51,6 +52,7 @@ const app = new OpenAPIHono<{ Bindings: Bindings }>()
       const api = new Provider({
         provider,
         kv: c.env.KV,
+        fetcher: c.env.TELLER_CERT,
         envs,
       });
 
@@ -113,12 +115,13 @@ const app = new OpenAPIHono<{ Bindings: Bindings }>()
       const api = new Provider({
         provider,
         kv: c.env.KV,
+        fetcher: c.env.TELLER_CERT,
         envs,
       });
 
       try {
         await api.deleteConnection({
-          accountId,
+          id,
           accessToken,
         });
 

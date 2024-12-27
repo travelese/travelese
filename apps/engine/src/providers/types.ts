@@ -1,11 +1,14 @@
 import type { AccountType } from "@/utils/account";
 
-export type Providers = "plaid";
+export type Providers = "teller" | "plaid" | "gocardless";
 
 export type ProviderParams = {
   provider: Providers;
   kv: KVNamespace;
+  fetcher?: Fetcher | null; // Teller
   envs: {
+    GOCARDLESS_SECRET_KEY: string;
+    GOCARDLESS_SECRET_ID: string;
     PLAID_CLIENT_ID: string;
     PLAID_SECRET: string;
     PLAID_ENVIRONMENT: string;
@@ -41,6 +44,8 @@ export type Account = {
   type: AccountType;
   institution: Institution;
   balance: Balance;
+  enrollment_id: string | null; // Teller
+  resource_id: string | null; // GoCardLess
 };
 
 export type ConnectionStatus = {
@@ -55,18 +60,19 @@ export type Balance = {
 export type GetTransactionsRequest = {
   accountId: string;
   latest?: boolean;
-  accessToken?: string; // Plaid
+  accessToken?: string; // Teller & Plaid
   accountType: AccountType;
 };
 
 export type GetAccountsRequest = {
-  accessToken?: string; // Plaid
+  id?: string; // GoCardLess
+  accessToken?: string; // Teller & Plaid
   institutionId?: string; // Plaid
 };
 
 export type GetAccountBalanceRequest = {
   accountId: string;
-  accessToken?: string; // Plaid
+  accessToken?: string; // Teller & Plaid
 };
 
 export type GetAccountBalanceResponse = {
@@ -75,12 +81,13 @@ export type GetAccountBalanceResponse = {
 };
 
 export type DeleteAccountsRequest = {
-  accessToken?: string; // Plaid
+  accountId?: string; // GoCardLess
+  accessToken?: string; // Teller & Plaid
 };
 
 export type GetConnectionStatusRequest = {
   id?: string;
-  accessToken?: string; // Plaid
+  accessToken?: string; // Teller & Plaid
 };
 
 export type GetTransactionsResponse = Transaction[];
@@ -103,12 +110,14 @@ export type HealthCheckResponse = {
 };
 
 export type GetHealthCheckResponse = {
+  teller: HealthCheckResponse;
+  gocardless: HealthCheckResponse;
   plaid: HealthCheckResponse;
 };
 
 export type GetConnectionStatusResponse = ConnectionStatus;
 
 export type DeleteConnectionRequest = {
-  accountId: string;
-  accessToken?: string; // Plaid
+  id: string; // GoCardLess
+  accessToken?: string; // Teller & Plaid
 };

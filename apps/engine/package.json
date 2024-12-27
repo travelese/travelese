@@ -9,6 +9,7 @@
     "check:types": "tsc --noEmit"
   },
   "dependencies": {
+    "@hono/swagger-ui": "^0.5.0",
     "@hono/zod-openapi": "^0.18.3",
     "@hono/zod-validator": "^0.4.1",
     "hono": "^4.6.13",
@@ -19,11 +20,12 @@
     "zod": "^3.23.8"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "^4.20240925.0",
+    "@cloudflare/workers-types": "^4.20241205.0",
     "@types/bun": "^1.1.14",
     "wrangler": "^3.99.0"
   },
   "exports": {
-    "./client": "./src/client/index.ts"
+    "./client": "./src/client/index.ts",
+    "./gocardless/utils": "./src/providers/gocardless/utils.ts"
   }
 }

@@ -14,14 +14,14 @@ const authMiddleware = (c: Context, next: Next) => {
   }
 
   const { API_SECRET_KEY } = env(c);
+
   const bearer = bearerAuth({ token: API_SECRET_KEY });
 
   return bearer(c, next);
 };
 
 const cacheMiddleware = (c: Context, next: Next) => {
-  const environment = c.env.ENVIRONMENT || "development";
-  if (environment === "development") {
+  if (process.env.NODE_ENV === "development") {
     return next();
   }
 

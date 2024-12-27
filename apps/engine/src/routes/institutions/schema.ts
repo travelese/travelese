@@ -25,7 +25,7 @@ export const InstitutionSchema = z
       })
       .nullable(),
     provider: Providers.openapi({
-      example: Providers.Enum.plaid,
+      example: Providers.Enum.teller,
     }),
   })
   .openapi("InstitutionSchema");

@@ -11,6 +11,10 @@ kv_namespaces = [
   { binding = "ENRICH_KV", id = "1ce9f0355d854a569f72bfccbfbea369"}
 ]
 
+mtls_certificates = [
+  { binding = "TELLER_CERT", certificate_id = "76fdbac8-e96b-4a1e-922c-e54891b7371c" }
+]
+
 r2_buckets = [
   { binding = "STORAGE", bucket_name = "engine-assets", preview_bucket_name = "" },
 ]
@@ -28,6 +32,10 @@ route = { pattern = "engine-staging.travelese.ai/*", zone_name = "travelese.ai" 
 kv_namespaces = [
   { binding = "KV", id = "b321b928d84747a4b899b21894a720c2" },
   { binding = "ENRICH_KV", id = "72051e71ec964899a3d0da95df04b92f" }
+]
+
+mtls_certificates = [
+  { binding = "TELLER_CERT", certificate_id = "76fdbac8-e96b-4a1e-922c-e54891b7371c" }
 ]
 
 r2_buckets = [

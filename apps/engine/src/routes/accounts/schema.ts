@@ -3,14 +3,25 @@ import { z } from "@hono/zod-openapi";
 import { InstitutionSchema } from "../institutions/schema";
 
 export const AccountsParamsSchema = z.object({
+  id: z
+    .string()
+    .optional()
+    .openapi({
+      description: "GoCardLess reference id",
+      param: {
+        name: "id",
+        in: "query",
+      },
+      example: "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    }),
   provider: Providers.openapi({
-    example: Providers.Enum.plaid,
+    example: Providers.Enum.teller,
   }),
   accessToken: z
     .string()
     .optional()
     .openapi({
-      description: "Plaid access token",
+      description: "Teller or Plaid access token",
       param: {
         name: "accessToken",
         in: "query",
@@ -58,7 +69,15 @@ export const AccountSchema = z
     enrollment_id: z
       .string()
       .openapi({
+        description: "Teller/Plaid enrollment id",
         example: "add29d44-1b36-4bcc-b317-b2cbc73ab8e7",
+      })
+      .nullable(),
+    resource_id: z
+      .string()
+      .openapi({
+        description: "GoCardLess reference id",
+        example: "GBRGZX62Y8",
       })
       .nullable(),
   })
@@ -72,14 +91,22 @@ export const AccountsSchema = z
 
 export const AccountBalanceParamsSchema = z
   .object({
+    id: z.string().openapi({
+      description: "Account id",
+      param: {
+        name: "id",
+        in: "query",
+      },
+      example: "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    }),
     provider: Providers.openapi({
-      example: Providers.Enum.plaid,
+      example: Providers.Enum.teller,
     }),
     accessToken: z
       .string()
       .optional()
       .openapi({
-        description: "Plaid access token",
+        description: "Teller or Plaid access token",
         param: {
           name: "accessToken",
           in: "query",
@@ -106,14 +133,22 @@ export const AccountBalanceSchema = z
 
 export const DeleteAccountsParamsSchema = z
   .object({
+    accountId: z.string().openapi({
+      description: "Account id (GoCardLess)",
+      param: {
+        name: "accountId",
+        in: "query",
+      },
+      example: "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    }),
     provider: Providers.openapi({
-      example: Providers.Enum.plaid,
+      example: Providers.Enum.teller,
     }),
     accessToken: z
       .string()
       .optional()
       .openapi({
-        description: "Plaid access token",
+        description: "Teller or Plaid access token",
         param: {
           name: "accessToken",
           in: "query",

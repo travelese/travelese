@@ -146,6 +146,22 @@ export function saveFile(filePath: string, content: string) {
   }
 }
 
+const TELLER_ENDPOINT = "https://api.teller.io/institutions";
+
+type TellerResponse = {
+  id: string;
+  name: string;
+  capabilities: string[];
+};
+
+export async function getTellerData() {
+  const response = await fetch(TELLER_ENDPOINT);
+
+  const data = (await response.json()) as TellerResponse[];
+
+  return data;
+}
+
 export async function batchPromises<T>(promises: Promise<T>[]): Promise<T[]> {
   const batchSize = 10;
   const results: T[] = [];
