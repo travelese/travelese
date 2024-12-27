@@ -16,12 +16,16 @@ export default {
     description: "Change the language used in the user interface.",
     placeholder: "Select language",
   },
+  locale: {
+    title: "Locale",
+    searchPlaceholder: "Search locale",
+    description:
+      "Sets the region and language preferences for currency, dates, and other locale-specific formats.",
+    placeholder: "Select locale",
+  },
   languages: {
     en: "English", // English
     fr: "French", // French
-    fa: "Persian", // Persian (Farsi)
-    it: "Italian", // Italian
-    ja: "Japanese", // Japanese
   },
   timezone: {
     title: "Time Zone",

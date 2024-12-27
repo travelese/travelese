@@ -2,30 +2,32 @@
 
 import { updateCurrencyAction } from "@/actions/transactions/update-currency-action";
 import { SelectCurrency as SelectCurrencyBase } from "@/components/select-currency";
+import { useSyncStatus } from "@/hooks/use-sync-status";
 import { uniqueCurrencies } from "@travelese/location/currencies";
 import { Button } from "@travelese/ui/button";
 import { useToast } from "@travelese/ui/use-toast";
-import { useRealtimeRun } from "@trigger.dev/react-hooks";
 import { useAction } from "next-safe-action/hooks";
 import { useEffect, useState } from "react";
 
 export function SelectCurrency({ defaultValue }: { defaultValue: string }) {
   const { toast } = useToast();
-  const [eventId, setEventId] = useState<string | undefined>();
   const [isSyncing, setSyncing] = useState(false);
-  const { run } = useRealtimeRun(eventId ?? "");
+  const [runId, setRunId] = useState<string | undefined>();
+  const [accessToken, setAccessToken] = useState<string | undefined>();
 
-  const error = run?.status === "FAILED" || run?.status === "TIMED_OUT";
+  const { status, setStatus } = useSyncStatus({ runId, accessToken });
 
   const updateCurrency = useAction(updateCurrencyAction, {
     onExecute: () => setSyncing(true),
     onSuccess: ({ data }) => {
-      if (data?.id) {
-        setEventId(data.id);
+      if (data) {
+        setRunId(data.id);
+        setAccessToken(data.publicAccessToken);
       }
     },
     onError: () => {
-      setEventId(undefined);
+      setRunId(undefined);
+
       toast({
         duration: 3500,
         variant: "error",
@@ -42,7 +44,13 @@ export function SelectCurrency({ defaultValue }: { defaultValue: string }) {
           "This will update the base currency for all transactions and account balances.",
         duration: 7000,
         footer: (
-          <Button onClick={() => updateCurrency.execute({ baseCurrency })}>
+          <Button
+            onClick={() =>
+              updateCurrency.execute({
+                baseCurrency: baseCurrency.toUpperCase(),
+              })
+            }
+          >
             Update
           </Button>
         ),
@@ -53,21 +61,17 @@ export function SelectCurrency({ defaultValue }: { defaultValue: string }) {
   };
 
   useEffect(() => {
-    if (eventId) {
-    }
-  }, [eventId]);
-
-  useEffect(() => {
-    if (run?.status === "COMPLETED") {
+    if (status === "COMPLETED") {
       setSyncing(false);
-      setEventId(undefined);
+      setStatus(null);
+      setRunId(undefined);
       toast({
         duration: 3500,
         variant: "success",
         title: "Transactions and account balances updated.",
       });
     }
-  }, [run?.status]);
+  }, [status]);
 
   useEffect(() => {
     if (isSyncing) {
@@ -81,9 +85,9 @@ export function SelectCurrency({ defaultValue }: { defaultValue: string }) {
   }, [isSyncing]);
 
   useEffect(() => {
-    if (error) {
+    if (status === "FAILED") {
       setSyncing(false);
-      setEventId(undefined);
+      setRunId(undefined);
 
       toast({
         duration: 3500,
@@ -91,7 +95,7 @@ export function SelectCurrency({ defaultValue }: { defaultValue: string }) {
         title: "Something went wrong pleaase try again.",
       });
     }
-  }, [error]);
+  }, [status]);
 
   return (
     <div className="w-[200px]">
