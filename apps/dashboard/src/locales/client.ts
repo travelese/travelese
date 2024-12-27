@@ -14,7 +14,4 @@ export const {
 } = createI18nClient({
   en: () => import("./en"),
   fr: () => import("./fr"),
-  it: () => import("./it"),
-  ja: () => import("./jp"),
-  fa: () => import("./fa"),
 });
