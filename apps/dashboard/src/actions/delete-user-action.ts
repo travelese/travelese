@@ -1,14 +1,12 @@
 "use server";
 
+import { resend } from "@/utils/resend";
 import { LogEvents } from "@travelese/events/events";
 import { setupAnalytics } from "@travelese/events/server";
 import { getUser } from "@travelese/supabase/cached-queries";
 import { deleteUser } from "@travelese/supabase/mutations";
 import { createClient } from "@travelese/supabase/server";
-import { LoopsClient } from "loops";
 import { redirect } from "next/navigation";
-
-const loops = new LoopsClient(process.env.LOOPS_API_KEY!);
 
 export const deleteUserAction = async () => {
   const supabase = createClient();
@@ -30,7 +28,10 @@ export const deleteUserAction = async () => {
 
   const userId = await deleteUser(supabase);
 
-  await loops.deleteContact({ userId });
+  await resend.contacts.remove({
+    email: user.data?.email!,
+    audienceId: process.env.RESEND_AUDIENCE_ID!,
+  });
 
   const analytics = await setupAnalytics({
     userId,
