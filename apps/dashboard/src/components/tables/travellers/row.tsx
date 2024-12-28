@@ -3,14 +3,14 @@
 import { cn } from "@travelese/ui/cn";
 import { TableCell, TableRow } from "@travelese/ui/table";
 import { flexRender, type Row } from "@tanstack/react-table";
-import type { Traveller } from "./columns";
+import type { Customer } from "./columns";
 
 type Props = {
   row: Row<Customer>;
   setOpen: (id?: string) => void;
 };
 
-export function TravellerRow({ row, setOpen }: Props) {
+export function CustomerRow({ row, setOpen }: Props) {
   return (
     <>
       <TableRow
