@@ -1,8 +1,9 @@
+import { getAccessValidForDays } from "@travelese/engine/gocardless/utils";
 import { addDays } from "date-fns";
 import { getCurrentUserTeamQuery, getUserInviteQuery } from "../queries";
 import type { Client } from "../types";
 
-type CreateBankAccountsPayload = {
+type CreateBankConnectionPayload = {
   accounts: {
     account_id: string;
     institution_id: string;
@@ -13,6 +14,7 @@ type CreateBankAccountsPayload = {
     enabled: boolean;
     balance: number;
     type: "depository" | "credit" | "other_asset" | "loan" | "other_liability";
+    account_reference: string | null;
   }[];
   balance: number;
   accessToken?: string;
@@ -23,7 +25,7 @@ type CreateBankAccountsPayload = {
   provider: "gocardless" | "teller" | "plaid";
 };
 
-export async function createBankAccounts(
+export async function createBankConnection(
   supabase: Client,
   {
     accounts,
@@ -33,7 +35,7 @@ export async function createBankAccounts(
     teamId,
     userId,
     provider,
-  }: CreateBankAccountsPayload,
+  }: CreateBankConnectionPayload,
 ) {
   // Get first account to create a bank connection
   const account = accounts?.at(0);
@@ -41,6 +43,15 @@ export async function createBankAccounts(
   if (!account) {
     return;
   }
+
+  // NOTE: GoCardLess connection expires after 90-180 days
+  const expiresAt =
+    provider === "gocardless"
+      ? addDays(
+          new Date(),
+          getAccessValidForDays({ institutionId: account.institution_id }),
+        ).toDateString()
+      : undefined;
 
   const bankConnection = await supabase
     .from("bank_connections")
@@ -54,6 +65,7 @@ export async function createBankAccounts(
         access_token: accessToken,
         enrollment_id: enrollmentId,
         reference_id: referenceId,
+        expires_at: expiresAt,
       },
       {
         onConflict: "institution_id, team_id",
@@ -62,33 +74,54 @@ export async function createBankAccounts(
     .select()
     .single();
 
-  return supabase
-    .from("bank_accounts")
-    .upsert(
-      accounts.map(
-        (account) => ({
-          account_id: account.account_id,
-          bank_connection_id: bankConnection?.data?.id,
-          team_id: teamId,
-          created_by: userId,
-          name: account.name,
-          currency: account.currency,
-          enabled: account.enabled,
-          type: account.type,
-          balance: account.balance ?? 0,
-        }),
-        {
-          onConflict: "account_id",
-        },
-      ),
-    )
-    .select();
+  await supabase.from("bank_accounts").upsert(
+    accounts.map(
+      (account) => ({
+        account_id: account.account_id,
+        bank_connection_id: bankConnection?.data?.id,
+        team_id: teamId,
+        created_by: userId,
+        name: account.name,
+        currency: account.currency,
+        enabled: account.enabled,
+        type: account.type,
+        account_reference: account.account_reference,
+        balance: account.balance ?? 0,
+      }),
+      {
+        onConflict: "account_id",
+      },
+    ),
+  );
+
+  return bankConnection;
 }
 
 type UpdateBankConnectionData = {
   id: string;
   referenceId?: string;
 };
+
+// NOTE: Only GoCardLess needs to be updated
+export async function updateBankConnection(
+  supabase: Client,
+  data: UpdateBankConnectionData,
+) {
+  const { id, referenceId } = data;
+
+  return await supabase
+    .from("bank_connections")
+    .update({
+      expires_at: addDays(
+        new Date(),
+        getAccessValidForDays({ institutionId: id }),
+      ).toDateString(),
+      reference_id: referenceId,
+    })
+    .eq("id", id)
+    .select()
+    .single();
+}
 
 type CreateTransactionsData = {
   transactions: any[];
@@ -118,7 +151,7 @@ export async function updateTransaction(
     .from("transactions")
     .update(data)
     .eq("id", id)
-    .select("id, category, category_slug, team_id, name, status")
+    .select("id, category, category_slug, team_id, name, status, internal")
     .single();
 }
 
@@ -189,10 +222,6 @@ export async function updateUserTeamRole(
     .eq("team_id", teamId)
     .select()
     .single();
-}
-
-export async function deleteTeam(supabase: Client, teamId: string) {
-  return supabase.from("teams").delete().eq("id", teamId);
 }
 
 type DeleteTeamMemberParams = {
@@ -346,7 +375,7 @@ type CreateTeamParams = {
 };
 
 export async function createTeam(supabase: Client, params: CreateTeamParams) {
-  const { data } = await supabase.rpc("create_team", {
+  const { data } = await supabase.rpc("create_team_v2", {
     name: params.name,
     currency: params.currency,
   });
@@ -484,20 +513,12 @@ type CreateProjectParams = {
   rate?: number;
   currency?: string;
   customer_id?: string;
+  team_id: string;
 };
 
 export async function createProject(
   supabase: Client,
   params: CreateProjectParams,
 ) {
-  const { data: userData } = await getCurrentUserTeamQuery(supabase);
-
-  return supabase
-    .from("tracker_projects")
-    .insert({
-      ...params,
-      team_id: userData?.team_id,
-    })
-    .select()
-    .single();
+  return supabase.from("tracker_projects").insert(params).select().single();
 }
