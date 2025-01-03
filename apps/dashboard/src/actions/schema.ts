@@ -1394,3 +1394,4 @@ export const planeDetailsSchema = z.object({
 });
 
 export type PlaneDetails = z.infer<typeof planeDetailsSchema>;
+
