@@ -555,7 +555,7 @@ export const createTransactionSchema = z.object({
 
 export type CreateTransactionSchema = z.infer<typeof createTransactionSchema>;
 
-export const createTravellerSchema = z.object({
+export const createCustomerSchema = z.object({
   id: z.string().uuid().optional(),
   name: z.string(),
   email: z.string().email(),
@@ -1360,7 +1360,7 @@ export const travelExploreSchema = z.object({
   eta: z.string(),
 });
 
-export type Flight = z.infer<typeof flightPositionSchema>;
+export type Flight = z.infer<typeof travelExploreSchema>;
 
 // Schema for the input parameters
 export const flightPositionsRequestSchema = z.object({
@@ -1375,3 +1375,22 @@ export type FlightPosition = z.infer<typeof travelExploreSchema>;
 export type FlightPositionsRequest = z.infer<
   typeof flightPositionsRequestSchema
 >;
+
+export const planeDetailsSchema = z.object({
+  registration_number: z.string(),
+  model_name: z.string(),
+  model_code: z.string(),
+  miles_flown: z.string(),
+  engines_count: z.string(),
+  engines_type: z.string(),
+  plane_age: z.string(),
+  plane_status: z.string(),
+  description: z.string(),
+  airline:z.object ({
+    name: z.string(),
+    code: z.string(),
+    country: z.string(),
+  }),
+});
+
+export type PlaneDetails = z.infer<typeof planeDetailsSchema>;
