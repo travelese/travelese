@@ -3,8 +3,8 @@
 import { LogEvents } from "@travelese/events/events";
 import { generateToken } from "@travelese/invoice/token";
 import { revalidateTag } from "next/cache";
-import { authActionClient } from "./safe-action";
-import { createCustomerSchema } from "./schema";
+import { authActionClient } from "../safe-action";
+import { createCustomerSchema } from "../schema";
 
 export const createCustomerAction = authActionClient
   .schema(createCustomerSchema)

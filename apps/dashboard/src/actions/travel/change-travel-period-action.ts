@@ -2,7 +2,7 @@
 
 import { authActionClient } from "@/actions/safe-action";
 import { revalidateTag } from "next/cache";
-import { changeTravelPeriodSchema } from "./schema";
+import { changeTravelPeriodSchema } from "../schema";
 
 export const changeTravelPeriodAction = authActionClient
   .schema(changeTravelPeriodSchema)

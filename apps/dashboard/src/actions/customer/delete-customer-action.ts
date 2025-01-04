@@ -3,7 +3,7 @@
 import { LogEvents } from "@travelese/events/events";
 import { revalidateTag } from "next/cache";
 import { z } from "zod";
-import { authActionClient } from "./safe-action";
+import { authActionClient } from "../safe-action";
 
 export const deleteCustomerAction = authActionClient
   .schema(z.object({ id: z.string().uuid() }))

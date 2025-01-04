@@ -26,7 +26,7 @@ import {
 } from "nuqs";
 import { useRef, useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
-import { FilterList } from "./filter-list";
+import { FilterList } from "../filter-list";
 
 type Props = {
   members?: {

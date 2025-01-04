@@ -14,7 +14,7 @@ type Props = {
   customerIds?: string[];
 };
 
-export async function TravelTable({
+export async function Table({
   statuses,
   sort,
   q,

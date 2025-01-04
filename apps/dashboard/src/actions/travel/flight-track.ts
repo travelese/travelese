@@ -1,6 +1,6 @@
 import { useMap } from "@/hooks/use-map";
 import { useStateToRef } from "@/hooks/use-state-to-ref";
-import { getFlightTracks } from "@/actions/get-flight-tracks";
+import { getFlightTracks } from "@/actions/travel/get-flight-tracks";
 import { useEffect } from "react";
 
 export function PlaneTrack({

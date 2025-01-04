@@ -122,7 +122,7 @@ export async function GET(request: NextRequest) {
               type: "section",
               text: {
                 type: "mrkdwn",
-                text: "Hello there! 👋 I'm your new Midday bot, I'll send notifications in this channel regarding new transactions and other important updates.\n\n Head over to the <slack://app?id=A07PN48FW3A&tab=home|Midday Assistant> to ask questions.",
+                text: "Hello there! 👋 I'm your new Midday bot, I'll send notifications in this channel regarding new transactions and other important updates.\n\n Head over to the <slack://app?id=A07PN48FW3A&tab=home|Travelese Assistant> to ask questions.",
               },
             },
             {

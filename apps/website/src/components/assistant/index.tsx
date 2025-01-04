@@ -45,7 +45,7 @@ export function Assistant() {
     }
   };
 
-  useHotkeys("meta+j", () => onNewChat(), {
+  useHotkeys("meta+k", () => onNewChat(), {
     enableOnFormTags: true,
   });
 

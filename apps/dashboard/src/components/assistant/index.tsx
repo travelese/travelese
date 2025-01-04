@@ -38,7 +38,7 @@ export function Assistant() {
     setChatId(id);
   };
 
-  useHotkeys("meta+j", () => onNewChat(), {
+  useHotkeys("meta+k", () => onNewChat(), {
     enableOnFormTags: true,
   });
 

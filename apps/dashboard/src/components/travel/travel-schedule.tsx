@@ -1,7 +1,7 @@
 "use client";
 
-import { createTravelEntriesAction } from "@/actions/create-travel-entries-action";
-import { deleteTravelEntryAction } from "@/actions/delete-travel-entries";
+import { createTravelEntriesAction } from "@/actions/travel/create-travel-entries-action";
+import { deleteTravelEntryAction } from "@/actions/travel/delete-travel-entries";
 import { useTravelParams } from "@/hooks/use-travel-params";
 import { secondsToHoursAndMinutes } from "@/utils/format";
 import {

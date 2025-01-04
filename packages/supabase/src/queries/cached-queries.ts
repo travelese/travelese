@@ -4,41 +4,44 @@ import { unstable_cache } from "next/cache";
 import { cache } from "react";
 import { createClient } from "../client/server";
 import {
+  type GetBurnRateQueryParams,
+  type GetCategoriesParams,
+  type GetCustomersQueryParams,
+  type GetExpensesQueryParams,
+  type GetInvoiceSummaryParams,
+  type GetInvoicesQueryParams,
+  type GetMetricsParams,
+  type GetRunwayQueryParams,
+  type GetSpendingParams,
+  type GetTeamBankAccountsParams,
+  type GetTravelBookingsQueryParams,
+  type GetTravelRecordsByRangeParams,
+  type GetTransactionsParams,
+  getBankAccountsBalancesQuery,
   getBankAccountsCurrenciesQuery,
   getBankConnectionsByTeamIdQuery,
   getBurnRateQuery,
-  type GetBurnRateQueryParams,
-  type GetCategoriesParams,
   getCategoriesQuery,
   getCustomersQuery,
   getExpensesQuery,
-  type GetExpensesQueryParams,
-  getInvoiceNumberQuery,
-  getInvoicesQuery,
-  type GetInvoicesQueryParams,
-  type GetInvoiceSummaryParams,
   getInvoiceSummaryQuery,
   getInvoiceTemplatesQuery,
-  type GetMetricsParams,
+  getInvoicesQuery,
+  getLastInvoiceNumberQuery,
   getMetricsQuery,
   getPaymentStatusQuery,
   getRunwayQuery,
-  type GetRunwayQueryParams,
-  type GetSpendingParams,
   getSpendingQuery,
-  type GetTeamBankAccountsParams,
+  getTagsQuery,
   getTeamBankAccountsQuery,
   getTeamInvitesQuery,
   getTeamMembersQuery,
-  getTeamsByUserIdQuery,
   getTeamSettingsQuery,
   getTeamUserQuery,
-  type GetTransactionsParams,
-  getTransactionsQuery,
+  getTeamsByUserIdQuery,
   getTravelBookingsQuery,
-  type GetTravelBookingsQueryParams,
-  type GetTravelRecordsByRangeParams,
   getTravelRecordsByRangeQuery,
+  getTransactionsQuery,
   getUserInvitesQuery,
   getUserQuery,
 } from "../queries";
@@ -60,22 +63,25 @@ export const getTransactions = async (
     },
     ["transactions", teamId],
     {
-      revalidate: 180,
+      revalidate: 600,
       tags: [`transactions_${teamId}`],
     },
   )(params);
 };
 
+// Cache per request
 export const getSession = cache(async () => {
   const supabase = createClient();
 
   return supabase.auth.getSession();
 });
 
-export const getUser = async () => {
+// Cache per request and revalidate every 30 minutes
+export const getUser = cache(async () => {
   const {
     data: { session },
   } = await getSession();
+
   const userId = session?.user?.id;
 
   if (!userId) {
@@ -91,10 +97,11 @@ export const getUser = async () => {
     ["user", userId],
     {
       tags: [`user_${userId}`],
-      revalidate: 180,
+      // 30 minutes, jwt expires in 1 hour
+      revalidate: 1800,
     },
-  )(userId);
-};
+  )();
+});
 
 export const getTeamUser = async () => {
   const supabase = createClient();
@@ -110,7 +117,7 @@ export const getTeamUser = async () => {
     ["team", "user", data.id],
     {
       tags: [`team_user_${data.id}`],
-      revalidate: 180,
+      revalidate: 1800,
     },
   )(data.id);
 };
@@ -348,7 +355,7 @@ export const getTravelBookings = async (
     ["travel_bookings", teamId],
     {
       tags: [`travel_bookings_${teamId}`],
-      revalidate: 180,
+      revalidate: 3600,
     },
   )(params);
 };
@@ -371,7 +378,7 @@ export const getTravelRecordsByRange = async (
     ["travel_entries", teamId],
     {
       tags: [`travel_entries_${teamId}`],
-      revalidate: 180,
+      revalidate: 3600,
     },
   )(params);
 };
@@ -460,6 +467,7 @@ export const getInvoiceSummary = async (
   const supabase = createClient();
   const user = await getUser();
   const teamId = user?.data?.team_id;
+
   return unstable_cache(
     async () => {
       return getInvoiceSummaryQuery(supabase, { ...params, teamId });
@@ -476,9 +484,11 @@ export const getPaymentStatus = async () => {
   const supabase = createClient();
   const user = await getUser();
   const teamId = user?.data?.team_id;
+
   if (!teamId) {
     return null;
   }
+
   return unstable_cache(
     async () => {
       return getPaymentStatusQuery(supabase, teamId);
@@ -491,23 +501,27 @@ export const getPaymentStatus = async () => {
   )();
 };
 
-export const getTravellers = async () => {
+export const getCustomers = async (
+  params?: Omit<GetCustomersQueryParams, "teamId">,
+) => {
   const supabase = createClient();
   const user = await getUser();
   const teamId = user?.data?.team_id;
+
   if (!teamId) {
     return null;
   }
+
   return unstable_cache(
     async () => {
-      return getCustomersQuery(supabase, teamId);
+      return getCustomersQuery(supabase, { ...params, teamId });
     },
-    ["travellers", teamId],
+    ["customers", teamId],
     {
-      tags: [`travellers_${teamId}`],
+      tags: [`customers_${teamId}`],
       revalidate: 3600,
     },
-  )();
+  )(params);
 };
 
 export const getInvoices = async (
@@ -516,9 +530,11 @@ export const getInvoices = async (
   const supabase = createClient();
   const user = await getUser();
   const teamId = user?.data?.team_id;
+
   if (!teamId) {
     return null;
   }
+
   return unstable_cache(
     async () => {
       return getInvoicesQuery(supabase, { ...params, teamId });
@@ -535,9 +551,11 @@ export const getInvoiceTemplates = async () => {
   const supabase = createClient();
   const user = await getUser();
   const teamId = user?.data?.team_id;
+
   if (!teamId) {
     return null;
   }
+
   return unstable_cache(
     async () => {
       return getInvoiceTemplatesQuery(supabase, teamId);
@@ -550,16 +568,18 @@ export const getInvoiceTemplates = async () => {
   )();
 };
 
-export const getInvoiceNumber = async () => {
+export const getLastInvoiceNumber = async () => {
   const supabase = createClient();
   const user = await getUser();
   const teamId = user?.data?.team_id;
+
   if (!teamId) {
     return null;
   }
+
   return unstable_cache(
     async () => {
-      return getInvoiceNumberQuery(supabase, teamId);
+      return getLastInvoiceNumberQuery(supabase, teamId);
     },
     ["invoice_number", teamId],
     {
@@ -569,3 +589,44 @@ export const getInvoiceNumber = async () => {
   )();
 };
 
+export const getTags = async () => {
+  const supabase = createClient();
+  const user = await getUser();
+  const teamId = user?.data?.team_id;
+
+  if (!teamId) {
+    return null;
+  }
+
+  return unstable_cache(
+    async () => {
+      return getTagsQuery(supabase, teamId);
+    },
+    ["tags", teamId],
+    {
+      tags: [`tags_${teamId}`],
+      revalidate: 3600,
+    },
+  )();
+};
+
+export const getBankAccountsBalances = async () => {
+  const supabase = createClient();
+  const user = await getUser();
+  const teamId = user?.data?.team_id;
+
+  if (!teamId) {
+    return null;
+  }
+
+  return unstable_cache(
+    async () => {
+      return getBankAccountsBalancesQuery(supabase, teamId);
+    },
+    ["bank_accounts_balances", teamId],
+    {
+      tags: [`bank_accounts_balances_${teamId}`],
+      revalidate: 3600,
+    },
+  )();
+};

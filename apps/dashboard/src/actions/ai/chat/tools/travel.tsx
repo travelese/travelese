@@ -1,7 +1,7 @@
 import { travelAgent } from "@/actions/ai/travel-agent";
 import type { MutableAIState } from "@/actions/ai/types";
-import { listPlaceSuggestionsAction } from "@/actions/list-place-suggestions-action";
-import { searchTravelAction } from "@/actions/search-travel-action";
+import { listPlaceSuggestionsAction } from "@/actions/travel/list-place-suggestions-action";
+import { searchTravelAction } from "@/actions/travel/search-travel-action";
 import { logger } from "@/utils/logger";
 import { client as RedisClient } from "@travelese/kv";
 import { nanoid } from "nanoid";

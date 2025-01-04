@@ -5,7 +5,7 @@ import { UTCDate } from "@date-fns/utc";
 import { revalidateTag } from "next/cache";
 import { cookies } from "next/headers";
 import { z } from "zod";
-import { authActionClient } from "./safe-action";
+import { authActionClient } from "../safe-action";
 
 export const createTravelEntriesAction = authActionClient
   .schema(

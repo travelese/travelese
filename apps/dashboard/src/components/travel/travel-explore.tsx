@@ -7,7 +7,7 @@ import { parseAsJson, parseAsString, useQueryStates } from "nuqs";
 import { useEffect, useState } from "react";
 import { cn } from "@travelese/ui/cn";
 
-export default function TravelExplore() {
+export function TravelExplore() {
   const [flights, setFlights] = useState([]);
   const [queryParams] = useQueryStates({
     geo_code: parseAsJson<{

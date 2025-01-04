@@ -5,7 +5,7 @@ import { Cookies } from "@/utils/constants";
 import { addYears } from "date-fns";
 import { revalidateTag } from "next/cache";
 import { cookies } from "next/headers";
-import { changeTravelBaggageSchema } from "./schema";
+import { changeTravelBaggageSchema } from "../schema";
 
 export const changeTravelBaggageAction = authActionClient
   .schema(changeTravelBaggageSchema)

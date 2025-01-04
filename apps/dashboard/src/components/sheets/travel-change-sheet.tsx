@@ -115,7 +115,7 @@ export function TravelChangeSheet({ userId, currency }: Props) {
           </h2>
         </DrawerHeader>
 
-        <ChangeTravelForm
+        <TravelChangeForm
           form={form}
           isSaving={changeAction.status === "executing"}
           onSubmit={changeAction.execute}

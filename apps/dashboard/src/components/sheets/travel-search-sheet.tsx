@@ -2,7 +2,7 @@
 
 import { searchTravelSchema } from "@/actions/schema";
 import { searchTravelAction } from "@/actions/travel/search-travel-action";
-import { SearchTravelForm } from "@/components/forms/travel-search-form";
+import { TravelSearchForm } from "@/components/forms/travel-search-form";
 import { useTravelParams } from "@/hooks/use-travel-params";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Drawer, DrawerContent, DrawerHeader } from "@travelese/ui/drawer";
@@ -233,7 +233,7 @@ export function TravelSearchSheet({ userId, currency }: Props) {
           <SearchTypeDropdown onSearchTypeChange={handleSearchTypeChange} />
         </DrawerHeader>
 
-        <SearchTravelForm
+        <TravelSearchForm
           form={form}
           isSubmitting={searchAction.status === "executing"}
           onSubmit={searchAction.execute}

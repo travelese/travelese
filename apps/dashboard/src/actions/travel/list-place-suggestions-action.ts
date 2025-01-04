@@ -6,7 +6,7 @@ import { logger } from "@/utils/logger";
 import { DuffelError } from "@duffel/api";
 import type { Places } from "@duffel/api/Places/Suggestions/SuggestionsType";
 import { LogEvents } from "@travelese/events/events";
-import { listPlaceSuggestionsSchema } from "./schema";
+import { listPlaceSuggestionsSchema } from "../schema";
 
 export const listPlaceSuggestionsAction = authActionClient
   .schema(listPlaceSuggestionsSchema)
