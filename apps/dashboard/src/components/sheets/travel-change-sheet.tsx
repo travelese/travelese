@@ -1,6 +1,6 @@
 "use client";
 
-import { changeTravelAction } from "@/actions/change-travel-action";
+import { changeTravelAction } from "@/actions/travel/change-travel-action";
 import { changeTravelSchema } from "@/actions/schema";
 import { TravelChangeForm } from "@/components/forms/travel-change-form";
 import { useTravelParams } from "@/hooks/use-travel-params";

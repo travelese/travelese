@@ -1,8 +1,8 @@
 "use client";
 
-import { exploreTravelAction } from "@/actions/explore-travel-action";
-import { TravelMap } from "@/components/travel-map";
-import { Planes } from "@/components/planes";
+import { exploreTravelAction } from "@/actions/travel/explore-travel-action";
+import { TravelMap } from "@/components/travel/travel-map";
+import { Planes } from "@/components/travel/planes";
 import { parseAsJson, parseAsString, useQueryStates } from "nuqs";
 import { useEffect, useState } from "react";
 import { cn } from "@travelese/ui/cn";

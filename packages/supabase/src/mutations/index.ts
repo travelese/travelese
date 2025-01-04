@@ -505,7 +505,7 @@ export async function updateInboxById(
   return inbox;
 }
 
-type CreateProjectParams = {
+type CreateBookingParams = {
   name: string;
   description?: string;
   estimate?: number;
@@ -516,9 +516,9 @@ type CreateProjectParams = {
   team_id: string;
 };
 
-export async function createProject(
+export async function createBooking(
   supabase: Client,
-  params: CreateProjectParams,
+  params: CreateBookingParams,
 ) {
-  return supabase.from("tracker_projects").insert(params).select().single();
+  return supabase.from("travel_bookings").insert(params).select().single();
 }

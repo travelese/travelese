@@ -1,5 +1,5 @@
 import { findMatchingCategory } from "@/actions/ai/find-matching-category";
-import { createTransactionAction } from "@/actions/create-transaction-action";
+import { createTransactionAction } from "@/actions/transactions/create-transaction-action";
 import { createTransactionSchema } from "@/actions/schema";
 import { AssignUser } from "@/components/assign-user";
 import { Attachments } from "@/components/attachments";

@@ -7,9 +7,9 @@ import {
 } from "@/components/open-travel-sheet";
 import { TravelTable } from "@/components/tables/travel";
 import { Loading } from "@/components/tables/travel/loading";
-import { TravelCalendar } from "@/components/travel-calendar";
-import TravelExplore from "@/components/travel-explore";
-import { TravelSearchFilter } from "@/components/travel-search-filters";
+import { TravelCalendar } from "@/components/travel/travel-calendar";
+import TravelExplore from "@/components/travel/travel-explore";
+import { TravelSearchFilter } from "@/components/travel/travel-search-filters";
 import {
   getTravelRecordsByRange,
   getUser,
@@ -24,25 +24,26 @@ export const metadata: Metadata = {
   title: "Travel | Travelese",
 };
 
-export default async function Page({
-  searchParams,
-}: {
-  searchParams: Record<string, string | string[] | undefined>;
-}) {
+type Props = {
+  searchParams: {
+    statuses: string;
+    sort: string;
+    q: string;
+    start?: string;
+    end?: string;
+    customers?: string[];
+  };
+};
+
+export default async function Travel({ searchParams }: Props) {
   const {
-    page,
-    q: query,
-    geo_code,
-    iata_code,
-    sort,
-    start,
-    end,
+    sort: sortParams,
     statuses,
     customers,
-  } = searchParamsCache.parse(searchParams);
+  } = searchParamsCache.parse(searchParams);  
 
   const currentDate =
-    searchParams?.start ?? formatISO(new Date(), { representation: "date" });
+    searchParams?.date ?? formatISO(new Date(), { representation: "date" });
 
   const [{ data: userData }, { data, meta }] = await Promise.all([
     getUser(),

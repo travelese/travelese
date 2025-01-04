@@ -1,29 +1,42 @@
 "use client";
 
-import { changeTravelTypeAction } from "@/actions/change-travel-type-action";
+import { changeTravelCabinAction } from "@/actions/travel/change-travel-class-action";
 import { useI18n } from "@/locales/client";
 import { Button } from "@travelese/ui/button";
 import { Icons } from "@travelese/ui/icons";
 import { Popover, PopoverContent, PopoverTrigger } from "@travelese/ui/popover";
-import { ChevronDown } from "lucide-react";
 import { useOptimisticAction } from "next-safe-action/hooks";
 
-const options = ["flights", "stays"] as const;
+const cabinClasses = [
+  "economy",
+  "premium_economy",
+  "business",
+  "first_class",
+] as const;
+
+type CabinClass = (typeof cabinClasses)[number];
 
 type Props = {
-  initialValue: (typeof options)[number];
+  value: CabinClass;
   disabled?: boolean;
+  onChange: (value: CabinClass) => void;
 };
 
-export function TravelMode({ initialValue, disabled }: Props) {
+export function TravelCabin({ value, disabled, onChange }: Props) {
   const t = useI18n();
+
   const { execute, optimisticState } = useOptimisticAction(
-    changeTravelTypeAction,
+    changeTravelCabinAction,
     {
-      currentState: initialValue,
+      currentState: value,
       updateFn: (_, newState) => newState,
     },
   );
+
+  const handleCabinChange = (newCabinClass: CabinClass) => {
+    execute(newCabinClass);
+    onChange(newCabinClass);
+  };
 
   return (
     <Popover>
@@ -33,22 +46,22 @@ export function TravelMode({ initialValue, disabled }: Props) {
           className="w-full justify-between"
           disabled={disabled}
         >
-          <Icons.ModeOfTravel className="size-4 mr-2" />
+          <Icons.CabinClass className="size-4 mr-2" />
           <span className="flex-grow line-clamp-1 text-ellipsis text-left">
-            {t(`travel_mode.${optimisticState}`)}
+            {t(`cabin_class.${optimisticState}`)}
           </span>
-          <ChevronDown className="ml-2 size-4" />
+          <Icons.ChevronDown className="ml-2 size-4" />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-[225px]" sideOffset={10}>
-        {options.map((option) => (
+        {cabinClasses.map((cabinClass) => (
           <Button
-            key={option}
+            key={cabinClass}
             variant="ghost"
             className="w-full justify-start"
-            onClick={() => execute(option)}
+            onClick={() => handleCabinChange(cabinClass)}
           >
-            {t(`travel_mode.${option}`)}
+            {t(`cabin_class.${cabinClass}`)}
           </Button>
         ))}
       </PopoverContent>

@@ -1,8 +1,8 @@
 "use client";
 
 import { searchTravelSchema } from "@/actions/schema";
-import { searchTravelAction } from "@/actions/search-travel-action";
-import { TravelSearchForm } from "@/components/forms/travel-search-form";
+import { searchTravelAction } from "@/actions/travel/search-travel-action";
+import { SearchTravelForm } from "@/components/forms/travel-search-form";
 import { useTravelParams } from "@/hooks/use-travel-params";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Drawer, DrawerContent, DrawerHeader } from "@travelese/ui/drawer";

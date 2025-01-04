@@ -71,7 +71,7 @@ export function TravelSelectBooking({
     setData(bookingsData);
 
     const foundBooking = bookingsData.find(
-      (booking) => projet?.id === selectedId,
+      (booking) => booking?.id === selectedId,
     );
 
     if (foundBooking) {
