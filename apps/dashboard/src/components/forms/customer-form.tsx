@@ -1,6 +1,6 @@
 "use client";
 
-import { createCustomerAction } from "@/actions/create-customer-action";
+import { createCustomerAction } from "@/actions/customer/create-customer-action";
 import { createCustomerTagAction } from "@/actions/customer/create-customer-tag-action";
 import { deleteCustomerTagAction } from "@/actions/customer/delete-customer-tag-action";
 import { useCustomerParams } from "@/hooks/use-customer-params";

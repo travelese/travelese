@@ -1,7 +1,7 @@
 import type { searchTravelSchema } from "@/actions/schema";
 import { BotCard } from "@/components/chat/messages";
-import { FlightCard } from "@/components/travel-flight-card";
-import { StayCard } from "@/components/travel-stay-card";
+import { FlightCard } from "@/components/travel/travel-flight-card";
+import { StayCard } from "@/components/travel/travel-stay-card";
 import { logger } from "@/utils/logger";
 import type { Places } from "@duffel/api/Places/Suggestions/SuggestionsType";
 import type { Offer, StaysSearchResult } from "@duffel/api/types";

@@ -4,8 +4,8 @@ import { Cookies } from "@/utils/constants";
 import { addYears } from "date-fns";
 import { revalidateTag } from "next/cache";
 import { cookies } from "next/headers";
-import { authActionClient } from "./safe-action";
-import { changeTransactionsPeriodSchema } from "./schema";
+import { authActionClient } from "../safe-action";
+import { changeTransactionsPeriodSchema } from "../schema";
 
 export const changeTransactionsPeriodAction = authActionClient
   .schema(changeTransactionsPeriodSchema)

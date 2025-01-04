@@ -1,7 +1,7 @@
 "use client";
 
 import type { UpdateTransactionValues } from "@/actions/schema";
-import { updateTransactionAction } from "@/actions/update-transaction-action";
+import { updateTransactionAction } from "@/actions/transactions/update-transaction-action";
 import { TransactionSheet } from "@/components/sheets/transaction-sheet";
 import { cn } from "@travelese/ui/cn";
 import { useAction } from "next-safe-action/hooks";

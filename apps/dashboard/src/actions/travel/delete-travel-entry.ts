@@ -2,7 +2,7 @@
 
 import { revalidateTag } from "next/cache";
 import { z } from "zod";
-import { authActionClient } from "./safe-action";
+import { authActionClient } from "../safe-action";
 
 export const deleteTravelEntryAction = authActionClient
   .schema(

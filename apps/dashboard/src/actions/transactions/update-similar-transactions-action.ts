@@ -2,8 +2,8 @@
 
 import { updateSimilarTransactionsCategory } from "@travelese/supabase/mutations";
 import { revalidateTag } from "next/cache";
-import { authActionClient } from "./safe-action";
-import { updateSimilarTransactionsCategorySchema } from "./schema";
+import { authActionClient } from "../safe-action";
+import { updateSimilarTransactionsCategorySchema } from "../schema";
 
 export const updateSimilarTransactionsCategoryAction = authActionClient
   .schema(updateSimilarTransactionsCategorySchema)

@@ -5,18 +5,17 @@ import {
   OpenTravelExploreSheet,
   OpenTravelSearchSheet,
 } from "@/components/open-travel-sheet";
-import { TravelTable } from "@/components/tables/travel";
+import { Table } from "@/components/tables/travel";
 import { Loading } from "@/components/tables/travel/loading";
 import { TravelCalendar } from "@/components/travel/travel-calendar";
-import TravelExplore from "@/components/travel/travel-explore";
+import { TravelExplore } from "@/components/travel/travel-explore";
 import { TravelSearchFilter } from "@/components/travel/travel-search-filters";
 import {
   getTravelRecordsByRange,
   getUser,
 } from "@travelese/supabase/cached-queries";
-import { addWeeks, endOfMonth, formatISO, startOfMonth } from "date-fns";
+import { endOfMonth, formatISO, startOfMonth } from "date-fns";
 import type { Metadata } from "next";
-import { ErrorBoundary } from "next/dist/client/components/error-boundary";
 import { Suspense } from "react";
 import { searchParamsCache } from "./search-params";
 
@@ -32,6 +31,11 @@ type Props = {
     start?: string;
     end?: string;
     customers?: string[];
+    geo_code: {
+      latitude: number;
+      longitude: number;
+    },
+    iata_code: string;
   };
 };
 
@@ -41,6 +45,8 @@ export default async function Travel({ searchParams }: Props) {
     statuses,
     customers,
   } = searchParamsCache.parse(searchParams);  
+
+  const sort = sortParams?.split(":") ?? ["status", "asc"];
 
   const currentDate =
     searchParams?.date ?? formatISO(new Date(), { representation: "date" });
@@ -57,15 +63,7 @@ export default async function Travel({ searchParams }: Props) {
     }),
   ]);
 
-  const loadingKey = JSON.stringify({
-    query,
-    sort,
-    start,
-    end,
-    statuses,
-    customers,
-    page,
-  });
+  const geo_code = searchParams?.geo_code ?? { latitude: 0, longitude: 0 };
 
   return (
     <div>
@@ -92,19 +90,17 @@ export default async function Travel({ searchParams }: Props) {
         </div>
       </div>
 
-      <ErrorBoundary errorComponent={ErrorFallback}>
-        <Suspense fallback={<Loading />} key={loadingKey}>
-          <TravelTable
-            query={query}
-            sort={sort}
-            start={start}
-            end={end}
-            statuses={statuses}
-            customers={customers}
-            page={page}
-          />
-        </Suspense>
-      </ErrorBoundary>
+      <Suspense fallback={<Loading />}>
+        <Table
+          status={statuses}
+          sort={sort}
+          q={searchParams?.q}
+          start={searchParams?.start}
+          end={searchParams?.end}
+          userId={userData?.id}
+          customerIds={customers}
+        />
+      </Suspense>
     </div>
   );
 }

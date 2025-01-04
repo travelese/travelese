@@ -155,7 +155,7 @@ export function TravelExploreSheet({ userId, currency }: Props) {
           </DropdownMenu>
         </DrawerHeader>
 
-        <ExploreTravelForm
+        <TravelExploreForm
           form={form}
           isSubmitting={exploreAction.status === "executing"}
           onSubmit={() => exploreAction.execute(form.getValues())}

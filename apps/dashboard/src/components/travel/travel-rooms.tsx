@@ -1,6 +1,6 @@
 "use client";
 
-import { changeTravelRoomsAction } from "@/actions/change-travel-rooms-action";
+import { changeTravelRoomsAction } from "@/actions/travel/change-travel-rooms-action";
 import { ItemCounter, type ItemType } from "@/components/item-counter";
 import { useI18n } from "@/locales/client";
 import { Icons } from "@travelese/ui/icons";

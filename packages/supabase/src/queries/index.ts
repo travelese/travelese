@@ -1,5 +1,4 @@
 import { UTCDate } from "@date-fns/utc";
-import { generateInvoiceNumber } from "@travelese/invoice/number";
 import {
   addDays,
   endOfMonth,
@@ -46,6 +45,7 @@ export async function getCurrentUserTeamQuery(supabase: Client) {
   if (!session?.user) {
     return;
   }
+
   return getUserQuery(supabase, session.user?.id);
 }
 
@@ -146,7 +146,7 @@ export async function getSpendingQuery(
   supabase: Client,
   params: GetSpendingParams,
 ) {
-  return supabase.rpc("get_spending", {
+  return supabase.rpc("get_spending_v3", {
     team_id: params.teamId,
     date_from: params.from,
     date_to: params.to,
@@ -164,12 +164,15 @@ export type GetTransactionsParams = {
     statuses?: string[];
     attachments?: "include" | "exclude";
     categories?: string[];
+    tags?: string[];
     accounts?: string[];
     assignees?: string[];
     type?: "income" | "expense";
     start?: string;
     end?: string;
     recurring?: string[];
+    amount_range?: [number, number];
+    amount?: [string, string];
   };
 };
 
@@ -183,12 +186,15 @@ export async function getTransactionsQuery(
     statuses,
     attachments,
     categories,
+    tags,
     type,
     accounts,
     start,
     end,
     assignees,
     recurring,
+    amount_range,
+    amount,
   } = filter || {};
 
   const columns = [
@@ -200,6 +206,7 @@ export async function getTransactionsQuery(
     "status",
     "note",
     "manual",
+    "internal",
     "recurring",
     "frequency",
     "name",
@@ -208,6 +215,7 @@ export async function getTransactionsQuery(
     "category:transaction_categories(id, name, color, slug)",
     "bank_account:bank_accounts(id, name, currency, bank_connection:bank_connections(id, logo_url))",
     "attachments:transaction_attachments(id, name, size, path, type)",
+    "tags:transaction_tags(id, tag_id, tag:tags(id, name))",
     "vat:calculated_vat",
   ];
 
@@ -228,6 +236,8 @@ export async function getTransactionsQuery(
       query.order("bank_account(name)", { ascending });
     } else if (column === "category") {
       query.order("category(name)", { ascending });
+    } else if (column === "tags") {
+      query.order("is_transaction_tagged", { ascending });
     } else {
       query.order(column, { ascending });
     }
@@ -249,20 +259,20 @@ export async function getTransactionsQuery(
     if (!Number.isNaN(Number.parseInt(searchQuery))) {
       query.eq("amount", Number(searchQuery));
     } else {
-      query.textSearch("fts_vector", `'${searchQuery}'`);
+      query.textSearch("fts_vector", `%${searchQuery}%:*`);
     }
   }
 
-  if (statuses?.includes("fullfilled") || attachments === "include") {
-    query.eq("is_fulfilled", true);
-  }
-
-  if (statuses?.includes("unfulfilled") || attachments === "exclude") {
+  if (statuses?.includes("uncompleted") || attachments === "exclude") {
     query.eq("is_fulfilled", false);
+  } else if (statuses?.includes("completed") || attachments === "include") {
+    query.eq("is_fulfilled", true);
+  } else if (statuses?.includes("excluded")) {
+    query.eq("internal", true);
   }
 
-  if (statuses?.includes("excluded")) {
-    query.eq("status", "excluded");
+  if (statuses?.includes("archived")) {
+    query.eq("status", "archived");
   } else {
     query.or("status.eq.pending,status.eq.posted,status.eq.completed");
   }
@@ -278,6 +288,15 @@ export async function getTransactionsQuery(
       .join(",");
 
     query.or(matchCategory);
+  }
+
+  if (tags) {
+    query
+      .select(
+        [...columns, "temp_filter_tags:transaction_tags!inner()"].join(","),
+      )
+      .eq("team_id", teamId)
+      .in("temp_filter_tags.tag_id", tags);
   }
 
   if (recurring) {
@@ -303,6 +322,21 @@ export async function getTransactionsQuery(
 
   if (assignees?.length) {
     query.in("assigned_id", assignees);
+  }
+
+  if (amount_range) {
+    query.gte("amount", amount_range[0]);
+    query.lte("amount", amount_range[1]);
+  }
+
+  if (amount?.length === 2) {
+    const [operator, value] = amount;
+
+    if (operator === "gte") {
+      query.gte("amount", value);
+    } else if (operator === "lte") {
+      query.lte("amount", value);
+    }
   }
 
   const { data, count } = await query.range(from, to);
@@ -338,6 +372,7 @@ export async function getTransactionQuery(supabase: Client, id: string) {
     "assigned:assigned_id(*)",
     "category:category_slug(id, name, vat)",
     "attachments:transaction_attachments(*)",
+    "tags:transaction_tags(id, tag:tags(id, name))",
     "bank_account:bank_accounts(id, name, currency, bank_connection:bank_connections(id, logo_url))",
     "vat:calculated_vat",
   ];
@@ -371,8 +406,7 @@ export async function getSimilarTransactions(
     .from("transactions")
     .select("id, amount, team_id", { count: "exact" })
     .eq("team_id", teamId)
-    .neq("category_slug", categorySlug)
-    .textSearch("fts_vector", `'${name}'`)
+    .textSearch("fts_vector", `%${name}%:*`)
     .throwOnError();
 }
 
@@ -434,7 +468,7 @@ export async function getRunwayQuery(
   const fromDate = new UTCDate(from);
   const toDate = new UTCDate(to);
 
-  return supabase.rpc("get_runway", {
+  return supabase.rpc("get_runway_v4", {
     team_id: teamId,
     date_from: startOfMonth(fromDate).toDateString(),
     date_to: endOfMonth(toDate).toDateString(),
@@ -456,7 +490,7 @@ export async function getMetricsQuery(
 ) {
   const { teamId, from, to, type = "profit", currency } = params;
 
-  const rpc = type === "profit" ? "get_profit" : "get_revenue";
+  const rpc = type === "profit" ? "get_profit_v3" : "get_revenue_v3";
 
   const fromDate = new UTCDate(from);
   const toDate = new UTCDate(to);
@@ -544,9 +578,10 @@ export async function getExpensesQuery(
     base_currency: currency,
   });
 
-  const averageExpense = data && data.length > 0
-    ? data.reduce((sum, item) => sum + (item.value || 0), 0) / data.length
-    : 0;
+  const averageExpense =
+    data && data.length > 0
+      ? data.reduce((sum, item) => sum + (item.value || 0), 0) / data.length
+      : 0;
 
   return {
     summary: {
@@ -584,10 +619,11 @@ export async function getVaultQuery(supabase: Client, params: GetVaultParams) {
 
   const { start, end, owners, tags } = filter || {};
 
-  const isSearch = (filter !== undefined &&
-    Object.values(filter).some(
-      (value) => value !== undefined && value !== null,
-    )) ||
+  const isSearch =
+    (filter !== undefined &&
+      Object.values(filter).some(
+        (value) => value !== undefined && value !== null,
+      )) ||
     Boolean(searchQuery);
 
   const query = supabase
@@ -629,19 +665,23 @@ export async function getVaultQuery(supabase: Client, params: GetVaultParams) {
 
   const { data } = await query;
 
-  const defaultFolders = parentId || isSearch ? [] : [
-    { name: "exports", isFolder: true },
-    { name: "inbox", isFolder: true },
-    { name: "imports", isFolder: true },
-    { name: "transactions", isFolder: true },
-    { name: "invoices", isFolder: true },
-  ];
+  const defaultFolders =
+    parentId || isSearch
+      ? []
+      : [
+          { name: "exports", isFolder: true },
+          { name: "inbox", isFolder: true },
+          { name: "imports", isFolder: true },
+          { name: "transactions", isFolder: true },
+          { name: "invoices", isFolder: true },
+        ];
 
   const filteredData = (data ?? []).map((item) => ({
     ...item,
-    name: item.path_tokens?.at(-1) === ".folderPlaceholder"
-      ? item.path_tokens?.at(-2)
-      : item.path_tokens?.at(-1),
+    name:
+      item.path_tokens?.at(-1) === ".folderPlaceholder"
+        ? item.path_tokens?.at(-2)
+        : item.path_tokens?.at(-1),
     isFolder: item.path_tokens?.at(-1) === ".folderPlaceholder",
   }));
 
@@ -713,7 +753,7 @@ export async function getVaultRecursiveQuery(
       getVaultRecursiveQuery(supabase, {
         ...params,
         folder: decodeURIComponent(folder.name),
-      })
+      }),
     ),
   );
 
@@ -864,7 +904,7 @@ export async function getTravelBookingQuery(
 ) {
   return supabase
     .from("travel_bookings")
-    .select("*")
+    .select("*, tags:travel_booking_tags(id, tag:tags(id, name))")
     .eq("id", params.bookingId)
     .eq("team_id", params.teamId)
     .single();
@@ -883,6 +923,7 @@ export type GetTravelBookingsQueryParams = {
   };
   filter?: {
     status?: "in_progress" | "completed";
+    customers?: string[];
   };
 };
 
@@ -900,12 +941,12 @@ export async function getTravelBookingsQuery(
     start,
     end,
   } = params;
-  const { status } = filter || {};
+  const { status, customers } = filter || {};
 
   const query = supabase
     .from("travel_bookings")
     .select(
-      "*, total_duration, users:get_assigned_users_for_booking, total_amount:get_booking_total_amount",
+      "*, total_duration, users:get_assigned_users_for_booking, total_amount:get_booking_total_amount, customer:customer_id(id, name, website), tags:travel_booking_tags(id, tag:tags(id, name))",
       {
         count: "exact",
       },
@@ -925,6 +966,10 @@ export async function getTravelBookingsQuery(
     query.ilike("name", `%${search.query}%`);
   }
 
+  if (customers?.length) {
+    query.in("customer_id", customers);
+  }
+
   if (sort) {
     const [column, value] = sort;
     if (column === "time") {
@@ -933,6 +978,10 @@ export async function getTravelBookingsQuery(
       // query.order("total_amount", { ascending: value === "asc" });
     } else if (column === "assigned") {
       // query.order("assigned_id", { ascending: value === "asc" });
+    } else if (column === "customer") {
+      query.order("customer(name)", { ascending: value === "asc" });
+    } else if (column === "tags") {
+      query.order("is_booking_tagged", { ascending: value === "asc" });
     } else {
       query.order(column, { ascending: value === "asc" });
     }
@@ -957,7 +1006,7 @@ type GetTravelRecordsByDateParams = {
   userId?: string;
 };
 
-export async function getTrackerRecordsByDateQuery(
+export async function getTravelRecordsByDateQuery(
   supabase: Client,
   params: GetTravelRecordsByDateParams,
 ) {
@@ -966,7 +1015,7 @@ export async function getTrackerRecordsByDateQuery(
   const query = supabase
     .from("travel_entries")
     .select(
-      "*, assigned:assigned_id(id, full_name, avatar_url), booking:booking_id(id, name, rate, currency)",
+      "*, assigned:assigned_id(id, full_name, avatar_url), booking:booking_id(id, name, rate, currency, customer:customer_id(id, name))",
     )
     .eq("team_id", teamId)
     .eq("date", formatISO(new UTCDate(date), { representation: "date" }));
@@ -1158,7 +1207,7 @@ export async function getInvoicesQuery(
       query.order(column, { ascending });
     }
   } else {
-    query.order("due_date", { ascending: false });
+    query.order("created_at", { ascending: false });
   }
 
   if (statuses) {
@@ -1181,7 +1230,7 @@ export async function getInvoicesQuery(
     if (!Number.isNaN(Number.parseInt(searchQuery))) {
       query.eq("amount", Number(searchQuery));
     } else {
-      query.textSearch("fts", `'${searchQuery}'`);
+      query.textSearch("fts", `%${searchQuery}%:*`);
     }
   }
 
@@ -1220,17 +1269,64 @@ export async function getPaymentStatusQuery(supabase: Client, teamId: string) {
     .single();
 }
 
-export async function getCustomersQuery(supabase: Client, teamId: string) {
-  return supabase
+export type GetCustomersQueryParams = {
+  teamId: string;
+  from?: number;
+  to?: number;
+  searchQuery?: string | null;
+  sort?: string[] | null;
+};
+
+export async function getCustomersQuery(
+  supabase: Client,
+  params: GetCustomersQueryParams,
+) {
+  const { teamId, from = 0, to = 100, searchQuery, sort } = params;
+
+  const query = supabase
     .from("customers")
-    .select("*")
+    .select(
+      "*, invoices:invoices(id), bookings:travel_bookings(id), tags:customer_tags(id, tag:tags(id, name))",
+      { count: "exact" },
+    )
     .eq("team_id", teamId)
-    .order("created_at", { ascending: false })
-    .limit(100);
+    .range(from, to);
+
+  if (searchQuery) {
+    query.ilike("name", `%${searchQuery}%`);
+  }
+
+  if (sort) {
+    const [column, value] = sort;
+    const ascending = value === "asc";
+
+    if (column === "invoices") {
+      query.order("invoices(id)", { ascending });
+    } else if (column === "bookings") {
+      query.order("bookings(id)", { ascending });
+    } else {
+      query.order(column, { ascending });
+    }
+  } else {
+    query.order("created_at", { ascending: false });
+  }
+
+  const { data, count } = await query;
+
+  return {
+    meta: {
+      count,
+    },
+    data,
+  };
 }
 
 export async function getCustomerQuery(supabase: Client, customerId: string) {
-  return supabase.from("customers").select("*").eq("id", customerId).single();
+  return supabase
+    .from("customers")
+    .select("*, tags:customer_tags(id, tag:tags(id, name))")
+    .eq("id", customerId)
+    .single();
 }
 
 export async function getInvoiceTemplatesQuery(
@@ -1242,37 +1338,6 @@ export async function getInvoiceTemplatesQuery(
     .select("*")
     .eq("team_id", teamId)
     .single();
-}
-
-export async function getInvoiceNumberQuery(supabase: Client, teamId: string) {
-  const { count } = await supabase
-    .from("invoices")
-    .select("id", { count: "exact" })
-    .eq("team_id", teamId);
-
-  let nextCount = (count || 0) + 1;
-  let nextNumber = generateInvoiceNumber(nextCount);
-  let tries = 0;
-
-  // Try up to 10 times to find an unused invoice number
-  while (tries < 10) {
-    const { data } = await supabase
-      .from("invoices")
-      .select("id")
-      .eq("team_id", teamId)
-      .eq("invoice_number", nextNumber)
-      .single();
-
-    if (!data) {
-      break;
-    }
-
-    nextCount++;
-    nextNumber = generateInvoiceNumber(nextCount);
-    tries++;
-  }
-
-  return nextNumber;
 }
 
 export async function getInvoiceQuery(supabase: Client, id: string) {
@@ -1287,7 +1352,7 @@ export async function getDraftInvoiceQuery(supabase: Client, id: string) {
   return supabase
     .from("invoices")
     .select(
-      "id, due_date, invoice_number, template, status, discount, amount, currency, line_items, payment_details, note_details, customer_details, vat, tax, from_details, issue_date, customer_id, customer_name, token",
+      "id, due_date, invoice_number, template, status, discount, amount, currency, line_items, payment_details, note_details, customer_details, vat, tax, from_details, issue_date, customer_id, customer_name, token, top_block, bottom_block",
     )
     .eq("id", id)
     .single();
@@ -1307,6 +1372,19 @@ export async function searchInvoiceNumberQuery(
     .select("invoice_number")
     .eq("team_id", params.teamId)
     .ilike("invoice_number", `%${params.query}`);
+}
+
+export async function getLastInvoiceNumberQuery(
+  supabase: Client,
+  teamId: string,
+) {
+  const { data } = await supabase
+    .rpc("get_next_invoice_number", {
+      team_id: teamId,
+    })
+    .single();
+
+  return { data };
 }
 
 export async function getTagsQuery(supabase: Client, teamId: string) {

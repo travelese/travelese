@@ -1,7 +1,7 @@
 "use client";
 
 import type { FlightPositionsRequest } from "@/actions/schema";
-import { TravelLocation } from "@/components/travel-location";
+import { TravelLocation } from "@/components/travel/travel-location";
 import {
   Form,
   FormControl,

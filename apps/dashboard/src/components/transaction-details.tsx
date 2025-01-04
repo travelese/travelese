@@ -1,7 +1,7 @@
 import { createAttachmentsAction } from "@/actions/create-attachments-action";
 import type { UpdateTransactionValues } from "@/actions/schema";
-import { updateSimilarTransactionsCategoryAction } from "@/actions/update-similar-transactions-action";
-import { updateSimilarTransactionsRecurringAction } from "@/actions/update-similar-transactions-recurring";
+import { updateSimilarTransactionsCategoryAction } from "@/actions/transactions/update-similar-transactions-action";
+import { updateSimilarTransactionsRecurringAction } from "@/actions/transactions/update-similar-transactions-recurring";
 import { createClient } from "@travelese/supabase/client";
 import {
   getCurrentUserTeamQuery,

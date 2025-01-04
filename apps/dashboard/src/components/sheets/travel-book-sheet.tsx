@@ -115,7 +115,7 @@ export function TravelBookSheet({ userId, currency }: Props) {
           </h2>
         </DrawerHeader>
 
-        <BookTravelForm
+        <TravelBookForm
           form={form}
           isSaving={bookAction.status === "executing"}
           onSubmit={bookAction.execute}

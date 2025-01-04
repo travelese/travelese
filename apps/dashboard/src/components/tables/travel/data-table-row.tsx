@@ -2,8 +2,8 @@
 
 import { deleteBookingAction } from "@/actions/booking/delete-booking-action";
 import { updateBookingAction } from "@/actions/booking/update-booking-action";
-import { TravelExportCSV } from "@/components/travel-export-csv";
-import { TravelStatus } from "@/components/travel-status";
+import { TravelExportCSV } from "@/components/travel/travel-export-csv";
+import { TravelStatus } from "@/components/travel/travel-status";
 import { useTravelParams } from "@/hooks/use-travel-params";
 import { formatAmount, secondsToHoursAndMinutes } from "@/utils/format";
 import {

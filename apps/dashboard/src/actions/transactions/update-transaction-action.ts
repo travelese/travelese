@@ -2,8 +2,8 @@
 
 import { updateTransaction } from "@travelese/supabase/mutations";
 import { revalidateTag } from "next/cache";
-import { authActionClient } from "./safe-action";
-import { updateTransactionSchema } from "./schema";
+import { authActionClient } from "../safe-action";
+import { updateTransactionSchema } from "../schema";
 
 export const updateTransactionAction = authActionClient
   .schema(updateTransactionSchema)
