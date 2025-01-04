@@ -15,7 +15,7 @@ export const updateBookingAction = authActionClient
     },
   })
   .action(async ({ parsedInput: params, ctx: { user, supabase } }) => {
-    const { id, ...data } = params;
+    const { id, tags, ...data } = params;
 
     await supabase.from("travel_bookings").update(data).eq("id", id);
 

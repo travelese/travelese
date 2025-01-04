@@ -1,16 +1,14 @@
 "use client";
 
+import NyanCat from "@/assets/nyan.gif";
 import { useMap } from "@/hooks/use-map";
 import type { PlaneDetails } from "@/actions/schema";
 import { Marker } from "mapbox-gl";
 import Image from "next/image";
 import { useEffect, useMemo, useRef, useState } from "react";
-
-import NyanCat from "@/assets/nyan.gif";
-
-import { mapClickSubscribable } from "@/components/travel-map";
-import { PlaneMarker } from "@/components/plane-marker";
-import { PlaneTrack } from "@/actions/flight-track";
+import { mapClickSubscribable } from "@/components/travel/travel-map";
+import { PlaneMarker } from "@/components/travel/plane-marker";
+import { PlaneTrack } from "@/actions/travel/flight-track";
 import Link from "next/link";
 
 /** Based on https://gist.github.com/chriswhong/8977c0d4e869e9eaf06b4e9fda80f3ab */

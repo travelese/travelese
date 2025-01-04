@@ -1,6 +1,6 @@
 "use client";
 
-import { changeTravelPeriodAction } from "@/actions/change-travel-period-action";
+import { changeTravelPeriodAction } from "@/actions/travel/change-travel-period-action";
 import { useI18n } from "@/locales/client";
 import { Button } from "@travelese/ui/button";
 import { Calendar } from "@travelese/ui/calendar";

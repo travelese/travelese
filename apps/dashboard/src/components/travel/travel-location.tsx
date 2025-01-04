@@ -1,6 +1,6 @@
 "use client";
 
-import { listPlaceSuggestionsAction } from "@/actions/list-place-suggestions-action";
+import { listPlaceSuggestionsAction } from "@/actions/travel/list-place-suggestions-action";
 import { useI18n } from "@/locales/client";
 import type { Places } from "@duffel/api/Places/Suggestions/SuggestionsType";
 import { Button } from "@travelese/ui/button";

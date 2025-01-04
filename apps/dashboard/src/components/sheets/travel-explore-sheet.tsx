@@ -17,7 +17,7 @@ import { Sheet, SheetContent, SheetHeader } from "@travelese/ui/sheet";
 import { useToast } from "@travelese/ui/use-toast";
 import { useAction } from "next-safe-action/hooks";
 import { parseAsJson, parseAsString, useQueryStates } from "nuqs";
-import { exploreTravelAction } from "@/actions/explore-travel-action";
+import { exploreTravelAction } from "@/actions/travel/explore-travel-action";
 import { flightPositionsRequestSchema } from "@/actions/schema";
 import { TravelExploreForm } from "@/components/forms/travel-explore-form";
 import { useTravelParams } from "@/hooks/use-travel-params";

@@ -3,7 +3,7 @@
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { MapContext } from "@/hooks/use-map";
-import { subscribable } from "@/utils/subscribable";
+import { subscribable } from "./subscribable";
 import {
   type MouseEvent,
   type PropsWithChildren,

@@ -18,23 +18,35 @@ export const createBookingAction = authActionClient
       channel: LogEvents.BookingCreated.channel,
     },
   })
-  .action(async ({ parsedInput: params, ctx: { user, supabase } }) => {
-    const { data } = await createBooking(supabase, {
-      ...params,
-      team_id: user.team_id,
-    });
+  .action(
+    async ({ parsedInput: { tags, ...params }, ctx: { user, supabase } }) => {
+      const { data } = await createBooking(supabase, {
+        ...params,
+        team_id: user.team_id!,
+      });
 
-    if (!data) {
-      throw new Error("Failed to create booking");
-    }
+      if (!data) {
+        throw new Error("Failed to create booking");
+      }
 
-    cookies().set({
-      name: Cookies.LastBooking,
-      value: data.id,
-      expires: addYears(new Date(), 1),
-    });
+      if (tags?.length) {
+        await supabase.from("travel_booking_tags").insert(
+          tags.map((tag) => ({
+            tag_id: tag.id,
+            travel_booking_id: data?.id,
+            team_id: user.team_id!,
+          })),
+        );
+      }
 
-    revalidateTag(`travel_bookings_${user.team_id}`);
+      cookies().set({
+        name: Cookies.LastBooking,
+        value: data.id,
+        expires: addYears(new Date(), 1),
+      });
 
-    return data;
-  });
+      revalidateTag(`travel_bookings_${user.team_id}`);
+
+      return data;
+    },
+  );
