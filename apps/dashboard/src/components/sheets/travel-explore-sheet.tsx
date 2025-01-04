@@ -19,7 +19,7 @@ import { useAction } from "next-safe-action/hooks";
 import { parseAsJson, parseAsString, useQueryStates } from "nuqs";
 import { exploreTravelAction } from "@/actions/explore-travel-action";
 import { flightPositionsRequestSchema } from "@/actions/schema";
-import { ExploreTravelForm } from "@/components/forms/travel-explore-form";
+import { TravelExploreForm } from "@/components/forms/travel-explore-form";
 import { useTravelParams } from "@/hooks/use-travel-params";
 import type { z } from "zod";
 
@@ -28,7 +28,7 @@ type Props = {
   currency: string;
 };
 
-export function ExploreTravelSheet({ userId, currency }: Props) {
+export function TravelExploreSheet({ userId, currency }: Props) {
   const { toast } = useToast();
   const isDesktop = useMediaQuery("(min-width: 768px)");
   const { explore, setParams } = useTravelParams();
@@ -54,6 +54,10 @@ export function ExploreTravelSheet({ userId, currency }: Props) {
 
   const exploreAction = useAction(exploreTravelAction, {
     onSuccess: ({ data }) => {
+      console.log('Explore Action Success - Data:', data);
+      console.log('Form Current Values:', form.getValues());
+      console.log('Current Query Params:', queryParams);
+      
       toast({
         title: "Explore Found",
         description: `Found ${data?.data.length} flights`,
@@ -107,7 +111,7 @@ export function ExploreTravelSheet({ userId, currency }: Props) {
           </SheetHeader>
 
           <ScrollArea className="h-full p-0 pb-28" hideScrollbar>
-            <ExploreTravelForm
+            <TravelExploreForm
               form={form}
               isSubmitting={exploreAction.status === "executing"}
               onSubmit={() => exploreAction.execute(form.getValues())}

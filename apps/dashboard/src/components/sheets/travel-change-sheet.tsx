@@ -2,7 +2,7 @@
 
 import { changeTravelAction } from "@/actions/change-travel-action";
 import { changeTravelSchema } from "@/actions/schema";
-import { ChangeTravelForm } from "@/components/forms/travel-change-form";
+import { TravelChangeForm } from "@/components/forms/travel-change-form";
 import { useTravelParams } from "@/hooks/use-travel-params";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Drawer, DrawerContent, DrawerHeader } from "@travelese/ui/drawer";
@@ -27,7 +27,7 @@ type Props = {
   currency: string;
 };
 
-export function ChangeTravelSheet({ userId, currency }: Props) {
+export function TravelChangeSheet({ userId, currency }: Props) {
   const { toast } = useToast();
   const isDesktop = useMediaQuery("(min-width: 768px)");
   const { change, setParams } = useTravelParams();
@@ -86,7 +86,7 @@ export function ChangeTravelSheet({ userId, currency }: Props) {
           </SheetHeader>
 
           <ScrollArea className="h-full p-0 pb-28" hideScrollbar>
-            <ChangeTravelForm
+            <TravelChangeForm
               form={form}
               isSaving={changeAction.status === "executing"}
               onSubmit={changeAction.execute}
