@@ -2,7 +2,7 @@
 
 import { bookTravelAction } from "@/actions/book-travel-action";
 import { bookTravelSchema } from "@/actions/schema";
-import { BookTravelForm } from "@/components/forms/travel-book-form";
+import { TravelBookForm } from "@/components/forms/travel-book-form";
 import { useTravelParams } from "@/hooks/use-travel-params";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Drawer, DrawerContent, DrawerHeader } from "@travelese/ui/drawer";
@@ -27,7 +27,7 @@ type Props = {
   currency: string;
 };
 
-export function BookTravelSheet({ userId, currency }: Props) {
+export function TravelBookSheet({ userId, currency }: Props) {
   const { toast } = useToast();
   const isDesktop = useMediaQuery("(min-width: 768px)");
   const { book, setParams } = useTravelParams();
@@ -86,7 +86,7 @@ export function BookTravelSheet({ userId, currency }: Props) {
           </SheetHeader>
 
           <ScrollArea className="h-full p-0 pb-28" hideScrollbar>
-            <BookTravelForm
+            <TravelBookForm
               form={form}
               isSaving={bookAction.status === "executing"}
               onSubmit={bookAction.execute}

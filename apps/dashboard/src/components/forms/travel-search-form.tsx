@@ -32,7 +32,7 @@ interface Props {
   ) => void;
 }
 
-export function SearchTravelForm({
+export function TravelSearchForm({
   form,
   onSubmit,
   isSubmitting,

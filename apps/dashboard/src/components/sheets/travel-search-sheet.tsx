@@ -2,7 +2,7 @@
 
 import { searchTravelSchema } from "@/actions/schema";
 import { searchTravelAction } from "@/actions/search-travel-action";
-import { SearchTravelForm } from "@/components/forms/travel-search-form";
+import { TravelSearchForm } from "@/components/forms/travel-search-form";
 import { useTravelParams } from "@/hooks/use-travel-params";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Drawer, DrawerContent, DrawerHeader } from "@travelese/ui/drawer";
@@ -56,7 +56,7 @@ function SearchTypeDropdown({
   );
 }
 
-export function SearchTravelSheet({ userId, currency }: Props) {
+export function TravelSearchSheet({ userId, currency }: Props) {
   const { toast } = useToast();
   const isDesktop = useMediaQuery("(min-width: 768px)");
   const { search, setParams } = useTravelParams();
@@ -180,7 +180,7 @@ export function SearchTravelSheet({ userId, currency }: Props) {
           </SheetHeader>
 
           <ScrollArea className="h-full p-0 pb-28" hideScrollbar>
-            <SearchTravelForm
+            <TravelSearchForm
               form={form}
               isSubmitting={searchAction.status === "executing"}
               onSubmit={searchAction.execute}

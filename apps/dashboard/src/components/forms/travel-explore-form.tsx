@@ -20,7 +20,7 @@ interface Props {
   onQueryParamsChange: (updates: FlightPositionsRequest) => void;
 }
 
-export function ExploreTravelForm({
+export function TravelExploreForm({
   form,
   onSubmit,
   isSubmitting,

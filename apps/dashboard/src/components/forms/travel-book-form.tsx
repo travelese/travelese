@@ -36,7 +36,7 @@ interface Props {
   defaultValues?: Partial<z.infer<typeof bookTravelSchema>>;
 }
 
-export function BookTravelForm({
+export function TravelBookForm({
   form,
   onSubmit,
   isSaving,

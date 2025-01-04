@@ -68,16 +68,16 @@ export default async function Page({
 
   return (
     <div>
-      {geo_code.latitude && geo_code.longitude ? (
-        <TravelExplore />
-      ) : (
-        <TravelCalendar
-          weekStartsOnMonday={userData?.week_starts_on_monday}
-          timeFormat={userData?.time_format}
-          data={data}
-          meta={meta}
-        />
-      )}
+      {geo_code.latitude !== 0 && geo_code.longitude !== 0 ? (
+      <TravelExplore />
+    ) : (
+      <TravelCalendar
+        weekStartsOnMonday={userData?.week_starts_on_monday}
+        timeFormat={userData?.time_format}
+        data={data}
+        meta={meta}
+      />
+    )}
 
       <div className="mt-14 mb-6 flex items-center justify-between space-x-4">
         <h2 className="text-md font-medium">Bookings</h2>

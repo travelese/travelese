@@ -29,7 +29,7 @@ interface Props {
   defaultValues?: Partial<z.infer<typeof changeTravelSchema>>;
 }
 
-export function ChangeTravelForm({
+export function TravelChangeForm({
   form,
   onSubmit,
   isSaving,
