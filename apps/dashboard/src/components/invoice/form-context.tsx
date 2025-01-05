@@ -5,17 +5,19 @@ import {
   type InvoiceTemplate,
   invoiceFormSchema,
 } from "@/actions/invoice/schema";
+import { useInvoiceParams } from "@/hooks/use-invoice-params";
 import { UTCDate } from "@date-fns/utc";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { Settings } from "@travelese/invoice/default";
 import { createClient } from "@travelese/supabase/client";
 import { getDraftInvoiceQuery } from "@travelese/supabase/queries";
 import { addMonths } from "date-fns";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { v4 as uuidv4 } from "uuid";
 
 const defaultTemplate: InvoiceTemplate = {
+  title: "Invoice",
   customer_label: "To",
   from_label: "From",
   invoice_no_label: "Invoice No",
@@ -25,8 +27,10 @@ const defaultTemplate: InvoiceTemplate = {
   price_label: "Price",
   quantity_label: "Quantity",
   total_label: "Total",
+  total_summary_label: "Total",
+  subtotal_label: "Subtotal",
   vat_label: "VAT",
-  tax_label: "Sales Tax",
+  tax_label: "Tax",
   payment_label: "Payment Details",
   payment_details: undefined,
   note_label: "Note",
@@ -35,13 +39,14 @@ const defaultTemplate: InvoiceTemplate = {
   from_details: undefined,
   size: "a4",
   include_vat: true,
+  include_tax: true,
   discount_label: "Discount",
   include_discount: false,
   include_decimals: false,
   include_qr: true,
   date_format: "dd/MM/yyyy",
-  include_tax: true,
   tax_rate: 0,
+  vat_rate: 0,
   delivery_type: "create",
 };
 
@@ -58,11 +63,13 @@ export function FormContext({
   id,
   children,
   template,
-  invoiceNumber,
   defaultSettings,
   isOpen,
+  invoiceNumber,
 }: FormContextProps) {
   const supabase = createClient();
+  const { lineItems, currency } = useInvoiceParams();
+  const [isLoading, setLoading] = useState(false);
 
   const defaultValues = {
     id: uuidv4(),
@@ -71,7 +78,8 @@ export function FormContext({
       size: defaultSettings.size ?? defaultTemplate.size,
       include_tax: defaultSettings.include_tax ?? defaultTemplate.include_tax,
       include_vat: defaultSettings.include_vat ?? defaultTemplate.include_vat,
-      timezone: defaultSettings.timezone ?? defaultTemplate.timezone,
+      timezone: defaultSettings.timezone,
+      locale: defaultSettings.locale,
       ...template,
     },
     customer_details: undefined,
@@ -87,23 +95,21 @@ export function FormContext({
     tax: undefined,
     token: undefined,
     discount: undefined,
+    subtotal: undefined,
     status: "draft",
+    top_block: undefined,
+    bottom_block: undefined,
   };
 
   const form = useForm<InvoiceFormValues>({
     resolver: zodResolver(invoiceFormSchema),
     defaultValues,
+    mode: "onChange",
   });
 
   useEffect(() => {
     if (!isOpen) {
-      form.reset({
-        ...defaultValues,
-        template: {
-          ...defaultValues.template,
-          locale: navigator.language,
-        },
-      });
+      form.reset(defaultValues);
     }
   }, [isOpen]);
 
@@ -120,12 +126,32 @@ export function FormContext({
           },
         });
       }
+
+      setLoading(false);
     }
 
     if (id) {
+      setLoading(true);
       fetchInvoice();
     }
   }, [id, isOpen]);
+
+  // These values comes from the travel table
+  useEffect(() => {
+    if (lineItems) {
+      form.setValue("line_items", lineItems);
+    }
+  }, [lineItems]);
+
+  useEffect(() => {
+    if (currency) {
+      form.setValue("template.currency", currency);
+    }
+  }, [currency]);
+
+  if (isLoading) {
+    return null;
+  }
 
   return <FormProvider {...form}>{children}</FormProvider>;
 }

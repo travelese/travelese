@@ -1,6 +1,6 @@
 import type { InvoiceFormValues } from "@/actions/invoice/schema";
 import { updateInvoiceTemplateAction } from "@/actions/invoice/update-invoice-template-action";
-import { calculateTotals } from "@travelese/invoice/calculate";
+import { calculateTotal } from "@travelese/invoice/calculate";
 import { useAction } from "next-safe-action/hooks";
 import { useCallback, useEffect } from "react";
 import { useFormContext, useWatch } from "react-hook-form";
@@ -9,9 +9,12 @@ import { FormatAmount } from "../format-amount";
 import { AmountInput } from "./amount-input";
 import { LabelInput } from "./label-input";
 import { TaxInput } from "./tax-input";
+import { VATInput } from "./vat-input";
 
 export function Summary() {
   const { control, setValue } = useFormContext<InvoiceFormValues>();
+
+  const updateInvoiceTemplate = useAction(updateInvoiceTemplateAction);
 
   const includeDecimals = useWatch({
     control,
@@ -25,6 +28,11 @@ export function Summary() {
     name: "template.currency",
   });
 
+  const locale = useWatch({
+    control,
+    name: "template.locale",
+  });
+
   const includeTax = useWatch({
     control,
     name: "template.include_tax",
@@ -33,6 +41,11 @@ export function Summary() {
   const taxRate = useWatch({
     control,
     name: "template.tax_rate",
+  });
+
+  const vatRate = useWatch({
+    control,
+    name: "template.vat_rate",
   });
 
   const includeVAT = useWatch({
@@ -50,53 +63,46 @@ export function Summary() {
     name: "line_items",
   });
 
-  const updateInvoiceTemplate = useAction(updateInvoiceTemplateAction);
-  const { totalAmount, totalVAT } = calculateTotals(lineItems);
-
   const discount = useWatch({
     control,
     name: "discount",
   });
 
-  const discountAmount = includeDiscount ? discount || 0 : 0;
-  const amountAfterDiscount = totalAmount - discountAmount;
-  const totalTax = includeTax
-    ? (amountAfterDiscount * (taxRate || 0)) / 100
-    : 0;
-
-  const total = amountAfterDiscount + totalVAT + totalTax;
+  const {
+    subTotal,
+    total,
+    vat: totalVAT,
+    tax: totalTax,
+  } = calculateTotal({
+    lineItems,
+    taxRate,
+    vatRate,
+    includeTax,
+    discount: discount ?? 0,
+  });
 
   const updateFormValues = useCallback(() => {
-    if (total >= 0) {
-      setValue("amount", total, { shouldValidate: true });
-    }
-
-    if (totalVAT) {
-      setValue("vat", totalVAT, { shouldValidate: true });
-    }
-
-    if (totalTax) {
-      setValue("tax", totalTax, { shouldValidate: true });
-    }
-  }, [total, totalVAT, totalTax]);
+    setValue("amount", total, { shouldValidate: true });
+    setValue("vat", totalVAT, { shouldValidate: true });
+    setValue("tax", totalTax, { shouldValidate: true });
+    setValue("subtotal", subTotal, { shouldValidate: true });
+  }, [total, totalVAT, totalTax, subTotal]);
 
   useEffect(() => {
     updateFormValues();
   }, [updateFormValues]);
 
   useEffect(() => {
-    if (!includeVAT) {
-      lineItems.forEach((_, index) => {
-        setValue(`line_items.${index}.vat`, 0, { shouldValidate: true });
-      });
-    }
-  }, [includeVAT]);
-
-  useEffect(() => {
     if (!includeTax) {
       setValue("template.tax_rate", 0, { shouldValidate: true });
     }
   }, [includeTax]);
+
+  useEffect(() => {
+    if (!includeVAT) {
+      setValue("template.vat_rate", 0, { shouldValidate: true });
+    }
+  }, [includeVAT]);
 
   useEffect(() => {
     if (!includeDiscount) {
@@ -106,6 +112,26 @@ export function Summary() {
 
   return (
     <div className="w-[320px] flex flex-col">
+      <div className="flex justify-between items-center py-1">
+        <LabelInput
+          className="flex-shrink-0 min-w-6"
+          name="template.subtotal_label"
+          onSave={(value) => {
+            updateInvoiceTemplate.execute({
+              subtotal_label: value,
+            });
+          }}
+        />
+        <span className="text-right font-mono text-[11px] text-[#878787]">
+          <FormatAmount
+            amount={subTotal}
+            maximumFractionDigits={maximumFractionDigits}
+            currency={currency}
+            locale={locale}
+          />
+        </span>
+      </div>
+
       {includeDiscount && (
         <div className="flex justify-between items-center py-1">
           <LabelInput
@@ -128,20 +154,26 @@ export function Summary() {
 
       {includeVAT && (
         <div className="flex justify-between items-center py-1">
-          <LabelInput
-            name="template.vat_label"
-            onSave={(value) => {
-              updateInvoiceTemplate.execute({
-                vat_label: value,
-              });
-            }}
-          />
+          <div className="flex items-center gap-1">
+            <LabelInput
+              className="flex-shrink-0 min-w-5"
+              name="template.vat_label"
+              onSave={(value) => {
+                updateInvoiceTemplate.execute({
+                  vat_label: value,
+                });
+              }}
+            />
+
+            <VATInput />
+          </div>
 
           <span className="text-right font-mono text-[11px] text-[#878787]">
             <FormatAmount
               amount={totalVAT}
               maximumFractionDigits={maximumFractionDigits}
               currency={currency}
+              locale={locale}
             />
           </span>
         </div>
@@ -151,7 +183,7 @@ export function Summary() {
         <div className="flex justify-between items-center py-1">
           <div className="flex items-center gap-1">
             <LabelInput
-              className="flex-shrink-0"
+              className="flex-shrink-0 min-w-5"
               name="template.tax_label"
               onSave={(value) => {
                 updateInvoiceTemplate.execute({
@@ -175,14 +207,14 @@ export function Summary() {
 
       <div className="flex justify-between items-center py-4 mt-2 border-t border-border">
         <LabelInput
-          name="template.total_label"
+          name="template.total_summary_label"
           onSave={(value) => {
             updateInvoiceTemplate.execute({
-              total_label: value,
+              total_summary_label: value,
             });
           }}
         />
-        <span className="text-right font-mono text-[21px]">
+        <span className="text-right font-mono font-medium text-[21px]">
           <AnimatedNumber
             value={total}
             currency={currency}

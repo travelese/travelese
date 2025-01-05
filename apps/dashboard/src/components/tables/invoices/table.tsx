@@ -1,13 +1,16 @@
 "use client";
 
 import { deleteInvoiceAction } from "@/actions/invoice/delete-invoice-action";
+import { InvoiceDetailsSheet } from "@/components/sheets/invoice-details-sheet";
+import { useInvoiceParams } from "@/hooks/use-invoice-params";
+import { useUserContext } from "@/store/user/hook";
+import { Spinner } from "@travelese/ui/spinner";
+import { Table, TableBody } from "@travelese/ui/table";
 import {
   getCoreRowModel,
   getFilteredRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { Spinner } from "@travelese/ui/spinner";
-import { Table, TableBody } from "@travelese/ui/table";
 import { useAction } from "next-safe-action/hooks";
 import React, { useEffect, useState } from "react";
 import { useInView } from "react-intersection-observer";
@@ -38,8 +41,20 @@ export function DataTable({
   const [from, setFrom] = useState(pageSize);
   const { ref, inView } = useInView();
   const [hasNextPage, setHasNextPage] = useState(initialHasNextPage);
+  const { setParams, invoiceId, type } = useInvoiceParams();
 
   const deleteInvoice = useAction(deleteInvoiceAction);
+  const { date_format: dateFormat } = useUserContext((state) => state.data);
+
+  const selectedInvoice = data.find((invoice) => invoice?.id === invoiceId);
+
+  const setOpen = (id?: string) => {
+    if (id) {
+      setParams({ type: "details", invoiceId: id });
+    } else {
+      setParams(null);
+    }
+  };
 
   const handleDeleteInvoice = (id: string) => {
     setData((prev) => {
@@ -57,6 +72,7 @@ export function DataTable({
     getFilteredRowModel: getFilteredRowModel(),
     meta: {
       deleteInvoice: handleDeleteInvoice,
+      dateFormat,
     },
   });
 
@@ -95,7 +111,7 @@ export function DataTable({
 
         <TableBody>
           {table.getRowModel().rows.map((row) => (
-            <InvoiceRow key={row.id} row={row} />
+            <InvoiceRow key={row.id} row={row} setOpen={setOpen} />
           ))}
         </TableBody>
       </Table>
@@ -108,6 +124,12 @@ export function DataTable({
           </div>
         </div>
       )}
+
+      <InvoiceDetailsSheet
+        data={selectedInvoice}
+        isOpen={type === "details" && !!invoiceId}
+        setOpen={setOpen}
+      />
     </div>
   );
 }

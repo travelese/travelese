@@ -1,33 +1,47 @@
 export function calculateTotal({
-  price,
-  quantity,
-  vat,
-  includeVAT,
+  lineItems,
+  taxRate = 0,
+  vatRate = 0,
+  discount = 0,
+  includeVAT = true,
+  includeTax = true,
 }: {
-  price: number;
-  quantity: number;
-  vat?: number;
-  includeVAT: boolean;
-}): number {
-  const baseTotal = (price ?? 0) * (quantity ?? 0);
-  const vatMultiplier = includeVAT ? 1 + (vat || 0) / 100 : 1;
-  return baseTotal * vatMultiplier;
+  lineItems: Array<{ price?: number; quantity?: number }>;
+  taxRate?: number;
+  vatRate?: number;
+  discount?: number;
+  includeVAT?: boolean;
+  includeTax?: boolean;
+}) {
+  // Calculate Subtotal: Sum of all Base Prices for line items
+  const subTotal = lineItems.reduce((acc, item) => {
+    return acc + (item.price ?? 0) * (item.quantity ?? 0);
+  }, 0);
+
+  // Calculate VAT (Total): Calculate VAT on the Subtotal
+  const totalVAT = includeVAT ? (subTotal * vatRate) / 100 : 0;
+
+  // Calculate Total: Subtotal + VAT - Discount
+  const total = subTotal + (includeVAT ? totalVAT : 0) - discount;
+
+  // Calculate tax (if included)
+  const tax = includeTax ? (total * taxRate) / 100 : 0;
+
+  return {
+    subTotal,
+    total: total + tax,
+    vat: totalVAT,
+    tax,
+  };
 }
 
-export function calculateTotals(
-  lineItems: Array<{ price?: number; quantity?: number; vat?: number }>,
-) {
-  return lineItems.reduce(
-    (acc, item) => {
-      const itemTotal = (item.price ?? 0) * (item.quantity ?? 0);
-
-      const itemVAT = (itemTotal * (item.vat ?? 0)) / 100;
-
-      return {
-        totalAmount: acc.totalAmount + itemTotal,
-        totalVAT: acc.totalVAT + itemVAT,
-      };
-    },
-    { totalAmount: 0, totalVAT: 0 },
-  );
+export function calculateLineItemTotal({
+  price = 0,
+  quantity = 0,
+}: {
+  price?: number;
+  quantity?: number;
+}) {
+  // Calculate and return total price
+  return price * quantity;
 }
