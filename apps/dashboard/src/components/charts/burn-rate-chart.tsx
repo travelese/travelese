@@ -61,7 +61,7 @@ export async function BurnRateChart({
           <TooltipProvider delayDuration={100}>
             <Tooltip>
               <TooltipTrigger asChild>
-                <Icons.Info className="size-4 mt-1" />
+                <Icons.Info className="h-4 w-4 mt-1" />
               </TooltipTrigger>
               <TooltipContent
                 className="text-xs text-[#878787] max-w-[240px] p-4 space-y-2"
@@ -75,7 +75,8 @@ export async function BurnRateChart({
                 <p>
                   Explanation: This tracks how fast you’re spending. If it’s
                   incorrect, internal transfers may be counted as income. You
-                  can change this manually in the transaction list.
+                  can adjust this by excluding the transactions from the
+                  calculations.
                 </p>
 
                 <p>

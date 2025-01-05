@@ -1,4 +1,6 @@
-import { Avatar, AvatarFallback } from "@travelese/ui/avatar";
+import { useUserContext } from "@/store/user/hook";
+import { formatDate } from "@/utils/format";
+import { Avatar, AvatarFallback, AvatarImageNext } from "@travelese/ui/avatar";
 import { Button } from "@travelese/ui/button";
 import { cn } from "@travelese/ui/cn";
 import {
@@ -11,9 +13,7 @@ import { Separator } from "@travelese/ui/separator";
 import { Skeleton } from "@travelese/ui/skeleton";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@travelese/ui/tooltip";
 import { useToast } from "@travelese/ui/use-toast";
-import { format } from "date-fns";
 import { MoreVertical, Trash2 } from "lucide-react";
-import Image from "next/image";
 import { useEffect, useState } from "react";
 import { FilePreview } from "./file-preview";
 import { FormatAmount } from "./format-amount";
@@ -34,6 +34,7 @@ type InboxItem = {
   content_type?: string;
   description?: string;
   transaction?: any;
+  locale?: string;
 };
 
 type Props = {
@@ -56,6 +57,7 @@ export function InboxDetails({
   const { toast } = useToast();
   const [isOpen, setOpen] = useState(false);
   const [showFallback, setShowFallback] = useState(false);
+  const { date_format: dateFormat } = useUserContext((state) => state.data);
 
   const isProcessing = item?.status === "processing" || item?.status === "new";
 
@@ -95,7 +97,7 @@ export function InboxDetails({
                 disabled={!item}
                 onClick={onDelete}
               >
-                <Trash2 className="size-4" />
+                <Trash2 className="h-4 w-4" />
               </Button>
             </TooltipTrigger>
             <TooltipContent className="px-3 py-1.5 text-xs">
@@ -108,7 +110,7 @@ export function InboxDetails({
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon" disabled={!item}>
-                <MoreVertical className="size-4" />
+                <MoreVertical className="h-4 w-4" />
                 <span className="sr-only">More</span>
               </Button>
             </DropdownMenuTrigger>
@@ -144,7 +146,7 @@ export function InboxDetails({
               ) : (
                 <Avatar>
                   {item.website && (
-                    <Image
+                    <AvatarImageNext
                       alt={item.website}
                       width={40}
                       height={40}
@@ -153,6 +155,7 @@ export function InboxDetails({
                         showFallback && "hidden",
                       )}
                       src={`https://img.logo.dev/${item.website}?token=pk_X-1ZO13GSgeOoUrIuJ6GMQ`}
+                      quality={100}
                       onError={() => {
                         setShowFallback(true);
                       }}
@@ -197,7 +200,7 @@ export function InboxDetails({
                 {isProcessing && !item.date && (
                   <Skeleton className="h-3 w-[50px] rounded-sm" />
                 )}
-                {item.date && format(new Date(item.date), "PP")}
+                {item.date && formatDate(item.date, dateFormat)}
               </div>
 
               <div className="flex space-x-4 items-center ml-auto mt-1">

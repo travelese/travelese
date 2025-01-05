@@ -56,7 +56,7 @@ export async function ProfitRevenueChart({
           <TooltipProvider delayDuration={100}>
             <Tooltip>
               <TooltipTrigger asChild>
-                <Icons.Info className="size-4 mt-1" />
+                <Icons.Info className="h-4 w-4 mt-1" />
               </TooltipTrigger>
               <TooltipContent
                 className="text-xs text-[#878787] max-w-[240px] p-4"
@@ -71,8 +71,8 @@ export async function ProfitRevenueChart({
                     <p>
                       Explanation: This shows how much you’re making after
                       costs. If the profit seems off, it may be due to internal
-                      transfers labeled as income. You can adjust this manually
-                      in the transaction list.
+                      transfers labeled as income. You can adjust this by
+                      excluding the transactions from the calculations.
                     </p>
 
                     <p>
@@ -94,8 +94,8 @@ export async function ProfitRevenueChart({
                     <p>
                       Explanation: This is your gross income before expenses. If
                       the revenue appears too high, internal transfers may have
-                      been marked as income. You can fix this manually in the
-                      transaction list.
+                      been marked as income. You can fix this by excluding the
+                      transactions from the calculations.
                     </p>
 
                     <p>
