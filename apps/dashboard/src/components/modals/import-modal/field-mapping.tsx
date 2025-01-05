@@ -3,6 +3,7 @@
 import { generateCsvMapping } from "@/actions/ai/generate-csv-mapping";
 import { SelectAccount } from "@/components/select-account";
 import { SelectCurrency } from "@/components/select-currency";
+import { useUserContext } from "@/store/user/hook";
 import { formatAmount } from "@/utils/format";
 import { formatAmountValue, formatDate } from "@travelese/import";
 import {
@@ -12,6 +13,7 @@ import {
   AccordionTrigger,
 } from "@travelese/ui/accordion";
 import { Icons } from "@travelese/ui/icons";
+import { Input } from "@travelese/ui/input";
 import { Label } from "@travelese/ui/label";
 import {
   Select,
@@ -70,7 +72,7 @@ export function FieldMapping({ currencies }: { currencies: string[] }) {
     <div className="mt-6">
       <div className="grid grid-cols-2 gap-x-4 gap-y-2">
         <div className="text-sm">CSV Data column</div>
-        <div className="text-sm">Travelese data column</div>
+        <div className="text-sm">Midday data column</div>
         {(Object.keys(mappableFields) as (keyof typeof mappableFields)[]).map(
           (field) => (
             <FieldRow
@@ -224,6 +226,9 @@ function FieldRow({
 }) {
   const { label, required } = mappableFields[field];
   const { control, watch, fileColumns, firstRows } = useCsvContext();
+  const { locale, date_format: dateFormat } = useUserContext(
+    (state) => state.data,
+  );
 
   const value = watch(field);
   const inverted = watch("inverted");
@@ -238,14 +243,14 @@ function FieldRow({
     if (!description) return;
 
     if (field === "date") {
-      return formatDate(description);
+      return formatDate(description, dateFormat);
     }
 
     if (field === "amount") {
       const amount = formatAmountValue({ amount: description, inverted });
 
       if (currency) {
-        return formatAmount({ currency, amount });
+        return formatAmount({ currency, amount, locale });
       }
 
       return amount;
@@ -258,7 +263,7 @@ function FieldRow({
       const balance = +(amount * -1);
 
       if (currency) {
-        return formatAmount({ currency, amount: balance });
+        return formatAmount({ currency, amount: balance, locale });
       }
 
       return balance;
@@ -288,7 +293,7 @@ function FieldRow({
                   <SelectValue placeholder={`Select ${label}`} />
 
                   {isLoading && (
-                    <div className="absolute right-2">
+                    <div className="absolute top-2 right-2">
                       <Spinner />
                     </div>
                   )}

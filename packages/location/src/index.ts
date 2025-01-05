@@ -1,50 +1,23 @@
 import { headers } from "next/headers";
 import countries from "./countries.json";
 import flags from "./country-flags";
-import { currencies } from "./currencies";
 import { EU_COUNTRY_CODES } from "./eu-countries";
 import timezones from "./timezones.json";
 
 export function getCountryCode() {
-  return headers().get("x-vercel-ip-country") || "SE";
+  return headers().get("x-vercel-ip-country") || "CA";
 }
 
 export function getTimezone() {
-  return headers().get("x-vercel-ip-timezone") || "Europe/Berlin";
+  return headers().get("x-vercel-ip-timezone") || "America/Toronto";
 }
 
 export function getLocale() {
-  return headers().get("x-vercel-ip-locale") || "en-US";
+  return headers().get("x-vercel-ip-locale") || "en-CA";
 }
 
 export function getTimezones() {
   return timezones;
-}
-export function getCurrency() {
-  const countryCode = getCountryCode();
-
-  return currencies[countryCode as keyof typeof currencies];
-}
-
-export function getDateFormat() {
-  const country = getCountryCode();
-
-  // US uses MM/dd/yyyy
-  if (country === "US") {
-    return "MM/dd/yyyy";
-  }
-
-  // China, Japan, Korea, Taiwan use yyyy-MM-dd
-  if (["CN", "JP", "KR", "TW"].includes(country)) {
-    return "yyyy-MM-dd";
-  }
-  // Most Latin American, African, and some Asian countries use dd/MM/yyyy
-  if (["AU", "NZ", "IN", "ZA", "BR", "AR"].includes(country)) {
-    return "dd/MM/yyyy";
-  }
-
-  // Default to yyyy-MM-dd for other countries
-  return "yyyy-MM-dd";
 }
 
 export function getCountryInfo() {
