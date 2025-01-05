@@ -7,7 +7,6 @@ import { TransactionBankAccount } from "@/components/transaction-bank-account";
 import { TransactionMethod } from "@/components/transaction-method";
 import { TransactionStatus } from "@/components/transaction-status";
 import { formatDate } from "@/utils/format";
-import type { ColumnDef } from "@tanstack/react-table";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -36,6 +35,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@travelese/ui/tooltip";
+import type { ColumnDef } from "@tanstack/react-table";
 import { Loader2 } from "lucide-react";
 
 export type Transaction = {
@@ -89,8 +89,8 @@ export const columns: ColumnDef<Transaction>[] = [
   {
     accessorKey: "date",
     header: "Date",
-    cell: ({ row }) => {
-      return formatDate(row.original.date);
+    cell: ({ row, table }) => {
+      return formatDate(row.original.date, table.options.meta?.dateFormat);
     },
   },
   {
@@ -322,7 +322,7 @@ export const columns: ColumnDef<Transaction>[] = [
               >
                 {table.options.meta?.deleteTransactions?.status ===
                 "executing" ? (
-                  <Loader2 className="size-4 animate-spin" />
+                  <Loader2 className="h-4 w-4 animate-spin" />
                 ) : (
                   "Confirm"
                 )}
