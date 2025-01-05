@@ -5,6 +5,7 @@ import { updateBookingAction } from "@/actions/booking/update-booking-action";
 import { TravelExportCSV } from "@/components/travel/travel-export-csv";
 import { TravelStatus } from "@/components/travel/travel-status";
 import { useTravelParams } from "@/hooks/use-travel-params";
+import { useUserContext } from "@/store/user/hook";
 import { formatAmount, secondsToHoursAndMinutes } from "@/utils/format";
 import {
   AlertDialog,
@@ -60,6 +61,7 @@ type DataTableRowProps = {
 export function DataTableRow({ row, userId }: DataTableRowProps) {
   const { toast } = useToast();
   const { setParams } = useTravelParams();
+  const { locale } = useUserContext((state) => state.data);
 
   const deleteAction = useAction(deleteBookingAction, {
     onError: () => {
@@ -100,6 +102,7 @@ export function DataTableRow({ row, userId }: DataTableRowProps) {
                 amount: row.total_amount,
                 minimumFractionDigits: 0,
                 maximumFractionDigits: 0,
+                locale,
               })}
             </span>
           </DataTableCell>

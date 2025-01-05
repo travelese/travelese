@@ -4,7 +4,6 @@ import { useTravelParams } from "@/hooks/use-travel-params";
 import { useUserContext } from "@/store/user/hook";
 import { formatAmount, secondsToHoursAndMinutes } from "@/utils/format";
 import { TZDate } from "@date-fns/tz";
-import NumberFlow from "@number-flow/react";
 import { cn } from "@travelese/ui/cn";
 import { Icons } from "@travelese/ui/icons";
 import {
@@ -13,6 +12,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@travelese/ui/tooltip";
+import NumberFlow from "@number-flow/react";
 import { useClickAway } from "@uidotdev/usehooks";
 import {
   addMonths,
@@ -177,18 +177,13 @@ function handleMonthChange(
 
 type CalendarHeaderProps = {
   meta: { totalDuration?: number };
-  data: Record<string, TrackerEvent[]>;
+  data: Record<string, TravelEvent[]>;
 };
 
-function CalendarHeader({
-  meta,
-  data,
-  timeFormat,
-  weekStartsOnMonday,
-}: CalendarHeaderProps) {
+function CalendarHeader({ meta, data }: CalendarHeaderProps) {
   const { locale } = useUserContext((state) => state.data);
 
-  const bookingTotals = Object.entries(data || {}).reduce(
+  const bookingTotals = Object.entries(data).reduce(
     (acc, [_, events]) => {
       for (const event of events) {
         const bookingName = event.booking?.name;
@@ -437,10 +432,7 @@ function CalendarDay({
       )}
     >
       <div>{format(date, "d")}</div>
-      <TravelEvents
-        data={(data || {})[formattedDate]}
-        isToday={isToday(date)}
-      />
+      <TravelEvents data={data[formattedDate]} isToday={isToday(date)} />
     </div>
   );
 }
