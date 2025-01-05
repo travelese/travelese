@@ -1,23 +1,20 @@
 "use client";
 
-import { InvoiceDetailsSheet } from "@/components/sheets/invoice-details-sheet";
-import { type Row, flexRender } from "@tanstack/react-table";
 import { cn } from "@travelese/ui/cn";
 import { TableCell, TableRow } from "@travelese/ui/table";
-import { useState } from "react";
+import { type Row, flexRender } from "@tanstack/react-table";
 import type { Invoice } from "./columns";
 
 type Props = {
   row: Row<Invoice>;
+  setOpen: (id?: string) => void;
 };
 
-export function InvoiceRow({ row }: Props) {
-  const [open, setOpen] = useState(false);
-
+export function InvoiceRow({ row, setOpen }: Props) {
   return (
     <>
       <TableRow
-        className="hover:bg-transparent cursor-default h-[57px]"
+        className="hover:bg-transparent cursor-default h-[57px] cursor-pointer"
         key={row.id}
       >
         {row.getVisibleCells().map((cell, index) => (
@@ -32,19 +29,13 @@ export function InvoiceRow({ row }: Props) {
                 "hidden md:table-cell",
             )}
             onClick={() =>
-              index !== row.getVisibleCells().length - 1 && setOpen(true)
+              index !== row.getVisibleCells().length - 1 && setOpen(row.id)
             }
           >
             {flexRender(cell.column.columnDef.cell, cell.getContext())}
           </TableCell>
         ))}
       </TableRow>
-
-      <InvoiceDetailsSheet
-        data={row.original}
-        isOpen={open}
-        setOpen={setOpen}
-      />
     </>
   );
 }

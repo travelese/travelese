@@ -3,22 +3,20 @@
 import type { InvoiceFormValues } from "@/actions/invoice/schema";
 import { updateInvoiceTemplateAction } from "@/actions/invoice/update-invoice-template-action";
 import { formatAmount } from "@/utils/format";
-import { calculateTotal } from "@travelese/invoice/calculate";
+import { calculateLineItemTotal } from "@travelese/invoice/calculate";
 import { Button } from "@travelese/ui/button";
 import { Icons } from "@travelese/ui/icons";
 import { Reorder, useDragControls } from "framer-motion";
 import { useAction } from "next-safe-action/hooks";
 import { useFieldArray, useFormContext, useWatch } from "react-hook-form";
 import { AmountInput } from "./amount-input";
-import { Input } from "./input";
+import { Description } from "./description";
 import { LabelInput } from "./label-input";
 import { QuantityInput } from "./quantity-input";
-import { VATInput } from "./vat-input";
 
 export function LineItems() {
   const { control } = useFormContext<InvoiceFormValues>();
   const currency = useWatch({ control, name: "template.currency" });
-  const includeVAT = useWatch({ control, name: "template.include_vat" });
   const includeDecimals = useWatch({
     control,
     name: "template.include_decimals",
@@ -57,9 +55,7 @@ export function LineItems() {
 
   return (
     <div className="space-y-4">
-      <div
-        className={`grid ${includeVAT ? "grid-cols-[1.5fr_15%_15%_10%_15%]" : "grid-cols-[1.5fr_15%_15%_15%]"} gap-4 items-end mb-2`}
-      >
+      <div className="grid grid-cols-[1.5fr_15%_15%_15%] gap-4 items-end mb-2">
         <LabelInput
           name="template.description_label"
           onSave={(value) => {
@@ -69,15 +65,7 @@ export function LineItems() {
           }}
           className="truncate"
         />
-        <LabelInput
-          name="template.price_label"
-          onSave={(value) => {
-            updateInvoiceTemplate.execute({
-              price_label: value,
-            });
-          }}
-          className="truncate"
-        />
+
         <LabelInput
           name="template.quantity_label"
           onSave={(value) => {
@@ -87,17 +75,17 @@ export function LineItems() {
           }}
           className="truncate"
         />
-        {includeVAT && (
-          <LabelInput
-            name="template.vat_label"
-            onSave={(value) => {
-              updateInvoiceTemplate.execute({
-                vat_label: value,
-              });
-            }}
-            className="truncate"
-          />
-        )}
+
+        <LabelInput
+          name="template.price_label"
+          onSave={(value) => {
+            updateInvoiceTemplate.execute({
+              price_label: value,
+            });
+          }}
+          className="truncate"
+        />
+
         <LabelInput
           name="template.total_label"
           onSave={(value) => {
@@ -123,7 +111,6 @@ export function LineItems() {
             handleRemove={handleRemove}
             isReorderable={fields.length > 1}
             currency={currency}
-            includeVAT={includeVAT}
             maximumFractionDigits={maximumFractionDigits}
           />
         ))}
@@ -136,7 +123,6 @@ export function LineItems() {
             name: "",
             quantity: 0,
             price: 0,
-            vat: includeVAT ? 0 : undefined,
           })
         }
         className="flex items-center space-x-2 text-xs text-[#878787] font-mono"
@@ -154,7 +140,6 @@ function LineItemRow({
   isReorderable,
   item,
   currency,
-  includeVAT,
   maximumFractionDigits,
 }: {
   index: number;
@@ -162,11 +147,12 @@ function LineItemRow({
   isReorderable: boolean;
   item: InvoiceFormValues["line_items"][number];
   currency: string;
-  includeVAT: boolean;
   maximumFractionDigits: number;
 }) {
   const controls = useDragControls();
   const { control } = useFormContext<InvoiceFormValues>();
+
+  const locale = useWatch({ control, name: "template.locale" });
 
   const price = useWatch({
     control,
@@ -178,14 +164,9 @@ function LineItemRow({
     name: `line_items.${index}.quantity`,
   });
 
-  const vat = useWatch({
-    control,
-    name: `line_items.${index}.vat`,
-  });
-
   return (
     <Reorder.Item
-      className={`grid ${includeVAT ? "grid-cols-[1.5fr_15%_15%_10%_15%]" : "grid-cols-[1.5fr_15%_15%_15%]"} gap-4 items-end relative group mb-2 w-full`}
+      className="grid grid-cols-[1.5fr_15%_15%_15%] gap-4 items-start relative group mb-2 w-full"
       value={item}
       dragListener={false}
       dragControls={controls}
@@ -193,32 +174,29 @@ function LineItemRow({
       {isReorderable && (
         <Button
           type="button"
-          className="absolute -left-9 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-transparent cursor-grab"
+          className="absolute -left-9 -top-[4px] opacity-0 group-hover:opacity-100 transition-opacity hover:bg-transparent cursor-grab"
           onPointerDown={(e) => controls.start(e)}
           variant="ghost"
         >
-          <Icons.DragIndicator className="h-4 w-4 text-[#878787]" />
+          <Icons.DragIndicator className="size-4 text-[#878787]" />
         </Button>
       )}
 
-      <Input name={`line_items.${index}.name`} autoFocus={index > 0} />
-
-      <AmountInput name={`line_items.${index}.price`} />
+      <Description name={`line_items.${index}.name`} />
 
       <QuantityInput name={`line_items.${index}.quantity`} />
 
-      {includeVAT && <VATInput name={`line_items.${index}.vat`} />}
+      <AmountInput name={`line_items.${index}.price`} />
 
       <div className="text-right">
-        <span className="text-[11px] text-primary">
+        <span className="text-xs text-primary font-mono">
           {formatAmount({
-            amount: calculateTotal({
+            amount: calculateLineItemTotal({
               price,
               quantity,
-              vat,
-              includeVAT,
             }),
             currency,
+            locale,
             maximumFractionDigits,
           })}
         </span>
@@ -228,7 +206,7 @@ function LineItemRow({
         <Button
           type="button"
           onClick={() => handleRemove(index)}
-          className="absolute -right-9 top-[14px] -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-transparent text-[#878787]"
+          className="absolute -right-9 -top-[4px] opacity-0 group-hover:opacity-100 transition-opacity hover:bg-transparent text-[#878787]"
           variant="ghost"
         >
           <Icons.Close />

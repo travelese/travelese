@@ -4,11 +4,10 @@ import type { InvoiceTemplate } from "@/actions/invoice/schema";
 import { updateInvoiceAction } from "@/actions/invoice/update-invoice-action";
 import { FormatAmount } from "@/components/format-amount";
 import { InvoiceStatus } from "@/components/invoice-status";
+import { OpenURL } from "@/components/open-url";
 import { useInvoiceParams } from "@/hooks/use-invoice-params";
 import { formatDate, getDueDateStatus } from "@/utils/format";
-import { DotsHorizontalIcon } from "@radix-ui/react-icons";
-import type { ColumnDef } from "@tanstack/react-table";
-import { Avatar, AvatarFallback, AvatarImage } from "@travelese/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImageNext } from "@travelese/ui/avatar";
 import { Button } from "@travelese/ui/button";
 import { cn } from "@travelese/ui/cn";
 import {
@@ -21,6 +20,8 @@ import { Icons } from "@travelese/ui/icons";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@travelese/ui/tooltip";
 import { TooltipProvider } from "@travelese/ui/tooltip";
 import { useToast } from "@travelese/ui/use-toast";
+import { DotsHorizontalIcon } from "@radix-ui/react-icons";
+import type { ColumnDef } from "@tanstack/react-table";
 import { formatDistanceToNow } from "date-fns";
 import { useAction } from "next-safe-action/hooks";
 import * as React from "react";
@@ -54,9 +55,19 @@ export type Invoice = {
 
 export const columns: ColumnDef<Invoice>[] = [
   {
+    header: "Invoice no.",
+    accessorKey: "invoice_number",
+    cell: ({ row }) => row.getValue("invoice_number"),
+  },
+  {
+    header: "Status",
+    accessorKey: "status",
+    cell: ({ row }) => <InvoiceStatus status={row.getValue("status")} />,
+  },
+  {
     header: "Due date",
     accessorKey: "due_date",
-    cell: ({ row }) => {
+    cell: ({ row, table }) => {
       const date = row.getValue("due_date");
 
       const showDate =
@@ -66,7 +77,9 @@ export const columns: ColumnDef<Invoice>[] = [
 
       return (
         <div className="flex flex-col space-y-1 w-[80px]">
-          <span>{date ? formatDate(date) : "-"}</span>
+          <span>
+            {date ? formatDate(date, table.options.meta?.dateFormat) : "-"}
+          </span>
           {showDate && (
             <span className="text-xs text-muted-foreground">
               {date ? getDueDateStatus(date) : "-"}
@@ -75,11 +88,6 @@ export const columns: ColumnDef<Invoice>[] = [
         </div>
       );
     },
-  },
-  {
-    header: "Status",
-    accessorKey: "status",
-    cell: ({ row }) => <InvoiceStatus status={row.getValue("status")} />,
   },
   {
     header: "Customer",
@@ -95,9 +103,12 @@ export const columns: ColumnDef<Invoice>[] = [
         <div className="flex items-center space-x-2">
           <Avatar className="size-5">
             {customer?.website && (
-              <AvatarImage
+              <AvatarImageNext
                 src={`https://img.logo.dev/${customer?.website}?token=pk_X-1ZO13GSgeOoUrIuJ6GMQ&size=60`}
                 alt={`${name} logo`}
+                width={20}
+                height={20}
+                quality={100}
               />
             )}
             <AvatarFallback className="text-[9px] font-medium">
@@ -143,16 +154,15 @@ export const columns: ColumnDef<Invoice>[] = [
     ),
   },
   {
-    header: "Invoice no.",
-    accessorKey: "invoice_number",
-    cell: ({ row }) => row.getValue("invoice_number"),
-  },
-  {
     header: "Issue date",
     accessorKey: "issue_date",
-    cell: ({ row }) => {
+    cell: ({ row, table }) => {
       const date = row.getValue("issue_date");
-      return <span>{date ? formatDate(date) : "-"}</span>;
+      return (
+        <span>
+          {date ? formatDate(date, table.options.meta?.dateFormat) : "-"}
+        </span>
+      );
     },
   },
   {
@@ -165,7 +175,6 @@ export const columns: ColumnDef<Invoice>[] = [
     header: "Actions",
     cell: ({ row, table }) => {
       const status = row.getValue("status");
-      const hasNewMessages = status === "overdue";
       const { setParams } = useInvoiceParams();
       const updateInvoice = useAction(updateInvoiceAction);
       const { toast } = useToast();
@@ -189,16 +198,17 @@ export const columns: ColumnDef<Invoice>[] = [
           <DropdownMenu>
             <DropdownMenuTrigger asChild className="relative">
               <Button variant="ghost" className="h-8 w-8 p-0">
-                {hasNewMessages && (
+                {/* {hasNewMessages && (
                   <div className="rounded-full size-1 absolute bg-[#FFD02B] -right-0 top-0.5 ring-2 ring-background">
                     <div className="absolute inset-0 rounded-full bg-[#FFD02B] animate-[ping_1s_ease-in-out_5]" />
                     <div className="absolute inset-0 rounded-full bg-[#FFD02B] animate-[pulse_1s_ease-in-out_5] opacity-75" />
                     <div className="absolute inset-0 rounded-full bg-[#FFD02B] animate-[pulse_1s_ease-in-out_5] opacity-50" />
                   </div>
-                )}
+                )} */}
                 <DotsHorizontalIcon className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
+
             <DropdownMenuContent align="end">
               {status !== "paid" && status !== "canceled" && (
                 <DropdownMenuItem
@@ -212,6 +222,12 @@ export const columns: ColumnDef<Invoice>[] = [
                   Edit invoice
                 </DropdownMenuItem>
               )}
+
+              <DropdownMenuItem>
+                <OpenURL href={`/i/${row.original.token}`}>
+                  Open invoice
+                </OpenURL>
+              </DropdownMenuItem>
 
               <DropdownMenuItem onClick={handleCopyLink}>
                 Copy link
@@ -251,6 +267,17 @@ export const columns: ColumnDef<Invoice>[] = [
                   className="text-[#FF3638]"
                 >
                   Cancel
+                </DropdownMenuItem>
+              )}
+
+              {status === "canceled" && (
+                <DropdownMenuItem
+                  onClick={() =>
+                    table.options.meta?.deleteInvoice(row.original.id)
+                  }
+                  className="text-[#FF3638]"
+                >
+                  Delete
                 </DropdownMenuItem>
               )}
 

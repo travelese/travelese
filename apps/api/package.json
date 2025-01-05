@@ -7,6 +7,6 @@
     "db:reset": "supabase db reset"
   },
   "dependencies": {
-    "supabase": "^2.1.1"
+    "supabase": "^2.2.1"
   }
 }
