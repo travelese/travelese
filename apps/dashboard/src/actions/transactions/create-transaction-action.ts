@@ -4,8 +4,8 @@ import { LogEvents } from "@travelese/events/events";
 import { createAttachments } from "@travelese/supabase/mutations";
 import { nanoid } from "nanoid";
 import { revalidateTag } from "next/cache";
-import { authActionClient } from "./safe-action";
-import { createTransactionSchema } from "./schema";
+import { authActionClient } from "../safe-action";
+import { createTransactionSchema } from "../schema";
 
 export const createTransactionAction = authActionClient
   .schema(createTransactionSchema)

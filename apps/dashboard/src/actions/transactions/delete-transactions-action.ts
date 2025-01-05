@@ -1,8 +1,8 @@
 "use server";
 
 import { revalidateTag } from "next/cache";
-import { authActionClient } from "./safe-action";
-import { deleteTransactionSchema } from "./schema";
+import { authActionClient } from "../safe-action";
+import { deleteTransactionSchema } from "../schema";
 
 export const deleteTransactionsAction = authActionClient
   .schema(deleteTransactionSchema)

@@ -1,4 +1,4 @@
-import { exportTransactionsAction } from "@/actions/export-transactions-action";
+import { exportTransactionsAction } from "@/actions/transactions/export-transactions-action";
 import { useExportStore } from "@/store/export";
 import { useTransactionsStore } from "@/store/transactions";
 import { Button } from "@travelese/ui/button";
