@@ -9,7 +9,8 @@ import { TabsContent } from "@travelese/ui/tabs";
 import { ToastAction } from "@travelese/ui/toast";
 import { useToast } from "@travelese/ui/use-toast";
 import { useDebounce } from "@uidotdev/usehooks";
-import { useAction, useOptimisticAction } from "next-safe-action/hooks";
+import { useOptimisticAction } from "next-safe-action/hooks";
+import { useAction } from "next-safe-action/hooks";
 import { parseAsString, parseAsStringEnum, useQueryStates } from "nuqs";
 import { useEffect, useState } from "react";
 import { InboxEmpty } from "./inbox-empty";
@@ -25,6 +26,7 @@ type Props = {
   ascending: boolean;
   query?: string;
   currencies: string[];
+  locale: string;
 };
 
 export const TAB_ITEMS = ["todo", "done"];
@@ -48,6 +50,7 @@ export function InboxView({
   ascending,
   query,
   currencies,
+  locale,
 }: Props) {
   const supabase = createClient();
   const { toast } = useToast();
