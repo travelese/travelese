@@ -1,12 +1,17 @@
 "use client";
 
-import { deleteTransactionsAction } from "@/actions/delete-transactions-action";
+import { deleteTransactionsAction } from "@/actions/transactions/delete-transactions-action";
 import type { UpdateTransactionValues } from "@/actions/schema";
 import { updateColumnVisibilityAction } from "@/actions/update-column-visibility-action";
-import { updateTransactionAction } from "@/actions/update-transaction-action";
+import { updateTransactionAction } from "@/actions/transactions/update-transaction-action";
 import { TransactionSheet } from "@/components/sheets/transaction-sheet";
 import { useTransactionsStore } from "@/store/transactions";
+import { useUserContext } from "@/store/user/hook";
 import { Cookies } from "@/utils/constants";
+import { cn } from "@travelese/ui/cn";
+import { Spinner } from "@travelese/ui/spinner";
+import { Table, TableBody, TableCell, TableRow } from "@travelese/ui/table";
+import { useToast } from "@travelese/ui/use-toast";
 import {
   type ColumnDef,
   type VisibilityState,
@@ -14,14 +19,10 @@ import {
   getCoreRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { Button } from "@travelese/ui/button";
-import { cn } from "@travelese/ui/cn";
-import { Spinner } from "@travelese/ui/spinner";
-import { Table, TableBody, TableCell, TableRow } from "@travelese/ui/table";
-import { useToast } from "@travelese/ui/use-toast";
 import { useAction } from "next-safe-action/hooks";
 import { useQueryState } from "nuqs";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
+import { useState } from "react";
 import { useInView } from "react-intersection-observer";
 import { BottomBar } from "./bottom-bar";
 import { DataTableHeader } from "./data-table-header";
@@ -42,6 +43,7 @@ interface DataTableProps<TData, TValue> {
 export function DataTable<TData, TValue>({
   columns,
   query,
+
   data: initialData,
   pageSize,
   loadMore,
@@ -54,6 +56,8 @@ export function DataTable<TData, TValue>({
   const [data, setData] = useState(initialData);
   const [from, setFrom] = useState(pageSize);
   const { ref, inView } = useInView();
+  const { date_format: dateFormat } = useUserContext((state) => state.data);
+
   const [hasNextPage, setHasNextPage] = useState(initialHasNextPage);
   const { setColumns, setCanDelete, rowSelection, setRowSelection } =
     useTransactionsStore();
@@ -161,6 +165,7 @@ export function DataTable<TData, TValue>({
       copyUrl: handleCopyUrl,
       updateTransaction: handleUpdateTransaction,
       deleteTransactions: handleDeleteTransactions,
+      dateFormat,
     },
     state: {
       rowSelection,
@@ -239,7 +244,7 @@ export function DataTable<TData, TValue>({
               <TableRow
                 key={row.id}
                 data-state={row.getIsSelected() && "selected"}
-                className="h-[40px] md:h-[45px] cursor-default select-text"
+                className="h-[40px] md:h-[45px] cursor-pointer select-text"
               >
                 {row.getVisibleCells().map((cell) => (
                   <TableCell
@@ -281,10 +286,10 @@ export function DataTable<TData, TValue>({
 
       {hasNextPage && (
         <div className="flex items-center justify-center mt-6" ref={ref}>
-          <Button variant="outline" className="space-x-2 px-6 py-5">
+          <div className="flex items-center space-x-2 px-6 py-5">
             <Spinner />
             <span className="text-sm text-[#606060]">Loading more...</span>
-          </Button>
+          </div>
         </div>
       )}
 
