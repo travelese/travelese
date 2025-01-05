@@ -29,6 +29,13 @@ export default async function Overview({
 }: {
   searchParams: Record<string, string>;
 }) {
+  console.log('SERVER: Current Timezone', Intl.DateTimeFormat().resolvedOptions().timeZone);
+
+  console.log('SERVER: defaultValue', defaultValue);
+  console.log('SERVER: defaultValue.from', defaultValue.from);
+  console.log('SERVER: defaultValue.to', defaultValue.to);
+  console.log('SERVER: searchParams', searchParams);
+
   const accounts = await getTeamBankAccounts();
   const chartType = cookies().get(Cookies.ChartType)?.value ?? "profit";
 

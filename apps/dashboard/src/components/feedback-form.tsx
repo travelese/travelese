@@ -19,12 +19,12 @@ export function FeedbackForm() {
 
   return (
     <Popover>
-      <PopoverTrigger asChild className="hidden md:flex-inline">
+      <PopoverTrigger asChild className="hidden md:block">
         <Button
           variant="outline"
           className="rounded-full font-normal h-[32px] p-0 px-3 text-xs text-[#878787]"
         >
-          Feedback
+          Beta feedback
         </Button>
       </PopoverTrigger>
       <PopoverContent
@@ -58,7 +58,7 @@ export function FeedbackForm() {
                 disabled={value.length === 0 || action.status === "executing"}
               >
                 {action.status === "executing" ? (
-                  <Loader2 className="size-4 animate-spin" />
+                  <Loader2 className="h-4 w-4 animate-spin" />
                 ) : (
                   "Send"
                 )}

@@ -1,5 +1,5 @@
 import { getUser } from "@travelese/supabase/cached-queries";
-import { Avatar, AvatarFallback } from "@travelese/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImageNext } from "@travelese/ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -10,7 +10,6 @@ import {
   DropdownMenuShortcut,
   DropdownMenuTrigger,
 } from "@travelese/ui/dropdown-menu";
-import Image from "next/image";
 import Link from "next/link";
 import { SignOut } from "./sign-out";
 import { ThemeSwitch } from "./theme-switch";
@@ -23,11 +22,12 @@ export async function UserMenu({ onlySignOut }) {
       <DropdownMenuTrigger asChild>
         <Avatar className="rounded-full w-8 h-8 cursor-pointer">
           {userData?.avatar_url && (
-            <Image
+            <AvatarImageNext
               src={userData?.avatar_url}
               alt={userData?.full_name}
               width={32}
               height={32}
+              quality={100}
             />
           )}
           <AvatarFallback>

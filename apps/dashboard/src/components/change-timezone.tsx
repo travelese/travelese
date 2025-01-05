@@ -9,50 +9,54 @@ import {
   CardHeader,
   CardTitle,
 } from "@travelese/ui/card";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@travelese/ui/select";
-import { useAction } from "next-safe-action/hooks";
+import { ComboboxDropdown } from "@travelese/ui/combobox-dropdown";
+import { useOptimisticAction } from "next-safe-action/hooks";
 
-export function ChangeTimezone({
-  value,
-  timezones,
-}: { value: string; timezones: any[] }) {
-  const action = useAction(updateUserAction);
+type Props = {
+  timezone: string;
+  timezones: { tzCode: string; name: string }[];
+};
+
+export function ChangeTimezone({ timezone, timezones }: Props) {
   const t = useI18n();
 
+  const { execute, optimisticState } = useOptimisticAction(updateUserAction, {
+    currentState: { timezone },
+    updateFn: (state, newTimezone) => {
+      return {
+        timezone: newTimezone.timezone ?? state.timezone,
+      };
+    },
+  });
+
+  const timezoneItems = timezones.map((tz, id) => ({
+    id: id.toString(),
+    label: tz.name,
+    value: tz.tzCode,
+  }));
+
   return (
-    <Card>
+    <Card className="flex justify-between items-center">
       <CardHeader>
         <CardTitle>{t("timezone.title")}</CardTitle>
         <CardDescription>{t("timezone.description")}</CardDescription>
       </CardHeader>
 
       <CardContent>
-        <Select
-          defaultValue={value}
-          onValueChange={(value) => {
-            action.execute({ timezone: value });
-          }}
-        >
-          <SelectTrigger className="w-[220px]">
-            <SelectValue placeholder={t("timezone.placeholder")} />
-          </SelectTrigger>
-          <SelectContent className="max-w-[300px]">
-            <SelectGroup>
-              {timezones.map((timezone) => (
-                <SelectItem value={timezone.tzCode} key={timezone.tzCode}>
-                  <span className="line-clamp-1">{timezone.name}</span>
-                </SelectItem>
-              ))}
-            </SelectGroup>
-          </SelectContent>
-        </Select>
+        <div className="w-[250px]">
+          <ComboboxDropdown
+            placeholder={t("timezone.placeholder")}
+            selectedItem={timezoneItems.find(
+              (item) => item.value === optimisticState.timezone,
+            )}
+            searchPlaceholder={t("timezone.searchPlaceholder")}
+            items={timezoneItems}
+            className="text-xs py-1"
+            onSelect={(item) => {
+              execute({ timezone: item.value });
+            }}
+          />
+        </div>
       </CardContent>
     </Card>
   );
