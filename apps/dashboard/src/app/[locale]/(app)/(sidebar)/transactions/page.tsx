@@ -9,6 +9,7 @@ import { TransactionsSearchFilter } from "@/components/transactions-search-filte
 import { Cookies } from "@/utils/constants";
 import {
   getCategories,
+  getTags,
   getTeamBankAccounts,
   getTeamMembers,
   getUser,
@@ -39,15 +40,19 @@ export default async function Transactions({
     statuses,
     recurring,
     accounts,
+    tags,
+    amount_range,
+    amount,
   } = searchParamsCache.parse(searchParams);
 
   // Move this in a suspense
-  const [accountsData, categoriesData, teamMembersData, userData] =
+  const [accountsData, categoriesData, teamMembersData, userData, tagsData] =
     await Promise.all([
       getTeamBankAccounts(),
       getCategories(),
       getTeamMembers(),
       getUser(),
+      getTags(),
     ]);
 
   const filter = {
@@ -59,6 +64,9 @@ export default async function Transactions({
     statuses,
     recurring,
     accounts,
+    tags,
+    amount_range,
+    amount,
   };
 
   const sort = searchParams?.sort?.split(":");
@@ -99,8 +107,18 @@ export default async function Transactions({
             id: member?.user?.id,
             name: member.user?.full_name,
           }))}
+          tags={tagsData?.data?.map((tag) => ({
+            id: tag.id,
+            name: tag.name,
+          }))}
         />
-        <TransactionsActions isEmpty={isEmpty} />
+        <TransactionsActions
+          isEmpty={isEmpty}
+          tags={tagsData?.data?.map((tag) => ({
+            id: tag.id,
+            name: tag.name,
+          }))}
+        />
       </div>
 
       {isEmpty ? (
