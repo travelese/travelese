@@ -1,6 +1,6 @@
 "use client";
 
-import { deleteTransactionsAction } from "@/actions/delete-transactions-action";
+import { deleteTransactionsAction } from "@/actions/transactions/delete-transactions-action";
 import { AddTransactions } from "@/components/add-transactions";
 import { BulkActions } from "@/components/bulk-actions";
 import { ColumnVisibility } from "@/components/column-visibility";

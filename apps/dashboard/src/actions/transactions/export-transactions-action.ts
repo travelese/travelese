@@ -2,8 +2,8 @@
 
 import { LogEvents } from "@travelese/events/events";
 import { exportTransactions } from "jobs/tasks/transactions/export";
-import { authActionClient } from "./safe-action";
-import { exportTransactionsSchema } from "./schema";
+import { authActionClient } from "../safe-action";
+import { exportTransactionsSchema } from "../schema";
 
 export const exportTransactionsAction = authActionClient
   .schema(exportTransactionsSchema)

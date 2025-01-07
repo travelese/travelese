@@ -1,12 +1,12 @@
 "use server";
 
-import { engine } from "@/utils/engine";
+import { client } from "@travelese/engine/client";
 
 type GetAccountParams = {
   id?: string;
   accessToken?: string;
   institutionId?: string; // Plaid
-  provider: "plaid";
+  provider: "gocardless" | "teller" | "plaid";
 };
 
 export async function getAccounts({
@@ -15,12 +15,20 @@ export async function getAccounts({
   accessToken,
   institutionId,
 }: GetAccountParams) {
-  const { data } = await engine.accounts.list({
-    id,
-    provider,
-    accessToken,
-    institutionId,
+  const accountsResponse = await client.accounts.$get({
+    query: {
+      id,
+      provider,
+      accessToken,
+      institutionId,
+    },
   });
+
+  if (!accountsResponse.ok) {
+    throw new Error("Failed to get accounts");
+  }
+
+  const { data } = await accountsResponse.json();
 
   return {
     data: data.sort((a, b) => b.balance.amount - a.balance.amount),

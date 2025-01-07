@@ -1,6 +1,6 @@
 "use client";
 
-import { bulkUpdateTransactionsAction } from "@/actions/bulk-update-transactions-action";
+import { bulkUpdateTransactionsAction } from "@/actions/transactions/bulk-update-transactions-action";
 import { useTransactionsStore } from "@/store/transactions";
 import { Button } from "@travelese/ui/button";
 import {

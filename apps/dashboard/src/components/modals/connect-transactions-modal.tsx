@@ -4,6 +4,7 @@ import { createPlaidLinkTokenAction } from "@/actions/institutions/create-plaid-
 import { exchangePublicToken } from "@/actions/institutions/exchange-public-token";
 import { getInstitutions } from "@/actions/institutions/get-institutions";
 import { useConnectParams } from "@/hooks/use-connect-params";
+import type { Institutions } from "@midday-ai/engine/resources/institutions/institutions";
 import { track } from "@travelese/events/client";
 import { LogEvents } from "@travelese/events/events";
 import { Button } from "@travelese/ui/button";
@@ -105,19 +106,25 @@ export function ConnectTransactionsModal({
   const isOpen = step === "connect";
   const debouncedSearchTerm = useDebounce(query, 200);
 
+  // NOTE: Load SDKs here so it's not unmonted
+  useScript("https://cdn.teller.io/connect/connect.js", {
+    removeOnUnmount: false,
+  });
+
   const { open: openPlaid } = usePlaidLink({
     token: plaidToken,
     publicKey: "",
     env: process.env.NEXT_PUBLIC_PLAID_ENVIRONMENT!,
-    clientName: "Travelese",
+    clientName: "Midday",
     product: ["transactions"],
     onSuccess: async (public_token, metadata) => {
-      const accessToken = await exchangePublicToken(public_token);
+      const { access_token, item_id } = await exchangePublicToken(public_token);
 
       setParams({
         step: "account",
         provider: "plaid",
-        token: accessToken,
+        token: access_token,
+        ref: item_id,
         institution_id: metadata.institution?.institution_id,
       });
       track({
@@ -268,7 +275,7 @@ export function ConnectTransactionsModal({
                   );
                 })}
 
-                {!loading && results.length === 0 && (
+                {!loading && results?.length === 0 && (
                   <div className="flex flex-col items-center justify-center min-h-[350px]">
                     <p className="font-medium mb-2">No banks found</p>
                     <p className="text-sm text-center text-[#878787]">
