@@ -1,7 +1,7 @@
 import { TravellersHeader } from "@/components/travellers-header";
 import { ErrorFallback } from "@/components/error-fallback";
-import { TravellersTable } from "@/components/tables/travellers";
-import { TravellersSkeleton } from "@/components/tables/travellers/skeleton";
+import { CustomersTable } from "@/components/tables/customers";
+import { CustomersSkeleton } from "@/components/tables/customers/skeleton";
 import type { Metadata } from "next";
 import { ErrorBoundary } from "next/dist/client/components/error-boundary";
 import { Suspense } from "react";
@@ -29,8 +29,8 @@ export default async function Page({
       <TravellersHeader />
 
       <ErrorBoundary errorComponent={ErrorFallback}>
-        <Suspense fallback={<TravellersSkeleton />}>
-          <TravellersTable
+        <Suspense fallback={<CustomersSkeleton />}>
+          <CustomersTable
             query={query}
             sort={sort}
             start={start}

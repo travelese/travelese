@@ -1,6 +1,6 @@
 "use client";
 
-import { deleteCustomerAction } from "@/actions/delete-customer-action";
+import { deleteCustomerAction } from "@/actions/customer/delete-customer-action";
 import { useCustomerParams } from "@/hooks/use-customer-params";
 import { Spinner } from "@travelese/ui/spinner";
 import { Table, TableBody } from "@travelese/ui/table";
