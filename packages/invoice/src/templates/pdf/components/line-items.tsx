@@ -1,6 +1,7 @@
-import { Text, View } from "@react-pdf/renderer";
 import { formatAmount } from "@travelese/utils/format";
+import { Text, View } from "@react-pdf/renderer";
 import type { LineItem } from "../../types";
+import { Description } from "./description";
 
 type Props = {
   lineItems: LineItem[];
@@ -9,9 +10,9 @@ type Props = {
   quantityLabel: string;
   priceLabel: string;
   totalLabel: string;
-  vatLabel?: string;
-  includeVAT?: boolean;
   locale: string;
+  includeDecimals?: boolean;
+  includeUnits?: boolean;
 };
 
 export function LineItems({
@@ -22,9 +23,10 @@ export function LineItems({
   priceLabel,
   totalLabel,
   locale,
-  includeVAT = false,
-  vatLabel,
+  includeDecimals,
+  includeUnits,
 }: Props) {
+  const maximumFractionDigits = includeDecimals ? 2 : 0;
   return (
     <View style={{ marginTop: 20 }}>
       <View
@@ -40,16 +42,11 @@ export function LineItems({
           {descriptionLabel}
         </Text>
         <Text style={{ flex: 1, fontSize: 9, fontWeight: 500 }}>
-          {priceLabel}
-        </Text>
-        <Text style={{ flex: 1, fontSize: 9, fontWeight: 500 }}>
           {quantityLabel}
         </Text>
-        {includeVAT && (
-          <Text style={{ flex: 1, fontSize: 9, fontWeight: 500 }}>
-            {vatLabel}
-          </Text>
-        )}
+        <Text style={{ flex: 1, fontSize: 9, fontWeight: 500 }}>
+          {priceLabel}
+        </Text>
         <Text
           style={{
             flex: 1,
@@ -64,23 +61,34 @@ export function LineItems({
       {lineItems.map((item, index) => (
         <View
           key={`line-item-${index.toString()}`}
-          style={{ flexDirection: "row", paddingVertical: 5 }}
+          style={{
+            flexDirection: "row",
+            paddingVertical: 5,
+            alignItems: "flex-start",
+          }}
         >
-          <Text style={{ flex: 3, fontSize: 9 }}>{item.name}</Text>
-          <Text style={{ flex: 1, fontSize: 9 }}>
-            {formatAmount({ currency, amount: item.price, locale })}
-          </Text>
+          <View style={{ flex: 3 }}>
+            <Description content={item.name} />
+          </View>
+
           <Text style={{ flex: 1, fontSize: 9 }}>{item.quantity}</Text>
 
-          {includeVAT && (
-            <Text style={{ flex: 1, fontSize: 9 }}>{item.vat}%</Text>
-          )}
+          <Text style={{ flex: 1, fontSize: 9 }}>
+            {formatAmount({
+              currency,
+              amount: item.price,
+              locale,
+              maximumFractionDigits,
+            })}
+            {includeUnits && item.unit ? ` / ${item.unit}` : null}
+          </Text>
 
           <Text style={{ flex: 1, fontSize: 9, textAlign: "right" }}>
             {formatAmount({
               currency,
               amount: item.quantity * item.price,
               locale,
+              maximumFractionDigits,
             })}
           </Text>
         </View>

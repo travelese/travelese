@@ -1,16 +1,25 @@
-import { Text, View } from "@react-pdf/renderer";
 import { formatAmount } from "@travelese/utils/format";
+import { Text, View } from "@react-pdf/renderer";
 
 interface SummaryProps {
   amount: number;
   tax?: number;
   taxRate?: number;
   vat?: number;
+  vatRate?: number;
   currency: string;
   totalLabel: string;
   taxLabel: string;
   vatLabel: string;
   locale: string;
+  discount?: number;
+  discountLabel: string;
+  includeDiscount: boolean;
+  includeVAT: boolean;
+  includeTax: boolean;
+  includeDecimals: boolean;
+  subtotalLabel: string;
+  subtotal: number;
 }
 
 export function Summary({
@@ -18,12 +27,23 @@ export function Summary({
   tax,
   taxRate,
   vat,
+  vatRate,
   currency,
   totalLabel,
   taxLabel,
   vatLabel,
   locale,
+  discount,
+  discountLabel,
+  includeDiscount,
+  includeVAT,
+  includeTax,
+  includeDecimals,
+  subtotalLabel,
+  subtotal,
 }: SummaryProps) {
+  const maximumFractionDigits = includeDecimals ? 2 : 0;
+
   return (
     <View
       style={{
@@ -34,22 +54,60 @@ export function Summary({
         width: 250,
       }}
     >
-      {tax && (
+      <View style={{ flexDirection: "row", marginBottom: 5, width: "100%" }}>
+        <Text style={{ fontSize: 9, flex: 1 }}>{subtotalLabel}</Text>
+        <Text style={{ fontSize: 9, textAlign: "right" }}>
+          {formatAmount({
+            currency,
+            amount: subtotal,
+            locale,
+            maximumFractionDigits,
+          })}
+        </Text>
+      </View>
+
+      {includeDiscount && discount && (
+        <View style={{ flexDirection: "row", marginBottom: 5, width: "100%" }}>
+          <Text style={{ fontSize: 9, flex: 1 }}>{discountLabel}</Text>
+          <Text style={{ fontSize: 9, textAlign: "right" }}>
+            {formatAmount({
+              currency,
+              amount: discount,
+              locale,
+              maximumFractionDigits,
+            })}
+          </Text>
+        </View>
+      )}
+
+      {includeVAT && (
+        <View style={{ flexDirection: "row", marginBottom: 5, width: "100%" }}>
+          <Text style={{ fontSize: 9, flex: 1 }}>
+            {vatLabel} ({vatRate}%)
+          </Text>
+          <Text style={{ fontSize: 9, textAlign: "right" }}>
+            {formatAmount({
+              currency,
+              amount: vat,
+              locale,
+              maximumFractionDigits,
+            })}
+          </Text>
+        </View>
+      )}
+
+      {includeTax && (
         <View style={{ flexDirection: "row", marginBottom: 5, width: "100%" }}>
           <Text style={{ fontSize: 9, flex: 1 }}>
             {taxLabel} ({taxRate}%)
           </Text>
           <Text style={{ fontSize: 9, textAlign: "right" }}>
-            {formatAmount({ currency, amount: tax, locale })}
-          </Text>
-        </View>
-      )}
-
-      {vat && (
-        <View style={{ flexDirection: "row", marginBottom: 5, width: "100%" }}>
-          <Text style={{ fontSize: 9, flex: 1 }}>{vatLabel}</Text>
-          <Text style={{ fontSize: 9, textAlign: "right" }}>
-            {formatAmount({ currency, amount: vat, locale })}
+            {formatAmount({
+              currency,
+              amount: tax,
+              locale,
+              maximumFractionDigits,
+            })}
           </Text>
         </View>
       )}
@@ -68,7 +126,7 @@ export function Summary({
       >
         <Text style={{ fontSize: 9, marginRight: 10 }}>{totalLabel}</Text>
         <Text style={{ fontSize: 21 }}>
-          {formatAmount({ currency, amount, locale })}
+          {formatAmount({ currency, amount, locale, maximumFractionDigits })}
         </Text>
       </View>
     </View>
