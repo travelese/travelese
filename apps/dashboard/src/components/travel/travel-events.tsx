@@ -3,7 +3,7 @@
 import { secondsToHoursAndMinutes } from "@/utils/format";
 import { cn } from "@travelese/ui/cn";
 
-export function TrackerEvents({
+export function TravelEvents({
   data,
   isToday,
 }: { data: TrackerEvent[]; isToday: boolean }) {
