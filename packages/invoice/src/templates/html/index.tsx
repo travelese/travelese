@@ -21,10 +21,12 @@ export function HtmlTemplate({
   customer_name,
   width,
   height,
+  top_block,
+  bottom_block,
 }: TemplateProps) {
   return (
     <ScrollArea
-      className="bg-background border border-border w-full md:w-auto h-full"
+      className="bg-background border border-border w-full md:w-auto h-full [&>div]:h-full"
       style={{
         width: "100%",
         maxWidth: width,
@@ -32,14 +34,11 @@ export function HtmlTemplate({
       }}
       hideScrollbar
     >
-      <div className="p-4 sm:p-6 md:p-8 h-full flex flex-col">
-        <div className="flex flex-col">
-          {template.logo_url && (
-            <Logo logo={template.logo_url} customerName={customer_name || ""} />
-          )}
-        </div>
-
-        <div className="mt-8">
+      <div
+        className="p-4 sm:p-6 md:p-8 h-full flex flex-col"
+        style={{ minHeight: height - 5 }}
+      >
+        <div className="flex justify-between">
           <Meta
             template={template}
             invoiceNumber={invoice_number}
@@ -47,9 +46,13 @@ export function HtmlTemplate({
             dueDate={due_date}
             timezone={template.timezone}
           />
+
+          {template.logo_url && (
+            <Logo logo={template.logo_url} customerName={customer_name || ""} />
+          )}
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mt-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mt-6 mb-4">
           <div>
             <p className="text-[11px] text-[#878787] font-mono mb-2 block">
               {template.from_label}
@@ -64,36 +67,37 @@ export function HtmlTemplate({
           </div>
         </div>
 
-        <div className="mt-4">
-          <LineItems
-            lineItems={line_items}
-            currency={currency}
-            descriptionLabel={template.description_label}
-            quantityLabel={template.quantity_label}
-            priceLabel={template.price_label}
-            totalLabel={template.total_label}
-            includeVAT={template.include_vat}
-            includeDecimals={template.include_decimals}
-            locale={template.locale}
-            vatLabel={template.vat_label}
-          />
-        </div>
+        <EditorContent content={top_block} />
+
+        <LineItems
+          lineItems={line_items}
+          currency={currency}
+          descriptionLabel={template.description_label}
+          quantityLabel={template.quantity_label}
+          priceLabel={template.price_label}
+          totalLabel={template.total_label}
+          includeDecimals={template.include_decimals}
+          locale={template.locale}
+          includeUnits={template.include_units}
+        />
 
         <div className="mt-10 md:mt-12 flex justify-end mb-6 md:mb-8">
           <Summary
             includeVAT={template.include_vat}
             includeTax={template.include_tax}
             taxRate={template.tax_rate}
+            vatRate={template.vat_rate}
             currency={currency}
             vatLabel={template.vat_label}
             taxLabel={template.tax_label}
-            totalLabel={template.total_label}
+            totalLabel={template.total_summary_label}
             lineItems={line_items}
             includeDiscount={template.include_discount}
             discountLabel={template.discount_label}
             discount={discount}
             locale={template.locale}
             includeDecimals={template.include_decimals}
+            subtotalLabel={template.subtotal_label}
           />
         </div>
 
@@ -114,6 +118,8 @@ export function HtmlTemplate({
               </div>
             )}
           </div>
+
+          <EditorContent content={bottom_block} />
         </div>
       </div>
     </ScrollArea>

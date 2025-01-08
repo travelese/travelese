@@ -1,5 +1,16 @@
 import { Link, Text, View } from "@react-pdf/renderer";
-import type { EditorDoc, TextStyle } from "../types";
+import type { Style } from "@react-pdf/types";
+import type { EditorDoc } from "../types";
+
+type PDFTextStyle = Style & {
+  fontFamily?: string;
+  fontStyle?: "normal" | "italic" | "oblique";
+  textDecoration?:
+    | "none"
+    | "underline"
+    | "line-through"
+    | "underline line-through";
+};
 
 export function formatEditorContent(doc?: EditorDoc): JSX.Element | null {
   if (!doc || !doc.content) {
@@ -13,67 +24,75 @@ export function formatEditorContent(doc?: EditorDoc): JSX.Element | null {
           return (
             <View
               key={`paragraph-${nodeIndex.toString()}`}
-              style={{ marginBottom: 5 }}
+              style={{ alignItems: "flex-start" }}
             >
-              {node.content?.map((inlineContent, inlineIndex) => {
-                if (inlineContent.type === "text") {
-                  const style: TextStyle = { fontSize: 9 };
-                  let href: string | undefined;
-
-                  if (inlineContent.marks) {
-                    for (const mark of inlineContent.marks) {
-                      if (mark.type === "bold") {
-                        style.fontWeight = 500;
-                      } else if (mark.type === "italic") {
-                        style.fontStyle = "italic";
-                      } else if (mark.type === "link") {
-                        href = mark.attrs?.href;
-                        style.textDecoration = "underline";
+              <Text>
+                {node.content?.map((inlineContent, inlineIndex) => {
+                  if (inlineContent.type === "text") {
+                    const style: PDFTextStyle = { fontSize: 9 };
+                    let href: string | undefined;
+                    if (inlineContent.marks) {
+                      for (const mark of inlineContent.marks) {
+                        if (mark.type === "bold") {
+                          style.fontFamily = "Helvetica-Bold";
+                        } else if (mark.type === "italic") {
+                          style.fontFamily = "Helvetica-Oblique";
+                        } else if (mark.type === "link") {
+                          href = mark.attrs?.href;
+                          style.textDecoration = "underline";
+                        } else if (mark.type === "strike") {
+                          style.textDecoration = "line-through";
+                        }
                       }
                     }
-                  }
 
-                  const content = inlineContent.text || "";
-                  const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(content);
+                    const content = inlineContent.text || "";
+                    const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(content);
 
-                  if (href || isEmail) {
-                    const linkHref =
-                      href || (isEmail ? `mailto:${content}` : content);
+                    if (href || isEmail) {
+                      const linkHref =
+                        href || (isEmail ? `mailto:${content}` : content);
+
+                      return (
+                        <Link
+                          key={`link-${nodeIndex.toString()}-${inlineIndex.toString()}`}
+                          src={linkHref}
+                          style={{
+                            ...style,
+                            color: "black",
+                            textDecoration: "underline",
+                          }}
+                        >
+                          {content}
+                        </Link>
+                      );
+                    }
+
                     return (
-                      <Link
-                        key={`link-${nodeIndex.toString()}-${inlineIndex.toString()}`}
-                        src={linkHref}
-                        style={{
-                          ...style,
-                          color: "black",
-                          textDecoration: "underline",
-                        }}
+                      <Text
+                        key={`text-${nodeIndex.toString()}-${inlineIndex.toString()}`}
+                        style={style}
                       >
                         {content}
-                      </Link>
+                      </Text>
                     );
                   }
 
-                  return (
-                    <Text
-                      key={`text-${nodeIndex.toString()}-${inlineIndex.toString()}`}
-                      style={style}
-                    >
-                      {content}
-                    </Text>
-                  );
-                }
+                  if (inlineContent.type === "hardBreak") {
+                    // This is a hack to force a line break in the PDF to look like the web editor
+                    return (
+                      <Text
+                        key={`hard-break-${nodeIndex.toString()}-${inlineIndex.toString()}`}
+                        style={{ height: 12, fontSize: 12 }}
+                      >
+                        {"\n"}
+                      </Text>
+                    );
+                  }
 
-                if (inlineContent.type === "hardBreak") {
-                  return (
-                    <View
-                      key={`break-${nodeIndex.toString()}-${inlineIndex.toString()}`}
-                      style={{ marginBottom: 5 }}
-                    />
-                  );
-                }
-                return null;
-              })}
+                  return null;
+                })}
+              </Text>
             </View>
           );
         }

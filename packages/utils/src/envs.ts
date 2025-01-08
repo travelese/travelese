@@ -1,5 +1,8 @@
 export function getAppUrl() {
-  if (process.env.VERCEL_ENV === "production") {
+  if (
+    process.env.VERCEL_ENV === "production" ||
+    process.env.NODE_ENV === "production"
+  ) {
     return "https://app.travelese.ai";
   }
 
@@ -19,7 +22,10 @@ export function getEmailUrl() {
 }
 
 export function getWebsiteUrl() {
-  if (process.env.VERCEL_ENV === "production") {
+  if (
+    process.env.VERCEL_ENV === "production" ||
+    process.env.NODE_ENV === "production"
+  ) {
     return "https://travelese.ai";
   }
 
