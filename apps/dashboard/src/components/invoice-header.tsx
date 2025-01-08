@@ -1,9 +1,9 @@
 import { InvoiceSearchFilter } from "@/components/invoice-search-filter";
-import { getTravellers } from "@travelese/supabase/cached-queries";
+import { getCustomers } from "@travelese/supabase/cached-queries";
 import { OpenInvoiceSheet } from "./open-invoice-sheet";
 
 export async function InvoiceHeader() {
-  const travellers = await getTravellers();
+  const travellers = await getCustomers();
 
   return (
     <div className="flex items-center justify-between">

@@ -1,4 +1,4 @@
-import { getTravellers } from "@travelese/supabase/cached-queries";
+import { getCustomers } from "@travelese/supabase/cached-queries";
 import { EmptyState, NoResults } from "./empty-states";
 import { DataTable } from "./table";
 
@@ -12,7 +12,7 @@ type Props = {
 
 const pageSize = 25;
 
-export async function TravellersTable({
+export async function CustomersTable({
   query,
   sort,
   start,
@@ -27,7 +27,7 @@ export async function TravellersTable({
   async function loadMore({ from, to }: { from: number; to: number }) {
     "use server";
 
-    return getTravellers({
+    return getCustomers({
       to,
       from: from + 1,
       searchQuery: query,
@@ -35,7 +35,7 @@ export async function TravellersTable({
     });
   }
 
-  const { data, meta } = await getTravellers({
+  const { data, meta } = await getCustomers({
     searchQuery: query,
     sort,
     to: pageSize,

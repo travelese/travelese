@@ -2,7 +2,7 @@ import { Skeleton } from "@travelese/ui/skeleton";
 import { Table, TableBody, TableCell, TableRow } from "@travelese/ui/table";
 import { TableHeader } from "./table-header";
 
-export function TravellersSkeleton() {
+export function CustomersSkeleton() {
   return (
     <Table>
       <TableHeader />
