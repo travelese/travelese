@@ -192,6 +192,7 @@ import {
   MdTrendingUp,
 } from "react-icons/md";
 import { PiDiscordLogo } from "react-icons/pi";
+import { FaArrowsRotate } from "react-icons/fa6";
 
 export const Icons = {
   LogoSmall: (props: any) => (
@@ -866,4 +867,5 @@ export const Icons = {
   Minimize: FiMinimize2,
   Maximize: FiMaximize2,
   Room: MdOutlineBedroomParent,
+  ArrowRotate: FaArrowsRotate,
 };

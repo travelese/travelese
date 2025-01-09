@@ -82,7 +82,7 @@ export default function Layout({ children }: { children: ReactElement }) {
       <body
         className={cn(
           `${GeistSans.variable} ${GeistMono.variable}`,
-          "bg-[#0C0C0C] overflow-x-hidden dark antialiased",
+          "bg-black overflow-x-hidden dark antialiased",
         )}
       >
         <Header />

@@ -130,6 +130,17 @@ export default {
             transform: "scale(1) translateY(0)",
           },
         },
+        shine: {
+          "0%": {
+            "background-position": "0% 0%",
+          },
+          "50%": {
+            "background-position": "100% 100%",
+          },
+          to: {
+            "background-position": "0% 0%",
+          },
+        },
       },
       animation: {
         "animate-webgl-scale-in-fade": "webgl-scale-in-fade 1s ease-in-out",
@@ -144,6 +155,7 @@ export default {
         fifth: "moveInCircle 20s ease infinite",
         scroll:
           "scroll var(--animation-duration, 40s) var(--animation-direction, forwards) linear infinite",
+        shine: "shine var(--duration) infinite linear",
       },
       screens: {
         "3xl": "1800px",
