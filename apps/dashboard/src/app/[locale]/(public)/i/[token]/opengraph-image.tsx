@@ -27,7 +27,7 @@ export default async function Image({ params }: { params: { token: string } }) {
     `${CDN_URL}/fonts/Geist/og/Geist-Regular.otf`,
   ).then((res) => res.arrayBuffer());
 
-  const logoUrl = `https://img.logo.dev/${invoice.customer?.website}?token=pk_X-1ZO13GSgeOoUrIuJ6GMQ&size=60`;
+  const logoUrl = `https://img.logo.dev/${invoice.customer?.website}?token=pk_EEZFSTstR9qLTTTJnIEg6w&size=60`;
 
   const isValidLogo = await isValidLogoUrl(logoUrl);
 

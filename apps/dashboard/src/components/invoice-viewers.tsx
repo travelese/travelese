@@ -90,7 +90,7 @@ export function InvoiceViewers({ customer, viewedAt }: Props) {
               <Avatar className="size-5 object-contain border border-border">
                 {customer?.website && (
                   <AvatarImage
-                    src={`https://img.logo.dev/${customer.website}?token=pk_X-1ZO13GSgeOoUrIuJ6GMQ&size=60`}
+                    src={`https://img.logo.dev/${customer.website}?token=pk_EEZFSTstR9qLTTTJnIEg6w&size=60`}
                     alt={`${customer.name} logo`}
                   />
                 )}

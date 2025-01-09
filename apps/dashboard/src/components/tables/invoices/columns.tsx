@@ -104,7 +104,7 @@ export const columns: ColumnDef<Invoice>[] = [
           <Avatar className="size-5">
             {customer?.website && (
               <AvatarImageNext
-                src={`https://img.logo.dev/${customer?.website}?token=pk_X-1ZO13GSgeOoUrIuJ6GMQ&size=60`}
+                src={`https://img.logo.dev/${customer?.website}?token=pk_EEZFSTstR9qLTTTJnIEg6w&size=60`}
                 alt={`${name} logo`}
                 width={20}
                 height={20}
