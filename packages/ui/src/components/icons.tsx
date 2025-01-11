@@ -192,7 +192,11 @@ import {
   MdTrendingUp,
 } from "react-icons/md";
 import { PiDiscordLogo } from "react-icons/pi";
-import { FaArrowsRotate } from "react-icons/fa6";
+import { 
+  FaArrowsRotate,
+  FaLocationDot,
+  FaArrowRightLong
+} from "react-icons/fa6";
 
 export const Icons = {
   LogoSmall: (props: any) => (
@@ -723,7 +727,7 @@ export const Icons = {
   ChevronRight: MdChevronRight,
   ChevronLeft: MdChevronLeft,
   ArrowLeft: MdArrowLeft,
-  ArrowRight: MdArrowRight,
+  ArrowRight: FaArrowRightLong,
   ArrowDown: MdOutlineArrowDownward,
   ArrowUp: MdArrowUpward,
   ArrowBack: MdArrowBack,
@@ -813,7 +817,7 @@ export const Icons = {
   BatteryCharging: MdBatteryCharging30,
   CloudFog: MdCloudQueue,
   Clock: MdAlarm,
-  Location: MdOutlineLocationOn,
+  Location: FaLocationDot,
   Loader: FiLoader,
   BookingStatus: MdDownloading,
   ModeOfTravel: MdModeOfTravel,

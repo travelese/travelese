@@ -112,7 +112,7 @@ export default {
     stays: "Stays",
   },
   travel_type: {
-    return: "Return",
+    return: "Round trip",
     one_way: "One way",
     multi_city: "Multi city",
   },
