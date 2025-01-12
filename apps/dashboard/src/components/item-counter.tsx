@@ -40,7 +40,7 @@ export function ItemCounter({
       <PopoverTrigger asChild>
         <Button
           variant="outline"
-          className="w-full justify-start"
+          className="w-full justify-start border-none"
           disabled={disabled}
         >
           <div className="flex items-center space-x-2">

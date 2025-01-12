@@ -43,7 +43,7 @@ export function TravelCabin({ value, disabled, onChange }: Props) {
       <PopoverTrigger asChild>
         <Button
           variant="outline"
-          className="w-full justify-between"
+          className="w-full justify-between border-none"
           disabled={disabled}
         >
           <Icons.CabinClass className="size-4 mr-2" />

@@ -116,7 +116,7 @@ export function TravelPeriod({
     <div className="flex space-x-4">
       <Popover>
         <PopoverTrigger asChild disabled={Boolean(disabled)}>
-          <Button variant="outline" className="w-full justify-between">
+          <Button variant="ghost" className="w-full justify-between">
             <Icons.Calendar className="w-4 h-4 mr-2" />
             <span className="flex-grow line-clamp-1 text-ellipsis text-left">
               {displayDateRange}

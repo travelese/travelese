@@ -78,7 +78,8 @@
     "./quantity-input": "./src/components/quantity-input.tsx",
     "./box-reveal": "./src/components/box-reveal.tsx",
     "./shine-border": "./src/components/shine-border.tsx",
-    "./dot-pattern": "./src/components/dot-pattern.tsx"
+    "./dot-pattern": "./src/components/dot-pattern.tsx",
+    "./interactive-hover-button": "./src/components/interactive-hover-button.tsx"
   },
   "dependencies": {
     "@kiwicom/orbit-components": "^19.0.0-alpha.0",

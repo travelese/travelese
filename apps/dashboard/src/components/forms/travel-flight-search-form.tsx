@@ -107,7 +107,7 @@ export function FlightSearch() {
   };
 
   return (
-    <div className="min-h-screen bg-black text-white flex flex-col items-center justify-center p-4 relative before:absolute before:inset-0 before:bg-[radial-gradient(#ffffff33_1px,transparent_1px)] before:bg-[size:20px_20px]">
+    <div className="min-h-[calc(100vh-100px)] bg-black text-white flex flex-col items-center justify-center p-4 relative before:absolute before:inset-0 before:bg-[radial-gradient(#ffffff33_1px,transparent_1px)] before:bg-[size:20px_20px]">
       <div className="w-full max-w-4xl space-y-4">
         <div className="text-center space-y-2">
           <h1 className="text-4xl font-semibold tracking-tight">
@@ -125,262 +125,279 @@ export function FlightSearch() {
               borderWidth={1}
               duration={10}
               color={["#ffffff33", "#ffffff66"]}
-              className="w-full bg-zinc-900/50 p-4 space-y-4"
+              className="w-full bg-zinc-900/50 space-y-4"
             >
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                <FormField
-                  control={form.control}
-                  name="travel_type"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormControl>
-                        <TravelType
-                          value={field.value}
-                          onChange={(value) => {
-                            field.onChange(value);
+              <div className="w-full max-w-4xl rounded-2xl backdrop-blur-sm">
+                <div className="flex gap-2">
+                  <FormField
+                    control={form.control}
+                    name="travel_type"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormControl>
+                          <TravelType
+                            value={field.value}
+                            onChange={(value) => {
+                              field.onChange(value);
 
-                            // Adjust slices based on travel type
-                            const currentSlices = form.getValues("slices");
-                            let newSlices: Array<{
-                              origin: string;
-                              destination: string;
-                              departure_date: string;
-                            }> = [];
+                              // Adjust slices based on travel type
+                              const currentSlices = form.getValues("slices");
+                              let newSlices: Array<{
+                                origin: string;
+                                destination: string;
+                                departure_date: string;
+                              }> = [];
 
-                            if (value === "return") {
-                              newSlices = [
-                                currentSlices[0] || {
-                                  origin: "",
-                                  destination: "",
-                                  departure_date: "",
-                                },
-                                {
-                                  origin: currentSlices[0]?.destination || "",
-                                  destination: currentSlices[0]?.origin || "",
-                                  departure_date: "",
-                                },
-                              ];
-                            } else if (value === "one_way") {
-                              newSlices = [
-                                currentSlices[0] || {
-                                  origin: "",
-                                  destination: "",
-                                  departure_date: "",
-                                },
-                              ];
-                            } else if (value === "multi_city") {
-                              newSlices =
-                                currentSlices.length < 2
-                                  ? [
-                                    ...currentSlices,
-                                    {
-                                      origin: "",
-                                      destination: "",
-                                      departure_date: "",
-                                    },
-                                  ]
-                                  : currentSlices;
-                            }
+                              if (value === "return") {
+                                newSlices = [
+                                  currentSlices[0] || {
+                                    origin: "",
+                                    destination: "",
+                                    departure_date: "",
+                                  },
+                                  {
+                                    origin: currentSlices[0]?.destination || "",
+                                    destination: currentSlices[0]?.origin || "",
+                                    departure_date: "",
+                                  },
+                                ];
+                              } else if (value === "one_way") {
+                                newSlices = [
+                                  currentSlices[0] || {
+                                    origin: "",
+                                    destination: "",
+                                    departure_date: "",
+                                  },
+                                ];
+                              } else if (value === "multi_city") {
+                                newSlices =
+                                  currentSlices.length < 2
+                                    ? [
+                                      ...currentSlices,
+                                      {
+                                        origin: "",
+                                        destination: "",
+                                        departure_date: "",
+                                      },
+                                    ]
+                                    : currentSlices;
+                              }
 
-                            form.setValue("slices", newSlices);
-                          }}
-                          disabled={isSubmitting}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                              form.setValue("slices", newSlices);
+                            }}
+                            disabled={isSubmitting}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-                <FormField
-                  control={form.control}
-                  name="cabin_class"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormControl>
-                        <TravelCabin
-                          value={field.value}
-                          onChange={field.onChange}
-                          disabled={isSubmitting}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                  <FormField
+                    control={form.control}
+                    name="cabin_class"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormControl>
+                          <TravelCabin
+                            value={field.value}
+                            onChange={field.onChange}
+                            disabled={isSubmitting}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-                <FormField
-                  control={form.control}
-                  name="passengers"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormControl>
-                        <TravelTraveller
-                          value={field.value}
-                          onChange={field.onChange}
-                          searchType="flights"
-                          disabled={isSubmitting}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                  <FormField
+                    control={form.control}
+                    name="passengers"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormControl>
+                          <TravelTraveller
+                            value={field.value}
+                            onChange={field.onChange}
+                            searchType="flights"
+                            disabled={isSubmitting}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
               </div>
 
               {slices.map((slice, index) => (
                 <div
                   key={index}
-                  className="grid sm:grid-cols-[1fr,auto,1fr,auto,auto] gap-2"
+                  className="w-full flex bg-[#313235] rounded-lg overflow-hidden px-4 py-1/2 space-x-4 items-center"
                 >
-                  <FormField
-                    control={form.control}
-                    name={`slices.${index}.origin`}
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormControl>
-                          <TravelLocation
-                            placeholder="Where from?"
-                            value={field.value}
-                            onChange={(value, place) => {
-                              field.onChange(place?.iata_code || value);
-                            }}
-                            type="origin"
-                            searchType="flights"
-                            disabled={isSubmitting}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <div className="hidden sm:flex items-center justify-center">
-                    <Icons.ArrowRotate className="w-4 h-4 text-gray-400" />
+                  <div className="flex-1">
+                    <FormField
+                      control={form.control}
+                      name={`slices.${index}.origin`}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormControl>
+                            <TravelLocation
+                              placeholder="Where from?"
+                              value={field.value}
+                              onChange={(value, place) => {
+                                field.onChange(place?.iata_code || value);
+                              }}
+                              type="origin"
+                              searchType="flights"
+                              disabled={isSubmitting}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
                   </div>
 
-                  <FormField
-                    control={form.control}
-                    name={`slices.${index}.destination`}
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormControl>
-                          <TravelLocation
-                            placeholder="Where to?"
-                            value={field.value}
-                            onChange={(value, place) => {
-                              field.onChange(place?.iata_code || value);
-                            }}
-                            type="destination"
-                            searchType="flights"
-                            disabled={isSubmitting}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    className="rounded-full hover:bg-white/5"
+                  >
+                    <Icons.ArrowRotate className="size-4" />
+                  </Button>
 
-                  <FormField
-                    control={form.control}
-                    name={`slices.${index}.departure_date`}
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormControl>
-                          <TravelPeriod
-                            value={{
-                              from: field.value,
-                              to:
-                                form.watch("travel_type") === "return" &&
-                                  index === 0
-                                  ? form.watch(`slices.1.departure_date`)
-                                  : undefined,
-                            }}
-                            travelType={
-                              form.watch("travel_type") as
-                              | "one_way"
-                              | "return"
-                              | "multi_city"
-                            }
-                            index={index}
-                            onChange={(value) => {
-                              field.onChange(value.from);
-                              const updates = {
-                                slices: form.getValues("slices").map((s, i) =>
-                                  i === index
-                                    ? { ...s, departure_date: value.from }
-                                    : form.watch("travel_type") === "return" &&
-                                      i === index + 1 &&
-                                      value.to
-                                      ? {
-                                        ...s,
-                                        departure_date: value.to,
-                                        origin: form.getValues(
-                                          `slices.${index}.destination`,
-                                        ),
-                                        destination: form.getValues(
-                                          `slices.${index}.origin`,
-                                        ),
-                                      }
-                                      : s,
-                                ),
-                              };
+                  <div className="flex-1">
+                    <FormField
+                      control={form.control}
+                      name={`slices.${index}.destination`}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormControl>
+                            <TravelLocation
+                              placeholder="Where to?"
+                              value={field.value}
+                              onChange={(value, place) => {
+                                field.onChange(place?.iata_code || value);
+                              }}
+                              type="destination"
+                              searchType="flights"
+                              disabled={isSubmitting}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
 
-                              if (
-                                value.to &&
-                                index === 0 &&
-                                form.watch("travel_type") === "return"
-                              ) {
-                                const firstSlice = form.getValues(
-                                  `slices.${index}`,
-                                );
-                                form.setValue(`slices.1`, {
-                                  departure_date: value.to,
-                                  origin: firstSlice.destination,
-                                  destination: firstSlice.origin,
-                                });
+                  <div className="flex-1">
+                    <FormField
+                      control={form.control}
+                      name={`slices.${index}.departure_date`}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormControl>
+                            <TravelPeriod
+                              value={{
+                                from: field.value,
+                                to:
+                                  form.watch("travel_type") === "return" &&
+                                    index === 0
+                                    ? form.watch(`slices.1.departure_date`)
+                                    : undefined,
+                              }}
+                              travelType={
+                                form.watch("travel_type") as
+                                | "one_way"
+                                | "return"
+                                | "multi_city"
                               }
-                            }}
-                            disabled={isSubmitting}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                              index={index}
+                              onChange={(value) => {
+                                field.onChange(value.from);
+                                const updates = {
+                                  slices: form
+                                    .getValues("slices")
+                                    .map((s, i) =>
+                                      i === index
+                                        ? { ...s, departure_date: value.from }
+                                        : form.watch("travel_type") ===
+                                          "return" &&
+                                          i === index + 1 &&
+                                          value.to
+                                          ? {
+                                            ...s,
+                                            departure_date: value.to,
+                                            origin: form.getValues(
+                                              `slices.${index}.destination`,
+                                            ),
+                                            destination: form.getValues(
+                                              `slices.${index}.origin`,
+                                            ),
+                                          }
+                                          : s,
+                                    ),
+                                };
+
+                                if (
+                                  value.to &&
+                                  index === 0 &&
+                                  form.watch("travel_type") === "return"
+                                ) {
+                                  const firstSlice = form.getValues(
+                                    `slices.${index}`,
+                                  );
+                                  form.setValue(`slices.1`, {
+                                    departure_date: value.to,
+                                    origin: firstSlice.destination,
+                                    destination: firstSlice.origin,
+                                  });
+                                }
+                              }}
+                              disabled={isSubmitting}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
 
                   {index === slices.length - 1 && (
-                    <SubmitButton
-                      className="w-full"
-                      isSubmitting={isSubmitting}
-                    >
-                      Search Flights
-                    </SubmitButton>
-                  )}
+                    <div className="flex items-center py-1">
+                      <SubmitButton
+                        isSubmitting={isSubmitting}
+                        interactive
+                        text="Search"
+                      >
+                        Search
+                      </SubmitButton>
 
-                  {travelType === "multi_city" &&
-                    index === slices.length - 1 && (
-                      <div className="flex space-x-2">
-                        <Button
-                          type="button"
-                          variant="outline"
-                          onClick={addFlightSegment}
-                          disabled={slices.length >= 3 || isSubmitting}
-                        >
-                          Add Segment
-                        </Button>
-                        {slices.length > 1 && (
+                      {travelType === "multi_city" && (
+                        <div className="flex space-x-2 ml-4">
                           <Button
                             type="button"
                             variant="outline"
-                            onClick={() => removeFlightSegment(index)}
-                            disabled={isSubmitting}
+                            onClick={addFlightSegment}
+                            disabled={slices.length >= 3 || isSubmitting}
                           >
-                            Remove
+                            Add Segment
                           </Button>
-                        )}
-                      </div>
-                    )}
+                          {slices.length > 1 && (
+                            <Button
+                              type="button"
+                              variant="outline"
+                              onClick={() => removeFlightSegment(index)}
+                              disabled={isSubmitting}
+                            >
+                              Remove
+                            </Button>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
               ))}
             </ShineBorder>

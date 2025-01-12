@@ -37,10 +37,10 @@ export function TravelType({ value, disabled, onChange }: Props) {
       <PopoverTrigger asChild>
         <Button
           variant="outline"
-          className="w-full justify-between"
+          className="w-full justify-between border-none"
           disabled={disabled}
         >
-          <Icons.Airports className="size-4 mr-2" />
+          <Icons.ArrowRotate className="size-4 mr-2" />
           <span className="flex-grow line-clamp-1 text-ellipsis text-left">
             {t(`travel_type.${optimisticState}`)}
           </span>

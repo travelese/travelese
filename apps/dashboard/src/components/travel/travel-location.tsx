@@ -5,7 +5,7 @@ import { useI18n } from "@/locales/client";
 import type { Places } from "@duffel/api/Places/Suggestions/SuggestionsType";
 import { Button } from "@travelese/ui/button";
 import { Icons } from "@travelese/ui/icons";
-import { Popover, PopoverContent, PopoverTrigger } from "@travelese/ui/popover";
+import { Popover, PopoverContent, PopoverTrigger, PopoverContentWithoutPortal } from "@travelese/ui/popover";
 import { useAction } from "next-safe-action/hooks";
 import { useMemo, useState } from "react";
 
@@ -124,13 +124,13 @@ export function TravelLocation({
     <Popover open={isOpen} onOpenChange={setIsOpen}>
       <PopoverTrigger asChild>
         <Button
-          variant="outline"
+          variant="ghost"
           role="combobox"
           aria-expanded={isOpen}
           className="w-full justify-start text-left font-normal"
           onClick={() => setIsOpen(!isOpen)}
         >
-          <TypeIcon className="mr-2 size-4 shrink-0" />
+          <Icons.Location className="mr-2 size-4 shrink-0" />
           <span className="flex-grow truncate">{displayValue}</span>
           {value && (
             <Button
@@ -147,11 +147,11 @@ export function TravelLocation({
           )}
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-full p-0" sideOffset={10}>
+      <PopoverContentWithoutPortal className="w-full p-0" sideOffset={10}>
         <div className="p-2 border-border">
           <div className="relative">
             <input
-              placeholder={t("Search places...")}
+              placeholder={placeholder}
               value={searchQuery}
               onChange={updateSearchQuery}
               className="pl-8 border-border"
@@ -174,7 +174,7 @@ export function TravelLocation({
             </div>
           )}
         </div>
-      </PopoverContent>
+      </PopoverContentWithoutPortal>
     </Popover>
   );
 }
