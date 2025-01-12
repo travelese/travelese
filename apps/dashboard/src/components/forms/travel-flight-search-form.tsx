@@ -377,22 +377,26 @@ export function FlightSearch() {
                       {travelType === "multi_city" && (
                         <div className="flex space-x-2 ml-4">
                           <Button
-                            type="button"
                             variant="outline"
+                            size="icon"
                             onClick={addFlightSegment}
                             disabled={slices.length >= 3 || isSubmitting}
+                            aria-label="Add"
+                            className="h-8 w-8"
                           >
-                            Add Segment
+                            <Icons.Plus className="size-4" />
                           </Button>
                           {slices.length > 1 && (
                             <Button
-                              type="button"
-                              variant="outline"
-                              onClick={() => removeFlightSegment(index)}
-                              disabled={isSubmitting}
-                            >
-                              Remove
-                            </Button>
+                            variant="outline"
+                            size="icon"
+                            onClick={() => removeFlightSegment(index)}
+                            disabled={isSubmitting}
+                            aria-label="Add"
+                            className="h-8 w-8"
+                          >
+                            <Icons.Minus className="size-4" />
+                          </Button>
                           )}
                         </div>
                       )}
