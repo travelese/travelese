@@ -4,7 +4,7 @@ import { TravelSearchForm } from "@/components/forms/travel-search-form";
 export default function Flights() {
   return (
     <div>
-        <FlightSearch />
+        <TravelSearchForm />
     </div>
   )
 }
