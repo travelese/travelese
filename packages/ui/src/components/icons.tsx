@@ -18,7 +18,12 @@ import { ArchiveIcon } from "@radix-ui/react-icons";
 import { CloudFogIcon } from "lucide-react";
 import { CiDumbbell, CiMaximize1, CiMinimize1 } from "react-icons/ci";
 import { FaXTwitter } from "react-icons/fa6";
-import { FiGithub, FiLoader, FiMaximize2, FiMinimize2 } from "react-icons/fi";
+import { 
+  FiGithub, 
+  FiLoader, 
+  FiMaximize2, 
+  FiMinimize2 
+} from "react-icons/fi";
 import { GrLounge } from "react-icons/gr";
 import {
   LuBedDouble,
@@ -195,7 +200,10 @@ import { PiDiscordLogo } from "react-icons/pi";
 import { 
   FaArrowsRotate,
   FaLocationDot,
-  FaArrowRightLong
+  FaArrowRightLong,
+  FaUser, 
+  FaMinus, 
+  FaPlus
 } from "react-icons/fa6";
 
 export const Icons = {
@@ -807,7 +815,7 @@ export const Icons = {
   Luggage: MdOutlineLuggage,
   Minus: MdOutlineRemove,
   Plus: MdOutlineAdd,
-  User: MdOutlinePerson,
+  User: FaUser,
   Backpack: MdOutlineBackpack,
   Briefcase: MdOutlineBusinessCenter,
   SeatPitch: MdOutlineAirlineSeatLegroomReduced,

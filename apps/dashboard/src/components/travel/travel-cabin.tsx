@@ -3,8 +3,6 @@
 import { changeTravelCabinAction } from "@/actions/travel/change-travel-class-action";
 import { useI18n } from "@/locales/client";
 import { Button } from "@travelese/ui/button";
-import { Icons } from "@travelese/ui/icons";
-import { Popover, PopoverContent, PopoverTrigger } from "@travelese/ui/popover";
 import { useOptimisticAction } from "next-safe-action/hooks";
 
 const cabinClasses = [
@@ -39,32 +37,20 @@ export function TravelCabin({ value, disabled, onChange }: Props) {
   };
 
   return (
-    <Popover>
-      <PopoverTrigger asChild>
+    <div className="grid grid-cols-2 gap-2">
+      {cabinClasses.map((cabinClass) => (
         <Button
+          key={cabinClass}
           variant="outline"
-          className="w-full justify-between border-none"
+          className={`w-full border-border ${
+            optimisticState === cabinClass ? 'bg-white/10' : ''
+          }`}
+          onClick={() => handleCabinChange(cabinClass)}
           disabled={disabled}
         >
-          <Icons.CabinClass className="size-4 mr-2" />
-          <span className="flex-grow line-clamp-1 text-ellipsis text-left">
-            {t(`cabin_class.${optimisticState}`)}
-          </span>
-          <Icons.ChevronDown className="ml-2 size-4" />
+          <span>{t(`cabin_class.${cabinClass}`)}</span>
         </Button>
-      </PopoverTrigger>
-      <PopoverContent className="w-[225px]" sideOffset={10}>
-        {cabinClasses.map((cabinClass) => (
-          <Button
-            key={cabinClass}
-            variant="ghost"
-            className="w-full justify-start"
-            onClick={() => handleCabinChange(cabinClass)}
-          >
-            {t(`cabin_class.${cabinClass}`)}
-          </Button>
-        ))}
-      </PopoverContent>
-    </Popover>
+      ))}
+    </div>
   );
 }

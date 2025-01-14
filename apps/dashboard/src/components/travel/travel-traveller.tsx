@@ -41,13 +41,13 @@ export function TravelTraveller({
         {
           id: "adult",
           label: t("travel_passenger.adult"),
-          subLabel: "12+",
+          subLabel: "13 or above",
           icon: <Icons.User className="size-4" />,
         },
         {
           id: "child",
           label: t("travel_passenger.child"),
-          subLabel: "2-11",
+          subLabel: "2 - 12",
           icon: <Icons.Child className="size-4" />,
         },
         {
@@ -61,13 +61,13 @@ export function TravelTraveller({
         {
           id: "adult",
           label: t("travel_guest.adult"),
-          subLabel: "12+",
+          subLabel: "13 or above",
           icon: <Icons.User className="size-4" />,
         },
         {
           id: "child",
           label: t("travel_guest.child"),
-          subLabel: "2-11",
+          subLabel: "2 - 12",
           icon: <Icons.Child className="size-4" />,
         },
       ];
