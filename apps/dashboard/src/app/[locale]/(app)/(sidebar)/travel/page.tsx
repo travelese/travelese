@@ -3,12 +3,10 @@ import {
   OpenTravelBookSheet,
   OpenTravelChangeSheet,
   OpenTravelExploreSheet,
-  OpenTravelSearchSheet,
 } from "@/components/open-travel-sheet";
 import { Table } from "@/components/tables/travel";
 import { Loading } from "@/components/tables/travel/loading";
-import { TravelCalendar } from "@/components/travel/travel-calendar";
-import { TravelExplore } from "@/components/travel/travel-explore";
+import { TravelSearch } from "@/components/travel/travel-search";
 import { TravelSearchFilter } from "@/components/travel/travel-search-filters";
 import {
   getTravelRecordsByRange,
@@ -67,23 +65,28 @@ export default async function Travel({ searchParams }: Props) {
 
   return (
     <div>
-      {geo_code.latitude !== 0 && geo_code.longitude !== 0 ? (
-      <TravelExplore />
-    ) : (
-      <TravelCalendar
-        weekStartsOnMonday={userData?.week_starts_on_monday}
-        timeFormat={userData?.time_format}
-        data={data}
-        meta={meta}
+      {/* {geo_code.latitude !== 0 && geo_code.longitude !== 0 ? (
+        <TravelExplore />
+      ) : (
+        <TravelCalendar
+          weekStartsOnMonday={userData?.week_starts_on_monday}
+          timeFormat={userData?.time_format}
+          data={data}
+          meta={meta}
+        />
+      )} */}
+
+      <TravelSearch 
+        userData={userData} 
+        data={data} 
+        meta={meta} 
       />
-    )}
 
       <div className="mt-14 mb-6 flex items-center justify-between space-x-4">
         <h2 className="text-md font-medium">Bookings</h2>
 
         <div className="flex space-x-2">
           <TravelSearchFilter />
-          <OpenTravelSearchSheet />
           <OpenTravelExploreSheet />
           <OpenTravelChangeSheet />
           <OpenTravelBookSheet />
@@ -104,3 +107,4 @@ export default async function Travel({ searchParams }: Props) {
     </div>
   );
 }
+
