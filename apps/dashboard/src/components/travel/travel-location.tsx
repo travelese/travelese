@@ -9,7 +9,7 @@ import { Popover, PopoverContent, PopoverTrigger, PopoverContentWithoutPortal } 
 import { useAction } from "next-safe-action/hooks";
 import { useMemo, useState } from "react";
 
-interface LocationSelectorProps {
+type Props = {
   placeholder: string;
   value: string;
   onChange: (value: string, place: Places | null) => void;
@@ -23,9 +23,9 @@ export function TravelLocation({
   onChange,
   type,
   searchType,
-}: LocationSelectorProps) {
+}: Props) {
   const t = useI18n();
-  const [isOpen, setIsOpen] = useState(false);
+  const [open, setOpen] = useState(false);
   const isFlights = searchType === "flights";
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -46,7 +46,7 @@ export function TravelLocation({
         : `${place.city_name} (${place.iata_code})`;
 
     onChange(place.iata_code, place);
-    setIsOpen(false);
+    setOpen(false);
   };
 
   const updateSearchQuery = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -121,16 +121,16 @@ export function TravelLocation({
   }, [value, places, placeholder]);
 
   return (
-    <Popover open={isOpen} onOpenChange={setIsOpen}>
+    <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <Button
           variant="ghost"
           role="combobox"
-          aria-expanded={isOpen}
+          aria-expanded={open}
           className="w-full justify-start text-left font-normal"
-          onClick={() => setIsOpen(!isOpen)}
+          onClick={() => setOpen(!open)}
         >
-          <Icons.Location className="mr-2 size-4 shrink-0" />
+          <Icons.Location className="mr-1 size-3 shrink-0" />
           <span className="flex-grow truncate">{displayValue}</span>
           {value && (
             <Button
@@ -147,19 +147,19 @@ export function TravelLocation({
           )}
         </Button>
       </PopoverTrigger>
-      <PopoverContentWithoutPortal className="w-full p-0" sideOffset={10}>
-        <div className="p-2 border-border">
+      <PopoverContent className="w-full p-0" sideOffset={-39} align="start">
+        <div className="p-2 border-border w-full"> 
           <div className="relative">
             <input
               placeholder={placeholder}
               value={searchQuery}
               onChange={updateSearchQuery}
-              className="pl-8 border-border"
+              className="pl-8 border-none"
             />
-            <Icons.Search className="absolute left-2 top-1/2 -translate-y-1/2 size-4" />
+            <Icons.Location className="absolute left-1 top-1/2 -translate-y-1/2 size-4" />
           </div>
         </div>
-        <div className="w-[350px] overflow-auto">
+        <div className="absolute left-0 w-[350px] bg-card rounded-lg mt-2">
           {isFlights ? (
             <>
               {cities.length > 0 && renderPlaceList(cities, t("Cities"))}
@@ -174,7 +174,7 @@ export function TravelLocation({
             </div>
           )}
         </div>
-      </PopoverContentWithoutPortal>
+      </PopoverContent>
     </Popover>
   );
 }

@@ -117,17 +117,18 @@ export function TravelPeriod({
       <Popover>
         <PopoverTrigger asChild disabled={Boolean(disabled)}>
           <Button variant="ghost" className="w-full justify-between">
-            <Icons.Calendar className="w-4 h-4 mr-2" />
+            <Icons.Calendar className="size-3 mr-1" />
             <span className="flex-grow line-clamp-1 text-ellipsis text-left">
               {displayDateRange}
             </span>
-            <Icons.ChevronDown className="w-4 h-4 ml-2" />
           </Button>
         </PopoverTrigger>
         <PopoverContent
           className="w-screen md:w-[550px] p-0 flex-col flex space-y-4"
           sideOffset={10}
+          side="bottom"
         >
+          {/*
           <div className="p-4 pb-0">
             <Select
               defaultValue={optimisticState.period ?? undefined}
@@ -151,7 +152,8 @@ export function TravelPeriod({
                 </SelectGroup>
               </SelectContent>
             </Select>
-          </div>
+                      </div>
+*/}
 
           {travelType === "return" ? (
             <Calendar

@@ -40,11 +40,11 @@ export function TravelType({ value, disabled, onChange }: Props) {
           className="w-full justify-between border-none"
           disabled={disabled}
         >
-          <Icons.ArrowRotate className="size-4 mr-2" />
+          <Icons.ArrowRotate className="size-3 mr-1" />
           <span className="flex-grow line-clamp-1 text-ellipsis text-left">
             {t(`travel_type.${optimisticState}`)}
           </span>
-          <Icons.ChevronDown className="ml-2 size-4" />
+          <Icons.CaretDown className="size-3 ml-1" />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-[225px]" sideOffset={10}>

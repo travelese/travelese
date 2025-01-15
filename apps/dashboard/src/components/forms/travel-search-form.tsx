@@ -1,13 +1,14 @@
 "use client";
 
-import type { searchTravelSchema } from "@/actions/schema";
-import { TravelBaggage } from "@/components//travel/travel-baggage";
-import { TravelCabin } from "@/components/travel/travel-cabin";
+import { searchTravelAction } from "@/actions/travel/search-travel-action";
+import { searchTravelSchema } from "@/actions/schema";
 import { TravelLocation } from "@/components/travel/travel-location";
 import { TravelPeriod } from "@/components/travel/travel-period";
 import { TravelRooms } from "@/components/travel/travel-rooms";
 import { TravelTraveller } from "@/components/travel/travel-traveller";
 import { TravelType } from "@/components/travel/travel-type";
+import { TravelTravellerCabin } from "@/components/travel/travel-traveller-cabin";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@travelese/ui/button";
 import {
   Form,
@@ -17,31 +18,62 @@ import {
   FormMessage,
 } from "@travelese/ui/form";
 import { Icons } from "@travelese/ui/icons";
+import { Separator } from "@travelese/ui/separator";
 import { ShineBorder } from "@travelese/ui/shine-border";
 import { SubmitButton } from "@travelese/ui/submit-button";
-import type { UseFormReturn } from "react-hook-form";
+import { useToast } from "@travelese/ui/use-toast";
+import { useAction } from "next-safe-action/hooks";
+import { useForm } from "react-hook-form";
 import type { z } from "zod";
 
-interface Props {
-  form: UseFormReturn<z.infer<typeof searchTravelSchema>>;
-  onSubmit: (data: z.infer<typeof searchTravelSchema>) => void;
-  isSubmitting: boolean;
-  defaultValues?: Partial<z.infer<typeof searchTravelSchema>>;
+type Props = {
+  userId: string;
+  currency: string;
   searchType: "flights" | "stays";
-  onQueryParamsChange: (
+  onQueryParamsChange?: (
     updates: Partial<z.infer<typeof searchTravelSchema>>,
   ) => void;
-}
+};
 
 export function TravelSearchForm({
-  form,
-  onSubmit,
-  isSubmitting,
-  defaultValues,
+  userId,
+  currency,
   searchType,
-  onQueryParamsChange,
+  onQueryParamsChange = () => {},
 }: Props) {
+  const { toast } = useToast();
+
+  const searchTravel = useAction(searchTravelAction, {
+    onSuccess: () => {
+      toast({
+        title: "Travel Search",
+        description: "Travel Search Successful",
+        variant: "success",
+      });
+    },
+  });
+
+  const form = useForm<z.infer<typeof searchTravelSchema>>({
+    resolver: zodResolver(searchTravelSchema),
+    defaultValues: {
+      search_type: searchType,
+      user_id: userId,
+      currency,
+      ...(searchType === "flights"
+        ? {
+            travel_type: "one_way",
+            slices: [{ origin: "", destination: "", departure_date: "" }],
+            passengers: [{ type: "adult" }],
+          }
+        : {
+            guests: [{ type: "adult" }],
+            rooms: 1,
+          }),
+    },
+  });
+
   const isFlights = searchType === "flights";
+  const isSubmitting = searchTravel.status === "executing";
 
   const addFlightSegment = () => {
     const currentSlices = form.getValues("slices");
@@ -62,9 +94,8 @@ export function TravelSearchForm({
       onQueryParamsChange({ slices: newSlices });
     }
   };
-
   return (
-    <div className="min-h-[calc(100vh-100px)] bg-black text-white flex flex-col items-center justify-center p-4 relative before:absolute before:inset-0 before:bg-[radial-gradient(#ffffff33_1px,transparent_1px)] before:bg-[size:20px_20px]">
+    <div className="min-h-[calc(100vh-100px)] bg-background text-primary flex flex-col items-center justify-center p-4 relative before:absolute before:inset-0 before:bg-[radial-gradient(#ffffff33_1px,transparent_1px)] before:bg-[size:20px_20px]">
       <div className="w-full max-w-4xl space-y-4">
         <div className="text-center space-y-2">
           <h1 className="text-4xl font-semibold tracking-tight">
@@ -72,7 +103,7 @@ export function TravelSearchForm({
               ? "Let's find your next flight!"
               : "Find your perfect stay"}
           </h1>
-          <p className="text-gray-400">
+          <p className="text-muted-foreground">
             {isFlights
               ? "To display available flights, please select your search options."
               : "Select your destination and travel dates to find the perfect accommodation."}
@@ -80,19 +111,18 @@ export function TravelSearchForm({
         </div>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)}>
+          <form onSubmit={form.handleSubmit(searchTravel.execute)}>
             <ShineBorder
               borderRadius={12}
               borderWidth={1}
               duration={10}
               color={["#ffffff33", "#ffffff66"]}
-              className="w-full bg-zinc-900/50 space-y-4"
+              className="w-full bg-card/50 space-y-4"
             >
               {isFlights ? (
-                // Flights Search Form
                 <>
                   <div className="w-full max-w-4xl rounded-2xl backdrop-blur-sm">
-                    <div className="flex gap-2">
+                    <div className="flex gap-2 pl-1">
                       <FormField
                         control={form.control}
                         name="travel_type"
@@ -161,32 +191,7 @@ export function TravelSearchForm({
                                 disabled={isSubmitting}
                               />
                             </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
 
-                      <FormField
-                        control={form.control}
-                        name="cabin_class"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormControl>
-                              <TravelCabin
-                                value={
-                                  field.value as
-                                    | "economy"
-                                    | "premium_economy"
-                                    | "business"
-                                    | "first_class"
-                                }
-                                onChange={(value) => {
-                                  field.onChange(value);
-                                  onQueryParamsChange({ cabin_class: value });
-                                }}
-                                disabled={isSubmitting}
-                              />
-                            </FormControl>
                             <FormMessage />
                           </FormItem>
                         )}
@@ -198,29 +203,14 @@ export function TravelSearchForm({
                         render={({ field }) => (
                           <FormItem>
                             <FormControl>
-                              <TravelTraveller
-                                value={
-                                  field.value as Array<{
-                                    type:
-                                      | "adult"
-                                      | "child"
-                                      | "infant_without_seat";
-                                    given_name: string;
-                                    family_name: string;
-                                  }>
-                                }
-                                onChange={(value) => {
-                                  field.onChange(value);
-                                  onQueryParamsChange(
-                                    isFlights
-                                      ? { passengers: value }
-                                      : { guests: value },
-                                  );
-                                }}
-                                disabled={isSubmitting}
+                              <TravelTravellerCabin
+                                form={form}
                                 searchType={searchType}
+                                onQueryParamsChange={onQueryParamsChange}
+                                isSubmitting={isSubmitting}
                               />
                             </FormControl>
+
                             <FormMessage />
                           </FormItem>
                         )}
@@ -231,7 +221,7 @@ export function TravelSearchForm({
                   {form.watch("slices")?.map((slice, index) => (
                     <div
                       key={index}
-                      className="w-full flex bg-[#313235] rounded-lg overflow-hidden px-4 py-1/2 space-x-4 items-center"
+                      className="w-full flex bg-card rounded-lg overflow-hidden p-1 space-x-2 items-center"
                     >
                       {(form.watch("travel_type") === "multi_city" ||
                         index === 0) && (
@@ -265,19 +255,29 @@ export function TravelSearchForm({
                                       searchType={searchType}
                                     />
                                   </FormControl>
+
                                   <FormMessage />
                                 </FormItem>
                               )}
                             />
                           </div>
 
+                          <Separator
+                            orientation="vertical"
+                            className="h-8 bg-muted-foreground"
+                          />
+
                           <Button
                             size="icon"
                             variant="ghost"
-                            className="rounded-full hover:bg-white/5"
                           >
                             <Icons.ArrowRotate className="size-4" />
                           </Button>
+
+                          <Separator
+                            orientation="vertical"
+                            className="h-8 bg-muted-foreground"
+                          />
 
                           <div className="flex-1">
                             <FormField
@@ -309,11 +309,17 @@ export function TravelSearchForm({
                                       searchType={searchType}
                                     />
                                   </FormControl>
+
                                   <FormMessage />
                                 </FormItem>
                               )}
                             />
                           </div>
+
+                          <Separator
+                            orientation="vertical"
+                            className="h-8 bg-muted-foreground"
+                          />
 
                           <div className="flex-1">
                             <FormField
@@ -388,6 +394,7 @@ export function TravelSearchForm({
                                       }}
                                     />
                                   </FormControl>
+
                                   <FormMessage />
                                 </FormItem>
                               )}
@@ -453,7 +460,6 @@ export function TravelSearchForm({
                   ))}
                 </>
               ) : (
-                // Stays Search Form
                 <>
                   <div className="grid grid-cols-2 gap-2 mb-3 mx-auto max-w-4xl">
                     <FormField
@@ -485,6 +491,7 @@ export function TravelSearchForm({
                               searchType={searchType}
                             />
                           </FormControl>
+
                           <FormMessage />
                         </FormItem>
                       )}
@@ -505,6 +512,7 @@ export function TravelSearchForm({
                               disabled={isSubmitting}
                             />
                           </FormControl>
+
                           <FormMessage />
                         </FormItem>
                       )}
@@ -530,6 +538,7 @@ export function TravelSearchForm({
                               searchType={searchType}
                             />
                           </FormControl>
+
                           <FormMessage />
                         </FormItem>
                       )}
@@ -553,14 +562,16 @@ export function TravelSearchForm({
                               disabled={isSubmitting}
                             />
                           </FormControl>
+
                           <FormMessage />
                         </FormItem>
                       )}
                     />
+
                     <div className="fixed bottom-8 w-full sm:max-w-[455px] right-8">
                       <SubmitButton
+                        isSubmitting={searchTravel.isExecuting}
                         className="w-full"
-                        isSubmitting={isSubmitting}
                       >
                         {isFlights ? "Search Flights" : "Search Stays"}
                       </SubmitButton>
