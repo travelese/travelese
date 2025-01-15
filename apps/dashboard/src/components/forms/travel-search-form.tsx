@@ -119,6 +119,7 @@ export function TravelSearchForm({
               color={["#ffffff33", "#ffffff66"]}
               className="w-full bg-card/50 space-y-4"
             >
+
               {isFlights ? (
                 <>
                   <div className="w-full max-w-4xl rounded-2xl backdrop-blur-sm">
