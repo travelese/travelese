@@ -203,7 +203,9 @@ import {
   FaArrowRightLong,
   FaUser, 
   FaMinus, 
-  FaPlus
+  FaPlus,
+  FaRegCalendar,
+  FaCaretDown
 } from "react-icons/fa6";
 
 export const Icons = {
@@ -782,7 +784,7 @@ export const Icons = {
   Delete: MdOutlineDelete,
   FolderImports: MdRuleFolder,
   FolderTransactions: MdTopic,
-  Calendar: MdEditCalendar,
+  Calendar: FaRegCalendar,
   CalendarMonth: MdOutlineCalendarMonth,
   Reply: MdReplay,
   Sort: MdSort,
@@ -880,4 +882,5 @@ export const Icons = {
   Maximize: FiMaximize2,
   Room: MdOutlineBedroomParent,
   ArrowRotate: FaArrowsRotate,
+  CaretDown: FaCaretDown,
 };

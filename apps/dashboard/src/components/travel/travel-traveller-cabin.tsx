@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import { Icons } from "@travelese/ui/icons";
 import { Button } from "@travelese/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@travelese/ui/popover";
@@ -48,12 +47,12 @@ export function TravelTravellerCabin({
           className="w-full justify-start border-none"
           disabled={isSubmitting}
         >
-          <Icons.User className="size-4 mr-2" />
+          <Icons.User className="size-3 mr-1" />
           <span className="flex-grow line-clamp-1 text-ellipsis text-left">
             {totalTravellers} {totalTravellers === 1 ? 'Traveller' : 'Travellers'}, 
             {` ${t(`cabin_class.${currentCabinClass}`)}`}
           </span>
-          <Icons.ChevronDown className="ml-2 size-4" />
+          <Icons.CaretDown className="size-3 ml-1" />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-[350px]" sideOffset={10}>

@@ -4,15 +4,15 @@ import { useI18n } from "@/locales/client";
 import { Button } from "@travelese/ui/button";
 import { Icons } from "@travelese/ui/icons";
 
-interface ItemType {
+type Type = {
   id: string;
   label: string;
   subLabel: string;
   icon: React.ReactNode;
 }
 
-interface ItemCounterProps {
-  items: ItemType[];
+type Props = {
+  items: Type[];
   value: Record<string, number>;
   onChange: (newCounts: Record<string, number>) => void;
   disabled?: boolean;
@@ -23,7 +23,7 @@ export function ItemCounter({
   value,
   onChange,
   disabled = false,
-}: ItemCounterProps) {
+}: Props) {
   const t = useI18n();
 
   const handleCountChange = (id: string, change: number) => {

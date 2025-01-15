@@ -663,6 +663,8 @@ export const searchTravelSchema = z.object({
     .optional(),
 });
 
+export type SearchTravelSchema = z.infer<typeof searchTravelSchema>;
+
 export const bookTravelSchema = z.object({
   booking_type: z.enum(["flights", "stays"]),
 
